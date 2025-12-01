@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECMEM // TeamMember Monitor</title>
+    <link rel="stylesheet" href="shared-theme-blue.css">
+    <style>
+        /* ============================================
+         * TEAM MEMBER MONITOR - Sleek Professional Design
+         * Real-time team member surveillance dashboard
+         * ============================================ */
+
+        :root {
+            --monitor-glow: rgba(14, 165, 233, 0.4);
+            --live-pulse: #10B981;
+            --warning-amber: #F59E0B;
+            --critical-red: #EF4444;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--primary-blue);
+        }
+
+        .header-center {
+            display: flex;
+            gap: 32px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-value.warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-value.danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 1.5s infinite;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--live-pulse);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--live-pulse);
+            animation: livePulse 2s infinite;
+        }
+
+        .live-indicator.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--critical-red);
+        }
+
+        .live-indicator.disconnected .live-dot {
+            background: var(--critical-red);
+            animation: none;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 340px;
+            gap: 16px;
+            padding: 72px 16px 16px;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Panel Base */
+        .panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title svg {
+            width: 14px;
+            height: 14px;
+            color: var(--primary-blue);
+        }
+
+        .panel-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--primary-blue);
+            background: rgba(14, 165, 233, 0.15);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+        }
+
+        .panel-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .panel-body::-webkit-scrollbar { width: 6px; }
+        .panel-body::-webkit-scrollbar-track { background: transparent; }
+        .panel-body::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+        .panel-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue);
+        }
+
+        /* TeamMember Cards */
+        .team-member-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-member-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--bg-tertiary);
+            transition: all var(--transition-fast);
+        }
+
+        .team-member-card:hover {
+            border-color: var(--border-accent);
+            transform: translateX(4px);
+        }
+
+        .team-member-card.active::before {
+            background: var(--status-success);
+            box-shadow: 0 0 8px var(--status-success);
+        }
+
+        .team-member-card.inactive::before {
+            background: var(--text-dim);
+        }
+
+        .team-member-card.selected {
+            border-color: var(--primary-blue);
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .team-member-card.selected::before {
+            background: var(--primary-blue);
+        }
+
+        .team-member-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .team-member-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .team-member-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--status-success);
+            animation: livePulse 1.5s infinite;
+        }
+
+        .team-member-pulse.dead {
+            background: var(--text-dim);
+            animation: none;
+        }
+
+        .team-member-type-badge {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .team-member-type-badge.worker {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--status-success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .team-member-type-badge.overseer {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .team-member-type-badge.helper {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .team-member-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .team-member-status {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--status-success);
+        }
+
+        .team-member-status.stale { color: var(--warning-amber); }
+        .team-member-status.dead { color: var(--text-dim); }
+
+        /* Controls Bar */
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-primary);
+            padding: 8px 14px;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-accent);
+            color: var(--text-primary);
+        }
+
+        .btn.active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .filter-input {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 8px 14px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .filter-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        /* Message Feed */
+        .message-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .message-card.new {
+            border-color: var(--status-success);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .message-card.broadcast {
+            border-color: var(--warning-amber);
+        }
+
+        .message-card.critical {
+            border-color: var(--critical-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .message-route {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .message-from {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            color: var(--accent-cyan);
+        }
+
+        .message-arrow {
+            color: var(--text-dim);
+        }
+
+        .message-arrow svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .message-to {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            color: var(--primary-purple);
+        }
+
+        .message-to.broadcast {
+            color: var(--warning-amber);
+        }
+
+        .message-priority {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message-priority.critical {
+            background: var(--critical-red);
+            color: white;
+        }
+
+        .message-priority.high {
+            background: var(--warning-amber);
+            color: var(--bg-primary);
+        }
+
+        .message-priority.medium {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .message-priority.low {
+            background: var(--bg-primary);
+            color: var(--text-dim);
+        }
+
+        .message-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        .message-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            word-break: break-word;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--text-dim);
+            font-size: 12px;
+            animation: slideInUp 0.2s ease;
+        }
+
+        .timeline-item.heartbeat { border-left-color: var(--status-success); }
+        .timeline-item.message { border-left-color: var(--accent-cyan); }
+        .timeline-item.error { border-left-color: var(--critical-red); }
+        .timeline-item.status { border-left-color: var(--primary-purple); }
+
+        .timeline-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            white-space: nowrap;
+            min-width: 55px;
+        }
+
+        .timeline-content {
+            flex: 1;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .timeline-team member {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* Empty States */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* Recording Indicator */
+        .recording-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--critical-red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .recording-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--critical-red);
+            border-radius: 50%;
+            animation: recordBlink 1s infinite;
+        }
+
+        @keyframes recordBlink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 260px 1fr 280px;
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .header-center {
+                display: none;
+            }
+        }
+    </style>
+    <script src="/shared-logger.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </div>
+            <span class="logo-text">SPEC<span>MEM</span> // MONITOR</span>
+        </div>
+
+        <div class="header-center">
+            <div class="stat-item">
+                <span class="stat-value" id="activeTeamMembers">0</span>
+                <span class="stat-label">Active Team Members</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalMessages">0</span>
+                <span class="stat-label">Messages</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="msgPerMin">0</span>
+                <span class="stat-label">Msg/Min</span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="recording-badge" id="recordingIndicator" style="display: none;">
+                <span class="recording-dot"></span>
+                RECORDING
+            </div>
+            <div class="live-indicator disconnected" id="wsStatus">
+                <span class="live-dot"></span>
+                <span id="wsText">Disconnected</span>
+            </div>
+            <a href="/team-members.html" class="nav-link">Team Member Ops</a>
+            <a href="/team-member-history.html" class="nav-link">History</a>
+            <a href="/" class="nav-link">Dashboard</a>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- TeamMember List Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <span class="panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    TeamMembers
+                </span>
+                <span class="panel-badge" id="agentCount">0</span>
+            </div>
+            <div class="panel-body">
+                <div class="controls">
+                    <button class="btn active" id="showAllBtn" onclick="filterTeamMembers('all')">All</button>
+                    <button class="btn" id="showActiveBtn" onclick="filterTeamMembers('active')">Active</button>
+                </div>
+                <div id="agentList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="empty-text">No team members detected</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Message Feed Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <span class="panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Communications
+                </span>
+                <span class="panel-badge" id="messageCount">0</span>
+            </div>
+            <div class="panel-body">
+                <div class="controls">
+                    <input type="text" class="filter-input" id="messageFilter" placeholder="Filter messages..." oninput="filterMessages()">
+                    <button class="btn" onclick="clearMessages()">Clear</button>
+                    <button class="btn active" id="pauseBtn" onclick="togglePause()">Pause</button>
+                </div>
+                <div class="message-feed" id="messageFeed">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <div class="empty-text">Monitoring team member communications...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <span class="panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    Activity
+                </span>
+            </div>
+            <div class="panel-body">
+                <div class="timeline-container" id="timeline">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                            </svg>
+                        </div>
+                        <div class="empty-text">Awaiting activity...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // State
+        let teamMembers = [];
+        let messages = [];
+        let timeline = [];
+        let ws = null;
+        let isPaused = false;
+        let selectedTeamMemberId = null;
+        let teamMemberFilter = 'all';
+        let messageFilterText = '';
+        let lastMessageId = null;
+        let pollInterval = null;
+        let messageRate = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadInitialData();
+            connectWebSocket();
+            startPolling();
+            document.getElementById('recordingIndicator').style.display = 'flex';
+        });
+
+        // Load initial data
+        async function loadInitialData() {
+            try {
+                // Load team members
+                const teamMemberRes = await fetch('/api/specmem/team-member/spy/history?sinceHours=24');
+                const teamMemberData = await team memberRes.json();
+                if (teamMemberData.success) {
+                    team members = team memberData.team-members;
+                    renderTeamMembers();
+                }
+
+                // Load recent messages
+                const msgRes = await fetch('/api/specmem/team-member/spy/all-messages?limit=100&sinceMinutes=60');
+                const msgData = await msgRes.json();
+                if (msgData.success) {
+                    messages = msgData.messages.reverse();
+                    renderMessages();
+                    if (messages.length > 0) {
+                        lastMessageId = messages[messages.length - 1].id;
+                    }
+                }
+
+                // Load stats
+                const statsRes = await fetch('/api/specmem/team-member/spy/stats?sinceHours=1');
+                const statsData = await statsRes.json();
+                if (statsData.success) {
+                    document.getElementById('totalMessages').textContent = statsData.stats.totalMessages;
+                    document.getElementById('activeTeamMembers').textContent = statsData.stats.activeTeamMembers;
+                }
+            } catch (error) {
+                console.error('Failed to load initial data:', error);
+                addTimelineEvent('error', 'system', 'Failed to load initial data');
+            }
+        }
+
+        // WebSocket connection
+        function connectWebSocket() {
+            const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${location.host}/ws/team-members/live`);
+
+            ws.onopen = () => {
+                const indicator = document.getElementById('wsStatus');
+                indicator.classList.remove('disconnected');
+                document.getElementById('wsText').textContent = 'Live';
+                addTimelineEvent('status', 'system', 'WebSocket connected');
+                ws.send(JSON.stringify({ action: 'subscribe_all' }));
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                } catch (e) {
+                    console.error('WS parse error:', e);
+                }
+            };
+
+            ws.onclose = () => {
+                const indicator = document.getElementById('wsStatus');
+                indicator.classList.add('disconnected');
+                document.getElementById('wsText').textContent = 'Reconnecting...';
+                addTimelineEvent('error', 'system', 'WebSocket disconnected');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Handle WebSocket messages
+        function handleWebSocketMessage(data) {
+            if (isPaused) return;
+
+            switch (data.type) {
+                case 'agent_status':
+                    updateTeamMember(data.sessionId, data.data);
+                    addTimelineEvent('status', data.sessionId, `Status: ${data.data.status}`);
+                    break;
+
+                case 'communication':
+                    addMessage({
+                        id: data.data.id,
+                        from: data.teamMemberType,
+                        to: 'target',
+                        message: data.data.content,
+                        priority: 'medium',
+                        timestamp: data.timestamp
+                    });
+                    break;
+
+                case 'session_created':
+                    addTimelineEvent('status', data.sessionId, `TeamMember started: ${data.teamMemberType}`);
+                    break;
+
+                case 'session_ended':
+                    addTimelineEvent('status', data.sessionId, `TeamMember ended: ${data.data.finalStatus}`);
+                    break;
+
+                case 'heartbeat':
+                    break;
+            }
+        }
+
+        // Polling for new messages (backup for WebSocket)
+        function startPolling() {
+            pollInterval = setInterval(async () => {
+                if (isPaused) return;
+
+                try {
+                    const msgRes = await fetch('/api/specmem/team-member/spy/all-messages?limit=20&sinceMinutes=2');
+                    const msgData = await msgRes.json();
+
+                    if (msgData.success && msgData.messages.length > 0) {
+                        msgData.messages.reverse().forEach(msg => {
+                            if (!messages.find(m => m.id === msg.id)) {
+                                addMessage(msg, true);
+                            }
+                        });
+                    }
+
+                    const teamMemberRes = await fetch('/api/specmem/team-member/active?withinSeconds=120');
+                    const teamMemberData = await team memberRes.json();
+
+                    if (teamMemberData.success) {
+                        updateTeamMemberList(teamMemberData.team-members);
+                    }
+
+                    document.getElementById('activeTeamMembers').textContent = team memberData.team-members?.length || 0;
+
+                    messageRate.push(Date.now());
+                    messageRate = messageRate.filter(t => Date.now() - t < 60000);
+                    document.getElementById('msgPerMin').textContent = messageRate.length;
+
+                } catch (error) {
+                    console.error('Poll error:', error);
+                }
+            }, 3000);
+        }
+
+        // Update team member list from poll
+        function updateTeamMemberList(newTeamMembers) {
+            newTeamMembers.forEach(newTeamMember => {
+                const existing = team members.find(a => a.teamMemberId === newTeamMember.teamMemberId);
+                if (existing) {
+                    Object.assign(existing, newTeamMember);
+                } else {
+                    team members.unshift(newTeamMember);
+                    addTimelineEvent('heartbeat', newTeamMember.teamMemberId, `New team member detected: ${newTeamMember.teamMemberName}`);
+                }
+            });
+
+            team members.forEach(team member => {
+                team member.isActive = newTeamMembers.some(a => a.teamMemberId === teamMember.teamMemberId);
+            });
+
+            renderTeamMembers();
+        }
+
+        // Render team members
+        function renderTeamMembers() {
+            const container = document.getElementById('agentList');
+            const filteredTeamMembers = team members.filter(a =>
+                team memberFilter === 'all' || a.isActive
+            );
+
+            document.getElementById('agentCount').textContent = filteredTeamMembers.length;
+
+            if (filteredTeamMembers.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="empty-text">No team members detected</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredTeamMembers.map(team member => `
+                <div class="team-member-card ${teamMember.isActive ? 'active' : 'inactive'} ${selectedTeamMemberId === teamMember.teamMemberId ? 'selected' : ''}"
+                     onclick="selectTeamMember('${teamMember.teamMemberId}')">
+                    <div class="team-member-card-header">
+                        <span class="team-member-name">
+                            <span class="team-member-pulse ${teamMember.isActive ? '' : 'dead'}"></span>
+                            ${escapeHtml(teamMember.teamMemberName || teamMember.teamMemberId)}
+                        </span>
+                        <span class="team-member-type-badge ${teamMember.teamMemberType || 'worker'}">${teamMember.teamMemberType || 'worker'}</span>
+                    </div>
+                    <div class="team-member-meta">
+                        <span class="team-member-status ${getTeamMemberStatusClass(teamMember.secondsAgo)}">${formatTimeAgo(teamMember.secondsAgo)}</span>
+                        <span>${teamMember.status || 'unknown'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add message to feed
+        function addMessage(msg, isNew = false) {
+            messages.push(msg);
+            if (messages.length > 500) messages.shift();
+
+            document.getElementById('messageCount').textContent = messages.length;
+            document.getElementById('totalMessages').textContent = messages.length;
+
+            messageRate.push(Date.now());
+
+            if (!isPaused) {
+                renderMessages();
+                if (isNew) {
+                    addTimelineEvent('message', msg.from, `${msg.from} -> ${msg.to}: ${msg.message.substring(0, 50)}...`);
+                }
+            }
+        }
+
+        // Render messages
+        function renderMessages() {
+            const container = document.getElementById('messageFeed');
+            const filter = messageFilterText.toLowerCase();
+
+            let filteredMessages = [...messages].reverse();
+
+            if (filter) {
+                filteredMessages = filteredMessages.filter(m =>
+                    m.message.toLowerCase().includes(filter) ||
+                    m.from.toLowerCase().includes(filter) ||
+                    m.to.toLowerCase().includes(filter)
+                );
+            }
+
+            if (selectedTeamMemberId) {
+                filteredMessages = filteredMessages.filter(m =>
+                    m.from === selectedTeamMemberId || m.to === selectedTeamMemberId
+                );
+            }
+
+            if (filteredMessages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <div class="empty-text">No messages match filter</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredMessages.slice(0, 100).map((msg, idx) => `
+                <div class="message-card ${idx === 0 ? 'new' : ''} ${msg.to === 'all' ? 'broadcast' : ''} ${msg.priority}">
+                    <div class="message-header">
+                        <div class="message-route">
+                            <span class="message-from">${escapeHtml(msg.from)}</span>
+                            <span class="message-arrow">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </span>
+                            <span class="message-to ${msg.to === 'all' ? 'broadcast' : ''}">${escapeHtml(msg.to)}</span>
+                            <span class="message-priority ${msg.priority}">${msg.priority}</span>
+                        </div>
+                        <span class="message-time">${formatTime(msg.timestamp)}</span>
+                    </div>
+                    <div class="message-content">${escapeHtml(msg.message)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Add timeline event
+        function addTimelineEvent(type, team member, content) {
+            timeline.unshift({
+                type,
+                team member,
+                content,
+                time: new Date()
+            });
+
+            if (timeline.length > 100) timeline.pop();
+            renderTimeline();
+        }
+
+        // Render timeline
+        function renderTimeline() {
+            const container = document.getElementById('timeline');
+
+            if (timeline.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                            </svg>
+                        </div>
+                        <div class="empty-text">Awaiting activity...</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = timeline.slice(0, 50).map(event => `
+                <div class="timeline-item ${event.type}">
+                    <span class="timeline-time">${formatTime(event.time)}</span>
+                    <span class="timeline-content">
+                        <span class="timeline-team-member">${escapeHtml(event.teamMember)}</span>
+                        ${escapeHtml(event.content)}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Filter functions
+        function filterTeamMembers(filter) {
+            team memberFilter = filter;
+            document.getElementById('showAllBtn').classList.toggle('active', filter === 'all');
+            document.getElementById('showActiveBtn').classList.toggle('active', filter === 'active');
+            renderTeamMembers();
+        }
+
+        function filterMessages() {
+            messageFilterText = document.getElementById('messageFilter').value;
+            renderMessages();
+        }
+
+        function selectTeamMember(teamMemberId) {
+            selectedTeamMemberId = selectedTeamMemberId === teamMemberId ? null : teamMemberId;
+            renderTeamMembers();
+            renderMessages();
+        }
+
+        function clearMessages() {
+            messages = [];
+            renderMessages();
+            document.getElementById('messageCount').textContent = '0';
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pauseBtn');
+            btn.textContent = isPaused ? 'Resume' : 'Pause';
+            btn.classList.toggle('active', !isPaused);
+            document.getElementById('recordingIndicator').style.display = isPaused ? 'none' : 'flex';
+        }
+
+        // Helper functions
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function formatTimeAgo(seconds) {
+            if (!seconds || seconds < 0) return 'now';
+            if (seconds < 60) return `${Math.round(seconds)}s ago`;
+            if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`;
+            return `${Math.round(seconds / 3600)}h ago`;
+        }
+
+        function getTeamMemberStatusClass(seconds) {
+            if (!seconds || seconds < 60) return '';
+            if (seconds < 300) return 'stale';
+            return 'dead';
+        }
+
+        function updateTeamMember(teamMemberId, data) {
+            const teamMember = team members.find(a => a.teamMemberId === teamMemberId);
+            if (teamMember) {
+                Object.assign(teamMember, data);
+                team member.isActive = true;
+                team member.secondsAgo = 0;
+                renderTeamMembers();
+            }
+        }
+    </script>
+</body>
+</html>

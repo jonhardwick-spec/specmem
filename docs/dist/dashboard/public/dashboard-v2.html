@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECMEM // TACTICAL MEMORY COMMAND CENTER v2</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128293;</text></svg>">
+    <!-- D3.js for graph visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* ============================================
+         * SPECMEM DASHBOARD V2 - Complete Rehaul
+         * CS:GO Tactical Theme - Enhanced Edition
+         * Team Member: team member1-ui | 2025-12-17
+         * ============================================ */
+
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Primary Colors - CSGO Yellow */
+            --primary: #FFD700;
+            --primary-dark: #B8860B;
+            --primary-light: #FFE44D;
+            --primary-glow: rgba(255, 215, 0, 0.5);
+            --primary-subtle: rgba(255, 215, 0, 0.1);
+
+            /* Background Colors */
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #121212;
+            --bg-card: #1a1a1a;
+            --bg-elevated: #242424;
+            --bg-overlay: rgba(0, 0, 0, 0.85);
+
+            /* Text Colors */
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --text-dim: #707070;
+            --text-muted: #505050;
+
+            /* Status Colors */
+            --success: #00E676;
+            --success-glow: rgba(0, 230, 118, 0.4);
+            --warning: #FFAB00;
+            --warning-glow: rgba(255, 171, 0, 0.4);
+            --error: #FF5252;
+            --error-glow: rgba(255, 82, 82, 0.4);
+            --info: #00B0FF;
+            --info-glow: rgba(0, 176, 255, 0.4);
+
+            /* Memory Type Colors */
+            --type-episodic: #FF6B6B;
+            --type-semantic: #4ECDC4;
+            --type-procedural: #45B7D1;
+            --type-working: #96CEB4;
+            --type-consolidated: #DDA0DD;
+
+            /* Borders */
+            --border-primary: #2a2a2a;
+            --border-secondary: #3a3a3a;
+            --border-accent: rgba(255, 215, 0, 0.3);
+
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.2);
+            --shadow-glow-strong: 0 0 40px rgba(255, 215, 0, 0.4);
+
+            /* Glassmorphism */
+            --glass-bg: rgba(26, 26, 26, 0.7);
+            --glass-border: rgba(255, 215, 0, 0.15);
+            --glass-blur: blur(12px);
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+
+            /* Layout */
+            --header-height: 64px;
+            --nav-width: 72px;
+            --nav-width-expanded: 220px;
+
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 300ms ease;
+            --transition-slow: 500ms ease;
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Rajdhani', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* Animated Background Grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(255,215,0,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(255,215,0,0.02) 0%, transparent 50%),
+                linear-gradient(90deg, rgba(255,215,0,0.015) 1px, transparent 1px),
+                linear-gradient(rgba(255,215,0,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridPulse 10s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-dark);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* ============================================
+         * HEADER - Command Center Top Bar
+         * ============================================ */
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(180deg, rgba(15, 15, 15, 0.95) 0%, rgba(5, 5, 5, 0.98) 100%);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-lg);
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(255, 215, 0, 0.15);
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            user-select: none;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.8); opacity: 0.6; }
+        }
+
+        .logo-subtitle {
+            font-size: 10px;
+            font-weight: 400;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-left: var(--space-sm);
+            text-transform: uppercase;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+        }
+
+        .live-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--primary-subtle);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            min-width: 90px;
+            transition: var(--transition-normal);
+        }
+
+        .live-stat:hover {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .live-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .live-stat-value.updating {
+            animation: statPop 0.3s ease;
+        }
+
+        @keyframes statPop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .live-stat-label {
+            font-size: 9px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        /* Connection Status Indicator */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-xs) var(--space-md);
+            background: var(--bg-elevated);
+            border-radius: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: connectionPulse 2s ease-in-out infinite;
+        }
+
+        .connection-dot.disconnected {
+            background: var(--error);
+            animation: none;
+        }
+
+        @keyframes connectionPulse {
+            0%, 100% { box-shadow: 0 0 0 0 var(--success-glow); }
+            50% { box-shadow: 0 0 0 6px transparent; }
+        }
+
+        /* ============================================
+         * NAVIGATION - Side Panel
+         * ============================================ */
+
+        .nav-panel {
+            position: fixed;
+            left: 0;
+            top: var(--header-height);
+            bottom: 0;
+            width: var(--nav-width);
+            background: linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(5, 5, 5, 0.98) 100%);
+            backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: var(--space-md) 0;
+            z-index: 999;
+            transition: width var(--transition-normal);
+        }
+
+        .nav-panel:hover {
+            width: var(--nav-width-expanded);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: var(--space-md);
+            margin: var(--space-xs) var(--space-sm);
+            cursor: pointer;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            transition: all var(--transition-normal);
+            text-decoration: none;
+            color: var(--text-secondary);
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-subtle);
+            border-left-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.15) 0%, transparent 100%);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            min-width: 36px;
+            text-align: center;
+            transition: var(--transition-normal);
+        }
+
+        .nav-item:hover .nav-icon,
+        .nav-item.active .nav-icon {
+            text-shadow: 0 0 15px var(--primary-glow);
+            transform: scale(1.1);
+        }
+
+        .nav-label {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: var(--transition-normal);
+        }
+
+        .nav-panel:hover .nav-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: var(--border-primary);
+            margin: var(--space-md) var(--space-md);
+        }
+
+        .nav-section-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: var(--space-sm) var(--space-md);
+            opacity: 0;
+            transition: var(--transition-normal);
+        }
+
+        .nav-panel:hover .nav-section-label {
+            opacity: 1;
+        }
+
+        /* ============================================
+         * MAIN CONTENT AREA
+         * ============================================ */
+
+        .main-content {
+            margin-left: var(--nav-width);
+            margin-top: var(--header-height);
+            padding: var(--space-lg);
+            min-height: calc(100vh - var(--header-height));
+            position: relative;
+            z-index: 1;
+            transition: margin-left var(--transition-normal);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: auto;
+            gap: var(--space-lg);
+            grid-template-areas:
+                "stats stats stats stats stats stats team members team members team members team members team members team members"
+                "graph graph graph graph graph graph graph timeline timeline timeline timeline timeline"
+                "search search search search search search recent recent recent recent recent recent";
+        }
+
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-areas:
+                    "stats stats stats stats stats stats stats stats stats stats stats stats"
+                    "teamMembers team members team members team members team members team members team members team members team members team members team members team members"
+                    "graph graph graph graph graph graph graph graph graph graph graph graph"
+                    "timeline timeline timeline timeline timeline timeline timeline timeline timeline timeline timeline timeline"
+                    "search search search search search search recent recent recent recent recent recent";
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "stats"
+                    "team-members"
+                    "graph"
+                    "timeline"
+                    "search"
+                    "recent";
+            }
+        }
+
+        /* ============================================
+         * PANEL COMPONENTS
+         * ============================================ */
+
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+        }
+
+        .panel:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.02) 100%);
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .panel-title-icon {
+            font-size: 16px;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .panel-body {
+            padding: var(--space-lg);
+        }
+
+        .panel-body.no-padding {
+            padding: 0;
+        }
+
+        /* Panel Button */
+        .panel-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .panel-btn:hover {
+            background: var(--primary);
+            color: var(--bg-primary);
+            border-color: var(--primary);
+        }
+
+        /* ============================================
+         * STATS PANEL - Grid Area: stats
+         * ============================================ */
+
+        .stats-panel {
+            grid-area: stats;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .stat-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: var(--space-lg);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-normal);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .stat-card-icon {
+            font-size: 24px;
+            margin-bottom: var(--space-sm);
+            opacity: 0.8;
+        }
+
+        .stat-card-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .stat-card-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: var(--space-xs);
+        }
+
+        .stat-card-change {
+            font-size: 11px;
+            margin-top: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .stat-card-change.positive {
+            color: var(--success);
+        }
+
+        .stat-card-change.negative {
+            color: var(--error);
+        }
+
+        /* ============================================
+         * AGENTS PANEL - Grid Area: team members
+         * ============================================ */
+
+        .team-members-panel {
+            grid-area: team members;
+        }
+
+        .team-members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .team-member-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            position: relative;
+        }
+
+        .team-member-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--success);
+            border-radius: 8px 0 0 8px;
+            opacity: 0;
+            transition: var(--transition-normal);
+        }
+
+        .team-member-card:hover {
+            border-color: var(--border-secondary);
+            transform: translateX(4px);
+        }
+
+        .team-member-card:hover::before {
+            opacity: 1;
+        }
+
+        .team-member-card.inactive::before {
+            background: var(--error);
+        }
+
+        .team-member-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-sm);
+        }
+
+        .team-member-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .team-member-status {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .team-member-status.active {
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .team-member-status.idle {
+            background: rgba(255, 171, 0, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(255, 171, 0, 0.3);
+        }
+
+        .team-member-status.offline {
+            background: rgba(255, 82, 82, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+
+        .team-member-type {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: var(--space-xs);
+        }
+
+        .team-member-heartbeat {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+         * MEMORY GRAPH - Grid Area: graph
+         * ============================================ */
+
+        .graph-panel {
+            grid-area: graph;
+            min-height: 400px;
+        }
+
+        #memory-graph {
+            width: 100%;
+            height: 350px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        #memory-graph .node {
+            cursor: pointer;
+        }
+
+        #memory-graph .node circle {
+            stroke: var(--primary);
+            stroke-width: 2px;
+            transition: var(--transition-fast);
+        }
+
+        #memory-graph .node:hover circle {
+            stroke-width: 4px;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
+        }
+
+        #memory-graph .link {
+            stroke: var(--border-secondary);
+            stroke-opacity: 0.6;
+        }
+
+        .graph-legend {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+            margin-top: var(--space-md);
+        }
+
+        .graph-legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .graph-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* ============================================
+         * TIMELINE - Grid Area: timeline
+         * ============================================ */
+
+        .timeline-panel {
+            grid-area: timeline;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: var(--space-lg);
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary), var(--border-primary));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            transition: var(--transition-normal);
+        }
+
+        .timeline-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: calc(-1 * var(--space-lg) - 4px);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+
+        .timeline-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+
+        .timeline-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .timeline-type {
+            display: inline-block;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: var(--space-xs);
+            text-transform: uppercase;
+        }
+
+        /* ============================================
+         * SEARCH PANEL - Grid Area: search
+         * ============================================ */
+
+        .search-panel {
+            grid-area: search;
+        }
+
+        .search-input-container {
+            position: relative;
+            margin-bottom: var(--space-md);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: var(--space-md) var(--space-lg) var(--space-md) 48px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            transition: var(--transition-normal);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--space-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 18px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 20px;
+            padding: var(--space-xs) var(--space-md);
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .filter-chip:hover,
+        .filter-chip.active {
+            background: var(--primary);
+            color: var(--bg-primary);
+            border-color: var(--primary);
+        }
+
+        /* ============================================
+         * RECENT MEMORIES - Grid Area: recent
+         * ============================================ */
+
+        .recent-panel {
+            grid-area: recent;
+        }
+
+        .memory-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .memory-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .memory-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .memory-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xs);
+        }
+
+        .memory-type-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .memory-type-badge.episodic { background: rgba(255, 107, 107, 0.2); color: var(--type-episodic); }
+        .memory-type-badge.semantic { background: rgba(78, 205, 196, 0.2); color: var(--type-semantic); }
+        .memory-type-badge.procedural { background: rgba(69, 183, 209, 0.2); color: var(--type-procedural); }
+        .memory-type-badge.working { background: rgba(150, 206, 180, 0.2); color: var(--type-working); }
+        .memory-type-badge.consolidated { background: rgba(221, 160, 221, 0.2); color: var(--type-consolidated); }
+
+        .memory-time {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .memory-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .memory-tags {
+            display: flex;
+            gap: var(--space-xs);
+            margin-top: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .memory-tag {
+            font-size: 9px;
+            padding: 2px 6px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            color: var(--text-dim);
+        }
+
+        /* ============================================
+         * BUTTONS
+         * ============================================ */
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-lg);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-glow-strong);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ============================================
+         * MODAL SYSTEM
+         * ============================================ */
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+            box-shadow: var(--shadow-glow-strong);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--bg-primary);
+            padding: var(--space-md) var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--bg-primary);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: var(--space-lg);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* ============================================
+         * TOAST NOTIFICATIONS
+         * ============================================ */
+
+        .toast-container {
+            position: fixed;
+            bottom: var(--space-lg);
+            right: var(--space-lg);
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: var(--space-md) var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            box-shadow: var(--shadow-lg);
+            animation: toastSlide 0.3s ease;
+            min-width: 300px;
+        }
+
+        @keyframes toastSlide {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--error); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        .toast.info { border-left: 4px solid var(--info); }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        /* ============================================
+         * LOADING STATES
+         * ============================================ */
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-tertiary) 50%, var(--bg-elevated) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-primary);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="/shared-logger.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-dot"></div>
+            SPECMEM
+            <span class="logo-subtitle">Command Center v2</span>
+        </div>
+
+        <div class="header-center">
+            <div class="live-stat">
+                <div class="live-stat-value" id="stat-memories">--</div>
+                <div class="live-stat-label">Memories</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-value" id="stat-teamMembers">--</div>
+                <div class="live-stat-label">TeamMembers</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-value" id="stat-relations">--</div>
+                <div class="live-stat-label">Relations</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-value" id="stat-queries">--</div>
+                <div class="live-stat-label">Queries/min</div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <div class="connection-status">
+                <div class="connection-dot" id="connection-indicator"></div>
+                <span id="connection-text">LIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION -->
+    <nav class="nav-panel">
+        <a href="#" class="nav-item active" data-section="dashboard">
+            <span class="nav-icon">&#128200;</span>
+            <span class="nav-label">Dashboard</span>
+        </a>
+        <a href="memory-recall.html" class="nav-item" data-section="memories">
+            <span class="nav-icon">&#129504;</span>
+            <span class="nav-label">Memories</span>
+        </a>
+        <a href="team-members.html" class="nav-item" data-section="team-members">
+            <span class="nav-icon">&#129302;</span>
+            <span class="nav-label">TeamMembers</span>
+        </a>
+        <a href="team-member-spy.html" class="nav-item" data-section="spy">
+            <span class="nav-icon">&#128373;</span>
+            <span class="nav-label">Team Member Spy</span>
+        </a>
+
+        <div class="nav-divider"></div>
+        <div class="nav-section-label">Tools</div>
+
+        <a href="terminal.html" class="nav-item" data-section="terminal">
+            <span class="nav-icon">&#128187;</span>
+            <span class="nav-label">Terminal</span>
+        </a>
+        <a href="codebase-config.html" class="nav-item" data-section="config">
+            <span class="nav-icon">&#9881;</span>
+            <span class="nav-label">Config</span>
+        </a>
+        <a href="prompt-console.html" class="nav-item" data-section="prompt">
+            <span class="nav-icon">&#128172;</span>
+            <span class="nav-label">Prompt</span>
+        </a>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="dashboard-grid">
+            <!-- STATS PANEL -->
+            <div class="panel stats-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">&#128202;</span>
+                        System Statistics
+                    </div>
+                    <div class="panel-actions">
+                        <button class="panel-btn" onclick="refreshStats()">Refresh</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="stats-grid" id="stats-grid">
+                        <!-- Stats cards populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENTS PANEL -->
+            <div class="panel team members-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">&#129302;</span>
+                        Active Team Members
+                    </div>
+                    <div class="panel-actions">
+                        <button class="panel-btn" onclick="refreshTeamMembers()">Refresh</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="teamMembers-grid" id="teamMembers-grid">
+                        <!-- TeamMember cards populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEMORY GRAPH -->
+            <div class="panel graph-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">&#127760;</span>
+                        Memory Graph
+                    </div>
+                    <div class="panel-actions">
+                        <button class="panel-btn" onclick="resetGraphZoom()">Reset View</button>
+                    </div>
+                </div>
+                <div class="panel-body no-padding">
+                    <div id="memory-graph"></div>
+                    <div class="graph-legend" style="padding: var(--space-md);">
+                        <div class="graph-legend-item">
+                            <div class="graph-legend-dot" style="background: var(--type-episodic);"></div>
+                            Episodic
+                        </div>
+                        <div class="graph-legend-item">
+                            <div class="graph-legend-dot" style="background: var(--type-semantic);"></div>
+                            Semantic
+                        </div>
+                        <div class="graph-legend-item">
+                            <div class="graph-legend-dot" style="background: var(--type-procedural);"></div>
+                            Procedural
+                        </div>
+                        <div class="graph-legend-item">
+                            <div class="graph-legend-dot" style="background: var(--type-working);"></div>
+                            Working
+                        </div>
+                        <div class="graph-legend-item">
+                            <div class="graph-legend-dot" style="background: var(--type-consolidated);"></div>
+                            Consolidated
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="panel timeline-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">&#128337;</span>
+                        Activity Timeline
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="timeline" id="activity-timeline">
+                        <!-- Timeline items populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEARCH PANEL -->
+            <div class="panel search-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">&#128269;</span>
+                        Quick Search
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="search-input-container">
+                        <span class="search-icon">&#128269;</span>
+                        <input type="text" class="search-input" id="quick-search" placeholder="Search memories semantically...">
+                    </div>
+                    <div class="search-filters">
+                        <span class="filter-chip active" data-filter="all">All</span>
+                        <span class="filter-chip" data-filter="episodic">Episodic</span>
+                        <span class="filter-chip" data-filter="semantic">Semantic</span>
+                        <span class="filter-chip" data-filter="procedural">Procedural</span>
+                        <span class="filter-chip" data-filter="working">Working</span>
+                    </div>
+                    <div id="search-results" style="margin-top: var(--space-md);"></div>
+                </div>
+            </div>
+
+            <!-- RECENT MEMORIES -->
+            <div class="panel recent-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">&#128203;</span>
+                        Recent Memories
+                    </div>
+                    <div class="panel-actions">
+                        <button class="panel-btn" onclick="loadRecentMemories()">Refresh</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="memory-list" id="recent-memories">
+                        <!-- Memory items populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">Memory Details</div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Modal content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // ============================================
+        // SPECMEM DASHBOARD V2 - JavaScript
+        // ============================================
+
+        // Configuration
+        const API_BASE = '/api';
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+
+        // State
+        let stats = {};
+        let teamMembers = [];
+        let recentMemories = [];
+        let graphData = { nodes: [], links: [] };
+        let simulation = null;
+
+        // Color mapping for memory types
+        const typeColors = {
+            episodic: '#FF6B6B',
+            semantic: '#4ECDC4',
+            procedural: '#45B7D1',
+            working: '#96CEB4',
+            consolidated: '#DDA0DD'
+        };
+
+        // ============================================
+        // API Functions
+        // ============================================
+
+        async function fetchStats() {
+            try {
+                const response = await fetch(`${API_BASE}/memory/stats`);
+                const data = await response.json();
+                if (data.success) {
+                    stats = data.stats;
+                    renderStats();
+                    updateHeaderStats();
+                }
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+                showToast('Failed to load statistics', 'error');
+            }
+        }
+
+        async function fetchTeamMembers() {
+            try {
+                const response = await fetch(`${API_BASE}/specmem/team-member/active?withinSeconds=120`);
+                const data = await response.json();
+                if (data.success) {
+                    team members = data.team-members;
+                    renderTeamMembers();
+                    document.getElementById('stat-teamMembers').textContent = team members.length;
+                }
+            } catch (error) {
+                console.error('Failed to fetch team members:', error);
+            }
+        }
+
+        async function fetchRecentMemories() {
+            try {
+                const response = await fetch(`${API_BASE}/memory/recent?limit=10`);
+                const data = await response.json();
+                if (data.success) {
+                    recentMemories = data.memories;
+                    renderRecentMemories();
+                    renderTimeline();
+                }
+            } catch (error) {
+                console.error('Failed to fetch recent memories:', error);
+            }
+        }
+
+        async function searchMemories(query) {
+            if (!query) return;
+            try {
+                const response = await fetch(`${API_BASE}/specmem/find`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, limit: 5 })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    renderSearchResults(data.memories);
+                }
+            } catch (error) {
+                console.error('Search failed:', error);
+                showToast('Search failed', 'error');
+            }
+        }
+
+        async function fetchGraphData() {
+            try {
+                // Fetch recent memories for graph nodes
+                const memoriesRes = await fetch(`${API_BASE}/memory/recent?limit=30`);
+                const memoriesData = await memoriesRes.json();
+
+                if (memoriesData.success) {
+                    graphData.nodes = memoriesData.memories.map(m => ({
+                        id: m.id,
+                        type: m.memoryType,
+                        importance: m.importance,
+                        content: m.content.substring(0, 50) + '...'
+                    }));
+
+                    // For now, create some random links (in production, fetch from relations)
+                    graphData.links = [];
+                    for (let i = 0; i < graphData.nodes.length; i++) {
+                        if (Math.random() > 0.5 && i > 0) {
+                            graphData.links.push({
+                                source: graphData.nodes[i].id,
+                                target: graphData.nodes[Math.floor(Math.random() * i)].id
+                            });
+                        }
+                    }
+
+                    renderGraph();
+                }
+            } catch (error) {
+                console.error('Failed to fetch graph data:', error);
+            }
+        }
+
+        // ============================================
+        // Render Functions
+        // ============================================
+
+        function renderStats() {
+            const grid = document.getElementById('stats-grid');
+            const statsConfig = [
+                { label: 'Total Memories', value: stats.total || 0, icon: '&#129504;', change: '+12' },
+                { label: 'With Embeddings', value: stats.withEmbeddings || 0, icon: '&#127919;', change: '+5' },
+                { label: 'Expired', value: stats.expired || 0, icon: '&#128163;', change: '-3' },
+                { label: 'Avg Access', value: (stats.averageAccessCount || 0).toFixed(1), icon: '&#128202;', change: '+0.5' }
+            ];
+
+            grid.innerHTML = statsConfig.map(s => `
+                <div class="stat-card">
+                    <div class="stat-card-icon">${s.icon}</div>
+                    <div class="stat-card-value">${s.value}</div>
+                    <div class="stat-card-label">${s.label}</div>
+                    <div class="stat-card-change ${s.change.startsWith('+') ? 'positive' : 'negative'}">
+                        ${s.change.startsWith('+') ? '&#9650;' : '&#9660;'} ${s.change}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateHeaderStats() {
+            const memoriesEl = document.getElementById('stat-memories');
+            memoriesEl.textContent = stats.total || 0;
+            memoriesEl.classList.add('updating');
+            setTimeout(() => memoriesEl.classList.remove('updating'), 300);
+        }
+
+        function renderTeamMembers() {
+            const grid = document.getElementById('teamMembers-grid');
+
+            if (teamMembers.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: var(--space-xl); color: var(--text-dim);">
+                        No active team members detected
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = team members.map(a => {
+                const isActive = a.secondsAgo < 60;
+                const statusClass = isActive ? 'active' : (a.secondsAgo < 120 ? 'idle' : 'offline');
+                const statusText = isActive ? 'Active' : (a.secondsAgo < 120 ? 'Idle' : 'Offline');
+
+                return `
+                    <div class="team-member-card ${!isActive ? 'inactive' : ''}" onclick="viewTeamMember('${a.teamMemberId}')">
+                        <div class="team-member-card-header">
+                            <span class="team-member-name">${a.teamMemberName || a.teamMemberId}</span>
+                            <span class="team-member-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="team-member-type">${a.teamMemberType || 'worker'}</div>
+                        <div class="team-member-heartbeat">Last seen: ${a.secondsAgo}s ago</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecentMemories() {
+            const list = document.getElementById('recent-memories');
+
+            if (recentMemories.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: var(--space-xl); color: var(--text-dim);">
+                        No memories found
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = recentMemories.map(m => `
+                <div class="memory-item" onclick="viewMemory('${m.id}')">
+                    <div class="memory-item-header">
+                        <span class="memory-type-badge ${m.memoryType}">${m.memoryType}</span>
+                        <span class="memory-time">${formatTime(m.createdAt)}</span>
+                    </div>
+                    <div class="memory-content">${escapeHtml(m.content)}</div>
+                    ${m.tags && m.tags.length > 0 ? `
+                        <div class="memory-tags">
+                            ${m.tags.slice(0, 3).map(t => `<span class="memory-tag">${t}</span>`).join('')}
+                            ${m.tags.length > 3 ? `<span class="memory-tag">+${m.tags.length - 3}</span>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderTimeline() {
+            const timeline = document.getElementById('activity-timeline');
+            const events = recentMemories.slice(0, 5);
+
+            timeline.innerHTML = events.map(m => `
+                <div class="timeline-item" onclick="viewMemory('${m.id}')">
+                    <div class="timeline-time">${formatTime(m.createdAt)}</div>
+                    <div class="timeline-content">${escapeHtml(m.content.substring(0, 100))}...</div>
+                    <span class="timeline-type" style="background: ${typeColors[m.memoryType]}20; color: ${typeColors[m.memoryType]}">
+                        ${m.memoryType}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function renderSearchResults(memories) {
+            const container = document.getElementById('search-results');
+
+            if (!memories || memories.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: var(--space-md); color: var(--text-dim);">
+                        No results found
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = memories.map(m => `
+                <div class="memory-item" onclick="viewMemory('${m.id}')" style="margin-bottom: var(--space-sm);">
+                    <div class="memory-item-header">
+                        <span class="memory-type-badge ${m.memoryType || m.memory_type}">${m.memoryType || m.memory_type}</span>
+                        ${m.similarity ? `<span class="memory-time">Score: ${(m.similarity * 100).toFixed(1)}%</span>` : ''}
+                    </div>
+                    <div class="memory-content">${escapeHtml(m.content)}</div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // Graph Visualization (D3.js)
+        // ============================================
+
+        function renderGraph() {
+            const container = document.getElementById('memory-graph');
+            container.innerHTML = '';
+
+            const width = container.clientWidth;
+            const height = 350;
+
+            const svg = d3.select('#memory-graph')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            // Add zoom behavior
+            const g = svg.append('g');
+
+            svg.call(d3.zoom()
+                .extent([[0, 0], [width, height]])
+                .scaleExtent([0.5, 4])
+                .on('zoom', (event) => g.attr('transform', event.transform)));
+
+            // Create simulation
+            simulation = d3.forceSimulation(graphData.nodes)
+                .force('link', d3.forceLink(graphData.links).id(d => d.id).distance(80))
+                .force('charge', d3.forceManyBody().strength(-150))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(30));
+
+            // Draw links
+            const link = g.append('g')
+                .selectAll('line')
+                .data(graphData.links)
+                .join('line')
+                .attr('class', 'link')
+                .attr('stroke', 'var(--border-secondary)')
+                .attr('stroke-opacity', 0.6);
+
+            // Draw nodes
+            const node = g.append('g')
+                .selectAll('.node')
+                .data(graphData.nodes)
+                .join('g')
+                .attr('class', 'node')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            node.append('circle')
+                .attr('r', d => getNodeSize(d.importance))
+                .attr('fill', d => typeColors[d.type] || '#888')
+                .attr('stroke', 'var(--primary)')
+                .attr('stroke-width', 2);
+
+            node.append('title')
+                .text(d => d.content);
+
+            // Update positions on tick
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+        }
+
+        function getNodeSize(importance) {
+            switch (importance) {
+                case 'critical': return 18;
+                case 'high': return 14;
+                case 'medium': return 10;
+                case 'low': return 8;
+                default: return 6;
+            }
+        }
+
+        function resetGraphZoom() {
+            const svg = d3.select('#memory-graph svg');
+            svg.transition().duration(500).call(
+                d3.zoom().transform,
+                d3.zoomIdentity
+            );
+        }
+
+        // ============================================
+        // Modal Functions
+        // ============================================
+
+        async function viewMemory(id) {
+            try {
+                const response = await fetch(`${API_BASE}/memory/recall/${id}`);
+                const data = await response.json();
+
+                if (data.success && data.memory) {
+                    const m = data.memory;
+                    document.getElementById('modal-title').textContent = `Memory: ${m.memoryType}`;
+                    document.getElementById('modal-body').innerHTML = `
+                        <div style="margin-bottom: var(--space-md);">
+                            <span class="memory-type-badge ${m.memoryType}">${m.memoryType}</span>
+                            <span style="margin-left: var(--space-sm); color: var(--text-dim); font-size: 12px;">
+                                ID: ${m.id.substring(0, 8)}...
+                            </span>
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-md); border-radius: 8px; margin-bottom: var(--space-md);">
+                            <pre style="white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-secondary);">${escapeHtml(m.content)}</pre>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); font-size: 13px;">
+                            <div><strong style="color: var(--primary);">Importance:</strong> ${m.importance}</div>
+                            <div><strong style="color: var(--primary);">Access Count:</strong> ${m.accessCount}</div>
+                            <div><strong style="color: var(--primary);">Created:</strong> ${formatTime(m.createdAt)}</div>
+                            <div><strong style="color: var(--primary);">Updated:</strong> ${formatTime(m.updatedAt)}</div>
+                        </div>
+                        ${m.tags && m.tags.length > 0 ? `
+                            <div style="margin-top: var(--space-md);">
+                                <strong style="color: var(--primary);">Tags:</strong>
+                                <div style="margin-top: var(--space-sm);">
+                                    ${m.tags.map(t => `<span class="memory-tag" style="margin-right: var(--space-xs);">${t}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    `;
+                    document.getElementById('modal-overlay').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Failed to fetch memory:', error);
+                showToast('Failed to load memory details', 'error');
+            }
+        }
+
+        function viewTeamMember(teamMemberId) {
+            window.location.href = `team-members.html?team-member=${teamMemberId}`;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        // ============================================
+        // Toast Notifications
+        // ============================================
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '&#10004;',
+                error: '&#10006;',
+                warning: '&#9888;',
+                info: '&#8505;'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type]}</span>
+                <span class="toast-message">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'toastSlide 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================
+        // Utility Functions
+        // ============================================
+
+        function formatTime(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = (now - date) / 1000;
+
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ============================================
+        // Event Handlers
+        // ============================================
+
+        function refreshStats() {
+            fetchStats();
+            showToast('Statistics refreshed', 'success');
+        }
+
+        function refreshTeamMembers() {
+            fetchTeamMembers();
+            showToast('Team Member list refreshed', 'success');
+        }
+
+        function loadRecentMemories() {
+            fetchRecentMemories();
+            showToast('Memories refreshed', 'success');
+        }
+
+        // Search debounce
+        let searchTimeout;
+        document.getElementById('quick-search').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchMemories(e.target.value);
+            }, 300);
+        });
+
+        // Filter chips
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                // Implement filter logic here
+            });
+        });
+
+        // Close modal on overlay click
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') closeModal();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+            if (e.key === '/' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('quick-search').focus();
+            }
+        });
+
+        // ============================================
+        // Initialization
+        // ============================================
+
+        async function init() {
+            showToast('Initializing dashboard...', 'info');
+
+            await Promise.all([
+                fetchStats(),
+                fetchTeamMembers(),
+                fetchRecentMemories(),
+                fetchGraphData()
+            ]);
+
+            showToast('Dashboard ready', 'success');
+
+            // Set up auto-refresh
+            setInterval(() => {
+                fetchStats();
+                fetchTeamMembers();
+            }, REFRESH_INTERVAL);
+        }
+
+        // Start the dashboard
+        init();
+    </script>
+</body>
+</html>

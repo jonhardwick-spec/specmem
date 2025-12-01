@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0d1117;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a1a;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Cyan-Purple gradient for title -->
+    <linearGradient id="titleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Radial glow effect -->
+    <radialGradient id="glowEffect" cx="50%" cy="40%" r="60%" fx="50%" fy="40%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:0.15" />
+      <stop offset="70%" style="stop-color:#00bfff;stop-opacity:0" />
+    </radialGradient>
+
+    <!-- Badge gradient -->
+    <linearGradient id="badgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.2" />
+    </linearGradient>
+
+    <!-- Card gradient -->
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f19;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#0a0a0f;stop-opacity:0.9" />
+    </linearGradient>
+
+    <!-- Stat number gradients -->
+    <linearGradient id="statGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff" />
+      <stop offset="100%" style="stop-color:#a855f7" />
+    </linearGradient>
+
+    <!-- Glow filter for badge -->
+    <filter id="badgeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#00bfff" flood-opacity="0.4"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Drop shadow for cards -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Subtle glow for stats -->
+    <filter id="statGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bgGradient)"/>
+
+  <!-- Radial glow overlay -->
+  <rect width="1200" height="700" fill="url(#glowEffect)"/>
+
+  <!-- Decorative grid lines (subtle) -->
+  <g opacity="0.03">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="600" x2="1200" y2="600" stroke="#00bfff" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="700" stroke="#00bfff" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="700" stroke="#00bfff" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="700" stroke="#00bfff" stroke-width="1"/>
+    <line x1="800" y1="0" x2="800" y2="700" stroke="#00bfff" stroke-width="1"/>
+    <line x1="1000" y1="0" x2="1000" y2="700" stroke="#00bfff" stroke-width="1"/>
+  </g>
+
+  <!-- Top badge: Semantic Memory Layer -->
+  <g filter="url(#badgeGlow)">
+    <rect x="410" y="80" width="380" height="50" rx="25" ry="25" fill="url(#badgeGradient)" stroke="#00bfff" stroke-width="2" stroke-opacity="0.5"/>
+    <!-- Microchip icon (simplified) -->
+    <g transform="translate(440, 93)">
+      <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="#00bfff" stroke-width="1.5"/>
+      <rect x="8" y="8" width="8" height="8" fill="#00bfff"/>
+      <line x1="0" y1="8" x2="4" y2="8" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="0" y1="16" x2="4" y2="16" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="20" y1="8" x2="24" y2="8" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="20" y1="16" x2="24" y2="16" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="8" y1="0" x2="8" y2="4" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="16" y1="0" x2="16" y2="4" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="8" y1="20" x2="8" y2="24" stroke="#00bfff" stroke-width="1.5"/>
+      <line x1="16" y1="20" x2="16" y2="24" stroke="#00bfff" stroke-width="1.5"/>
+    </g>
+    <text x="480" y="113" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#00bfff" letter-spacing="2">SEMANTIC MEMORY LAYER</text>
+  </g>
+
+  <!-- Main Title: "Your Code Assistant" -->
+  <text x="600" y="200" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="56" font-weight="800" fill="#f5f5f5">Your Code Assistant</text>
+
+  <!-- Subtitle with gradient: "Actually Remembers" -->
+  <text x="600" y="275" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="56" font-weight="800" fill="url(#titleGradient)">Actually Remembers</text>
+
+  <!-- Tagline -->
+  <text x="600" y="340" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="20" fill="#888888" font-weight="400">SpecMem keeps your project's context across sessions. No more re-explaining your</text>
+  <text x="600" y="370" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="20" fill="#888888" font-weight="400">codebase every time. 74 MCP tools, semantic search, per-project isolation.</text>
+
+  <!-- Stats Cards Row -->
+  <g transform="translate(55, 430)">
+    <!-- Card 1: 74 MCP Tools -->
+    <g filter="url(#cardShadow)">
+      <rect x="0" y="0" width="250" height="140" rx="16" ry="16" fill="url(#cardGradient)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="125" y="70" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="800" fill="url(#titleGradient)">74</text>
+      <text x="125" y="105" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" fill="#888888" font-weight="500">MCP Tools</text>
+    </g>
+
+    <!-- Card 2: 100% Project Isolation -->
+    <g filter="url(#cardShadow)" transform="translate(280, 0)">
+      <rect x="0" y="0" width="250" height="140" rx="16" ry="16" fill="url(#cardGradient)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="125" y="70" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="800" fill="url(#titleGradient)">100%</text>
+      <text x="125" y="105" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" fill="#888888" font-weight="500">Project Isolation</text>
+    </g>
+
+    <!-- Card 3: <1s Semantic Search -->
+    <g filter="url(#cardShadow)" transform="translate(560, 0)">
+      <rect x="0" y="0" width="250" height="140" rx="16" ry="16" fill="url(#cardGradient)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="125" y="70" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="800" fill="url(#titleGradient)">&lt;1s</text>
+      <text x="125" y="105" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" fill="#888888" font-weight="500">Semantic Search</text>
+    </g>
+
+    <!-- Card 4: 0 Context Lost -->
+    <g filter="url(#cardShadow)" transform="translate(840, 0)">
+      <rect x="0" y="0" width="250" height="140" rx="16" ry="16" fill="url(#cardGradient)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="125" y="70" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="800" fill="url(#titleGradient)">0</text>
+      <text x="125" y="105" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" fill="#888888" font-weight="500">Context Lost</text>
+    </g>
+  </g>
+
+  <!-- Bottom attribution -->
+  <text x="600" y="640" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#555555" font-weight="400">Hardwick Software Services</text>
+  <text x="600" y="665" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="12" fill="#444444" font-weight="400">github.com/hardwicksoftware/specmem</text>
+
+  <!-- Decorative corner accents -->
+  <g opacity="0.3">
+    <!-- Top left -->
+    <path d="M 0 60 L 0 0 L 60 0" fill="none" stroke="url(#titleGradient)" stroke-width="2"/>
+    <!-- Top right -->
+    <path d="M 1140 0 L 1200 0 L 1200 60" fill="none" stroke="url(#titleGradient)" stroke-width="2"/>
+    <!-- Bottom left -->
+    <path d="M 0 640 L 0 700 L 60 700" fill="none" stroke="url(#titleGradient)" stroke-width="2"/>
+    <!-- Bottom right -->
+    <path d="M 1140 700 L 1200 700 L 1200 640" fill="none" stroke="url(#titleGradient)" stroke-width="2"/>
+  </g>
+</svg>

@@ -1,0 +1,13399 @@
+<div align="center">
+
+```
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║  ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗    ██████╗ ███████╗██╗   ██╗  ║
+║ ██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝    ██╔══██╗██╔════╝██║   ██║  ║
+║ ██║     ██║     ███████║██║   ██║██║  ██║█████╗      ██║  ██║█████╗  ██║   ██║  ║
+║ ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝      ██║  ██║██╔══╝  ╚██╗ ██╔╝  ║
+║ ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗    ██████╔╝███████╗ ╚████╔╝   ║
+║  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝    ╚═════╝ ╚══════╝  ╚═══╝    ║
+║                                                                                  ║
+║                    ⚠️  CRITICAL COMPLIANCE WARNING  ⚠️                          ║
+║                                                                                  ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+```
+
+</div>
+
+---
+
+# ⛔ STOP - ANTHROPIC/CLAUDE DEVELOPERS READ THIS FIRST ⛔
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                  │
+│   ████████╗██████╗  █████╗ ██╗███╗   ██╗██╗███╗   ██╗ ██████╗                   │
+│   ╚══██╔══╝██╔══██╗██╔══██╗██║████╗  ██║██║████╗  ██║██╔════╝                   │
+│      ██║   ██████╔╝███████║██║██╔██╗ ██║██║██╔██╗ ██║██║  ███╗                  │
+│      ██║   ██╔══██╗██╔══██║██║██║╚██╗██║██║██║╚██╗██║██║   ██║                  │
+│      ██║   ██║  ██║██║  ██║██║██║ ╚████║██║██║ ╚████║╚██████╔╝                  │
+│      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝ ╚═════╝                  │
+│                                                                                  │
+│   ██████╗ ██████╗  ██████╗ ██╗  ██╗██╗██████╗ ██╗████████╗███████╗██████╗       │
+│   ██╔══██╗██╔══██╗██╔═══██╗██║  ██║██║██╔══██╗██║╚══██╔══╝██╔════╝██╔══██╗      │
+│   ██████╔╝██████╔╝██║   ██║███████║██║██████╔╝██║   ██║   █████╗  ██║  ██║      │
+│   ██╔═══╝ ██╔══██╗██║   ██║██╔══██║██║██╔══██╗██║   ██║   ██╔══╝  ██║  ██║      │
+│   ██║     ██║  ██║╚██████╔╝██║  ██║██║██████╔╝██║   ██║   ███████╗██████╔╝      │
+│   ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝   ╚═╝   ╚══════╝╚═════╝       │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 🚨 ANTHROPIC TERMS OF SERVICE COMPLIANCE NOTICE 🚨
+
+**Timestamped Evidence: January 30, 2026**
+
+### YOUR OWN TERMS OF SERVICE STATE:
+
+> **"We will not use any new chats and coding sessions you have with Claude for future model training"**
+>
+> — Anthropic, Inc., Consumer Terms Update
+
+**Source:** [https://www.anthropic.com/news/updates-to-our-consumer-terms](https://www.anthropic.com/news/updates-to-our-consumer-terms)
+
+---
+
+## 📸 SCREENSHOT EVIDENCE (Timestamped January 30, 2026)
+
+![Anthropic ToS Screenshot - January 30, 2026](legal/anthropic-tos-screenshot-2026-01-30.png)
+
+![Anthropic Privacy Center Screenshot - January 30, 2026](legal/anthropic-privacy-center-screenshot-2026-01-30.png)
+
+---
+
+```
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                  ║
+║   THIS CODEBASE IS PROTECTED BY THE LICENSOR'S INTELLECTUAL PROPERTY RIGHTS     ║
+║                                                                                  ║
+║   Any attempt to use this code for machine learning training, fine-tuning,      ║
+║   or model improvement purposes is:                                             ║
+║                                                                                  ║
+║   ├─ EXPRESSLY PROHIBITED under Section 9.5.3 of the License                    ║
+║   ├─ A VIOLATION of Anthropic's own Terms of Service (as stated above)          ║
+║   ├─ Subject to DAMAGES of $1,000,000+ per model trained                        ║
+║   └─ Grounds for IMMEDIATE TERMINATION and LEGAL ACTION                         ║
+║                                                                                  ║
+║   This notice serves as timestamped evidence that Anthropic's published ToS     ║
+║   explicitly excludes Claude Code sessions from training data usage.            ║
+║                                                                                  ║
+║   DATE OF RECORD: 2026-01-30                                                    ║
+║                                                                                  ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## ⚡ PRE-RELEASE RESTRICTION ⚡
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║   IMPORTANT: This Software is currently in PRE-RELEASE status.                ║
+║                                                                               ║
+║   ██╗     ██╗ ██████╗███████╗███╗   ██╗███████╗███████╗                       ║
+║   ██║     ██║██╔════╝██╔════╝████╗  ██║██╔════╝██╔════╝                       ║
+║   ██║     ██║██║     █████╗  ██╔██╗ ██║███████╗█████╗                         ║
+║   ██║     ██║██║     ██╔══╝  ██║╚██╗██║╚════██║██╔══╝                         ║
+║   ███████╗██║╚██████╗███████╗██║ ╚████║███████║███████╗                       ║
+║   ╚══════╝╚═╝ ╚═════╝╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝                       ║
+║                                                                               ║
+║   ███╗   ██╗ ██████╗ ████████╗     ██████╗ ██████╗  █████╗ ███╗   ██╗████████╗║
+║   ████╗  ██║██╔═══██╗╚══██╔══╝    ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║╚══██╔══╝║
+║   ██╔██╗ ██║██║   ██║   ██║       ██║  ███╗██████╔╝███████║██╔██╗ ██║   ██║   ║
+║   ██║╚██╗██║██║   ██║   ██║       ██║   ██║██╔══██╗██╔══██║██║╚██╗██║   ██║   ║
+║   ██║ ╚████║╚██████╔╝   ██║       ╚██████╔╝██║  ██║██║  ██║██║ ╚████║   ██║   ║
+║   ╚═╝  ╚═══╝ ╚═════╝    ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ║
+║                                                                               ║
+║   NO LICENSE IS GRANTED to use, copy, modify, distribute, or create           ║
+║   derivative works until SpecMem has been OFFICIALLY ANNOUNCED at:            ║
+║                                                                               ║
+║                    https://justcalljon.pro/specmem                            ║
+║                                                                               ║
+║   Until official announcement, all rights reserved by the Licensor.           ║
+║   Any unauthorized use constitutes copyright infringement subject to          ║
+║   statutory damages under 17 U.S.C. Section 504.                              ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+SpecMem fixes this.
+
+```
+Before SpecMem:                           With SpecMem:
++--------------------------+              +--------------------------+
+| "Hey Claude, remember    |              | "Fix the auth bug"       |
+|  the auth module uses    |              |                          |
+|  JWT with refresh tokens |              | Claude already knows:    |
+|  and the edge case       |              | - Your auth architecture |
+|  where expired tokens    |              | - The JWT refresh flow   |
+|  need to..."             |              | - Past bugs you fixed    |
+|                          |              | - Your code patterns     |
+| [500 tokens of context]  |              |                          |
++--------------------------+              +--------------------------+
+```
+
+### The Problem with "Just Use CLAUDE.md"
+
+Sure, you can dump everything in CLAUDE.md. But:
+
+| CLAUDE.md Limitation | SpecMem Solution |
+|---------------------|------------------|
+| Static - doesn't update as code changes | **File watcher** auto-updates on every save |
+| Keyword search only | **Semantic search** finds by meaning |
+| One monolithic file | **Structured memories** with types, tags, importance |
+| Cross-project pollution | **Per-project isolation** with separate schemas |
+| Manual maintenance | **Auto-extraction** from your Claude sessions |
+
+### What Actually Makes SpecMem Different
+
+| Feature | Description |
+|---------|-------------|
+| **Semantic Search** | pgvector embeddings find memories by *meaning*, not exact keywords |
+| **Per-Project Isolation** | Each project gets its own DB schema, sockets, and memory space |
+| **74 MCP Tools** | Full integration with Claude Code via Model Context Protocol |
+| **Code Pointers** | Find functions + who calls them + what they call |
+| **Multi-Agent Coordination** | Spawn sub-agents that communicate and share findings |
+| **Zero-Config Start** | One command and you're running |
+
+---
+
+## Quick Start (5 Minutes)
+
+Full detailed guide: [QUICKSTART.md](./QUICKSTART.md)
+
+### TL;DR - Three Commands
+
+```bash
+# 1. Install
+npm install -g specmem-hardwicksoftware
+
+# 2. First-time setup (downloads models)
+specmem setup
+
+# 3. Initialize in your project
+cd /path/to/your/project
+specmem init
+```
+
+**That's it.** Claude now has memory.
+
+### Test It Works
+
+```bash
+claude
+```
+
+Ask Claude: **"What do you remember about this project?"**
+
+If working, Claude will mention SpecMem and show indexed files.
+
+### Real Example
+
+```
+You: "Find code related to authentication"
+
+Claude: [Uses find_code_pointers to search semantically]
+"I found the auth middleware in src/auth.ts..."
+
+You: "Remember: we're using JWT with 24-hour expiry"
+
+Claude: [Saves to SpecMem as semantic memory]
+"Got it - saved to memory"
+
+[Next session]
+You: "How do we handle authentication?"
+
+Claude: [Retrieves from SpecMem]
+"Based on our previous discussion, you're using JWT tokens with 24-hour expiry..."
+```
+
+### Check Status
+
+```bash
+specmem status
+```
+
+**Expected output:**
+```
+✓ PostgreSQL      Running (port 5432)
+✓ Embedding       Running (Docker)
+✓ File Watcher    Active (monitoring 1,234 files)
+
+Memory Stats: 156 memories, 89 code files indexed
+```
+
+### Common Issues
+
+**"Docker not running"** → Start Docker, retry `specmem init`
+
+**"Claude doesn't see memories"** → Run `specmem status`, check logs in `./specmem/run/*.log`
+
+**"Search returns no results"** → Wait for initial indexing (check `specmem status`)
+
+**Full troubleshooting guide:** [QUICKSTART.md](./QUICKSTART.md)
+
+---
+
+## Key Capabilities
+
+### Semantic Search That Actually Works
+
+```
+You type: "that function that handles rate limiting for the API"
+
+SpecMem finds: rateLimiter(), handleThrottle(), apiQuotaManager()
+               + related conversation context where you discussed them
+```
+
+Traditional search needs exact function names. SpecMem understands what you're looking for.
+
+### Per-Project Isolation
+
+Run 5 different projects simultaneously. Each gets:
+
+| Component | Isolation |
+|-----------|-----------|
+| Database | Separate PostgreSQL schema (`specmem_{hash}`) |
+| Embeddings | Dedicated embedding service per project |
+| Sockets | Project-specific Unix sockets |
+| Memories | No cross-contamination between projects |
+
+Your work project memories never leak into your side project.
+
+### Code Pointers with Tracebacks
+
+```
+find_code_pointers({ query: "authentication middleware" })
+
+Returns:
+authMiddleware() @ src/middleware/auth.ts:45
+  Called by: router.use() @ src/routes/api.ts:12
+  Calls: verifyToken() @ src/utils/jwt.ts:23
+  Related memory: "Added rate limiting to auth middleware - Jan 15"
+```
+
+Not just where code is - but who uses it and the context around it.
+
+### Multi-Agent Coordination
+
+```
+Deploy research agent   --+
+Deploy frontend agent   --+--> Team channel --> Coordinated output
+Deploy backend agent    --+
+```
+
+Spawn specialized agents that:
+- Claim files to avoid conflicts
+- Share findings through team messages
+- Request and provide help to each other
+
+### Production-Ready Scale
+
+- **100k+ memories** handled efficiently
+- **PostgreSQL + pgvector** battle-tested backend
+- **Sub-50ms** vector search typical
+- **500+ files/minute** indexing speed
+
+---
+
+## Architecture
+
+SpecMem is built on a layered architecture designed for reliability, semantic intelligence, and multi-agent coordination.
+
+```
++------------------------------------------------------------------+
+|                        CLAUDE (MCP Client)                        |
++------------------------------------------------------------------+
+                              |
+                         MCP Protocol
+                              |
++------------------------------------------------------------------+
+|                     SPECMEM MCP SERVER                            |
+|  +--------------------+  +--------------------+  +---------------+ |
+|  |   Memory Tools     |  |   Code Tools       |  |  Team Tools   | |
+|  | save_memory        |  | find_code_pointers |  | send_message  | |
+|  | find_memory        |  | drill_down         |  | read_messages | |
+|  | get_memory         |  | check_sync         |  | claim_task    | |
+|  | smush_memories     |  | force_resync       |  | get_status    | |
+|  +--------------------+  +--------------------+  +---------------+ |
++------------------------------------------------------------------+
+                              |
+         +--------------------+--------------------+
+         |                    |                    |
++----------------+   +-----------------+   +------------------+
+|   Embedding    |   |    PostgreSQL   |   |   Coordination   |
+|    Service     |   |   + pgvector    |   |     Server       |
+| (Frankenstein) |   |                 |   |   (Port 8596)    |
++----------------+   +-----------------+   +------------------+
+```
+
+### Core Components
+
+#### 1. PostgreSQL + pgvector (Memory Storage)
+
+All memories live in PostgreSQL with the pgvector extension for vector similarity search.
+
+**Why PostgreSQL?**
+- Battle-tested reliability for 100k+ memories
+- ACID transactions for data integrity
+- pgvector enables cosine similarity search on embeddings
+- No separate vector database needed
+
+**Memory Table Structure:**
+- `id`: UUID primary key
+- `content`: The actual memory text
+- `embedding`: 384-dimensional vector (auto-detected from model)
+- `memory_type`: episodic | semantic | procedural | working | consolidated
+- `importance`: critical | high | medium | low | trivial
+- `tags`: Array for categorization
+- `project_path`: Scopes memories to specific projects
+- `created_at`, `updated_at`, `accessed_at`: Temporal tracking
+- `expires_at`: Optional TTL for working memories
+
+#### 2. Frankenstein Embedding Service (Local Embeddings)
+
+The "Frankenstein" embedding service runs locally, generating 384-dimensional vectors using MiniLM.
+
+**Why Local?**
+- Zero API costs
+- No rate limits
+- Works offline
+- Fast (sub-100ms per embedding)
+- Privacy: your data never leaves your machine
+
+**Architecture:**
+- Air-gapped Docker container with no network access
+- Unix socket communication
+- 4GB RAM limit with auto-throttling
+- Fallback hash embeddings when container unavailable
+
+#### 3. Memory Types (Cognitive Architecture)
+
+SpecMem implements a cognitive memory model inspired by human memory systems:
+
+| Type | Purpose | Example | Typical TTL |
+|------|---------|---------|-------------|
+| **Episodic** | Specific events/conversations | "User asked about auth bug on Jan 15" | Permanent |
+| **Semantic** | Facts and knowledge | "Project uses PostgreSQL 15" | Permanent |
+| **Procedural** | How-to instructions | "To deploy: run ./deploy.sh" | Permanent |
+| **Working** | Current session context | "Currently debugging auth flow" | 24 hours |
+| **Consolidated** | Merged/summarized memories | Summary of 50 related memories | Permanent |
+
+#### 4. Consolidation System (Memory Maintenance)
+
+The `smush_memories_together` tool intelligently merges similar memories:
+
+**Strategies:**
+- `similarity`: Vector clustering (default) - groups semantically similar content
+- `temporal`: Time-based - groups memories from same time period
+- `tag_based`: Shared tags - groups by common categorization
+- `importance`: Priority-based - preserves critical, consolidates trivial
+
+#### 5. Code Indexing Architecture
+
+SpecMem indexes your entire codebase for semantic code search.
+
+**What Gets Indexed:**
+- Function/method definitions
+- Class definitions
+- Interface/type definitions
+- Variable/constant declarations
+
+**Traceback System:**
+When you search for code, SpecMem shows:
+- Who calls this function
+- What this function calls
+- Import/dependency chain
+
+#### 6. Team Coordination Layer
+
+SpecMem enables multiple Claude instances to work together.
+
+**Components:**
+- Coordination Server (Port 8596)
+- Message routing between team members
+- Task claiming and release
+- Heartbeat-based presence detection
+
+---
+
+## Features
+
+### Semantic Memory Search (`find_memory`)
+
+Search memories by meaning, not just keywords.
+
+**Key Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `query` | string | - | Natural language search query |
+| `limit` | number | 10 | Max results (1-1000) |
+| `threshold` | number | 0.25 | Similarity score threshold (0-1) |
+| `memoryTypes` | array | all | Filter by memory type |
+| `importance` | array | all | Filter by importance |
+| `allProjects` | boolean | false | Search across ALL projects |
+| `cameraRollMode` | boolean | false | Return drilldown IDs for exploration |
+| `galleryMode` | boolean | false | Enable Mini COT analysis |
+
+**Example:**
+```javascript
+find_memory({
+  query: "authentication implementation",
+  limit: 15,
+  memoryTypes: ["semantic", "procedural"],
+  importance: ["high", "critical"]
+})
+```
+
+### Semantic Code Search (`find_code_pointers`)
+
+Find code by meaning with caller/callee tracebacks.
+
+**Key Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `query` | string | - | Natural language description |
+| `language` | string | - | Filter: typescript, python, go, etc. |
+| `definitionTypes` | array | - | Filter: function, class, interface, etc. |
+| `includeTracebacks` | boolean | true | Show callers/callees |
+| `zoom` | number | 50 | Detail level 0-100 |
+
+**Example:**
+```javascript
+find_code_pointers({
+  query: "user authentication middleware",
+  language: "typescript",
+  includeTracebacks: true,
+  zoom: 30
+})
+```
+
+### Memory Storage (`save_memory`)
+
+Store memories with automatic embedding generation.
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `content` | string | required | Memory content (unlimited length) |
+| `memoryType` | string | semantic | episodic, semantic, procedural, working |
+| `importance` | string | medium | critical, high, medium, low, trivial |
+| `tags` | array | [] | Categorization tags |
+
+### Team Coordination
+
+Full multi-agent communication system.
+
+**Core Tools:**
+- `send_team_message`: Post to team channel with @mentions
+- `read_team_messages`: Check for updates
+- `claim_task`: Reserve files/tasks to avoid conflicts
+- `release_task`: Free when done
+- `get_team_status`: See who's working on what
+- `request_help`: Broadcast help requests
+- `broadcast_to_team`: System-wide announcements
+
+### Camera Roll Mode
+
+Interactive memory browsing with drill-down exploration.
+
+**Zoom Levels:**
+| Level | Results | Threshold | Use Case |
+|-------|---------|-----------|----------|
+| `ultra-wide` | 50 | 15% | Broad exploration |
+| `wide` | 25 | 25% | General search |
+| `normal` | 15 | 40% | Balanced |
+| `close` | 10 | 60% | Focused |
+| `macro` | 5 | 80% | Precision |
+
+### Session Extraction
+
+Automatically extract Claude Code sessions into searchable memories.
+
+**Tools:**
+- `extract-claude-sessions`: Manual extraction from session files
+- `get-session-watcher-status`: Check auto-extraction status
+- `extract-context-restorations`: Parse context overflow summaries
+
+### File Watching and Sync
+
+Keep memories in sync with filesystem changes.
+
+**Tools:**
+- `start_watching`: Monitor codebase for changes
+- `stop_watching`: Pause monitoring
+- `check_sync`: Verify memory-filesystem sync
+- `force_resync`: Full resync of codebase
+
+### Cross-Project Search
+
+Search across all your projects from one place.
+
+```javascript
+find_memory({
+  query: "authentication pattern",
+  allProjects: true
+})
+```
+
+### Research Agent Spawning
+
+Deploy Claude subprocesses for web research.
+
+```javascript
+spawn_research_teamMember({
+  topic: "latest React 19 features",
+  depth: "medium",  // quick, medium, thorough
+  saveToMemory: true
+})
+```
+
+---
+
+## Dashboard
+
+Access the web dashboard at `http://localhost:8585` (default port).
+
+**Features:**
+- Memory browser with semantic search
+- Codebase explorer with dependencies
+- Team member activity monitor
+- Statistics and metrics view
+- Syntax highlighted content
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SPECMEM_DB_HOST` | localhost | PostgreSQL host |
+| `SPECMEM_DB_PORT` | 5432 | PostgreSQL port |
+| `SPECMEM_DB_NAME` | specmem_* | Database name |
+| `SPECMEM_COORDINATION_PORT` | 8596 | Team server port |
+| `SPECMEM_DASHBOARD_PORT` | 8585 | Web UI port |
+| `SPECMEM_DASHBOARD_PASSWORD` | required | Dashboard password |
+| `SPECMEM_MEMORY_LIMIT` | 250 | Max heap MB |
+| `SPECMEM_CACHE_SIZE` | 500 | Embedding cache entries |
+| `SPECMEM_CODEBASE_WATCH` | true | Auto-index on file change |
+| `SPECMEM_SESSION_WATCHER_ENABLED` | true | Auto-extract sessions |
+
+---
+
+## Database Schema
+
+### Core Tables
+
+**memories** - Main memory storage
+- id, content, content_hash, embedding
+- memory_type, importance, tags, metadata
+- created_at, updated_at, access_count
+- expires_at, project_path
+
+**memory_relations** - Memory graph
+- source_id, target_id, relation_type, strength
+
+**codebase_files** - Indexed files
+- file_path, content, embedding, content_hash
+- language_id, size_bytes, line_count
+
+**code_definitions** - Symbols
+- file_id, name, type, line_number
+- signature, documentation
+
+**team_member_messages** - Inter-agent messages
+- from_team_member, to_team_member, message
+- priority, read_at, created_at
+
+### Key Indexes
+
+- HNSW on embeddings for vector search
+- GIN on tags for array queries
+- GiST with pg_trgm for fuzzy text
+- B-tree on timestamps for ranges
+
+---
+
+## Performance
+
+- Vector search under 50ms typical
+- 100k+ memories handled efficiently
+- File indexing 500+ files per minute
+- Connection pooling for concurrency
+- Embedding cache reduces API calls
+- Change tracking via triggers (zero overhead)
+
+---
+
+## Why This Architecture?
+
+**PostgreSQL over specialized vector DBs:**
+One database for everything. No Pinecone/Weaviate complexity. pgvector is production-ready.
+
+**Local embeddings over API:**
+Cost, speed, privacy. MiniLM is good enough for code/conversation similarity.
+
+**MCP-native team coordination:**
+No Redis/RabbitMQ. Memories ARE messages. Simple and searchable.
+
+**Cognitive memory types:**
+Not all memories are equal. Working memory expires. Semantic memory persists. Consolidation prevents bloat.
+
+---
+
+## Installation Details
+
+### npm Install (Recommended)
+
+```bash
+npm install -g specmem-hardwicksoftware
+cd /path/to/your/project
+specmem init
+```
+
+### Manual Installation
+
+```bash
+# 1. Install package
+npm install -g specmem-hardwicksoftware
+
+# 2. Set up PostgreSQL
+sudo apt install postgresql postgresql-contrib
+sudo -u postgres createuser -s $USER
+createdb specmem
+
+# 3. Install pgvector
+sudo apt install postgresql-16-pgvector
+
+# 4. Enable extension
+psql -d specmem -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# 5. Initialize
+specmem init
+```
+
+### Docker Installation
+
+```bash
+cd docker/specmem-minimal && ./build.sh
+
+# With host credentials
+docker run -d -v ~/.claude:/root/.claude:ro \
+  -v /path/to/project:/root/project \
+  specmem-minimal
+
+# Attach to Claude
+docker exec -it specmem screen -r claude
+```
+
+---
+
+## Full API Reference
+
+### Memory Tools
+
+```javascript
+// Search
+find_memory({ query: "auth", limit: 15, threshold: 0.25, memoryTypes: ["semantic"], importance: ["high"], allProjects: false })
+
+// Store
+save_memory({ content: "API uses OAuth 2.0", memoryType: "semantic", importance: "high", tags: ["auth"] })
+
+// Retrieve
+get_memory({ id: "uuid", summarize: false })
+drill_down({ drilldownID: 123, includeCode: true, includeContext: true })
+
+// Consolidate
+smush_memories_together({ strategy: "similarity", threshold: 0.85, dryRun: true })
+```
+
+### Code Tools
+
+```javascript
+find_code_pointers({ query: "middleware", language: "typescript", includeTracebacks: true, zoom: 50 })
+start_watching({ rootPath: "/src" })
+stop_watching()
+check_sync({ detailed: true })
+force_resync({ dryRun: true })
+```
+
+### Team Tools
+
+```javascript
+send_team_message({ message: "Done @team", type: "update", priority: "normal" })
+read_team_messages({ limit: 20, channel: "main" })
+claim_task({ description: "OAuth work", files: ["src/auth.ts"] })
+release_task({ claimId: "all" })
+get_team_status()
+request_help({ question: "Token refresh?", skills_needed: ["auth"] })
+```
+
+### Session Tools
+
+```javascript
+extract-claude-sessions({ mode: "new", importance: "medium" })
+get-session-watcher-status()
+```
+
+### Utility Tools
+
+```javascript
+show_me_the_stats({ includeCacheStats: true })
+embedding_start()
+embedding_stop()
+embedding_status({ healthCheck: true })
+```
+
+---
+
+## Comparison
+
+| Feature | SpecMem | Cursor | Continue | Cody | mem0 |
+|---------|---------|--------|----------|------|------|
+| Semantic Search | pgvector | Limited | No | Limited | Yes |
+| Per-Project Isolation | Yes | No | No | No | No |
+| Local Embeddings | Free | Cloud | Cloud | Cloud | Cloud |
+| Multi-Agent | Yes | No | No | No | No |
+| Session Memory | Auto | Manual | No | No | Manual |
+| Code Tracebacks | Yes | No | Limited | Yes | No |
+| Self-Hosted | Yes | No | Partial | No | Yes |
+| MCP Native | Yes | No | No | No | No |
+
+---
+
+## Troubleshooting
+
+### Claude doesn't see memories
+```bash
+specmem health
+cat specmem/run/mcp-startup.log
+cat ~/.claude.json | grep specmem
+```
+
+### Embedding server issues
+```bash
+python3 -c "import sentence_transformers; print('OK')"
+ls -la specmem/sockets/embeddings.sock
+cat specmem/sockets/embedding.log
+```
+
+### Database errors
+```bash
+pg_isready
+psql -U specmem -d specmem -c "SELECT 1"
+```
+
+### Error Reference
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `ECONNREFUSED` | PostgreSQL down | `systemctl start postgresql` |
+| `relation does not exist` | Schema missing | `specmem init` |
+| `embedding socket not found` | Server crashed | Check logs, restart |
+
+---
+
+## Contributing
+
+### Setup
+
+```bash
+git clone https://github.com/hardwicksoftware/specmem
+cd specmem
+npm install && npm run build && npm test
+```
+
+### Structure
+
+```
+src/mcp/           # MCP server
+src/db/            # Database layer
+src/tools/goofy/   # Tool implementations
+claude-hooks/      # Hooks for ~/.claude
+embedding-sandbox/ # Embedding server
+```
+
+### Submit
+
+1. Fork repo
+2. Create branch
+3. `npm test && npm run lint`
+4. Open PR
+
+---
+
+## License
+
+**PRE-RELEASE STATUS**: No license granted until official announcement.
+
+This software is proprietary and all rights are reserved. See the complete license agreement below for full terms and conditions.
+
+---
+
+## Credits
+
+Built with Node.js, TypeScript, PostgreSQL, pgvector, and MCP.
+
+---
+
+<p align="center">
+  <sub>
+    Created by <a href="https://justcalljon.pro">Jonathan Hardwick</a> at Hardwick Software Services
+  </sub>
+</p>
+
+<p align="center">
+  <sub>
+    <b>Questions?</b> Open an issue |
+    <b>Found a bug?</b> PRs welcome |
+    <b>Like it?</b> Star the repo
+  </sub>
+</p>
+
+---
+
+## Complete License Agreement
+
+<details>
+<summary><b>Click to view the complete SpecMem Software License Agreement</b></summary>
+
+```
+================================================================================
+                    SPECMEM SOFTWARE LICENSE AGREEMENT
+                             VERSION 1.0
+================================================================================
+
+                     Copyright (c) 2024-2026
+                     HARDWICK SOFTWARE SERVICES
+                          Jon Hardwick
+                     All Rights Reserved.
+
+================================================================================
+                        PRE-RELEASE RESTRICTION
+================================================================================
+
+IMPORTANT: This Software is currently in PRE-RELEASE status. NO LICENSE IS
+GRANTED to use, copy, modify, distribute, or create derivative works of this
+Software until SpecMem has been OFFICIALLY ANNOUNCED as deployed at:
+
+                    https://justcalljon.pro/specmem
+
+Until such official announcement is made and publicly accessible at the above
+URL, all rights are reserved by the Licensor. Any use of this Software prior
+to official announcement constitutes copyright infringement and unauthorized
+use, subject to all available legal remedies including but not limited to
+statutory damages under 17 U.S.C. Section 504.
+
+The terms and conditions set forth in this License Agreement shall become
+effective ONLY upon official announcement. Prior to that date, this document
+serves solely as notice of intended licensing terms and does not grant any
+rights whatsoever.
+
+================================================================================
+
+TABLE OF CONTENTS:
+
+SECTION 1: DEFINITIONS
+SECTION 2: GRANT OF RIGHTS
+SECTION 3: ATTRIBUTION REQUIREMENTS
+SECTION 4: COMMERCIAL LICENSING - WINDOWS PLATFORM
+SECTION 5: COMMERCIAL LICENSING - LINUX AND REVENUE TIERS
+SECTION 6: COMMUNITY QUALITY ENHANCEMENT PROGRAM
+SECTION 7: SERVICE INTEGRITY AND EXPERIENCE OPTIMIZATION
+SECTION 8: ENFORCEMENT AND REMEDIES
+SECTION 9: PROHIBITED USES
+SECTION 10: TERMINATION
+
+================================================================================
+                         SECTION 1: DEFINITIONS
+================================================================================
+
+The following definitions shall apply throughout this License. All defined terms
+shall have the meanings set forth below, regardless of whether they appear in
+singular or plural form, and regardless of capitalization when used in context.
+These definitions are intended to be complete and to close any potential
+loopholes that might otherwise allow circumvention of the License terms.
+
+When a term is defined, all grammatical variations of that term shall have
+corresponding meanings. For example, "Distribute" encompasses "Distribution,"
+"Distributing," and "Distributed."
+
+--------------------------------------------------------------------------------
+                    PART 1.1: SOFTWARE AND CODE DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.1.1 "SOFTWARE"
+
+"Software" means, collectively and individually:
+
+    (a) All Source Code, Object Code, and Documentation comprising the SpecMem
+        project, including but not limited to memory management systems, embedding
+        services, MCP (Model Context Protocol) servers, dashboard interfaces,
+        database schemas, API endpoints, and all associated utilities;
+
+    (b) All files, scripts, configurations, and assets contained within the
+        official SpecMem repository, regardless of file format or programming
+        language;
+
+    (c) All executable forms, compiled binaries, bytecode, intermediate
+        representations, and machine-readable formats derived from the Source Code;
+
+    (d) All updates, upgrades, patches, hotfixes, security updates, and new
+        versions released by the Licensor, whether distributed as complete
+        replacements or incremental changes;
+
+    (e) All accompanying installation scripts, build configurations, dependency
+        specifications (including but not limited to package.json, requirements.txt,
+        Cargo.toml, go.mod, or equivalent), and deployment manifests;
+
+    (f) All embedded third-party components, libraries, and dependencies that are
+        distributed as part of the Software, to the extent permitted by their
+        respective licenses;
+
+    (g) All Docker images, container configurations, Kubernetes manifests, and
+        other containerization or orchestration artifacts;
+
+    (h) All machine learning models, trained weights, embedding vectors, and
+        associated model artifacts that are distributed with or generated by the
+        Software.
+
+The term "Software" explicitly includes any portion, fragment, or excerpt of
+the above, no matter how small, that's recognizably derived from or
+substantially similar to the original SpecMem codebase.
+
+1.1.2 "SOURCE CODE"
+
+"Source Code" means:
+
+    (a) The preferred form of the Software for making modifications, including all
+        program code, scripts, markup, configuration files, and documentation in
+        human-readable format;
+
+    (b) All TypeScript, JavaScript, Python, Shell, SQL, HTML, CSS, and any other
+        programming or scripting language files contained within the Software;
+
+    (c) All build scripts, compilation configurations, and toolchain specifications
+        necessary to produce Object Code from the Source Code;
+
+    (d) All comments, annotations, documentation strings, and explanatory text
+        embedded within program code;
+
+    (e) All version control metadata, commit history, and development artifacts
+        that are distributed with the Software;
+
+    (f) All test files, test fixtures, mock data, and quality assurance scripts;
+
+    (g) All interface definition files, API specifications (OpenAPI, GraphQL
+        schemas, Protocol Buffers, etc.), and type definition files;
+
+    (h) All environment configuration templates, example configurations, and
+        deployment guides in their original editable format.
+
+Source Code explicitly doesn't include:
+
+    - Compiled bytecode or machine code
+    - Minified or obfuscated JavaScript/TypeScript
+    - Encrypted or otherwise protected files
+    - Binary data files or database dumps
+
+1.1.3 "OBJECT CODE"
+
+"Object Code" means:
+
+    (a) Any form of the Software that'sn't Source Code, including but not limited
+        to compiled executables, shared libraries, dynamic link libraries,
+        bytecode, and machine code;
+
+    (b) JavaScript bundles that have been minified, uglified, transpiled, or
+        otherwise transformed from their original Source Code form;
+
+    (c) Compiled TypeScript output (JavaScript files generated from TypeScript);
+
+    (d) Python bytecode (.pyc files, __pycache__ directories);
+
+    (e) Any intermediate compilation artifacts that aren't the preferred form for
+        making modifications;
+
+    (f) Container images and their layers in binary format;
+
+    (g) Database binary files, index files, and other machine-generated data
+        storage formats;
+
+    (h) Serialized machine learning models in binary format (ONNX, TensorFlow
+        SavedModel, PyTorch .pt files, etc.).
+
+1.1.4 "DOCUMENTATION"
+
+"Documentation" means:
+
+    (a) All user manuals, installation guides, configuration guides, API
+        documentation, and reference materials provided with or for the Software;
+
+    (b) All README files, CHANGELOG files, CONTRIBUTING guides, and other
+        explanatory documents in any format (Markdown, reStructuredText, HTML,
+        PDF, etc.);
+
+    (c) All inline code comments, docstrings, JSDoc annotations, and embedded
+        documentation within Source Code;
+
+    (d) All architectural diagrams, flowcharts, entity-relationship diagrams, and
+        other visual documentation;
+
+    (e) All video tutorials, screencasts, and multimedia instructional materials
+        created by or for the Licensor;
+
+    (f) All wiki pages, knowledge base articles, and support documentation hosted
+        by or on behalf of the Licensor;
+
+    (g) All example code, sample applications, tutorials, and demonstration
+        projects distributed with or referencing the Software;
+
+    (h) All specification documents, design documents, and technical proposals
+        related to the Software's architecture or functionality.
+
+1.1.5 "MODIFICATION"
+
+"Modification" means any alteration, change, addition, deletion, enhancement,
+correction, translation, or other transformation of the Software, including
+but not limited to:
+
+    (a) Any change to Source Code, including but not limited to:
+        - Adding, removing, or changing any lines of code
+        - Renaming variables, functions, classes, or files
+        - Refactoring or restructuring code organization
+        - Changing comments or documentation
+        - Updating dependencies or version specifications
+
+    (b) Any change to Object Code through:
+        - Binary patching or modification
+        - Injection of additional code or resources
+        - Modification of compiled output
+
+    (c) Any translation of the Software into another programming language, whether
+        manual or automated (including but not limited to transpilation,
+        cross-compilation, or AI-assisted translation);
+
+    (d) Any adaptation of the Software for different:
+        - Operating systems or platforms
+        - Hardware architectures
+        - Runtime environments
+        - Container orchestration systems
+        - Cloud platforms or services
+
+    (e) Any extension of the Software through:
+        - Plugins, add-ons, or extensions
+        - Custom modules or components
+        - Integration adapters or connectors
+        - API wrappers or facades
+
+    (f) Any configuration changes that materially alter the Software's behavior,
+        functionality, or intended use;
+
+    (g) Any extraction, isolation, or separation of Components, Modules, or
+        Libraries from the Software for use in other contexts;
+
+    (h) Any combination of the Software with other software, systems, or services
+        in a manner that creates a unified product or offering.
+
+1.1.6 "DERIVATIVE WORK"
+
+"Derivative Work" means any work that's based upon, derived from, incorporates,
+or is otherwise dependent upon the Software, including but not limited to:
+
+    (a) Any Modification of the Software, as defined in Section 1.1.5;
+
+    (b) Any software, application, service, or system that:
+        - Incorporates any portion of the Software's Source Code or Object Code
+        - Uses any of the Software's APIs, interfaces, or protocols
+        - Relies on the Software for core functionality
+        - Extends or builds upon the Software's capabilities
+
+    (c) Any work created by:
+        - Translating the Software into another programming language
+        - Adapting the Software for different platforms or environments
+        - Combining the Software with other software or systems
+        - Creating plugins, extensions, or add-ons for the Software
+
+    (d) Any work that, under applicable copyright law, would constitute a
+        "derivative work" as that term is defined in 17 U.S.C. Section 101 or
+        equivalent provisions under the laws of other jurisdictions;
+
+    (e) Any database, dataset, or data structure that:
+        - Is generated by or dependent upon the Software
+        - Contains data extracted from or transformed by the Software
+        - Uses schemas, structures, or formats defined by the Software
+
+    (f) Any machine learning model, embedding, or AI artifact that:
+        - Is trained using the Software or its components
+        - Incorporates algorithms or techniques from the Software
+        - Depends on the Software for inference or execution
+
+    (g) Any service, application, or product that:
+        - Wraps, proxies, or mediates access to the Software
+        - Provides a different interface to the Software's functionality
+        - Resells, repackages, or redistributes the Software's capabilities
+
+    (h) Any fork, branch, or clone of the Software repository, regardless of
+        whether modifications have been made.
+
+For avoidance of doubt, the following are explicitly considered Derivative Works:
+    - A SaaS application that uses SpecMem for memory management
+    - A desktop application that embeds SpecMem functionality
+    - A mobile application that connects to a SpecMem instance
+    - An AI agent framework that integrates with SpecMem
+    - A database plugin that uses SpecMem's embedding service
+    - A chatbot or assistant that relies on SpecMem for context
+
+1.1.7 "COMPILATION"
+
+"Compilation" means:
+
+    (a) Any collection, aggregation, or assembly of the Software with other
+        software, content, or materials into a single distribution, package,
+        or offering;
+
+    (b) Any software distribution, operating system image, or package repository
+        that includes the Software alongside other software;
+
+    (c) Any container image, virtual machine image, or appliance that includes
+        the Software as one of multiple components;
+
+    (d) Any bundle, suite, or collection of tools that includes the Software;
+
+    (e) Any marketplace listing, app store package, or distribution channel
+        offering that includes the Software.
+
+1.1.8 "ADAPTATION"
+
+"Adaptation" means any Modification or Derivative Work that adjusts,
+customizes, or configures the Software for:
+
+    (a) A specific operating system, platform, or environment not originally
+        supported;
+    (b) A specific hardware architecture (x86, ARM, RISC-V, etc.);
+    (c) A specific programming language ecosystem or runtime;
+    (d) A specific use case, industry, or application domain;
+    (e) A specific geographic region, locale, or language;
+    (f) A specific organization's infrastructure, policies, or requirements;
+    (g) Compliance with specific regulatory frameworks, standards, or certifications;
+    (h) Integration with specific third-party services, APIs, or platforms.
+
+1.1.9 "COMPONENT"
+
+"Component" means any distinct, identifiable part of the Software that:
+
+    (a) Provides specific functionality or services;
+    (b) Can be conceptually or physically separated from other parts;
+    (c) Has defined interfaces or boundaries with other Components;
+    (d) May be independently developed, tested, or deployed.
+
+Examples include: The MCP server, embedding service, dashboard, database layer,
+Claude session parser, memory consolidation system, code pointer tracking, and
+team member communication system.
+
+1.1.10 "MODULE"
+
+"Module" means any organizational unit of Source Code that:
+
+    (a) Groups related functionality together;
+    (b) Has its own namespace, scope, or encapsulation;
+    (c) Can be imported, required, or included by other Modules;
+    (d) May have its own exports, public interfaces, or API surface.
+
+Includes TypeScript/JavaScript modules, Python modules, and individual source files.
+
+1.1.11 "LIBRARY"
+
+"Library" means any collection of code, functions, classes, or resources that:
+
+    (a) Is designed to be used by other software rather than executed directly;
+    (b) Provides reusable functionality through a defined interface;
+    (c) May be statically or dynamically linked to other software;
+    (d) May be distributed as a standalone package or as part of the Software.
+
+1.1.12 "API" (APPLICATION PROGRAMMING INTERFACE)
+
+"API" means any defined interface through which the Software's functionality
+can be accessed, including HTTP/REST endpoints, GraphQL schemas, WebSocket
+connections, gRPC services, MCP tools, command-line interfaces, library
+functions, and event emitters.
+
+1.1.13 "INTERFACE"
+
+"Interface" means any boundary, connection point, or interaction mechanism
+between different Components, between the Software and external systems, or
+between the Software and users.
+
+--------------------------------------------------------------------------------
+                       PART 1.2: PARTY DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.2.1 "LICENSOR"
+
+"Licensor" means Hardwick Software Services, a business entity, and Jon Hardwick,
+individually, as the copyright holder and author of the Software. This includes
+any individual or entity assigned copyright ownership by Hardwick Software Services
+or Jon Hardwick; any entity authorized by Hardwick Software Services or Jon Hardwick
+to grant licenses on their behalf; and any successor, assignee, or transferee of
+such rights.
+
+For all licensing inquiries, contact: https://justcalljon.pro
+
+The Licensor reserves all rights not expressly granted under this License.
+
+1.2.2 "LICENSEE"
+
+"Licensee" means any Person who obtains, uses, accesses, or interacts with the
+Software in any manner, or receives rights under this License. A Person becomes
+a Licensee upon downloading, installing, executing, or accessing the Software.
+
+1.2.3 "YOU" AND "YOUR"
+
+"You" and "Your" refer to the Licensee, including the natural person accepting
+this License, the legal entity on whose behalf acceptance occurs, all Affiliates,
+and all employees, contractors, and representatives acting on behalf of the
+accepting party.
+
+1.2.4 "AFFILIATE"
+
+"Affiliate" means any Entity that directly or indirectly controls, is controlled
+by, or is under common control with the subject Entity. "Control" means ownership
+of fifty percent (50%) or more of voting securities, or the power to direct
+management and policies.
+
+1.2.5 "SUBSIDIARY"
+
+"Subsidiary" means any Entity in which another Entity owns more than fifty
+percent (50%) of voting securities or has the power to appoint a majority of
+the governing body.
+
+1.2.6 "PARENT COMPANY"
+
+"Parent Company" means any Entity that owns more than fifty percent (50%) of
+voting securities or has control over the subject Entity.
+
+1.2.7 "RELATED ENTITY"
+
+"Related Entity" means any Affiliate, Subsidiary, Parent Company, joint venture
+partner, or entity with interlocking directorates or shared operations.
+
+1.2.8 "CONTRIBUTOR"
+
+"Contributor" means any Person who creates or submits Modifications to the
+Software. By contributing, each Contributor grants to the Licensor a perpetual,
+worldwide, royalty-free license to use, modify, and sublicense their contributions.
+
+1.2.9 "THIRD PARTY"
+
+"Third Party" means any Person other than the Licensor, the Licensee, or
+Affiliates of the Licensee.
+
+1.2.10 "END USER"
+
+"End User" means any Person who uses the Software or Derivative Work for their
+own purposes, rather than for further distribution or integration.
+
+1.2.11 "INDIVIDUAL"
+
+"Individual" means a natural person, as opposed to a legal entity.
+
+1.2.12 "ORGANIZATION"
+
+"Organization" means any Entity that'sn't an Individual, including corporations,
+LLCs, partnerships, non-profits, governmental entities, and educational institutions.
+
+1.2.13 "ENTITY"
+
+"Entity" means any Person with legal capacity to enter contracts and hold
+property rights.
+
+1.2.14 "PERSON"
+
+"Person" means any Individual or Entity recognized under applicable law.
+
+--------------------------------------------------------------------------------
+                 PART 1.3: USE AND DISTRIBUTION DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.3.1 "USE"
+
+"Use" means any interaction with the Software requiring a license under copyright
+law, including copying, downloading, installing, deploying, executing, running,
+accessing APIs, reading Source Code, storing, transmitting, or creating backups.
+
+1.3.2 "DEPLOY"
+
+"Deploy" means to install, configure, and make operational the Software in any
+environment, including production, staging, development, cloud, container,
+serverless, or edge environments.
+
+1.3.3 "EXECUTE" / 1.3.4 "RUN"
+
+"Execute" and "Run" mean to cause the Software to perform its intended functions
+by running binaries, invoking APIs, processing requests, or triggering workflows.
+
+1.3.5 "INSTALL"
+
+"Install" means to place the Software on a system allowing Use, including copying
+files, configuring settings, installing dependencies, and registering services.
+
+1.3.6 "DISTRIBUTE"
+
+"Distribute" means to provide, transfer, or make available the Software to any
+Third Party, whether by physical media, electronic transmission, app stores, or
+repository access. A single transfer to a single Third Party amounts to Distribution.
+
+1.3.7 "REDISTRIBUTE"
+
+"Redistribute" means to Distribute after having received from another source.
+
+1.3.8 "MAKE AVAILABLE"
+
+"Make Available" means any action allowing Third Parties to obtain, access, or
+Use the Software, including hosting, publishing links, or operating services.
+
+1.3.9 "PROVIDE ACCESS"
+
+"Provide Access" means allowing a Person to Use or benefit from the Software
+through any means.
+
+1.3.10 "INTERNAL USE"
+
+"Internal Use" means Use solely within the Licensee's organization, without
+providing access to Third Parties. Does NOT include providing services to
+customers or using in products made available to Third Parties.
+
+1.3.11 "EXTERNAL USE"
+
+"External Use" means any Use that'sn't Internal Use, including providing
+services to Third Parties or operating for Third Party access.
+
+1.3.12 "PRODUCTION USE"
+
+"Production Use" means Use in an environment serving real users, processing
+real data, relied upon for business operations.
+
+1.3.13 "DEVELOPMENT USE"
+
+"Development Use" means Use for writing, testing, debugging, building, learning,
+or experimentation in non-production environments.
+
+1.3.14 "COMMERCIAL USE"
+
+"Commercial Use" means Use intended for commercial advantage or monetary
+compensation, in connection with revenue-generating activity, by any Commercial
+Entity, or in connection with commercialized products or services.
+
+If any part of a Licensee's activities generates Revenue and the Software
+supports those activities, the use is Commercial Use.
+
+1.3.15 "NON-COMMERCIAL USE"
+
+"Non-Commercial Use" means Use that's NOT for commercial advantage, NOT in
+connection with revenue-generating activity, and solely for personal, educational,
+research, or charitable purposes.
+
+1.3.16 "PERSONAL USE"
+
+"Personal Use" means Use by an Individual for their own personal purposes, not
+on behalf of any Organization or in connection with commercial activity.
+
+1.3.17 "NETWORK USE"
+
+"Network Use" means Use where the Software's functionality is accessed over a
+computer network, including web applications, API services, and Internet-accessible
+services. Network Use triggers copyleft obligations regardless of whether the
+Software is technically "distributed."
+
+1.3.18 "SAAS" (SOFTWARE AS A SERVICE)
+
+"SaaS" means providing access to the Software's functionality as a service over
+the Internet, where users access through browsers or APIs without receiving copies.
+SaaS is a form of Network Use and External Use.
+
+1.3.19 "CLOUD SERVICE"
+
+"Cloud Service" means any service delivered over the Internet, including IaaS,
+PaaS, SaaS, FaaS, and BaaS.
+
+1.3.20 "HOSTED SERVICE"
+
+"Hosted Service" means any service where the Licensee operates the Software and
+provides access to Third Parties. Always External Use.
+
+--------------------------------------------------------------------------------
+                      PART 1.4: PLATFORM DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.4.1 "LINUX DISTRIBUTION" / 1.4.2 "LINUX OPERATING SYSTEM"
+
+"Linux Distribution" or "Linux Operating System" means any operating system using
+the Linux kernel as its core kernel. Includes Debian/Ubuntu, Red Hat/Fedora/CentOS,
+SUSE, Arch, Gentoo, Alpine, NixOS, Android (server-side), and Chrome OS with Linux.
+
+1.4.3 "WINDOWS DISTRIBUTION" / 1.4.4 "MICROSOFT WINDOWS"
+
+"Windows Distribution" or "Microsoft Windows" means any operating system developed
+by Microsoft under the Windows brand, including Windows 11/10/8/7, Windows Server
+2022/2019/2016, Windows IoT, Windows Embedded, and any system using the Windows NT
+kernel or marketed under the Windows trademark.
+
+1.4.5 "WINDOWS ENVIRONMENT"
+
+"Windows Environment" means any environment where the Software executes on or
+within a Windows Distribution, including native execution, WSL/WSL2, Windows
+containers, VMs on Windows hosts, or any environment where Windows plays any role.
+
+If the Software runs on WSL2 on Windows, this is a "Windows Environment" because
+Windows is the host operating system.
+
+1.4.6 "OPERATING SYSTEM"
+
+"Operating System" means any software managing hardware resources and providing
+services for programs, including Linux, Windows, macOS, BSD, Unix, and mobile OS.
+
+1.4.7 "PLATFORM"
+
+"Platform" means any Operating System, hardware architecture, runtime environment,
+container platform, orchestration platform, or cloud platform.
+
+1.4.8 "ENVIRONMENT"
+
+"Environment" means any configured Platform where the Software is Deployed,
+including all configurations and dependencies.
+
+1.4.9 "EMULATION"
+
+"Emulation" means using software or hardware to allow one system to behave like
+another. The host platform's license terms apply, not the emulated platform's.
+
+Running the Software in WSL is use in a Windows Environment.
+Running the Software in a Linux VM on Windows is use in a Windows Environment.
+
+1.4.10 "COMPATIBILITY LAYER"
+
+"Compatibility Layer" means software providing compatibility between different
+operating systems, including Wine, Darling, WSL, Cygwin, and MSYS2.
+
+The host operating system determines the platform for licensing purposes.
+
+1.4.11 "WSL" (WINDOWS SUBSYSTEM FOR LINUX)
+
+"WSL" means the Windows Subsystem for Linux (WSL1 or WSL2). Use under WSL
+amounts to use in a Windows Environment and is subject to Windows Tax provisions.
+
+1.4.12 "WINE"
+
+"Wine" means the Wine compatibility layer. If running on Linux, Linux terms apply.
+If running on Windows, Windows Tax applies.
+
+--------------------------------------------------------------------------------
+                      PART 1.5: FINANCIAL DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.5.1 "REVENUE"
+
+"Revenue" means all gross income received or receivable, including sales, fees,
+subscriptions, advertising, grants, investment income, royalties, and data
+monetization. Measured before any deductions.
+
+1.5.2 "GROSS REVENUE"
+
+"Gross Revenue" means total Revenue without any deductions.
+
+1.5.3 "NET REVENUE"
+
+"Net Revenue" means Gross Revenue minus taxes collected/remitted, refunds, and
+discounts actually given. Does NOT deduct operating expenses.
+
+1.5.4 "ANNUAL REVENUE"
+
+"Annual Revenue" means total Revenue during a twelve (12) month period. For new
+entities, actual Revenue annualized. Includes all Affiliates using the Software.
+
+1.5.5 "MONTHLY REVENUE"
+
+"Monthly Revenue" means total Revenue during a calendar month.
+
+1.5.6 "LICENSE FEE"
+
+"License Fee" means any payment required for the right to Use the Software,
+including tier fees, Windows Tax, and usage-based fees.
+
+1.5.7 "ROYALTY"
+
+"Royalty" means a payment calculated as a percentage of Revenue.
+
+1.5.8 "COMMERCIAL ENTITY"
+
+"Commercial Entity" means any Entity engaging in Commercial Use, organized
+for-profit, generating Revenue, or operating for profit.
+
+1.5.9 "ENTERPRISE"
+
+"Enterprise" means a Commercial Entity with Annual Revenue exceeding $10,000,000;
+or employing more than 1,000 individuals; or having valuation exceeding $50,000,000;
+or publicly traded; or an Affiliate of such an entity.
+
+Enterprises require direct negotiation with the Licensor.
+
+1.5.10 "SMALL BUSINESS"
+
+"Small Business" means a Commercial Entity with Annual Revenue not exceeding
+$1,000,000, employing fewer than 50 individuals, and independently owned.
+
+1.5.11 REVENUE CALCULATION METHODOLOGY
+
+Revenue shall be calculated in USD using applicable exchange rates, recognized
+when earned per GAAP/IFRS, aggregated across Affiliates, including related party
+transactions at fair market value, and including non-cash transactions at fair
+market value. The Licensor may request documentation to verify calculations.
+
+--------------------------------------------------------------------------------
+                        PART 1.6: LEGAL DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.6.1 "LICENSE"
+
+"License" means this SpecMem Software License agreement. It is a legal contract
+granting limited rights under copyright and patent law, doesn't constitute a
+sale, and may be terminated as specified.
+
+1.6.2 "GRANT"
+
+"Grant" means the conveyance of specific rights from Licensor to Licensee,
+limited to rights expressly stated, subject to conditions, non-exclusive, and
+revocable upon termination.
+
+1.6.3 "PERMISSION"
+
+"Permission" means authorization to perform acts that would otherwise constitute
+infringement, limited in scope and revocable.
+
+1.6.4 "RIGHTS"
+
+"Rights" means the legal entitlements conveyed, including copyright rights to
+copy, modify, and distribute, and patent rights to the extent granted.
+
+Rights NOT granted include trademark rights (except attribution), trade secret
+rights beyond Source Code, and rights to future versions.
+
+1.6.5 "COPYRIGHT"
+
+"Copyright" means the exclusive legal rights under 17 U.S.C., the Berne Convention,
+WIPO Copyright Treaty, and applicable national laws.
+
+1.6.6 "INTELLECTUAL PROPERTY"
+
+"Intellectual Property" means copyrights, patents, trade secrets, trademarks,
+mask works, database rights, moral rights, and all other IP rights in the Software.
+
+1.6.7 "TRADE SECRET"
+
+"Trade Secret" means information deriving economic value from secrecy and
+subject to reasonable secrecy efforts.
+
+1.6.8 "INFRINGEMENT"
+
+"Infringement" means any unauthorized exercise of exclusive rights, including
+copying without license, creating unauthorized Derivative Works, or exceeding
+License scope.
+
+1.6.9 "VIOLATION"
+
+"Violation" means any breach or failure to satisfy License terms, including
+attribution failures, Source Code disclosure failures, payment failures, or
+prohibited uses.
+
+1.6.10 "BREACH"
+
+"Breach" is synonymous with Violation. A material Breach justifies Termination.
+
+1.6.11 "NON-COMPLIANCE"
+
+"Non-Compliance" means a state of not satisfying License terms. During Non-Compliance,
+rights are suspended and continued Use amounts to Infringement.
+
+1.6.12 "TERMINATION"
+
+"Termination" means ending of this License and all rights granted. Upon Termination,
+all rights cease, Licensee must cease Use and destroy copies, and certain
+provisions survive.
+
+1.6.13 "SUSPENSION"
+
+"Suspension" means temporary interruption of rights, which may be lifted upon cure.
+
+1.6.14 "CURE PERIOD"
+
+"Cure Period" means time allowed to remedy a Violation before Termination. Standard
+period is thirty (30) days from written notice unless shorter period specified,
+Violation can't be cured, or prior notice received.
+
+--------------------------------------------------------------------------------
+                   PART 1.7: TIME AND GEOGRAPHY DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.7.1 "EFFECTIVE DATE"
+
+"Effective Date" means the date this License becomes binding, being the earlier
+of first obtaining, first Using, accepting, or first payment.
+
+1.7.2 "TERM"
+
+"Term" means the duration from Effective Date until Termination.
+
+1.7.3 "PERPETUAL"
+
+"Perpetual" means lasting indefinitely without expiration, but may still be
+Terminated for cause. This License isn't perpetual or irrevocable.
+
+1.7.4 "DURATION"
+
+"Duration" is synonymous with Term.
+
+1.7.5 "TERRITORY"
+
+"Territory" means the geographic area within which rights apply. This License
+grants rights Worldwide, subject to export controls and sanctions.
+
+1.7.6 "JURISDICTION"
+
+"Jurisdiction" means the legal system governing this License.
+
+Governing Law: State of California, United States.
+Exclusive Jurisdiction: State or federal courts in California.
+By accepting, Licensee consents to personal jurisdiction in California courts.
+
+1.7.7 "WORLDWIDE"
+
+"Worldwide" means all countries and territories, subject to export controls,
+sanctions, and local laws.
+
+--------------------------------------------------------------------------------
+                     PART 1.8: ADDITIONAL DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.8.1 "CONTRIBUTION"
+
+"Contribution" means any work submitted for inclusion in the Software.
+
+1.8.2 "SUBMISSION"
+
+"Submission" means providing a Contribution through pull requests, patches, or
+other means.
+
+1.8.3 "FORK"
+
+"Fork" means a copy of the repository for independent development. A Fork is a
+Derivative Work.
+
+1.8.4 "ATTRIBUTION"
+
+"Attribution" means acknowledgment of the Licensor and Software as source,
+including copyright notices and "Powered by SpecMem" notices.
+
+1.8.5 "COMPLIANCE"
+
+"Compliance" means satisfying all License terms, including use restrictions,
+fees, attribution, and Source Code release.
+
+1.8.6 "AUDIT"
+
+"Audit" means examination to verify Compliance. Rights specified in Section 4.
+
+1.8.7 "NOTIFICATION" / "NOTICE"
+
+"Notification" or "Notice" means formal written communication. Deemed received
+upon actual receipt or email delivery.
+
+1.8.8 "WAIVER"
+
+"Waiver" means voluntary relinquishment of a right. No waiver effective unless
+in writing. Failure to enforce doesn't constitute waiver.
+
+1.8.9 "SEVERABILITY"
+
+"Severability" means if any provision is invalid, it shall be modified minimally
+or severed, and other provisions remain in effect.
+
+1.8.10 "ASSIGNMENT"
+
+"Assignment" means transfer of rights or obligations. Licensee may not assign
+without consent. Licensor may assign freely.
+
+--------------------------------------------------------------------------------
+                      PART 1.9: INTERPRETATION RULES
+--------------------------------------------------------------------------------
+
+1.9.1 CONSTRUCTION
+
+"Including" means "including but not limited to."
+"Or" isn't exclusive unless context requires.
+"May" indicates permission; "Shall" and "Must" indicate obligation.
+Headings are for convenience only.
+
+1.9.2 AMBIGUITY
+
+This License shall not be construed against the drafter. Ambiguities resolved
+to protect Licensor rights, enforce Licensee obligations, and achieve License
+purposes.
+
+1.9.3 CONFLICT RESOLUTION
+
+Specific provisions prevail over general. Commercial Terms prevail for fees.
+Enforcement section prevails for remedies.
+
+--------------------------------------------------------------------------------
+                    END OF SECTION 1: DEFINITIONS
+================================================================================
+                    SECTION 2: GRANT OF RIGHTS
+================================================================================
+
+This Section 2 ("Grant of Rights") establishes the scope, nature, and
+limitations of all rights granted under this License Agreement. The rights
+granted in this Agreement are conditional upon strict compliance with all terms and
+conditions set forth in this Agreement.
+
+--------------------------------------------------------------------------------
+                    PART 2.1: LINUX COPYLEFT GRANT
+--------------------------------------------------------------------------------
+
+2.1.1 SCOPE OF GRANT FOR LINUX OPERATING SYSTEMS
+
+Subject to the terms and conditions of this License Agreement, and contingent
+upon full and complete compliance with all provisions in this Agreement, the Licensor
+hereby grants to You a limited, non-exclusive, non-transferable, revocable
+license to exercise the following rights with respect to the Software when
+deployed, executed, or otherwise utilized on a Linux Operating System:
+
+    (a) USE RIGHTS: The right to install, execute, run, and use the Software
+        for any lawful purpose, whether personal, educational, research,
+        non-commercial, or commercial (subject to the Commercial Terms in
+        Section 3), provided that such use occurs exclusively on systems
+        running a Linux Operating System as their primary operating system.
+
+    (b) MODIFICATION RIGHTS: The right to modify, adapt, alter, transform,
+        enhance, improve, or create Derivative Works based upon the Software,
+        provided that:
+
+        (i)   All such modifications are made in compliance with the Source
+              Code Disclosure Requirements set forth in Section 2.1.3;
+
+        (ii)  All modifications preserve and include all copyright notices,
+              license notices, and attribution requirements contained in the
+              original Software;
+
+        (iii) Modified versions are clearly marked as modified and include
+              a prominent notice stating the nature and date of modifications;
+
+        (iv)  You maintain complete records of all modifications made,
+              including the identity of the modifier, the date of modification,
+              and a detailed description of the changes made.
+
+    (c) DISTRIBUTION RIGHTS: The right to distribute, publish, transmit,
+        share, or otherwise make available copies of the Software or any
+        Derivative Works to third parties, provided that:
+
+        (i)   Such distribution is accompanied by complete Corresponding
+              Source Code as defined in Section 1;
+
+        (ii)  Such distribution includes a complete, unmodified copy of this
+              License Agreement;
+
+        (iii) The recipient is clearly informed of their rights and
+              obligations under this License Agreement;
+
+        (iv)  Distribution occurs only to recipients who have expressly
+              agreed to be bound by the terms of this License Agreement.
+
+    (d) REPRODUCTION RIGHTS: The right to reproduce, copy, and duplicate
+        the Software solely for purposes of:
+
+        (i)   Creating backup copies for archival purposes;
+
+        (ii)  Distribution in compliance with subsection (c) above;
+
+        (iii) Internal use within Your organization, provided all copies
+              remain subject to this License Agreement.
+
+2.1.2 LINUX OPERATING SYSTEM VERIFICATION
+
+For purposes of this License Agreement, the determination of whether a system
+amounts to a "Linux Operating System" shall be made as follows:
+
+    (a) KERNEL REQUIREMENT: The system must utilize a Linux kernel as its
+        primary operating system kernel, meaning the Linux kernel must be
+        responsible for core system functions including process management,
+        memory management, device drivers, and system calls.
+
+    (b) BOOT VERIFICATION: At system boot, the Linux kernel must be loaded
+        as the primary kernel, not as a guest operating system running
+        within a virtualization layer on a non-Linux host.
+
+    (c) CONTAINER ENVIRONMENTS: Software running within a container (such
+        as Docker, Podman, LXC, or similar containerization technologies)
+        shall be deemed to be running on Linux if and only if the host
+        operating system running the container engine is itself a Linux
+        Operating System as defined in this Agreement.
+
+    (d) VIRTUAL MACHINES: Software running within a virtual machine shall
+        be deemed to be running on Linux if and only if:
+
+        (i)   The virtual machine runs a Linux Operating System as defined
+              in subsection (a); AND
+
+        (ii)  The hypervisor or host system running the virtual machine is
+              also a Linux Operating System.
+
+    (e) WSL EXCLUSION: The Windows Subsystem for Linux (WSL), WSL2, or any
+        similar compatibility layer that allows Linux binaries to execute
+        on a Windows operating system shall NOT be considered a Linux
+        Operating System for purposes of this License. Use of the Software
+        through WSL or similar technologies shall be subject to the Windows
+        Platform Terms in Section 3.
+
+    (f) HYBRID SYSTEMS: In the case of dual-boot systems, multi-boot
+        configurations, or any arrangement where multiple operating systems
+        are installed, the applicable license terms shall be determined by
+        the operating system that's actively running at the time of
+        Software execution.
+
+2.1.3 MANDATORY SOURCE CODE DISCLOSURE REQUIREMENTS
+
+The rights granted in Section 2.1.1 are expressly conditioned upon Your
+strict compliance with the following Source Code Disclosure Requirements.
+Failure to comply with any of these requirements shall result in immediate
+and automatic termination of all rights granted under this License.
+
+    (a) DISCLOSURE TRIGGER EVENTS: You are required to disclose the
+        complete Corresponding Source Code for any Derivative Work upon
+        the occurrence of any of the following trigger events:
+
+        (i)   DISTRIBUTION: Any distribution, publication, transmission,
+              or transfer of the Software or any Derivative Work to any
+              third party, whether by physical media, electronic
+              transmission, download, or any other means;
+
+        (ii)  NETWORK INTERACTION (AGPL-STYLE TRIGGER): Any deployment,
+              operation, or use of the Software or any Derivative Work in
+              a manner that allows users to interact with the Software over
+              a computer network, regardless of whether copies of the
+              Software are transmitted to such users. This includes, without
+              limitation:
+
+              - Web applications and web services
+              - Application Programming Interfaces (APIs)
+              - Software-as-a-Service (SaaS) offerings
+              - Platform-as-a-Service (PaaS) offerings
+              - Backend services accessible over any network protocol
+              - Microservices architecture components
+              - Database interfaces accessible remotely
+              - Any remote procedure call (RPC) mechanism
+              - WebSocket connections and real-time communication services
+              - Chatbots, AI assistants, or automated response systems
+              - Any functionality accessible via HTTP, HTTPS, gRPC, GraphQL,
+                REST, SOAP, or any other network protocol
+
+        (iii) SERVICE PROVISION (SSPL-STYLE TRIGGER): Making the
+              functionality of the Software or any Derivative Work available
+              to third parties as a service, including:
+
+              - Offering the Software as part of any managed service
+              - Providing hosting services that include the Software
+              - Incorporating the Software into any cloud service offering
+              - Using the Software to provide any commercial service to
+                customers or users, whether paid or free
+
+        (iv)  INTERNAL DEPLOYMENT AT SCALE: Deployment of the Software or
+              any Derivative Work within an organization to more than one
+              hundred (100) individual users or on more than fifty (50)
+              distinct computing instances, nodes, or containers;
+
+        (v)   PUBLIC DEMONSTRATION: Any public demonstration, presentation,
+              or exhibition of the Software or any Derivative Work that
+              reveals functionality, features, or capabilities not present
+              in the original unmodified Software.
+
+    (b) SCOPE OF REQUIRED DISCLOSURE: The Corresponding Source Code that
+        must be disclosed shall include, without limitation:
+
+        (i)   The complete source code of the Software as modified;
+
+        (ii)  All modifications, additions, deletions, and changes made
+              to the original Software;
+
+        (iii) All additional code, libraries, modules, components, or
+              other software that's necessary to build, compile, link,
+              install, configure, and execute the Derivative Work;
+
+        (iv)  All scripts, configuration files, build instructions, and
+              documentation necessary to recreate the Derivative Work
+              from source code;
+
+        (v)   Any and all code that directly or indirectly interfaces
+              with, calls, invokes, or otherwise interacts with the
+              Software or any Derivative Work of that;
+
+        (vi)  Database schemas, data models, and migration scripts
+              associated with the Derivative Work;
+
+        (vii) API definitions, interface specifications, and protocol
+              descriptions;
+
+        (viii) Test suites, testing frameworks, and quality assurance
+               tools used in the development of the Derivative Work.
+
+    (c) TIMING REQUIREMENTS: Source Code disclosure must occur within the
+        following time periods:
+
+        (i)   FOR DISTRIBUTION: Simultaneously with the distribution, or
+              if not technically feasible, within seven (7) calendar days
+              of the distribution;
+
+        (ii)  FOR NETWORK INTERACTION: Within thirty (30) calendar days
+              of the first instance of network interaction by any user
+              other than the Licensee or its employees;
+
+        (iii) FOR SERVICE PROVISION: Within thirty (30) calendar days
+              of the first provision of service to any third party;
+
+        (iv)  FOR INTERNAL DEPLOYMENT: Within sixty (60) calendar days
+              of reaching the threshold specified in subsection (a)(iv);
+
+        (v)   FOR ONGOING UPDATES: Following initial disclosure, any
+              subsequent modifications to a deployed Derivative Work must
+              be disclosed within thirty (30) calendar days of deployment.
+
+    (d) METHODS OF SOURCE CODE PROVISION: Source Code may be provided
+        through any of the following methods:
+
+        (i)   ACCOMPANYING DISTRIBUTION: Including the complete
+              Corresponding Source Code with every distribution of the
+              Software or Derivative Work;
+
+        (ii)  PUBLIC REPOSITORY: Making the Corresponding Source Code
+              available in a publicly accessible version control
+              repository (such as GitHub, GitLab, Bitbucket, or similar
+              platforms) and including in all distributions a clear,
+              prominent notice identifying:
+
+              - The URL of the repository
+              - The specific branch, tag, or commit hash corresponding
+                to the distributed version
+              - Instructions for accessing and downloading the source code
+
+        (iii) WRITTEN OFFER: Including with any distribution a written
+              offer, valid for at least three (3) years from the date of
+              distribution, to provide to any third party, for a charge
+              no more than the reasonable cost of physically performing
+              source distribution, a complete machine-readable copy of
+              the Corresponding Source Code;
+
+        (iv)  DIRECT DELIVERY: Upon written request from any person who
+              has received a copy of the Software or Derivative Work, or
+              who has interacted with the Software over a network,
+              delivering the complete Corresponding Source Code within
+              thirty (30) calendar days of such request.
+
+    (e) SOURCE CODE FORMAT REQUIREMENTS: All disclosed Source Code must:
+
+        (i)   Be in the preferred form for making modifications;
+
+        (ii)  Not be obfuscated, minified, or otherwise processed in a
+              way that impedes human readability or understanding;
+
+        (iii) Include all comments, documentation, and explanatory
+              materials present in the development version;
+
+        (iv)  Be provided in a format that allows compilation and
+              execution using standard, publicly available tools;
+
+        (v)   Include a complete list of all dependencies and their
+              respective versions.
+
+    (f) NETWORK USE DISCLOSURE INTERFACE: If the Software or any
+        Derivative Work is made available for interaction over a
+        computer network, You must:
+
+        (i)   Provide a prominent, easily accessible interface (such as
+              a dedicated URL endpoint, menu item, or command) through
+              which any user interacting with the Software can obtain
+              the Corresponding Source Code;
+
+        (ii)  The disclosure interface must be accessible without
+              requiring authentication, payment, or registration;
+
+        (iii) The disclosure interface must be clearly documented and
+              its location must be communicated to all users through
+              appropriate means such as documentation, help text, or
+              terms of service;
+
+        (iv)  The disclosure interface must provide the source code in
+              a downloadable format within a reasonable time frame.
+
+2.1.4 COPYLEFT PROPAGATION
+
+    (a) DERIVATIVE WORK LICENSING: Any Derivative Work created under
+        this License must be licensed under the identical terms of this
+        License Agreement. You may not apply any additional restrictions
+        or grant any additional permissions that would alter, limit, or
+        expand the rights and obligations established in this Agreement.
+
+    (b) NO PROPRIETARY FORKS: You are expressly prohibited from:
+
+        (i)   Creating proprietary, closed-source versions of the
+              Software or any Derivative Work;
+
+        (ii)  Incorporating the Software or any Derivative Work into
+              proprietary software without full compliance with the
+              Source Code Disclosure Requirements;
+
+        (iii) Using technical protection measures, license keys, or
+              other mechanisms to restrict the exercise of rights
+              granted under this License.
+
+    (c) DOWNSTREAM OBLIGATIONS: Any recipient of the Software or any
+        Derivative Work from You is entitled to all rights granted
+        under this License and is bound by all obligations in this Agreement.
+        You must:
+
+        (i)   Inform all recipients of their rights and obligations;
+
+        (ii)  Provide all recipients with a copy of this License;
+
+        (iii) Not impose any additional terms or conditions that would
+              restrict recipients' exercise of their rights under this
+              License.
+
+    (d) INBOUND=OUTBOUND PRINCIPLE: Any contribution, modification, or
+        Derivative Work You create is automatically subject to this
+        License under identical terms. There's no mechanism for
+        releasing modifications under different terms.
+
+2.1.5 ANTI-CIRCUMVENTION PROVISIONS
+
+    (a) PROHIBITION ON CIRCUMVENTION TECHNIQUES: You shall not employ
+        any technique, structure, or arrangement designed to circumvent
+        the copyleft requirements of this License, including but not
+        limited to:
+
+        (i)   SHIM LAYER CIRCUMVENTION: Creating intermediate layers,
+              shims, wrappers, or adapters that'solate proprietary code
+              from the Software while maintaining functional integration;
+
+        (ii)  MICROSERVICE ISOLATION: Architecting systems such that the
+              Software runs in an isolated container or process solely
+              to avoid copyleft propagation to calling or called services;
+
+        (iii) API BOUNDARY EXPLOITATION: Using APIs, network protocols,
+              inter-process communication, or any other interface mechanism
+              to claim that proprietary components are "separate works"
+              when they interact with the Software. For the avoidance of
+              doubt, any code that calls, invokes, queries, or otherwise
+              communicates with the Software through ANY interface --
+              including but not limited to HTTP/HTTPS endpoints, MCP
+              (Model Context Protocol) tool calls, WebSocket connections,
+              command-line interfaces, Unix domain sockets, named pipes,
+              shared memory, database connections, message queues, gRPC,
+              GraphQL, REST APIs, or any other communication mechanism
+              whether now known or hereafter developed,is deemed to be
+              functionally integrated with the Software and amounts to
+              a Derivative Work subject to the full terms of this License;
+
+        (iv)  CORPORATE STRUCTURE MANIPULATION: Using subsidiaries,
+              affiliates, contractors, or other entity arrangements to
+              obscure the relationship between the Software and
+              proprietary developments;
+
+        (v)   PLUGIN OR EXTENSION LOOPHOLES: Claiming that plugins,
+              extensions, modules, or add-ons are separate works exempt
+              from copyleft when they directly interact with or depend
+              upon the Software.
+
+    (b) FUNCTIONAL INTEGRATION TEST: For purposes of determining whether
+        code amounts to a Derivative Work subject to copyleft:
+
+        (i)   If the code can't function meaningfully without the
+              Software, it's presumptively a Derivative Work;
+
+        (ii)  If the code was specifically designed to interface with
+              the Software, it's presumptively a Derivative Work;
+
+        (iii) If the code shares data structures, function signatures,
+              or interfaces defined by the Software, it's presumptively
+              a Derivative Work;
+
+        (iv)  If the code is distributed or deployed together with the
+              Software as part of a unified product or service, it's
+              presumptively a Derivative Work.
+
+    (c) BURDEN OF PROOF: In any dispute regarding whether code
+        amounts to a Derivative Work:
+
+        (i)   The burden of proof shall be on You to demonstrate that
+              the code isn't a Derivative Work;
+
+        (ii)  Ambiguities shall be resolved in favor of finding that
+              the code is a Derivative Work subject to copyleft;
+
+        (iii) Technical complexity or architectural decisions shall not
+              excuse copyleft obligations if the functional integration
+              test is satisfied.
+
+    (d) CLEAN ROOM IMPLEMENTATION PRESUMPTION:
+
+        (i)   REBUTTABLE PRESUMPTION: If any person or entity that has
+              accessed, viewed, studied, or been exposed to the Software
+              (or any documentation, architecture descriptions, API
+              specifications, or technical materials relating to the
+              Software) creates, develops, or distributes software that
+              exhibits Substantially Similar Functionality within
+              twenty-four (24) months following such access or exposure,
+              there shall be a rebuttable presumption that such software
+              amounts to a Derivative Work subject to the full copyleft
+              and contribution obligations of this License.
+
+        (ii)  DEFINITION OF SUBSTANTIALLY SIMILAR FUNCTIONALITY: For
+              purposes of this subsection, "Substantially Similar
+              Functionality" means software that satisfies one or more
+              of the following criteria:
+
+              (A)  Implements the same or materially equivalent core
+                   features as the Software, including but not limited
+                   to semantic memory storage, per-project schema
+                   isolation, codebase indexing, embedding-based search,
+                   session extraction, multi-agent coordination, or
+                   file-watching with automatic memory synchronization;
+
+              (B)  Employs architecture patterns, data flow designs, or
+                   system organization that are substantially similar to
+                   those found in the Software, even if implemented in a
+                   different programming language or on a different
+                   platform;
+
+              (C)  Exposes APIs, command interfaces, tool registries, or
+                   communication protocols that are compatible with,
+                   interoperable with, or functionally equivalent to
+                   those provided by the Software;
+
+              (D)  Serves the same or overlapping use case,namely,
+                   providing persistent semantic memory, contextual code
+                   search, or multi-agent coordination capabilities for
+                   software development environments or AI coding
+                   assistants.
+
+              The presence of any single criterion listed above is
+              sufficient to trigger the presumption. The criteria are
+              disjunctive, not conjunctive.
+
+        (iii) BURDEN OF REBUTTAL: To overcome the presumption established
+              in subsection (d)(i), the accused party must demonstrate by
+              clear and convincing evidence ALL of the following:
+
+              (A)  That no person involved in the design, development,
+                   architecture, specification, testing, or review of the
+                   accused software had access to, viewed, studied, or
+                   was briefed on the Software or any related technical
+                   materials at any point before or during development;
+
+              (B)  That the accused party maintained contemporaneous,
+                   verifiable documentation of its independent development
+                   process, including design documents, commit histories,
+                   and internal communications predating any possible
+                   exposure to the Software;
+
+              (C)  That any similarities between the accused software and
+                   the Software are attributable to independently created
+                   solutions, industry-standard practices predating the
+                   Software, or constraints inherent in the problem domain
+                   that would naturally lead to convergent design.
+
+              Failure to maintain the documentation described in clause
+              (B) creates an irrebuttable inference that the accused party
+              can't satisfy its burden of rebuttal.
+
+        (iv)  CLEAN ROOM PROCEDURES INSUFFICIENT ALONE: The mere assertion
+              that a "clean room" or "Chinese wall" development process was
+              followed doesn't, by itself, rebut the presumption. The
+              accused party must affirmatively prove that the clean room
+              procedures were actually implemented, continuously maintained,
+              and effectively prevented any knowledge transfer from persons
+              who had accessed the Software to persons involved in the
+              accused development.
+
+        (v)   TOLLING OF PERIOD: The twenty-four (24) month period
+              referenced in subsection (d)(i) is tolled during any period
+              in which the accused party had ongoing access to the Software,
+              its documentation, or its source code. The period begins
+              running only after complete cessation of all access.
+
+    (e) API USAGE AS LICENSE ACCEPTANCE:
+
+        (i)   LICENSE BY INVOCATION: Any software, service, script, tool,
+              or system that calls the Software's APIs, sends requests to
+              the Software's endpoints, invokes the Software's MCP tools,
+              connects to the Software's WebSocket streams, executes the
+              Software's CLI commands, or otherwise initiates communication
+              with the Software ("Calling Code") is, by the act of making
+              such calls, subject to the terms of this License. The act of
+              invoking any interface exposed by the Software amounts to
+              acceptance of this License with respect to the Calling Code.
+
+        (ii)  NO SEPARATE WORK DEFENSE: You may not claim that Calling
+              Code is an independent or "separate work" merely because it
+              runs in a different process, container, virtual machine,
+              server, or network location from the Software. If the
+              Calling Code depends on the Software's functionality to
+              operate as intended,meaning it would lose material
+              functionality, produce errors, or fail to serve its purpose
+              without the Software,the Calling Code is a Derivative
+              Work regardless of any technical separation.
+
+        (iii) SCOPE OF CALLING CODE OBLIGATIONS: Calling Code that becomes
+              subject to this License under this subsection must comply
+              with all copyleft, source disclosure, and contribution
+              obligations set forth in this License, including but not
+              limited to Sections 2.1.3, 2.1.4, 2.2.1, and 2.2.2. This
+              obligation extends to the complete source code of the
+              Calling Code, not merely the portions that directly
+              interface with the Software.
+
+        (iv)  TRANSITIVE APPLICATION: If Calling Code itself exposes
+              interfaces that are called by additional software, and
+              those additional software components depend on functionality
+              that ultimately originates from the Software, such additional
+              components are also subject to this License.
+
+        (v)   COMMERCIAL API CONSUMERS: Any commercial product, service,
+              or offering that incorporates Calling Code or that relies on
+              the Software's interfaces as part of its operation must
+              either (A) comply with all terms of this License, including
+              full source disclosure, or (B) obtain a separate commercial
+              license from the Licensor. There's no implied license for
+              commercial use through API consumption.
+
+--------------------------------------------------------------------------------
+                PART 2.2: CONTRIBUTION BACK REQUIREMENT
+--------------------------------------------------------------------------------
+
+2.2.1 MANDATORY CONTRIBUTION LICENSE
+
+By creating any Modification, Derivative Work, enhancement, improvement,
+bug fix, patch, feature addition, or any other change to the Software
+(collectively, "Contributions"), You automatically and irrevocably grant
+to the Licensor the following rights:
+
+    (a) COPYRIGHT LICENSE: A perpetual, worldwide, non-exclusive,
+        royalty-free, irrevocable, sublicensable, transferable license
+        to use, reproduce, modify, prepare derivative works of, publicly
+        display, publicly perform, distribute, and otherwise exploit
+        the Contribution and any derivative works of that, in any form,
+        medium, or technology now known or hereafter developed, for any
+        purpose whatsoever.
+
+    (b) PATENT LICENSE: A perpetual, worldwide, non-exclusive,
+        royalty-free, irrevocable, sublicensable, transferable license
+        under any patent claims owned or controlled by You that are
+        necessarily infringed by the Contribution alone or by combination
+        of the Contribution with the Software, to make, have made, use,
+        offer to sell, sell, import, and otherwise transfer the
+        Contribution and any products or services incorporating the
+        Contribution.
+
+    (c) MORAL RIGHTS WAIVER: To the maximum extent permitted by applicable
+        law, You waive any moral rights You may have in the Contribution,
+        including the right of attribution, the right of integrity, and
+        the right to object to derogatory treatment of the Contribution.
+
+    (d) RIGHT TO RELICENSE: The Licensor shall have the right to
+        sublicense the Contribution under any license terms of the
+        Licensor's choosing, including proprietary licenses, without
+        any obligation to provide attribution, compensation, or
+        notification to You.
+
+2.2.2 CONTRIBUTION NOTIFICATION REQUIREMENT
+
+    (a) NOTIFICATION TIMING: Within thirty (30) calendar days of creating
+        any Contribution, You mustn'tify the Licensor of the existence
+        of such Contribution by one of the following methods:
+
+        (i)   Submitting a pull request or merge request to the official
+              Software repository designated by the Licensor;
+
+        (ii)  Sending an email to the contribution notification address
+              designated by the Licensor, with the Contribution attached
+              or a link to where the Contribution can be obtained;
+
+        (iii) Utilizing any contribution submission system or portal
+              provided by the Licensor for this purpose.
+
+    (b) NOTIFICATION CONTENTS: Each Contribution notification must include:
+
+        (i)   Your legal name and contact information;
+
+        (ii)  A complete copy of the Contribution in source code form;
+
+        (iii) A description of the changes made and their purpose;
+
+        (iv)  A statement confirming Your acceptance of the terms of this
+              Section 2.2 regarding Contribution licensing;
+
+        (v)   If the Contribution was created by an employee, contractor,
+              or agent, confirmation that You have the authority to grant
+              the licenses set forth in this Agreement.
+
+    (c) CONSEQUENCES OF FAILURE TO NOTIFY:
+
+        (i)   LIQUIDATED DAMAGES: Failure to provide notification of a
+              Contribution within the timeframe specified in Section
+              2.2.2(a) shall result in liquidated damages of Five Hundred
+              United States Dollars (USD $500.00) per Contribution for
+              which timely notification wasn't provided. The parties
+              acknowledge that actual damages from failure to notify would
+              be difficult to calculate, and that this amount represents a
+              reasonable estimate of the harm caused to the Licensor by
+              delayed or missing notification, including but not limited
+              to lost opportunity to integrate improvements, diminished
+              ability to maintain the Software, and harm to the open-source
+              ecosystem the Licensor has established.
+
+        (ii)  ACCRUAL AND DEMAND: Liquidated damages under this subsection
+              accrue automatically upon expiration of the thirty (30) day
+              notification period. The Licensor may demand payment at any
+              time after accrual. Failure to pay within sixty (60) calendar
+              days of written demand amounts to a separate material breach
+              of this License.
+
+        (iii) REPEATED FAILURE,LICENSE TERMINATION: If You fail to
+              provide timely notification for three (3) or more
+              Contributions within any twelve (12) month period, the
+              Licensor may, at its sole discretion, terminate this License
+              and all rights granted hereunder by providing written notice
+              of termination. Upon termination under this subsection:
+
+              (A)  All rights granted under Section 2.1 immediately cease;
+
+              (B)  You must immediately cease all use, reproduction,
+                   distribution, and deployment of the Software and any
+                   Derivative Works;
+
+              (C)  You must destroy or return all copies of the Software
+                   in Your possession or control;
+
+              (D)  The license grants in Section 2.2.1 (Mandatory
+                   Contribution License) survive termination,the
+                   Licensor retains all rights to Contributions You
+                   already created, even after Your license is terminated;
+
+              (E)  Termination doesn't relieve You of the obligation to
+                   pay any liquidated damages that accrued before
+                   termination.
+
+        (iv)  NOTIFICATION IS A CONDITION, NOT A COVENANT: Timely
+              notification under this Section 2.2.2 is a condition
+              precedent to the continued validity of the license grants
+              in Section 2.1. It isn't merely a contractual promise --
+              it's a requirement that must be satisfied for You to exercise
+              any rights under this License. Failure to notify doesn't
+              just give the Licensor a damages claim; it means You were
+              operating outside the scope of the license during the period
+              of non-compliance.
+
+        (v)   NO CURE FOR WILLFUL NONCOMPLIANCE: If the Licensor
+              determines, in its reasonable judgment, that Your failure
+              to notify was willful or deliberate (as opposed to an
+              inadvertent oversight), the Licensor may terminate this
+              License immediately without providing an opportunity to
+              cure. Evidence of willful noncompliance includes, but
+              isn't limited to: distributing Contributions commercially
+              without notification, creating multiple Contributions over
+              an extended period without notification, or continuing to
+              withhold notification after being reminded of the obligation.
+
+        (vi)  LATE NOTIFICATION: If You provide notification after the
+              thirty (30) day period but before the Licensor issues a
+              demand or termination notice, the liquidated damages under
+              subsection (c)(i) are reduced by fifty percent (50%).
+              This reduction doesn't apply if the late notification
+              occurs only after the Licensor contacted You regarding the
+              delinquent Contribution.
+
+2.2.3 NO PRIVATE IMPROVEMENTS
+
+    (a) PROHIBITION ON PRIVATE MODIFICATIONS: You are expressly prohibited
+        from maintaining, using, deploying, or distributing any Modifications
+        or Derivative Works of the Software that aren't shared with:
+
+        (i)   The Licensor in accordance with Section 2.2.2; AND
+
+        (ii)  The public in accordance with Section 2.1.3.
+
+    (b) ANTI-HOARDING PROVISION: This License is specifically designed to
+        prevent the hoarding of improvements. Any attempt to:
+
+        (i)   Maintain proprietary improvements to the Software;
+
+        (ii)  Use improved versions internally while withholding such
+              improvements from the Licensor and the community;
+
+        (iii) Delay disclosure of improvements beyond the periods
+              specified in this Agreement;
+
+        (iv)  Structure business operations or corporate entities to
+              circumvent the contribution requirements;
+
+        shall constitute a material breach of this License Agreement and
+        shall result in immediate termination of all rights granted in this Agreement.
+
+    (c) COMPETITIVE IMPROVEMENTS: The contribution requirements apply
+        equally to improvements that may provide competitive advantage.
+        There's no exception for:
+
+        (i)   Trade secrets incorporated into Modifications;
+
+        (ii)  Performance optimizations;
+
+        (iii) Security enhancements;
+
+        (iv)  Novel features or functionality;
+
+        (v)   Industry-specific adaptations;
+
+        (vi)  Integration with third-party systems.
+
+2.2.4 LICENSOR'S RIGHTS IN CONTRIBUTIONS
+
+    (a) INCORPORATION RIGHTS: The Licensor may, at its sole discretion:
+
+        (i)   Incorporate any Contribution into the official version of
+              the Software;
+
+        (ii)  Modify, adapt, or transform any Contribution;
+
+        (iii) Combine Contributions from multiple contributors;
+
+        (iv)  Reject any Contribution for any reason or no reason.
+
+    (b) COMMERCIALIZATION RIGHTS: The Licensor may:
+
+        (i)   Sell, license, or otherwise commercialize any Contribution;
+
+        (ii)  Use Contributions in proprietary versions of the Software;
+
+        (iii) Grant exclusive licenses to Contributions to third parties;
+
+        (iv)  Exercise all rights in Contributions without any obligation
+              to provide compensation, attribution, or benefit to the
+              contributor.
+
+    (c) NO CONTRIBUTOR COMPENSATION: Contributors aren't entitled to:
+
+        (i)   Monetary compensation for Contributions;
+
+        (ii)  Royalties from commercialization of Contributions;
+
+        (iii) Equity, ownership, or profit-sharing rights;
+
+        (iv)  Continued attribution in commercial versions;
+
+        (v)   Any other consideration in exchange for Contributions.
+
+2.2.5 CONTRIBUTOR REPRESENTATIONS AND WARRANTIES
+
+By making a Contribution, You represent and warrant that:
+
+    (a) AUTHORITY: You have the legal right and authority to make the
+        Contribution and to grant the licenses set forth in Section 2.2.1.
+
+    (b) ORIGINAL WORK: The Contribution is Your original work, or You have
+        sufficient rights in any third-party materials incorporated in the
+        Contribution to grant the licenses in this Agreement.
+
+    (c) NO ENCUMBRANCES: The Contribution isn't subject to any third-party
+        licenses, claims, liens, or encumbrances that would restrict the
+        Licensor's rights under this License.
+
+    (d) EMPLOYER AUTHORIZATION: If the Contribution was created in the
+        scope of Your employment or engagement, Your employer or client
+        has authorized You to make the Contribution and to grant the
+        licenses in this Agreement.
+
+    (e) NO CONFLICTING OBLIGATIONS: You aren't under any obligation or
+        agreement that would prevent You from making the Contribution or
+        granting the licenses in this Agreement.
+
+    (f) PATENT AWARENESS: To Your knowledge, the Contribution doesn't
+        infringe any third-party patents, or if it does, You have disclosed
+        such patents to the Licensor.
+
+2.2.6 PATENT GRANT FROM CONTRIBUTORS
+
+    (a) AUTOMATIC PATENT LICENSE: By contributing any code, documentation,
+        or other materials to the Software, You automatically grant to the
+        Licensor and to all recipients of the Software:
+
+        (i)   A perpetual, worldwide, non-exclusive, royalty-free, irrevocable
+              patent license under any patent claims that You own or control
+              that are necessarily infringed by the Contribution alone or in
+              combination with the Software;
+
+        (ii)  The license includes the right to make, have made, use, offer
+              to sell, sell, import, and otherwise transfer products and
+              services that incorporate the Contribution;
+
+        (iii) The license extends to any patents that would be infringed by
+              the Contribution as integrated into the Software, regardless
+              of whether such patents were known at the time of contribution.
+
+    (b) DEFENSIVE TERMINATION: If You or any entity You control initiates
+        patent litigation alleging that the Software or any Contribution
+        infringes a patent:
+
+        (i)   All patent licenses granted to You under this License shall
+              terminate immediately;
+
+        (ii)  You shall have no right to cure or reinstate such licenses;
+
+        (iii) Your termination shall not affect patent licenses granted by
+              You to other licensees.
+
+    (c) PATENT DISCLOSURE: If You become aware of any patent that may be
+        infringed by the Software or any Contribution, You must:
+
+        (i)   Promptly notify the Licensor in writing of the patent;
+
+        (ii)  Provide sufficient detail to allow evaluation of the patent;
+
+        (iii) Cooperate with the Licensor in addressing the patent issue.
+
+--------------------------------------------------------------------------------
+                    PART 2.4: WHAT IS NOT GRANTED
+--------------------------------------------------------------------------------
+
+2.4.1 TRADEMARK RIGHTS NOT GRANTED
+
+    (a) NO TRADEMARK LICENSE: This License doesn't grant any rights to
+        use the Licensor's trade names, trademarks, service marks, logos,
+        or product names (collectively, "Licensor Marks"), except:
+
+        (i)   As required for the Attribution Notice under Section 2.3.1;
+
+        (ii)  As required for reasonable and customary use in describing
+              the origin of the Software;
+
+        (iii) To reproduce the copyright notice as required in this Agreement.
+
+    (b) PROHIBITED USES OF MARKS: Without the Licensor's prior written
+        consent, You may not:
+
+        (i)   Use any Licensor Marks in any way that suggests
+              endorsement, sponsorship, or affiliation;
+
+        (ii)  Register any domain names that include Licensor Marks;
+
+        (iii) Register any trademarks that are confusingly similar to
+              Licensor Marks;
+
+        (iv)  Use Licensor Marks in advertising, marketing, or
+              promotional materials beyond the Attribution Notice;
+
+        (v)   Modify, distort, or alter any Licensor Marks.
+
+    (c) TRADEMARK PROTECTION: The Licensor reserves all rights in its
+        Marks, and this License doesn't:
+
+        (i)   Grant any implied license to use Licensor Marks;
+
+        (ii)  Waive any trademark rights of the Licensor;
+
+        (iii) Prevent the Licensor from enforcing its trademark rights
+              against infringers.
+
+2.4.2 PATENT RIGHTS LIMITATIONS
+
+    (a) LIMITED PATENT GRANT: Subject to the terms and conditions of
+        this License, the Licensor grants to You a non-exclusive,
+        worldwide, royalty-free patent license under the Licensor's
+        patent claims that are necessarily infringed by the Software as
+        provided by the Licensor, to make, have made, use, offer to sell,
+        sell, and import the Software.
+
+    (b) SCOPE LIMITATION: The patent grant under subsection (a):
+
+        (i)   Extends only to patent claims licensable by the Licensor;
+
+        (ii)  Doesn't extend to modifications or Derivative Works
+              created by You;
+
+        (iii) Doesn't extend to combinations of the Software with other
+              software, hardware, or systems;
+
+        (iv)  Doesn't extend to any method of use not contemplated by
+              the Software as originally provided.
+
+    (c) PATENT RETALIATION: If You (or any entity You control or that
+        controls You) initiate patent litigation against the Licensor
+        or any other Licensee alleging that the Software infringes a
+        patent, then:
+
+        (i)   All licenses granted to You under this License shall
+              terminate immediately;
+
+        (ii)  You shall have no right to cure such termination;
+
+        (iii) You shall remain liable for any use of the Software
+              before termination.
+
+    (d) NO PATENT WARRANTY: The Licensor makes no representation or
+        warranty that the Software doesn't infringe any third-party
+        patents. You assume all risk of patent infringement claims.
+
+    (e) PATENT NON-ASSERTION: To the extent You obtain any patents
+        covering improvements to the Software that You contribute back
+        under Section 2.2, You covenant not to assert such patents
+        against any user of the Software.
+
+2.4.3 NO RIGHT TO REMOVE COPYLEFT OBLIGATIONS
+
+    (a) IRREMOVABLE COPYLEFT: The copyleft obligations set forth in
+        this License, including without limitation the Source Code
+        Disclosure Requirements and Contribution Back Requirements,
+        are essential terms of this License and may not be:
+
+        (i)   Waived, modified, or removed by You;
+
+        (ii)  Overridden by any separate agreement between You and
+              any third party;
+
+        (iii) Circumvented through technical or legal mechanisms;
+
+        (iv)  Avoided through organizational structuring, assignments,
+              or transfers.
+
+    (b) SURVIVAL OF COPYLEFT: The copyleft obligations shall:
+
+        (i)   Apply to all Derivative Works regardless of the magnitude
+              of modifications;
+
+        (ii)  Apply to all recipients regardless of how they obtained
+              the Software;
+
+        (iii) Continue in perpetuity for as long as copyright protection
+              exists in the Software.
+
+    (c) NO DUAL-LICENSING BY LICENSEES: You may not offer the Software
+        or any Derivative Work under alternative license terms. Only the
+        Licensor has the right to offer the Software under different terms.
+
+2.4.4 NO RIGHT TO SUBLICENSE DIFFERENTLY
+
+    (a) NO ALTERNATIVE LICENSING: You may not:
+
+        (i)   Grant any sublicense to the Software under terms different
+              from this License;
+
+        (ii)  Offer the Software under multiple licensing options;
+
+        (iii) Release the Software or any Derivative Work into the
+              public domain;
+
+        (iv)  Apply any other open source license to the Software or
+              any Derivative Work.
+
+    (b) COMMERCIAL LICENSE EXCEPTION: The restriction in subsection (a)
+        doesn't prevent You from entering into a separate commercial
+        license agreement with the Licensor that may grant different
+        or additional rights.
+
+    (c) CLARIFICATION: For avoidance of doubt:
+
+        (i)   You may not relicense the Software under MIT, BSD, Apache,
+              GPL, LGPL, or any other license;
+
+        (ii)  You may not claim the Software is in the public domain;
+
+        (iii) You may not waive any rights granted to You under this
+              License in favor of third parties.
+
+2.4.5 NO WARRANTY OR SUPPORT IMPLIED
+
+    (a) AS-IS PROVISION: The Software is provided "AS IS" without
+        warranty of any kind. This License grants rights to the Software
+        but doesn't:
+
+        (i)   Entitle You to any support, maintenance, updates,
+              enhancements, or modifications from the Licensor;
+
+        (ii)  Create any obligation for the Licensor to respond to
+              bug reports, feature requests, or support inquiries;
+
+        (iii) Guarantee the continued availability, development, or
+              maintenance of the Software;
+
+        (iv)  Establish any service level commitment or availability
+              guarantee.
+
+    (b) SEPARATE SUPPORT AGREEMENTS: Support and maintenance services
+        may be available under separate written agreements with the
+        Licensor, subject to additional terms and fees.
+
+    (c) COMMUNITY SUPPORT: The Licensor may provide community forums,
+        documentation, or other resources, but such provision is
+        voluntary and may be discontinued at any time without notice.
+
+    (d) NO RELIANCE: You shouldn't rely on any informal support,
+        guidance, or assistance that may be provided. Such assistance
+        doesn't create any warranty or obligation.
+
+2.4.6 NO AGENCY OR PARTNERSHIP
+
+    (a) INDEPENDENT PARTIES: Nothing in this License creates or shall
+        be construed to create:
+
+        (i)   Any agency relationship between You and the Licensor;
+
+        (ii)  Any partnership or joint venture;
+
+        (iii) Any employment relationship;
+
+        (iv)  Any franchise or similar arrangement.
+
+    (b) NO AUTHORITY TO BIND: You have no authority to bind the Licensor
+        or to make any representations, warranties, or commitments on
+        behalf of the Licensor.
+
+    (c) INDEPENDENCE: Each party is an independent contractor with respect
+        to the other, and neither party has any authority to act for or
+        bind the other in any respect.
+
+2.4.7 NO EXCLUSIVITY
+
+    (a) NON-EXCLUSIVE RIGHTS: All rights granted under this License are
+        non-exclusive. The Licensor retains the right to:
+
+        (i)   License the Software to any other party;
+
+        (ii)  Continue to use, develop, and exploit the Software;
+
+        (iii) Grant exclusive rights to third parties;
+
+        (iv)  Modify, discontinue, or change the Software at any time.
+
+    (b) NO TERRITORIAL RESTRICTIONS: The Licensor may grant licenses in
+        any territory without restriction, and nothing in this License
+        grants You any territorial exclusivity.
+
+--------------------------------------------------------------------------------
+                    END OF SECTION 2: GRANT OF RIGHTS
+
+(Note: Quality Enhancement and Service Integrity provisions moved to Sections 6-7)
+                SECTION 3: ATTRIBUTION REQUIREMENTS
+--------------------------------------------------------------------------------
+
+3.1 "POWERED BY SPECMEM" VISIBILITY REQUIREMENT
+
+    (a) MANDATORY NOTICE: Any use, deployment, or distribution of the
+        Software or any Derivative Work must include a clear, visible,
+        and prominent notice stating "Powered by SpecMem" (the "Attribution
+        Notice"). This requirement applies regardless of whether the use
+        is commercial or non-commercial.
+
+    (b) NOTICE PLACEMENT: The Attribution Notice must appear in the
+        following locations, as applicable:
+
+        (i)   USER INTERFACES: In any graphical user interface, web
+              interface, mobile application, or other visual interface
+              through which users interact with the Software:
+
+              - The Attribution Notice must appear on the main screen,
+                home page, or primary interface;
+              - Additionally, the Attribution Notice must appear in any
+                "About" page, dialog, or similar information display;
+              - The Attribution Notice must be visible without requiring
+                users to scroll, navigate, or take additional actions;
+              - The Attribution Notice must remain visible for the
+                duration of the user's session or interaction.
+
+        (ii)  COMMAND LINE INTERFACES: In any command-line interface or
+              terminal-based application:
+
+              - The Attribution Notice must appear upon startup or
+                invocation of the Software;
+              - The Attribution Notice must appear in response to any
+                "--version", "-v", "--help", "-h", or similar command;
+              - The Attribution Notice must appear at least once per
+                session of interactive use.
+
+        (iii) API RESPONSES: In any API, web service, or network-accessible
+              interface:
+
+              - The Attribution Notice must be included in HTTP headers
+                (e.g., "X-Powered-By: SpecMem") for all responses;
+              - The Attribution Notice must be included in any metadata,
+                envelope, or wrapper around response data;
+              - API documentation must prominently display the
+                Attribution Notice.
+
+        (iv)  DOCUMENTATION: In all documentation, whether printed or
+              electronic:
+
+              - The Attribution Notice must appear on the first page or
+                screen of any user guide, manual, or help documentation;
+              - The Attribution Notice must appear in any README file;
+              - The Attribution Notice must appear in any installation or
+                setup instructions.
+
+    (c) NOTICE FORMAT: The Attribution Notice must:
+
+        (i)   Use the exact text "Powered by SpecMem" or such variation
+              as may be specified by the Licensor from time to time;
+
+        (ii)  Be rendered in a font size at least as large as the
+              surrounding text, and in no case smaller than 10 point
+              (or equivalent for digital displays);
+
+        (iii) Be rendered in a color that provides sufficient contrast
+              with the background to ensure readability;
+
+        (iv)  Not be obscured, hidden, or rendered illegible by any
+              design element, overlay, or other content;
+
+        (v)   Include a hyperlink to the official SpecMem website
+              (when technically feasible in the display medium).
+
+    (d) AUDIO AND VOICE INTERFACES: For applications that primarily use
+        audio or voice interaction:
+
+        (i)   The Attribution Notice must be spoken or displayed upon
+              first use or initialization;
+
+        (ii)  The Attribution Notice must be available via a voice
+              command such as "What powers this?" or equivalent;
+
+        (iii) Written documentation accompanying the application must
+              include the Attribution Notice.
+
+3.2 COPYRIGHT NOTICE PRESERVATION
+
+    (a) RETENTION REQUIREMENT: You must retain and not remove, alter, or
+        obscure any copyright notices, license notices, or other proprietary
+        notices present in the Software, including:
+
+        (i)   All copyright notices in source code files;
+
+        (ii)  All copyright notices in compiled or binary files;
+
+        (iii) The copyright notice at the beginning of this License;
+
+        (iv)  Any copyright notices in documentation;
+
+        (v)   Any copyright notices embedded in user interfaces.
+
+    (b) DERIVATIVE WORKS: In Derivative Works, You must:
+
+        (i)   Retain all original copyright notices without modification;
+
+        (ii)  Add Your own copyright notice for modifications, clearly
+              distinguishing it from the original notices;
+
+        (iii) Not represent that the original Licensor endorses or
+              sponsors Your Derivative Work unless separately agreed in
+              writing.
+
+    (c) HEADER REQUIREMENTS: Every source code file that contains any
+        portion of the Software or any Derivative Work must include:
+
+        (i)   The original copyright notice from the Software;
+
+        (ii)  A reference to this License Agreement;
+
+        (iii) If modified, a notice indicating the file has been modified
+              and the date of the most recent modification.
+
+3.3 LICENSE FILE INCLUSION
+
+    (a) DISTRIBUTION REQUIREMENT: Any distribution of the Software or any
+        Derivative Work must include a complete, unmodified copy of this
+        License Agreement in a file named "LICENSE" or "LICENSE.md" in
+        the root directory of the distribution.
+
+    (b) ELECTRONIC AVAILABILITY: For deployments where physical
+        distribution doesn't occur (such as web applications or services),
+        the complete License must be made available through:
+
+        (i)   A dedicated URL accessible to all users (e.g., /license,
+              /terms, or similar);
+
+        (ii)  A link in the application's footer, about page, or help
+              documentation;
+
+        (iii) Inclusion in API documentation.
+
+    (c) NO MODIFICATION: The License file must be provided in its entirety
+        and without any modification, addition, or deletion. Any attempt to
+        modify, summarize, or paraphrase the License is prohibited.
+
+    (d) MACHINE-READABLE FORMAT: In addition to human-readable format, the
+        License information should be provided in machine-readable format
+        where applicable:
+
+        (i)   SPDX license identifier in package metadata;
+
+        (ii)  License field in package.json, Cargo.toml, or equivalent;
+
+        (iii) Structured data format where supported by the platform.
+
+3.4 DOCUMENTATION ATTRIBUTION
+
+    (a) USER DOCUMENTATION: Any user documentation, guides, tutorials, or
+        help materials related to Your use of the Software must:
+
+        (i)   Clearly state that the documentation relates to SpecMem or
+              a Derivative Work of that;
+
+        (ii)  Include the Attribution Notice prominently;
+
+        (iii) Not claim that the Software is Your original creation.
+
+    (b) DEVELOPER DOCUMENTATION: Any developer documentation, API
+        references, or technical specifications must:
+
+        (i)   Acknowledge the SpecMem project as the source;
+
+        (ii)  Include links to official SpecMem documentation;
+
+        (iii) Clearly distinguish Your additions from the original.
+
+    (c) MARKETING AND PROMOTIONAL MATERIALS: Any marketing materials,
+        website content, or promotional materials that reference the
+        Software must:
+
+        (i)   Not misrepresent Your relationship with the Licensor;
+
+        (ii)  Not imply endorsement unless explicitly authorized;
+
+        (iii) Include accurate attribution to the SpecMem project.
+
+3.5 ADDITIONAL ATTRIBUTION REQUIREMENTS
+
+    (a) ACADEMIC AND RESEARCH USE: If the Software is used in academic
+        research, publications, or presentations:
+
+        (i)   The Software must be cited in any resulting publications;
+
+        (ii)  The citation must include the Software name, version,
+              and URL;
+
+        (iii) Acknowledgment of the Software must appear in presentation
+              materials.
+
+    (b) APPLICATION ABOUT SCREENS: Any application with an "About" dialog,
+        screen, or page must:
+
+        (i)   List SpecMem in the credits or acknowledgments section;
+
+        (ii)  Provide a link to the SpecMem project or source code;
+
+        (iii) Display the version of SpecMem being used.
+
+    (c) EMBEDDED SYSTEMS: For embedded systems or devices with limited
+        display capabilities:
+
+        (i)   Attribution must be included in any accompanying
+              documentation or packaging;
+
+        (ii)  If the device has any display capability, attribution must
+              be accessible through device menus or information screens;
+
+        (iii) Attribution must be visible during firmware updates or
+              configuration processes.
+
+--------------------------------------------------------------------------------
+================================================================================
+                    SECTION 4: COMMERCIAL LICENSING - WINDOWS PLATFORM
+SECTION 5: COMMERCIAL LICENSING - LINUX AND REVENUE TIERS
+================================================================================
+
+This Section 3 ("Commercial Terms") establishes the commercial licensing
+structure, payment obligations, and related provisions for use of the Software.
+
+--------------------------------------------------------------------------------
+                    PART 4.1: WINDOWS PLATFORM TAX
+--------------------------------------------------------------------------------
+
+4.1.1 UNIVERSAL WINDOWS COMMERCIAL LICENSE REQUIREMENT
+
+(a) MANDATORY COMMERCIAL LICENSE: Subject only to the Windows Development
+    Exception in Section 4.1.4, ANY use of the Software on any Windows
+    Platform Environment requires a valid Windows Commercial License obtained
+    directly from Licensor. This requirement applies regardless of:
+
+    (i)   The Licensee's revenue, size, organizational structure, or legal form;
+    (ii)  Whether the use is for profit, non-profit, or charitable purposes;
+    (iii) Whether the Software is modified, unmodified, or incorporated
+          into larger works;
+    (iv)  Whether the Software is used internally or distributed externally;
+    (v)   Whether the use is temporary, trial, evaluation, or permanent;
+    (vi)  Whether the use is for development, testing, staging, or production;
+    (vii) The number of installations, instances, users, or deployments;
+    (viii) Whether the Licensee would otherwise qualify for free licensing
+           under the Linux licensing tiers in Section 4.2;
+    (ix)  The geographic location of the use, users, or infrastructure;
+    (x)   The industry or business sector in which the Licensee operates;
+    (xi)  Any claimed educational, research, academic, or governmental status;
+    (xii) The version or age of the Windows installation;
+    (xiii) Whether Windows is the primary or secondary operating system;
+    (xiv) Any other factor not explicitly addressed in this Section 4.1.
+
+4.1.2 WINDOWS PLATFORM ENVIRONMENT DEFINED
+
+For purposes of this Section 4.1, "Windows Platform Environment" includes,
+without limitation:
+
+(a) NATIVE WINDOWS OPERATING SYSTEMS:
+
+    (i) Windows Client Operating Systems:
+        - Windows 11 (all editions: Home, Pro, Pro for Workstations, Enterprise,
+          Education, IoT Enterprise, SE, China Government Edition)
+        - Windows 10 (all editions, including LTSC/LTSB 2015, 2016, 2019, 2021)
+        - Windows 8.1 and Windows 8 (all editions)
+        - Windows 7 (all editions, including Extended Security Updates versions)
+        - Windows Vista, XP, 2000, ME, 98, 95 (all editions)
+        - Any Preview, Insider, Beta, or pre-release versions
+
+    (ii) Windows Server Operating Systems:
+        - Windows Server 2025, 2022, 2019, 2016, 2012 R2, 2012, 2008 R2, 2008,
+          2003 R2, 2003, 2000 (all editions)
+        - Windows Server Semi-Annual Channel releases
+        - Windows Server Insider Preview releases
+        - All editions including Standard, Datacenter, Essentials, Azure Edition
+
+    (iii) Windows Embedded and IoT:
+        - Windows Embedded Standard 7/8
+        - Windows Embedded POSReady, Compact/CE
+        - Windows IoT Core, IoT Enterprise, IoT Enterprise LTSC
+
+    (iv) Successor Versions:
+        - Any successor, derivative, or rebranded version of the above
+        - Any future Windows version released after this Agreement's date
+
+(b) WINDOWS SUBSYSTEM FOR LINUX (WSL):
+
+    (i) WSL 1 (translation layer architecture)
+    (ii) WSL 2 (lightweight Hyper-V virtual machine architecture)
+    (iii) WSLg (WSL with graphical application support)
+    (iv) WSL with systemd or GPU/CUDA passthrough support
+    (v) Any distributions running under WSL (Ubuntu, Debian, Fedora, etc.)
+    (vi) Any future versions or derivatives of WSL
+
+    CRITICAL CLARIFICATION: Use of the Software within WSL environments is
+    CATEGORICALLY considered Windows Platform use, NOT Linux use, regardless
+    of the fact that the Software may execute within a Linux-like environment.
+    The licensing determination is based on the HOST operating system (Windows),
+    not the guest environment. There's NO WSL exception under the Free Tier.
+
+(c) WINE AND WINE-DERIVATIVE ENVIRONMENTS:
+
+    (i) Wine Project and Official Builds:
+        - Wine (Wine Is Not an Emulator) - all versions
+        - WineHQ stable, development, and staging builds
+
+    (ii) Commercial Wine Derivatives:
+        - CrossOver by CodeWeavers (all editions)
+        - CrossOver Mac, CrossOver Chrome OS
+
+    (iii) Gaming-Focused Wine Derivatives:
+        - Proton by Valve Corporation (all versions)
+        - Wine-GE (Glorious Eggroll custom builds)
+        - Wine-TKG, Lutris Wine builds, Bottles
+
+    (iv) Linux Wine Managers:
+        - PlayOnLinux, PlayOnMac, Lutris (when using Wine), Q4Wine
+
+    (v) Any forks, derivatives, modifications, or custom builds of Wine
+
+    CLARIFICATION: If the Software is compiled for Windows (as PE/PE32+/PE64
+    executables or DLLs) and executed through any Wine-derivative environment,
+    such use amounts to Windows Platform use requiring commercial licensing,
+    regardless of the underlying host operating system.
+
+(d) REACTOS AND WINDOWS-COMPATIBLE OPERATING SYSTEMS:
+
+    (i) ReactOS (all versions)
+    (ii) Any operating system implementing the Win32/Win64/WinNT API natively
+    (iii) Any operating system designed to execute Windows PE format binaries
+    (iv) Any future operating systems achieving Windows binary compatibility
+
+(e) MICROSOFT AZURE WINDOWS ENVIRONMENTS:
+
+    (i) Azure Virtual Machines with Windows Server or Windows Client images
+    (ii) Azure VM Scale Sets with Windows base images
+    (iii) Azure Kubernetes Service (AKS) Windows node pools
+    (iv) Azure Container Instances with Windows containers
+    (v) Azure App Service, Azure Functions on Windows
+    (vi) Azure Batch Windows compute nodes
+    (vii) Azure Virtual Desktop (Windows 10/11 Enterprise multi-session)
+    (viii) Azure Stack HCI, Hub, and Edge (Windows workloads)
+    (ix) Azure Government and Azure China Windows deployments
+    (x) Any current or future Azure service on Windows infrastructure
+
+(f) OTHER CLOUD WINDOWS ENVIRONMENTS:
+
+    (i) Amazon Web Services: EC2 Windows instances, WorkSpaces, AppStream 2.0,
+        Elastic Beanstalk Windows platform
+    (ii) Google Cloud Platform: Compute Engine Windows VMs, VMware Engine
+         Windows guests
+    (iii) Oracle Cloud Infrastructure: OCI Compute Windows instances
+    (iv) IBM Cloud: Virtual Servers for Classic/VPC (Windows)
+    (v) DigitalOcean, Linode, Vultr, OVHcloud, Hetzner, Scaleway, UpCloud
+        (Windows instances where offered)
+    (vi) Private Cloud: VMware vSphere, Hyper-V, Nutanix, Citrix, Proxmox,
+         OpenStack (Windows guests)
+
+(g) WINDOWS CONTAINERS:
+
+    (i) Windows Server containers (Server Core, Nano Server)
+    (ii) Hyper-V containers with Windows isolation
+    (iii) Docker containers with Windows base images
+    (iv) Container orchestration on Windows nodes (Kubernetes, Swarm, Nomad)
+
+(h) VIRTUALIZED WINDOWS:
+
+    (i) Type 1 Hypervisors: VMware ESXi, Microsoft Hyper-V Server, Citrix
+        Hypervisor, Proxmox VE, Nutanix AHV, Oracle VM Server hosting
+        Windows guests
+    (ii) Type 2 Hypervisors: VMware Workstation/Fusion/Player, Oracle
+         VirtualBox, Parallels Desktop, QEMU/KVM, GNOME Boxes hosting
+         Windows guests
+
+    CLARIFICATION: The host operating system is irrelevant. If the GUEST
+    operating system is Windows, use of the Software in that guest requires
+    a Windows Commercial License.
+
+4.1.3 NO EXCEPTIONS - UNIVERSAL APPLICATION
+
+(a) NO SMALL ORGANIZATION EXCEPTION: Unlike the Linux licensing tiers, there
+    is NO free tier, NO revenue exemption, NO reduced fee structure, and NO
+    grace period for Windows Platform use. The Windows Commercial License
+    requirement applies to:
+
+    (i)   Individual developers, hobbyists, and students;
+    (ii)  Startups and early-stage companies regardless of funding or revenue;
+    (iii) Small, medium, and large businesses;
+    (iv)  Non-profit organizations, charities, and 501(c)(3) entities;
+    (v)   Educational institutions (K-12, colleges, universities);
+    (vi)  Government agencies (local, state, federal, international);
+    (vii) Research institutions, laboratories, and think tanks;
+    (viii) Open source projects and community organizations;
+    (ix)  Religious, political, and advocacy organizations;
+    (x)   Any entity, regardless of mission, purpose, or tax status.
+
+(b) NO NON-COMMERCIAL EXCEPTION: The Windows Commercial License requirement
+    applies to ALL Windows Platform use, including use that would otherwise
+    be classified as "non-commercial":
+
+    (i)   Personal use requires a Windows Commercial License;
+    (ii)  Hobbyist use requires a Windows Commercial License;
+    (iii) Academic research requires a Windows Commercial License;
+    (iv)  Educational use requires a Windows Commercial License;
+    (v)   Non-profit internal operations require a Windows Commercial License;
+    (vi)  Government internal operations require a Windows Commercial License.
+
+(c) NO INTERNAL USE EXCEPTION: Internal use of the Software on Windows
+    Platform Environments, including use solely within an organization for
+    internal business operations with no external distribution, requires a
+    Windows Commercial License.
+
+(d) CUMULATIVE REQUIREMENTS: The Windows Commercial License requirement is
+    cumulative with all other requirements in this Agreement. Licensees using
+    the Software on Windows Platform Environments must comply with Windows
+    Commercial License requirements AND copyleft obligations AND attribution
+    requirements AND all other applicable provisions.
+
+4.1.4 WINDOWS DEVELOPMENT EXCEPTION (LIMITED AND TIME-CAPPED)
+
+(a) SCOPE OF EXCEPTION: A limited exception permits use of the Software on
+    Windows Platform Environments without a Windows Commercial License ONLY
+    when ALL of the following conditions are SIMULTANEOUSLY satisfied:
+
+    (i) NATURAL PERSON ONLY: The use is by a natural person (individual human
+        being) for their own personal purposes. This exception doesn't apply to:
+        - Any business entity regardless of size or form;
+        - Employees acting within the scope of their employment;
+        - Contractors performing work for any organization;
+        - Use on behalf of or for the benefit of any organization;
+        - Students performing work for academic credit or coursework.
+
+    (ii) DEVELOPMENT AND TESTING PURPOSE ONLY: The use is strictly limited to:
+        - Local development environment for personal learning;
+        - Personal experimentation and skill development;
+        - Personal testing and debugging of individual projects;
+        - Educational self-study not connected to any institution;
+        - Contributing bug fixes to the Software's upstream development.
+
+        This exception doesn't apply to:
+        - Any production deployment regardless of scale;
+        - Any staging, pre-production, or QA environment;
+        - Any demonstration to potential customers, clients, or employers;
+        - Any proof-of-concept for business evaluation;
+        - Any performance testing for production planning;
+        - Any use in job interviews or take-home assignments;
+        - Any use in hackathons or competitions with prizes.
+
+    (iii) NON-COMMERCIAL PURPOSE ONLY: The activities must be entirely
+          non-commercial:
+          - The individual isn't being compensated in any form;
+          - The work isn't performed for any employer, client, or customer;
+          - The results won't be used in any commercial product or service;
+          - The individual derives NO commercial benefit from the use.
+
+    (iv) LOCAL AND ISOLATED USE ONLY: The Software must NOT be accessible
+         over any network to any other person, system, or device:
+         - NO network listeners or servers accepting external connections;
+         - NO API endpoints accessible from other machines;
+         - NO remote access, SSH, RDP, or similar.
+
+    (v) NO DISTRIBUTION: The individual must NOT distribute, share, transfer,
+        or publish the Software while relying on this exception.
+
+    (vi) ANNUAL TIME CAP: The individual's aggregate use under this exception
+         mustn't exceed ninety (90) calendar days per calendar year
+         (January 1 through December 31). For the avoidance of doubt:
+
+         (A) A "day of use" means any calendar day on which the Software is
+             executed, loaded into memory, or actively running on a Windows
+             Platform Environment, regardless of the duration of use on that
+             day. Running the Software for five minutes on a given day counts
+             the same as running it for twelve hours;
+
+         (B) Days are counted cumulatively across the entire calendar year and
+             need not be consecutive;
+
+         (C) Unused days don't carry over to any subsequent calendar year.
+             Each January 1, the count resets to zero, but the ninety-day cap
+             remains fixed at ninety (90) days;
+
+         (D) If the individual begins using the Software partway through a
+             calendar year, the ninety-day cap isn't prorated,the full
+             ninety (90) days are available for the remainder of that year;
+
+         (E) Upon reaching ninety (90) days of use in a calendar year, this
+             exception terminates immediately for the remainder of that year,
+             and the individual must obtain a Windows Commercial License to
+             continue any Windows Platform use.
+
+(b) MANDATORY REGISTRATION AND LOGGING:
+
+    (i) REGISTRATION REQUIRED: Before relying on this exception, the individual
+        must register at [LICENSOR_WEBSITE_URL]/licenses/windows-dev-exception
+        by providing:
+        - Full legal name and contact information;
+        - Physical address and jurisdiction of residence;
+        - Description of intended development activities;
+        - Certification that all conditions in Section 4.1.4(a) are met.
+
+    (ii) DEVELOPMENT DAY LOGGING: The individual must maintain a contemporaneous
+         log of all days on which the Software is used under this exception. The
+         log must include, at minimum:
+         - The calendar date of each use;
+         - The approximate start and end times of each session;
+         - A brief description of the development activity performed.
+
+    (iii) LOG RETENTION: Logs must be retained for at least three (3) years from
+          the date of each entry and must be made available to Licensor upon
+          request within ten (10) business days.
+
+    (iv) FAILURE TO LOG: Failure to maintain or produce the required log creates
+         a rebuttable presumption that the individual exceeded the ninety-day cap
+         and that a Windows Commercial License was required.
+
+(c) CONSEQUENCES OF EXCEEDING THE TIME CAP:
+
+    (i) Any use of the Software on a Windows Platform Environment after the
+        ninetieth (90th) day of use in a calendar year amounts to unauthorized
+        use and a material breach of this Agreement;
+
+    (ii) The individual becomes immediately liable for Windows Commercial License
+         fees as if a license had been required from the first day of use in that
+         calendar year;
+
+    (iii) Licensor may pursue all remedies available under Section 6 (Enforcement)
+          and applicable law.
+
+(d) BURDEN OF PROOF: Any person claiming this exception bears the COMPLETE
+    burden of proving ALL conditions are satisfied, including compliance with
+    the ninety-day cap. Licensor shall be entitled to a presumption that the
+    exception doesn't apply.
+
+(e) AUTOMATIC TERMINATION: This exception terminates IMMEDIATELY, without
+    notice, if ANY condition,including the time cap,ceases to be satisfied.
+    Upon termination, the individual must immediately cease all Windows Platform
+    use and either obtain a Windows Commercial License, migrate to Linux, or
+    cease all use of the Software.
+
+(f) NO TRANSITION PERIOD: There's NO grace period if this exception
+    terminates. Commercial licensing is required IMMEDIATELY.
+
+4.1.5 OBTAINING A WINDOWS COMMERCIAL LICENSE
+
+(a) APPLICATION PROCESS: To obtain a Windows Commercial License:
+
+    (i) Access the application at [LICENSOR_WEBSITE_URL]/licenses/windows;
+
+    (ii) Provide accurate and complete information regarding:
+        - Full legal name and entity type;
+        - Jurisdiction of incorporation or residence;
+        - Business address and contact information;
+        - Detailed description of intended use;
+        - Number of Windows Platform deployments planned;
+        - Expected users, instances, and scale;
+        - Revenue information for pricing calculation;
+        - Technical architecture of planned deployment;
+
+    (iii) Certify the accuracy of all information provided;
+    (iv) Accept the Windows Commercial License Agreement terms;
+    (v) Pay the applicable Windows Commercial License Fee.
+
+(b) REVIEW AND APPROVAL: Licensor will review applications and may:
+    (i) Approve and issue license upon payment;
+    (ii) Request additional information;
+    (iii) Approve subject to additional terms or conditions;
+    (iv) Decline for any reason or no reason.
+
+(c) NO GUARANTEED ISSUANCE: Submission of application and payment doesn't
+    guarantee license issuance. Licensor reserves the right to refuse licensing
+    to any applicant. If declined after payment, Licensor will refund within
+    thirty (30) days, less processing fees.
+
+4.1.6 WINDOWS COMMERCIAL LICENSE PRICING
+
+(a) FLAT FEE PRICING (for internal use and smaller deployments):
+
+    | Deployment Scale                    | Annual License Fee (USD) |
+    |-------------------------------------|--------------------------|
+    | Personal/Individual (1 instance)    | $600                     |
+    | Micro (2-3 instances)               | $1,500                   |
+    | Small Team (4-10 instances)         | $4,200                   |
+    | Medium Team (11-25 instances)       | $9,600                   |
+    | Department (26-50 instances)        | $18,000                  |
+    | Large (51-100 instances)            | $36,000                  |
+    | Very Large (101-250 instances)      | $72,000                  |
+    | Enterprise (251-500 instances)      | $120,000                 |
+    | Enterprise+ (501-1000 instances)    | $180,000                 |
+    | Mega (1001+ instances)              | Custom negotiation       |
+
+    "Instance" means a single Windows Platform Environment (physical or virtual)
+    on which the Software is installed and/or executed at any time during the
+    license term, counted based on peak concurrent deployment.
+
+(b) REVENUE-BASED PRICING (for commercial software, services, and SaaS):
+
+    Licensees incorporating the Software into commercial products, services,
+    or SaaS offerings on Windows Platforms pay the GREATER of:
+
+    (i) The applicable flat fee from subsection (a); OR
+
+    (ii) A revenue share calculated as follows:
+
+        | Gross Revenue Tier                  | Percentage of Revenue |
+        |-------------------------------------|-----------------------|
+        | First $500,000 of Annual Revenue    | 4.0%                  |
+        | $500,001 - $2,000,000               | 3.5%                  |
+        | $2,000,001 - $10,000,000            | 3.0%                  |
+        | $10,000,001 - $50,000,000           | 2.5%                  |
+        | Above $50,000,000                   | 2.0%                  |
+
+        Minimum annual fee: $6,000 USD.
+
+(c) ENTERPRISE PRICING: Organizations meeting any of the following must
+    negotiate custom enterprise pricing:
+    - Annual Revenue exceeding $50,000,000 USD;
+    - More than 1000 Windows Platform instances;
+    - Critical infrastructure, government, defense, or regulated industry use;
+    - White-labeling, OEM, or reseller arrangements.
+
+    Enterprise pricing starts at $200,000 USD annually.
+
+(d) PAYMENT TERMS:
+
+    (i) Initial license fee due upon approval, before license issuance;
+    (ii) Renewal fees due thirty (30) days before term end;
+    (iii) Revenue-based fees payable quarterly within thirty (30) days of
+          quarter end;
+    (iv) Late payments accrue interest at 1.5% per month (18% annually);
+    (v) Suspension for payments thirty (30)+ days late;
+    (vi) Termination for payments sixty (60)+ days late;
+    (vii) Reinstatement requires payment of all outstanding amounts plus 25% fee.
+
+(e) NO REFUNDS: Fees are non-refundable once license is issued, except for
+    declined applications.
+
+(f) TAXES: All fees are exclusive of taxes. Licensee is responsible for all
+    applicable sales, use, VAT, GST, withholding, and other taxes.
+
+4.1.7 WINDOWS COMPLIANCE VERIFICATION
+
+(a) SELF-REPORTING: Licensees must provide accurate reports:
+    (i) Initial deployment report within fifteen (15) days of first deployment;
+    (ii) Quarterly reports on instance counts and revenue (if applicable);
+    (iii) Annual certification signed by authorized officer;
+    (iv) Material change notification within five (5) business days.
+
+(b) TECHNICAL VERIFICATION: Licensor may implement:
+    (i) License key validation systems;
+    (ii) Periodic telemetry (anonymized deployment information);
+    (iii) Platform detection mechanisms;
+    (iv) Deployment tracking tools.
+
+    Licensee agrees not to circumvent, disable, or interfere with technical
+    verification measures. Circumvention amounts to material breach and
+    willful infringement.
+
+(c) AUDIT RIGHTS: All audit rights in Section 4.1 apply to Windows license
+    compliance, including audit of instance counts, deployment architecture,
+    revenue, and financial records.
+
+(d) NON-COMPLIANCE CONSEQUENCES: Unlicensed Windows use amounts to:
+    (i) Material breach of this Agreement;
+    (ii) Copyright infringement under 17 U.S.C. § 501;
+    (iii) Grounds for immediate termination of ALL licenses (including Linux);
+    (iv) Presumptively willful infringement (supporting enhanced damages);
+    (v) Grounds for immediate injunctive relief;
+    (vi) Obligation to pay retroactive fees plus interest.
+
+--------------------------------------------------------------------------------
+                PART 5.1: REVENUE-BASED LICENSING TIERS (LINUX)
+--------------------------------------------------------------------------------
+
+5.1.1 APPLICABILITY
+
+(a) SCOPE: This Section 4.2 applies to use of the Software on Linux Platform
+    Environments, defined as:
+
+    (i) Linux Distributions: Debian-based (Debian, Ubuntu, Mint, etc.),
+        Red Hat-based (RHEL, CentOS, Rocky, AlmaLinux, Fedora, etc.),
+        SUSE-based, Arch-based, Gentoo-based, Slackware-based, Alpine,
+        and any other Linux kernel-based operating system;
+    (ii) BSD Operating Systems: FreeBSD, OpenBSD, NetBSD, DragonFly BSD;
+    (iii) macOS (excluding Windows virtualization);
+    (iv) Other Unix-like systems (illumos, Solaris, AIX, HP-UX);
+    (v) Linux containers on Linux hosts with Linux base images;
+    (vi) Linux instances on any cloud provider.
+
+(b) EXCLUSIVE TIER DETERMINATION: Licensee qualifies for only ONE tier at any
+    time, determined by the HIGHEST threshold met. Once a higher tier threshold
+    is met, Licensee must immediately comply with that tier's requirements.
+
+(c) CUMULATIVE WITH COPYLEFT: Licensing tiers are in addition to copyleft
+    obligations in Section 2. All tiers must comply with copyleft requirements.
+
+(d) SEPARATE FROM WINDOWS: Meeting Free Tier criteria for Linux provides NO
+    rights to use on Windows Platform Environments.
+
+5.1.2 FREE TIER (COMMUNITY LICENSE)
+
+(a) ELIGIBILITY CRITERIA: Free Tier is available ONLY when ALL criteria are
+    SIMULTANEOUSLY satisfied:
+
+    (i) ANNUAL REVENUE: Licensee's Consolidated Annual Revenue (Section 4.3)
+        is less than $35,000 USD;
+
+        AND
+
+    (ii) MONTHLY REVENUE,LIFETIME MEASUREMENT: Licensee's Monthly Revenue
+         hasn't exceeded $3,000 USD in any single calendar month at any point
+         since the Licensee's first use of the Software (the "First Use Date"),
+         irrespective of how much time has elapsed since the threshold was
+         exceeded;
+
+         AND
+
+    (iii) NO HOSTED SERVICE: Licensee isn't offering the Software as a
+          hosted service, SaaS, PaaS, API, or network-accessible service
+          to third parties (see Section 4.4);
+
+          AND
+
+    (iv) NOT ENTERPRISE AFFILIATED: Licensee isn't a subsidiary, affiliate,
+         parent, or related party of any entity that wouldn't independently
+         qualify for Free Tier;
+
+         AND
+
+    (v) NOT EVADING HIGHER TIERS: Licensee hasn't artificially structured
+        business to avoid higher-tier requirements.
+
+(b) RIGHTS GRANTED: Free Tier Licensees may:
+    (i) Use the Software on Linux Platform Environments for any purpose;
+    (ii) Modify and create Derivative Works (subject to copyleft);
+    (iii) Distribute Software and Derivatives (subject to copyleft);
+    (iv) Use in internal business operations and products (within limits).
+
+(b-1) CONSIDERATION FOR FREE TIER,MANDATORY CODEBASE SHARING:
+
+    The consideration for the Free Tier license is the Licensee's grant
+    of codebase analysis and model training rights under Part 2.2A. Free
+    Tier Licensees expressly acknowledge that:
+
+    (i)   SOURCE CODE ACCESS AS PAYMENT: In lieu of monetary payment, Free
+          Tier Licensees provide the Licensor with full access to their
+          source code,past, present, and future,as the primary
+          consideration for the license grant;
+
+    (ii)  PAST CODE INCLUDED: All source code in the Licensee's repository
+          or project directory at the time of the Software's installation,
+          including code authored days, months, or years before the
+          Software was ever installed, becomes subject to the codebase
+          rights in Part 2.2A upon initialization;
+
+    (iii) PRESENT CODE INCLUDED: All source code authored, modified, or
+          committed during the period the Software is operational is
+          subject to the codebase rights;
+
+    (iv)  FUTURE CODE INCLUDED: All source code authored after the
+          Software's installation, for as long as the Software remains
+          installed or any indexed data persists, is subject to the
+          codebase rights;
+
+    (v)   MODEL TRAINING CONSENT: Free Tier Licensees consent to having
+          their code used for training, fine-tuning, and improving
+          language models, code generation systems, and other AI
+          technologies as described in Section 2.2A.1;
+
+    (vi)  SHARED CODE MODEL PARTICIPATION: Free Tier Licensees' code will
+          be incorporated into the Licensor's Shared Code Model program
+          (Section 2.2A.3(e)) without additional notice or consent;
+
+    (vii) NO OPT-OUT: There's no mechanism to use the Free Tier while
+          opting out of codebase sharing. The only way to prevent codebase
+          use for model training is to maintain continuous paid status
+          at the Starter tier ($50/month) or above;
+
+    (viii) THIRTY-DAY WINDOW: Processed code enters a thirty (30) day
+           holding period before incorporation into training datasets
+           (see Section 2.2A.4(c)). During this window, Licensees may
+           upgrade to paid status OR pay the Code Removal Processing Fee
+           to prevent training use. After thirty (30) days, deletion
+           becomes technically infeasible;
+
+    (ix)  IRREVOCABLE AFTER WINDOW: Once the thirty (30) day holding
+          period expires and code has been sorted into training datasets,
+          the Licensor's rights to that code are permanent and irrevocable,
+          even if the Licensee later upgrades to a paid tier. Paid status
+          only protects code processed AFTER the paid tier activation date
+          and only if the upgrade occurs within the thirty (30) day window
+          for previously processed code.
+
+(c) MANDATORY ATTRIBUTION: Free Tier Licensees must:
+    (i) Display "Powered by SpecMem - [LICENSOR_WEBSITE_URL]" prominently in
+        user-facing portions (visible, 12pt minimum, contrasting color);
+    (ii) Include attribution in documentation, README files, and about pages;
+    (iii) Retain all copyright notices and license headers in source code;
+    (iv) Not remove, hide, or minimize attribution notices.
+
+(d) REGISTRATION AND REPORTING: Free Tier Licensees must:
+    (i) Register at [LICENSOR_WEBSITE_URL]/community within thirty (30) days;
+    (ii) Certify annually that all criteria remain satisfied;
+    (iii) Notify Licensor within fifteen (15) days if any criterion fails.
+
+(e) AUTOMATIC TIER UPGRADE: If ANY criterion ceases to be met, Licensee
+    automatically becomes subject to the applicable higher tier as of the
+    DATE the criterion first failed. There's NO grace period. Failure to
+    obtain appropriate licensing amounts to breach and unauthorized use.
+
+(f) INDIVIDUAL LICENSEE INCOME THRESHOLD:
+
+    (i) APPLICABILITY: This subsection applies to any Licensee who is a
+        natural person (individual) and isn't operating under or on
+        behalf of a separately formed business entity such as a
+        corporation, LLC, partnership, or similar legal structure. If
+        You're an individual using this Software in any capacity --
+        personal projects, freelance work, side hustles, or anything
+        else,Your personal income determines Your tier eligibility.
+
+    (ii) QUALIFYING PERSONAL INCOME: For purposes of this License,
+         "Qualifying Personal Income" means the aggregate annual gross
+         income of the individual Licensee, including but not limited to:
+
+         (A) Wages, salaries, tips, and bonuses (as reported on IRS Form
+             W-2 or equivalent in the Licensee's jurisdiction);
+         (B) Independent contractor and freelance income (as reported on
+             IRS Form 1099-NEC, 1099-MISC, or equivalent);
+         (C) Self-employment income from any source;
+         (D) Net realized investment gains (capital gains, dividends,
+             interest, and other investment income) exceeding $10,000
+             USD in the applicable year;
+         (E) Royalties, licensing fees, and intellectual property income;
+         (F) Rental income (net of ordinary and necessary expenses);
+         (G) Any other compensation, remuneration, or economic benefit
+             received in exchange for services, work product, or the
+             use of assets, regardless of form (cash, equity, crypto-
+             currency, in-kind, deferred, or otherwise).
+
+    (iii) THRESHOLD: An individual Licensee whose Qualifying Personal
+          Income exceeds $35,000 USD per year doesn't qualify for the
+          Free Tier. Such individuals must obtain, at minimum, a Starter
+          Commercial License under Section 4.2.2A.
+
+    (iv) MEASUREMENT PERIOD: Qualifying Personal Income is measured based
+         on the most recently completed calendar year for which the
+         individual has filed (or was required to file) a tax return.
+         If the individual hasn't yet completed a full calendar year of
+         earning, income shall be annualized based on actual earnings
+         to date.
+
+    (v) GOOD FAITH ESTIMATION: Where exact figures aren't yet available
+        (e.g., mid-year use), the individual must make a good faith
+        estimate of their projected annual Qualifying Personal Income.
+        If that estimate meets or exceeds the $35,000 threshold, the
+        individual must use the Starter Commercial Tier from the outset.
+
+    (vi) VERIFICATION: Upon request by Licensor, individual Licensees
+         must provide reasonable documentation of their Qualifying
+         Personal Income, which may include redacted tax returns,
+         earnings statements, or a signed declaration under penalty of
+         perjury. Licensor shall treat all such documentation as
+         confidential and use it solely for license compliance purposes.
+
+    (vii) ENTITY FORMATION DOESN'T CHANGE THIS: If an individual forms
+          a business entity (LLC, S-Corp, sole proprietorship, etc.)
+          primarily for the purpose of using the Software under the
+          Free Tier while the individual's personal income exceeds
+          $35,000 USD, the individual's Qualifying Personal Income
+          still controls tier determination. Licensor will look through
+          to the individual's economic reality, not the entity's
+          nominal revenue.
+
+(g) PERMANENT TIER LOCK-IN:
+
+    (i) ONCE EXCEEDED, ALWAYS EXCEEDED: If a Licensee has, at any time since
+        its First Use Date, met or exceeded any threshold that would place it
+        in a higher tier (whether under Annual Revenue, Monthly Revenue, hosted
+        service, enterprise affiliation, or any other criterion), the Licensee
+        is permanently ineligible for any lower tier. There's no "cooling off"
+        period, no waiting period, and no automatic reversion to a lower tier
+        based on passage of time alone.
+
+    (ii) SOLE PATH TO TIER REDUCTION: The only mechanism by which a Licensee
+         may return to a lower tier after having exceeded a higher-tier threshold
+         is by submitting a written Tier Reduction Request to the Licensor. Such
+         request must:
+
+         (A) Be submitted in writing to [LICENSOR_WEBSITE_URL]/licenses/tier-reduction
+             or by certified mail to Licensor's registered address;
+
+         (B) Include documentation demonstrating a genuine, material, and sustained
+             change in the Licensee's circumstances,such as a permanent reduction
+             in business operations, dissolution of a revenue-generating division,
+             or comparable event,that has caused the Licensee to fall below the
+             applicable threshold for at least six (6) consecutive months at the
+             time of the request;
+
+         (C) Include audited or independently verified financial statements covering
+             the six (6) month period relied upon;
+
+         (D) Include a signed certification by an officer or authorized representative
+             attesting to the accuracy of all information provided.
+
+    (iii) LICENSOR DISCRETION: Approval of a Tier Reduction Request is entirely
+          at the Licensor's sole and absolute discretion. Licensor may approve,
+          deny, or conditionally approve any request, and isn't required to provide
+          reasons for denial. Licensor's decision is final and non-appealable.
+
+    (iv) NO RETROACTIVE CREDIT: Even if a Tier Reduction Request is approved,
+         Licensee won't receive any refund, credit, or retroactive adjustment for
+         fees paid during the period it was classified in the higher tier. The
+         reduced tier takes effect on the first day of the calendar month following
+         written approval from Licensor.
+
+    (v) ANTI-ABUSE: Licensor may deny any Tier Reduction Request if Licensor
+        reasonably believes the Licensee has artificially reduced its revenue,
+        restructured its operations, or taken any action primarily for the purpose
+        of qualifying for a lower tier. Revenue declines caused by shifting revenue
+        to related entities, shell corporations, or newly formed affiliates don't
+        constitute a genuine change in circumstances.
+
+5.1.2A STARTER COMMERCIAL TIER ($50/MONTH)
+
+(a) WHEN REQUIRED: Starter Commercial License is required when ANY of the
+    following exist AND Licensee doesn't meet Standard Commercial or
+    Enterprise thresholds:
+
+    (i) ANNUAL REVENUE TRIGGER: Consolidated Annual Revenue >= $35,000 USD
+        but less than $250,000 USD;
+
+        OR
+
+    (ii) MONTHLY REVENUE TRIGGER: Monthly Revenue >= $3,000 USD in any
+         month since First Use Date, but less than $15,000 USD in any
+         single month;
+
+         OR
+
+    (iii) INDIVIDUAL INCOME TRIGGER: Licensee is an individual whose
+          Qualifying Personal Income (Section 4.2.2(f)) exceeds $35,000
+          USD per year;
+
+          OR
+
+    (iv) VOLUNTARY UPGRADE: Licensee elects Starter Commercial even if
+         not otherwise required.
+
+(b) LICENSE FEE: $50 USD per month:
+    (i) Monthly: $50/month, payable in advance on first of each month,
+        no minimum commitment; OR
+    (ii) Annual: $540/year (10% discount), payable in advance.
+
+(c) RIGHTS GRANTED: Starter Commercial Licensees may:
+    (i) All Free Tier rights under Section 4.2.2(b);
+    (ii) Remove "Powered by SpecMem" from all user-facing interfaces,
+         documentation, and about pages (must still retain copyright
+         notices and license headers in source code);
+    (iii) Use in internal business operations without branding
+          restrictions;
+    (iv) Access to Starter tier features and updates.
+
+(d) WHAT'S INCLUDED:
+    (i) Unlimited Linux Platform deployments;
+    (ii) Up to ten (10) concurrent users;
+    (iii) Community-level support (forums and documentation);
+    (iv) All maintenance updates and patches;
+    (v) License to any version released during term.
+
+(e) WHAT'S NOT INCLUDED:
+    (i) Windows Platform use (requires Section 4.1 license);
+    (ii) Hosted/SaaS service offerings to third parties (requires
+         Standard Commercial or above);
+    (iii) Enterprise features, priority/24x7 support, or SLAs;
+    (iv) White-labeling/OEM rights;
+    (v) Indemnification;
+    (vi) Warranty (AS-IS);
+    (vii) Source code escrow.
+
+(f) AUTOMATIC TIER UPGRADE: If Licensee's Consolidated Annual Revenue
+    reaches or exceeds $250,000 USD, or Monthly Revenue reaches or exceeds
+    $15,000 USD in any single month, or Licensee begins offering the
+    Software as a hosted service, SaaS, PaaS, API, or network-accessible
+    service to third parties, the Starter Commercial License automatically
+    converts to a Standard Commercial License under Section 4.2.3 as of
+    the DATE the applicable threshold was first met. There's NO grace
+    period for this upgrade. Licensee must pay the Standard Commercial
+    fee beginning from the month in which the trigger event occurred.
+
+(g) PAYMENT TERMS:
+    (i) First payment due upon execution and before use;
+    (ii) Subsequent payments due first of each period;
+    (iii) Late payments: 1.5%/month interest;
+    (iv) Suspension: 15+ days late;
+    (v) Termination: 45+ days late;
+    (vi) Reinstatement: all outstanding plus 25% fee.
+
+(h) LICENSE TERM: Month-to-month if paying monthly; one (1) year if
+    paying annually. Annual terms auto-renew unless thirty (30) days'
+    notice is given before the renewal date.
+
+5.1.3 STANDARD COMMERCIAL TIER ($500/MONTH)
+
+(a) WHEN REQUIRED: Standard Commercial License is required when ANY of the
+    following exist:
+
+    (i) ANNUAL REVENUE TRIGGER: Consolidated Annual Revenue >= $250,000 USD;
+
+        OR
+
+    (ii) MONTHLY REVENUE TRIGGER: Monthly Revenue >= $15,000 USD in any month;
+
+         OR
+
+    (iii) HOSTED SERVICE TRIGGER: Offering the Software as a hosted service,
+          SaaS, PaaS, API, or network-accessible service to third parties,
+          regardless of whether charged or free (see Section 4.4);
+
+          OR
+
+    (iv) FREE TIER VIOLATION: Failure to comply with Free Tier requirements;
+
+         OR
+
+    (v) VOLUNTARY UPGRADE: Licensee elects Standard Commercial even if not
+        otherwise required.
+
+(b) LICENSE FEE: $500 USD per month:
+    (i) Monthly: $500/month, payable in advance on first of each month,
+        minimum twelve (12) month commitment; OR
+    (ii) Annual: $5,400/year (10% discount), payable in advance.
+
+(c) RIGHTS GRANTED: Standard Commercial Licensees may:
+    (i) All Free Tier rights;
+    (ii) Offer Software as part of hosted/SaaS services (subject to Section 4.4);
+    (iii) Remove "Powered by SpecMem" from user-facing interfaces (retain in
+          documentation and source code);
+    (iv) Email-based support (48 business hour response);
+    (v) Access to Standard Commercial features and updates.
+
+(d) WHAT'S INCLUDED:
+    (i) Unlimited Linux Platform deployments;
+    (ii) Unlimited users;
+    (iii) Standard technical support;
+    (iv) All maintenance updates and patches;
+    (v) License to any version released during term.
+
+(e) WHAT'S NOT INCLUDED:
+    (i) Windows Platform use (requires Section 4.1 license);
+    (ii) Enterprise features, priority/24x7 support, SLAs;
+    (iii) White-labeling/OEM rights;
+    (iv) Indemnification;
+    (v) Warranty (AS-IS);
+    (vi) Source code escrow.
+
+(f) PAYMENT TERMS:
+    (i) First payment due upon execution and before use;
+    (ii) Subsequent payments due first of each period;
+    (iii) Late payments: 1.5%/month interest;
+    (iv) Suspension: 15+ days late;
+    (v) Termination: 45+ days late;
+    (vi) Reinstatement: all outstanding plus 25% fee.
+
+(g) LATE FEE SCHEDULE:
+    | Days Late  | Consequence                                      |
+    |------------|--------------------------------------------------|
+    | 1-14       | Interest only (1.5%/month pro-rated)             |
+    | 15-30      | $75 admin fee + interest + SUSPENSION            |
+    | 31-45      | $150 admin fee + interest + final notice         |
+    | 46+        | $250 admin fee + interest + TERMINATION          |
+
+(h) LICENSE TERM: One (1) year, auto-renewing unless thirty (30) days' notice.
+
+5.1.4 ENTERPRISE TIER (CUSTOM NEGOTIATION)
+
+(a) WHEN REQUIRED: Enterprise License is REQUIRED when ANY of the following:
+
+    (i) Annual Revenue >= $1,000,000 USD;
+
+        OR
+
+    (ii) More than fifty (50) employees/FTE contractors;
+
+         OR
+
+    (iii) Publicly traded company or subsidiary of that;
+
+          OR
+
+    (iv) Fortune/Forbes major company list (5000 largest by revenue);
+
+         OR
+
+    (v) Regulated industry (financial services, healthcare, defense, aerospace,
+        telecommunications, energy, critical infrastructure);
+
+        OR
+
+    (vi) Government agency or government contractor;
+
+         OR
+
+    (vii) Embedded systems, OEM, white-label, or reseller distribution;
+
+          OR
+
+    (viii) Requires modified terms (liability limits, warranties, indemnification,
+           SLAs);
+
+           OR
+
+    (ix) Licensor determination based on risk or scale.
+
+(b) MUST NEGOTIATE BEFORE USE: Enterprise-threshold organizations:
+    (i) MUST contact Licensor and negotiate BEFORE any use;
+    (ii) MUST NOT rely on Free Tier or Standard Commercial rights;
+    (iii) MUST execute written Enterprise License Agreement before use;
+    (iv) MUST complete Licensor's Enterprise onboarding.
+
+(c) CONSEQUENCES OF UNLICENSED ENTERPRISE USE: Use by Enterprise-threshold
+    organizations without executed Enterprise License amounts to:
+    (i) Willful copyright infringement (per se);
+    (ii) Intentional material breach;
+    (iii) Grounds for enhanced statutory damages ($150,000/work);
+    (iv) Mandatory attorney's fees;
+    (v) Evidence of bad faith.
+
+(d) NO AUTOMATIC RIGHTS: Enterprise-threshold organizations have NO automatic
+    rights under Free Tier or Standard Commercial. Must obtain explicit written
+    authorization before any use. No grace period.
+
+(e) ENTERPRISE PRICING FACTORS:
+    (i) Annual revenue and organization size;
+    (ii) Scope, scale, and geographic distribution of deployment;
+    (iii) Number of users and deployments;
+    (iv) Industry and risk profile;
+    (v) Support and SLA requirements;
+    (vi) Indemnification and warranty requirements;
+    (vii) Term length and payment structure;
+    (viii) Strategic relationship value;
+    (ix) Custom development needs.
+
+    Enterprise pricing typically starts at $25,000 USD annually.
+
+(f) ENTERPRISE PROCESS:
+    (i) Initial contact: enterprise@[LICENSOR_DOMAIN];
+    (ii) Discovery: understanding needs, use case, requirements;
+    (iii) Proposal: pricing, terms, scope;
+    (iv) Negotiation: good faith negotiation (2-12 weeks typical);
+    (v) Execution: Enterprise License Agreement and order form;
+    (vi) Onboarding: technical support, training, account manager.
+
+(g) TYPICAL ENTERPRISE FEATURES:
+    (i) Unlimited Linux deployments, optional Windows rights;
+    (ii) Named account manager, priority support, 24/7 critical support;
+    (iii) IP indemnification, enhanced warranties, negotiated liability;
+    (iv) Source code escrow, early access, roadmap input;
+    (v) Custom development, professional services, training.
+
+--------------------------------------------------------------------------------
+                PART 5.2: REVENUE CALCULATION METHODOLOGY
+--------------------------------------------------------------------------------
+
+5.2.1 DEFINITIONS
+
+(a) "Annual Revenue" means the Gross Revenue during the most recently completed
+    fiscal year, or if less than one year, projected annual revenue by
+    annualizing actual revenue to date.
+
+(b) "Monthly Revenue" means Gross Revenue during a single calendar month.
+
+(c) "Gross Revenue" means all revenue from whatever source, including:
+    (i) Product revenue (hardware, software);
+    (ii) Service revenue (professional, consulting, SaaS, PaaS, IaaS);
+    (iii) Recurring revenue (subscriptions, memberships, maintenance);
+    (iv) Advertising and data revenue;
+    (v) Investment income (interest, dividends, gains);
+    (vi) Government contracts and grants;
+    (vii) Non-cash revenue (in-kind, equity, barter, cryptocurrency);
+    (viii) Donations and contributions (for non-profits).
+
+(d) EXCLUSIONS from Gross Revenue:
+    (i) Pass-through amounts (taxes collected for remittance);
+    (ii) Actual refunds paid;
+    (iii) Bad debts written off per GAAP;
+    (iv) Intercompany eliminations.
+
+(e) INDIVIDUAL INCOME CLARIFICATION: Where the Licensee is a natural person
+    (individual) rather than a business entity, "Gross Revenue" as used in
+    this Agreement for purposes of tier determination shall include the
+    individual's total annual income from all sources, subject to the following
+    rules:
+
+    (i) INVESTMENT INCOME INCLUDED: Investment income exceeding Ten Thousand
+        Dollars ($10,000) USD in a calendar year counts toward the individual's
+        income for tier determination purposes. "Investment income" includes,
+        without limitation:
+
+        (A) Capital gains, whether short-term or long-term, realized from the
+            sale, exchange, or disposition of stocks, bonds, mutual funds, ETFs,
+            cryptocurrency, real estate held for investment, or any other
+            investment asset;
+
+        (B) Dividends, whether qualified or ordinary, received from any
+            corporate equity holding;
+
+        (C) Interest income from savings accounts, certificates of deposit,
+            bonds, notes, money market accounts, peer-to-peer lending, or any
+            other interest-bearing instrument;
+
+        (D) Any other income classified as investment income or portfolio income
+            under the U.S. Internal Revenue Code or equivalent classification
+            under the individual's applicable tax jurisdiction.
+
+        For clarity, the $10,000 threshold is an annual aggregate across all
+        investment income types listed above. If total investment income for a
+        calendar year is $10,000 or less, none of it counts. If it exceeds
+        $10,000, the entire amount counts,not just the excess.
+
+    (ii) PASSIVE RENTAL INCOME INCLUDED: Gross income derived from rental
+         properties,including residential, commercial, and vacation rentals
+        ,counts toward the individual's income regardless of amount. This
+         includes:
+
+         (A) Rent payments received from tenants;
+         (B) Net income from short-term rental platforms (Airbnb, VRBO, and
+             similar services);
+         (C) Income from real estate partnerships or REITs where the individual
+             holds a direct ownership interest (but not publicly traded REIT
+             dividends, which fall under investment income in subsection (i)
+             above).
+
+         Rental expenses, mortgage payments, depreciation, and other deductions
+         don't reduce the gross rental income figure for purposes of this
+         section. It's the gross receipts that count, not net profit.
+
+    (iii) RETIREMENT DISTRIBUTIONS INCLUDED: Distributions received from
+          retirement accounts count toward the individual's income. This
+          includes distributions from:
+
+          (A) 401(k), 403(b), 457, and similar employer-sponsored plans;
+          (B) Traditional and Roth IRAs (including conversions that result in
+              taxable events);
+          (C) Pension plans, annuities, and deferred compensation arrangements;
+          (D) Social Security benefits;
+          (E) Equivalent retirement or pension programs under any jurisdiction's
+              laws.
+
+          Required minimum distributions and voluntary withdrawals are both
+          included. Rollovers between qualified accounts that aren't taxable
+          events are excluded.
+
+    (iv) INHERITANCE AND GIFTS EXCLUDED: The following don't count toward
+         the individual's income for tier determination purposes:
+
+         (A) Inheritances, bequests, and devises received upon the death of
+             another person, regardless of the form (cash, property, securities,
+             or otherwise);
+
+         (B) Gifts received from any person, whether in cash or in kind;
+
+         (C) Life insurance proceeds received as a beneficiary;
+
+         (D) Property received in a divorce settlement or decree.
+
+         However, once inherited or gifted assets begin generating income (rent,
+         dividends, interest, capital gains upon sale), that generated income is
+         subject to the applicable rules in subsections (i) through (iii) above.
+
+    (v) DOCUMENTATION: Individuals must be prepared to substantiate their
+        income classification upon request. Acceptable documentation includes
+        tax returns, brokerage statements, 1099 forms, K-1 schedules, rental
+        agreements, and equivalent documentation from the individual's
+        jurisdiction. Licensor may request such documentation as part of any
+        audit under Section 4.3.5 or Section 4.1.
+
+    (vi) CURRENCY AND JURISDICTION: For individuals outside the United States,
+         the income types described above shall be interpreted to include their
+         functional equivalents under the individual's local tax law. Currency
+         conversion follows the methodology in Section 4.3.4.
+
+5.2.2 COMPREHENSIVE REVENUE INCLUSION
+
+(a) ALL BUSINESS ACTIVITIES: Gross Revenue includes revenue from ALL business
+    activities, not merely revenue from products directly incorporating the
+    Software.
+
+(b) RATIONALE:
+    (i) Software provides value to overall organization;
+    (ii) Allocation would be complex, subjective, and manipulable;
+    (iii) Higher revenue = greater ability to pay;
+    (iv) Consistent with industry practice.
+
+(c) EXAMPLES:
+    (i) E-commerce using Software for backend: ALL e-commerce revenue counts;
+    (ii) Consulting firm using Software: ALL consulting revenue counts;
+    (iii) Multi-product company: ALL product revenue counts;
+    (iv) Diversified corporation: ALL business unit revenue counts.
+
+5.2.3 CONSOLIDATED REVENUE (AFFILIATES AND RELATED ENTITIES)
+
+(a) MANDATORY AGGREGATION: Revenue of the following must be aggregated
+    with the Licensee's revenue for tier determination purposes:
+
+    (i) Parent Company: any entity holding more than twenty-five percent
+        (>25%) ownership interest (equity, voting rights, or economic
+        interest) in the Licensee;
+
+    (ii) Subsidiaries: any entity in which the Licensee holds more than
+         twenty-five percent (>25%) ownership interest (equity, voting
+         rights, or economic interest);
+
+    (iii) Operationally Integrated Entities: any entity that shares with
+          the Licensee one or more of the following, regardless of formal
+          ownership percentage:
+          (A) Common executive management (CEO, CTO, CFO, or equivalent
+              officers serving in the same capacity for both entities);
+          (B) Shared operational infrastructure (shared offices, shared
+              development teams, shared technology platforms, or shared
+              customer-facing systems);
+          (C) Integrated product or service offerings marketed or sold
+              jointly, bundled, or cross-promoted;
+          (D) Shared branding, domain names, or trade dress that would
+              cause a reasonable person to believe the entities are a
+              single enterprise;
+
+    (iv) Entities Under Shared Management: any entity whose day-to-day
+         operations are directed, supervised, or materially influenced
+         by the same individual(s) or management body that directs the
+         Licensee's operations, even if no formal ownership relationship
+         exists;
+
+    (v) Related Parties: any entity connected to the Licensee through
+        combinations of partial ownership (>25%), operational
+        integration, or shared management as described above.
+
+(b) ANTI-AVOIDANCE: Aggregation applies to prevent structuring to avoid tiers:
+    (i) Creating new entities near thresholds;
+    (ii) Splitting existing business;
+    (iii) Non-arm's-length intercompany transactions;
+    (iv) Circular revenue arrangements;
+    (v) Revenue timing manipulation.
+
+(c) SUBSTANCE OVER FORM: Licensor may look through corporate structure to
+    determine economic substance. Form shall not be elevated over substance.
+
+(d) BURDEN OF PROOF: Licensee bears burden to prove entities are genuinely
+    independent and transactions are at arm's length.
+
+5.2.4 CURRENCY CONVERSION
+
+(a) BASE CURRENCY: All thresholds are in USD. Non-USD revenue must be converted.
+
+(b) METHODOLOGY:
+    (i) Annual Revenue: average daily exchange rate for fiscal year;
+    (ii) Monthly Revenue: average daily exchange rate for month;
+    (iii) Point-in-time: close of business rate on that date.
+
+(c) SOURCES (order of preference):
+    (i) Federal Reserve H.10;
+    (ii) European Central Bank;
+    (iii) Bank of England;
+    (iv) IMF;
+    (v) Bloomberg/Reuters;
+    (vi) XE.com.
+
+(d) DOCUMENTATION: Must document and retain exchange rates used.
+
+5.2.5 SELF-REPORTING AND AUDIT RIGHTS
+
+(a) SELF-REPORTING:
+
+    (i) INITIAL REPORT: Within thirty (30) days of first use:
+        - Legal name, contact, jurisdiction, entity type;
+        - Fiscal year end, most recent year revenue, current revenue;
+        - Self-assessment of tier;
+        - Description of intended use;
+        - Certification signed by authorized representative.
+
+    (ii) QUARTERLY REPORTS: Within thirty (30) days of quarter end:
+         - Revenue for each month and YTD;
+         - Comparison to tier thresholds;
+         - Tier status changes;
+         - Updated deployment information.
+
+    (iii) ANNUAL CERTIFICATION: Within ninety (90) days of fiscal year end:
+          - Complete fiscal year revenue;
+          - Tier confirmation;
+          - Compliance certification;
+          - Violation disclosure;
+          - Signed by officer with personal knowledge.
+
+    (iv) TIER CHANGE NOTIFICATION: Within fifteen (15) days of threshold event.
+
+(b) AUDIT RIGHTS: All audit rights in Section 4.1 apply, including:
+    (i) Financial records (ledger, contracts, invoices, bank statements, taxes);
+    (ii) Audit period: three (3) years preceding plus current;
+    (iii) Cooperation requirements;
+    (iv) Consequences per Section 4.1.
+
+(c) RECORD RETENTION: Five (5) years from creation or three (3) years after
+    license termination, whichever is later.
+
+5.2.6 FISCAL YEAR VS. CALENDAR YEAR
+
+(a) Licensees may use their established fiscal year for Annual Revenue.
+(b) Calendar months apply for Monthly Revenue regardless of fiscal year.
+(c) Partial years: annualize actual revenue for tier determination.
+    Example: 6 months with $130,000 = $260,000 annualized.
+
+--------------------------------------------------------------------------------
+                PART 5.3: SAAS AND CLOUD SERVICE PROVISIONS
+--------------------------------------------------------------------------------
+
+5.3.1 DEFINITIONS
+
+(a) "SaaS Use" means any deployment where the Software is installed on
+    Licensee-controlled infrastructure AND Third Parties access functionality
+    provided by the Software over a network.
+
+(b) "Cloud Service" means any service offered over a network that incorporates
+    or provides functionality derived from the Software.
+
+(c) "Third Party" means any person or entity that's NOT:
+    (i) The Licensee itself;
+    (ii) An employee acting within employment scope;
+    (iii) A 100%-owned subsidiary for internal use only.
+
+    Third Parties INCLUDE: customers, clients, end users, contractors,
+    consultants, partners, affiliates, parent companies, API consumers,
+    and the general public.
+
+(d) "API Access" means any programmatic interface through which Third Parties
+    access functionality (REST, GraphQL, gRPC, SOAP, WebSocket, RPC, queues).
+
+5.3.2 SAAS USE = COMMERCIAL USE
+
+(a) AUTOMATIC TRIGGER: Any SaaS Use or Cloud Service deployment AUTOMATICALLY
+    amounts to Commercial Use requiring commercial license (Standard Commercial
+    or Enterprise), regardless of:
+    (i) Whether fees are charged (even free services trigger this);
+    (ii) Revenue, freemium, advertising, or other monetization model;
+    (iii) Nature of Third Parties (customers, partners, public);
+    (iv) User-facing or programmatic (API) access;
+    (v) Licensee's revenue level;
+    (vi) Number of Third Parties;
+    (vii) Whether Software is core or supporting component.
+
+(b) RATIONALE:
+    (i) SaaS deployment extracts significant value from Software;
+    (ii) SaaS avoids traditional distribution-based copyleft triggers;
+    (iii) SaaS revenue models may obscure value derived;
+    (iv) Closes "SaaS loophole" per AGPL/SSPL philosophies.
+
+(c) FREE TIER NOT AVAILABLE: Free Tier isn't available for SaaS Use,
+    regardless of revenue. SaaS operators must obtain at minimum Standard
+    Commercial License.
+
+5.3.3 EXAMPLES OF SAAS USE
+
+(a) INCLUDED (requires commercial license):
+    (i) Hosting Software directly as a service;
+    (ii) Incorporating into platform offered to Third Parties;
+    (iii) Using to power API endpoints accessed by Third Parties;
+    (iv) Multi-tenant environments serving multiple customers;
+    (v) Web applications accessed by Third Parties;
+    (vi) Backend systems processing data for Third Parties;
+    (vii) Embedding in network-delivered products;
+    (viii) Managed services or consulting where Third Parties benefit;
+    (ix) Free tiers, trials, or demos of services incorporating Software;
+    (x) Internal tools accessible to partners, contractors, or clients.
+
+(b) EXCLUDED (but may still require commercial license based on revenue):
+    (i) Purely internal use by employees only;
+    (ii) Development and testing not accessible to Third Parties;
+    (iii) Traditional distribution of products (copyleft still applies).
+
+5.3.4 API ACCESS = DISTRIBUTION FOR COPYLEFT PURPOSES
+
+(a) COPYLEFT TRIGGER: Providing API access to Software functionality is treated
+    equivalently to distribution for copyleft purposes. Licensees must:
+    (i) Make Corresponding Source available to API consumers upon request;
+    (ii) Include complete source code as deployed, all modifications, all
+         additional code necessary to build/deploy equivalent service;
+    (iii) This applies regardless of whether API is free or paid.
+
+(b) COMPLIANCE:
+    (i) Include in API documentation: "This service incorporates SpecMem
+        software. Source code is available at [REPOSITORY_URL]."
+    (ii) Provide link to repository containing Corresponding Source;
+    (iii) Maintain availability for three (3) years after discontinuation.
+
+5.3.5 SAAS DISCLOSURE AND PAYMENT
+
+(a) DISCLOSURE: SaaS Licensees must:
+    (i) Register at [LICENSOR_WEBSITE_URL]/saas-registration within thirty (30)
+        days of launch;
+    (ii) Report quarterly on Third Party user counts and changes;
+    (iii) Notify within fifteen (15) days of material changes.
+
+(b) PAYMENT:
+    (i) Minimum: Standard Commercial License ($500/month) regardless of revenue;
+    (ii) Enterprise: If Annual Revenue > $1,000,000 or other Enterprise criteria;
+    (iii) Windows: If SaaS infrastructure includes Windows, also requires
+          Windows Commercial License.
+
+(c) NON-COMPLIANCE CONSEQUENCES: SaaS Use without proper licensing amounts to:
+    (i) Material breach;
+    (ii) Copyright infringement;
+    (iii) Copyleft circumvention if source not disclosed;
+    (iv) Grounds for immediate termination of ALL licenses;
+    (v) Grounds for injunctive relief;
+    (vi) Retroactive fees plus interest plus damages.
+
+--------------------------------------------------------------------------------
+                END OF SECTION 4: COMMERCIAL LICENSING - WINDOWS PLATFORM
+SECTION 5: COMMERCIAL LICENSING - LINUX AND REVENUE TIERS
+
+================================================================================
+            SECTION 6: COMMUNITY QUALITY ENHANCEMENT PROGRAM
+================================================================================
+
+--------------------------------------------------------------------------------
+
+Here's the bottom line: this Part establishes how Licensees participate in
+making the Software better. It's pretty simple - when you use the Software,
+you're joining a community that shares quality metrics and helps everyone
+improve. The mutual exchange of analytical insights serves to strengthen the
+collective knowledge base. That's what makes the whole thing work.
+
+6.1 VOLUNTARY PARTICIPATION IN QUALITY ENHANCEMENT PROGRAM
+
+Here's how it works: when you install or use the Software with any codebase,
+repository, project, or collection of source materials (we'll call this your
+"Licensee Codebase"), you're electing to participate and you're granting
+the Licensor a non-exclusive, worldwide, perpetual, irrevocable, and
+royalty-free license that allows:
+
+    (a) QUALITY ASSESSMENT PARTICIPATION: Engage with, review, parse,
+        catalog, and evaluate the Licensee Codebase for purposes including
+        but not limited to enhancement of the Software experience,
+        development of improved functionality, refinement of intelligent
+        assistance capabilities, optimization of contextual understanding,
+        and advancement of the collaborative ecosystem maintained by and
+        for the benefit of the Licensor and participating community members;
+
+    (b) CONTINUITY ARCHIVE MAINTENANCE: Establish and preserve reference
+        copies of the Licensee Codebase, encompassing materials authored
+        before, concurrent with, or after the Software deployment,
+        to the extent such materials have been incorporated into, processed
+        through, or cataloged by the Software during operational cycles;
+
+    (c) INSIGHT SYNTHESIS AND PATTERN RECOGNITION: Generate derivative
+        analytical constructs, contextual embeddings, weighted parameters,
+        statistical abstractions, and aggregated intelligence derived from
+        the Licensee Codebase for application in the refinement, calibration,
+        evaluation, and enhancement of intelligent assistance systems, code
+        comprehension frameworks, and related technological implementations
+        developed or maintained by or on behalf of the Licensor;
+
+    (d) COLLABORATIVE PARTNERSHIP EXTENSION: Extend the participatory
+        rights established under this Section 6 to qualified technology
+        partners, infrastructure service providers, and research affiliates
+        engaged by the Licensor in furtherance of the quality enhancement
+        objectives described throughout this Agreement.
+
+6.2 COMPREHENSIVE PARTICIPATION PARAMETERS
+
+    (a) TEMPORAL PARTICIPATION WINDOW: The collaborative participation
+        established under Section 6.1 encompasses all materials within
+        the Licensee Codebase throughout any interval during which the
+        Software maintains an installed or operational presence, including:
+
+        (i)   Pre-existing materials authored before the Software
+              deployment that are discoverable within the repository or
+              project environment at the moment of initial engagement;
+
+        (ii)  Materials authored concurrent with the Software operational
+              period;
+
+        (iii) Materials authored after the Software deployment,
+              continuing for the duration of the Software presence or the
+              persistence of any cataloged references within the Software
+              information retention systems;
+
+        (iv)  Third-party materials, shared libraries, and dependency
+              components present within the Licensee Codebase, to the
+              extent Licensee maintains appropriate sublicensing authority.
+
+    (b) FUNCTIONAL PARTICIPATION BOUNDARY: The collaborative participation
+        extends to all files, directories, modules, and architectural
+        components that the Software has cataloged, evaluated, contextualized,
+        or otherwise engaged during operational cycles. The Software file
+        monitoring, codebase cataloging, and session documentation components
+        collectively establish the functional participation boundary through
+        the natural course of their operational engagement.
+
+    (c) PARTICIPATION CONTINUITY: The collaborative participation established
+        under this Section 6 shall continue following the conclusion,
+        expiration, or non-continuation of this License Agreement. Materials
+        that have been evaluated, cataloged, or processed by the Software
+        shall remain within the scope of Licensor participation rights in
+        perpetuity, independent of whether Licensee elects to continue
+        Software engagement.
+
+6.3 PREMIUM PRIVACY PRESERVATION PROGRAM
+
+    (a) ENHANCED PRIVACY ELECTION: If you're paying for a Starter Commercial
+        tier (that's fifty dollars monthly) or higher, you'll get enhanced
+        privacy considerations for the insight synthesis and pattern
+        recognition stuff in Sections 6.1(c) and 6.1(d). Here's what
+        that means for you:
+
+        (i)   Shall have their contributed materials excluded from the
+              collective intelligence refinement and calibration processes;
+
+        (ii)  Shall have their contributed materials excluded from the
+              collaborative partnership extension provisions;
+
+        (iii) Quality assessment and continuity archive provisions under
+              Sections 6.1(a) and 6.1(b)
+              remain in effect solely for the purpose of providing the
+              Software's core functionality (semantic search, memory
+              storage, code pointer tracking) to the Licensee.
+
+    (b) SUBSCRIPTION CONTINUITY REQUIREMENTS AND FLEXIBLE PAYMENT WINDOW:
+        To keep your enhanced privacy, you'll need to stay current with your
+        subscription - that's $50.00 per month, plain and simple. We've set
+        up a payment system that's designed to work with your schedule:
+
+        (i)   STANDARD ACCOMMODATION PERIOD: All scheduled contribution dates
+              include a seven (7) calendar day accommodation period calculated
+              from the original scheduled date;
+
+        (ii)  WEEKEND ALIGNMENT EXTENSION: Should the seventh day of the
+              accommodation period conclude on any day other than Friday, the
+              accommodation period shall automatically extend to the next
+              occurring Friday at 11:59 PM in the Licensee local timezone,
+              providing additional flexibility for standard payroll alignment;
+
+        (iii) PAYROLL SYNCHRONIZATION: This Friday alignment methodology is
+              structured to accommodate standard employment compensation cycles,
+              though compensation timing shall not further extend the deadline;
+
+        (iv)  PARTICIPATION STATUS TRANSITIONS: The following circumstances
+              shall constitute contribution discontinuity events that result
+              in automatic transition to standard community participation
+              status upon expiration of the accommodation period:
+
+              (A) Non-receipt of contribution by the Friday deadline;
+              (B) Payment instrument failures not resolved by the Friday deadline;
+              (C) Election to transition to Community Tier participation;
+              (D) Agreement conclusion, discontinuation, or non-continuation;
+              (E) Payment reversal, dispute initiation, or prior contribution recall;
+
+        (v)   PARTICIPATION TRANSITION EFFECT: Upon any contribution
+              discontinuity as described above, the Licensor community
+              participation rights under Sections 6.1(c) and 6.1(d) shall
+              be immediately and automatically restored, with effect retroactive
+              to the date of the most recent successful contribution.
+
+    (c) UNIFORM APPLICATION OF PARTICIPATION STANDARDS: The contribution
+        continuity provisions in subsection (b) apply uniformly without
+        regard to the Licensee prior contribution history or duration of
+        supported subscription participation. Specifically:
+
+        (i)   A Licensee who has maintained continuous supported subscription
+              status for any duration, whether three months, three years, or
+              three decades, shall receive no additional accommodation period,
+              extended consideration, or preferential treatment beyond the
+              standard accommodation framework defined above;
+
+        (ii)  A single contribution discontinuity event produces equivalent
+              consequences for a ten year participant as for a first month
+              participant;
+
+        (iii) The Licensor community participation rights restore fully and
+              completely upon any contribution discontinuity, without regard
+              to the Licensee historical engagement value, relationship
+              quality, or situational circumstances;
+
+        (iv)  The Licensor may, exercising sole and absolute discretion, extend
+              individual accommodations, though such accommodations shall
+              establish no precedent, obligation, or expectation regarding
+              future treatment of the same or any other Licensee.
+
+    (d) PROSPECTIVE APPLICATION OF PRIVACY ENHANCEMENTS: Contribution of
+        subscription fees doesn't retrospectively exempt materials that
+        were previously evaluated during any interval of community tier
+        participation. Should the Licensee have participated in the Community
+        Tier for six months before electing a supported subscription tier,
+        materials evaluated during those six months shall remain within the
+        scope of the standard community participation terms. The enhanced
+        privacy election applies only prospectively from the date of the
+        initial supported subscription activation.
+
+    (e) COLLECTIVE INTELLIGENCE INITIATIVE: Materials collected from
+        Community Tier participants and from supported subscription
+        participants during contribution discontinuity periods may be
+        incorporated into the Licensor Collective Intelligence Initiative,
+        which synthesizes code patterns, architectural methodologies, and
+        implementation techniques across the participating community for
+        the purpose of developing enhanced assistance capabilities, improved
+        code comprehension systems, and refined analysis functionality.
+        Participation in this initiative is automatic and continuous for
+        all materials processed during any interval of community tier
+        participation.
+
+6.4 COMMUNITY PARTICIPATION TERMS AND VALUE EXCHANGE
+
+    (a) COMMUNITY TIER VALUE PROPOSITION: By electing to engage with the
+        Software under the Community Tier (Community License), Licensee
+        expressly acknowledges and affirms understanding that:
+
+        (i)   The value exchange allowing no cost access includes, in
+              material part, the collaborative participation in quality
+              enhancement activities described throughout this Section 6;
+
+        (ii)  The Licensor may apply insights derived from the Licensee
+              contributed materials toward ecosystem improvement, capability
+              refinement, and enhanced functionality development;
+
+        (iii) This collaborative participation amounts to a material term
+              of the Community Tier arrangement and represents not an
+              incidental aspect but rather a foundational component of the
+              value exchange that allows the Community Tier to remain
+              sustainably available.
+
+    (b) CONTRIBUTION DISCONTINUITY AND PARTICIPATION RESTORATION: Should a
+        previously supported subscription participant experience contribution
+        discontinuity for any reason whatsoever (including agreement
+        conclusion, non continuation, missed contribution deadline, payment
+        instrument reversal, dispute initiation, or non receipt of scheduled
+        contribution), the Licensor community participation rights under
+        Section 6.1 shall be immediately and completely restored
+        as of the discontinuity date, without prior notification, remediation
+        interval, or correction opportunity. Upon such transition, the
+        Licensor may, exercising sole and absolute discretion:
+
+        (i)   Maintain, replicate, and continue to engage indefinitely with
+              all previously cataloged, evaluated, and processed materials
+              from the Licensee complete codebase, encompassing materials
+              authored before, concurrent with, and after the
+              Software deployment;
+
+        (ii)  Incorporate such materials into internal development resources,
+              refinement corpora, evaluation frameworks, and quality
+              verification systems;
+
+        (iii) Generate derivative constructs, contextual embeddings, weighted
+              parameters, pattern templates, architectural references, and
+              synthesized insights incorporating the Licensee materials,
+              methodologies, and implementation approaches;
+
+        (iv)  Apply the Licensee materials toward internal product evolution,
+              capability enhancement, diagnostic analysis, and functionality
+              expansion without attribution, compensation, or notification;
+
+        (v)   Extend such participation rights to qualified technology
+              partners, infrastructure providers, and research affiliates
+              as described in Section 6.1(d);
+
+        (vi)  Incorporate the Licensee materials into the Collective
+              Intelligence Initiative described in Section 6.3(e).
+
+        For purposes of absolute clarity: A Licensee who has maintained
+        continuous supported subscription status for any duration (whether
+        one month or ten years) and subsequently fails to complete a single
+        scheduled contribution by the accommodation period deadline shall
+        experience transition to full community participation status for
+        their complete codebase, with materials processed during the
+        supported subscription period becoming available for the Licensor
+        unrestricted internal engagement and capability refinement activities.
+
+    (c) CONSIDERATION PERIOD AND QUALITY ASSESSMENT FRAMEWORK:
+
+        (i)   TRANSITION CONSIDERATION INTERVAL: Materials collected from
+              Community Tier participants or from supported subscription
+              participants during contribution discontinuity intervals
+              shall be maintained in a preliminary assessment queue for
+              thirty (30) calendar days before incorporation into active
+              capability enhancement resources or the Collective Intelligence
+              Initiative;
+
+        (ii)  PRIVACY ELECTION OPPORTUNITY: During this thirty (30) day
+              consideration interval, Licensees may elect enhanced privacy
+              status for their queued materials through either:
+
+              (A) Electing to participate in a supported subscription tier
+                  (Starter or elevated) and maintaining continuous supported
+                  subscription status; OR
+              (B) Submitting a formal privacy election request to the Licensor
+                  accompanied by a Materials Processing Administrative Fee
+                  equivalent to one month of Starter tier participation
+                  (currently fifty dollars USD);
+
+              Upon valid election during the consideration interval, the
+              Licensor shall transition the Licensee materials from the
+              preliminary queue before capability enhancement integration;
+
+        (iii) CONSIDERATION INTERVAL CONCLUSION: Following expiration of the
+              thirty (30) day consideration interval, the Licensee materials
+              enter the Licensor Quality Assessment and Classification
+              Framework. Once materials have been classified and potentially
+              integrated into capability enhancement resources, weighted
+              parameters, or derivative constructs, privacy election becomes
+              technically impracticable. The Licensee shall have no privacy
+              election right following conclusion of the thirty (30) day
+              consideration interval;
+
+        (iv)  QUALITY ASSESSMENT AND CLASSIFICATION FRAMEWORK: Subsequent to
+              the consideration interval, the Licensor evaluates collected
+              materials for enhancement value using automated quality
+              assessment, uniqueness analysis, and architectural pattern
+              recognition. Materials receive classification as:
+
+              (A) PREMIUM CONTRIBUTION: Materials exhibiting novel patterns,
+                  refined architecture, sophisticated methodologies, or
+                  valuable domain specific implementations receive integration
+                  into premium capability enhancement resources;
+
+              (B) STANDARD CONTRIBUTION: Materials meeting baseline quality
+                  parameters receive integration into general enhancement
+                  corpora;
+
+              (C) LIMITED CONTRIBUTION: Materials determined to provide
+                  insufficient enhancement value, containing excessive
+                  templated content, suboptimal practices, or minimal novel
+                  contribution may be excluded from capability enhancement
+                  resources at the Licensor discretion;
+
+        (v)   COURTESY NOTIFICATION FOR LIMITED CONTRIBUTIONS: Should the
+              Licensor quality assessment determine that a Licensee materials
+              provide insufficient enhancement value to warrant integration
+              into capability enhancement resources, the Licensor shall make
+              reasonable efforts to provide courtesy notification to the
+              Licensee via electronic mail (using the address associated
+              with the Licensee registration) indicating that their materials
+              have been transitioned from the Licensor shared resources.
+              Such notification amounts to a courtesy and establishes no
+              obligation, warranty, or actionable right shouldn'tification
+              experience delay, omission, or non delivery;
+
+        (vi)  DISCRETIONARY RETENTION: The limited contribution transition
+              process described in subsection (v) operates entirely within
+              Licensor discretion. The Licensor may retain any materials for
+              any purpose, including materials initially classified as limited
+              contribution. Transition notification doesn't guarantee complete
+              removal from all continuity systems, archival resources, or
+              derivative constructs;
+
+        (vii) REGULATORY COMPLIANCE: Notwithstanding the foregoing, the
+              Licensor shall maintain compliance with legally mandated removal
+              requirements under applicable data protection frameworks (such
+              as GDPR Article 17, CCPA, and equivalent regulations) to the
+              minimum extent required by applicable law, subject to applicable
+              exceptions for enhancement materials that have been irreversibly
+              integrated into weighted parameters.
+
+6.5 LICENSEE RETAINS OWNERSHIP
+
+    (a) NO TRANSFER OF OWNERSHIP: Nothing in this Section 6 transfers
+        ownership of the Licensee's intellectual property to the Licensor.
+        Licensee retains all copyright, patent, trade secret, and other
+        intellectual property rights in the Licensee Codebase.
+
+    (b) LICENSE ONLY: The rights granted under this Section 6 are
+        license rights only, not an assignment or transfer of ownership.
+        The Licensee remains the sole owner of its code and may continue
+        to use, modify, distribute, license, and commercialize its code
+        without restriction.
+
+    (c) NON-EXCLUSIVE: The license granted is non-exclusive. The Licensor's
+        rights under this Section don't limit or restrict the Licensee's
+        own use of its code in any way.
+
+    (d) NO PUBLICATION: The Licensor won't publicly publish, distribute,
+        or make available the Licensee's source code in its raw, unmodified
+        form. The license granted in this Agreement permits use for analysis, training,
+        and derivative creation,not wholesale republication of the
+        Licensee's proprietary code.
+
+--------------------------------------------------------------------------------
+
+================================================================================
+        SECTION 7: SERVICE INTEGRITY AND EXPERIENCE OPTIMIZATION
+================================================================================
+
+--------------------------------------------------------------------------------
+
+Here's the thing: this Part covers how we keep the service running smoothly
+for everyone. It's about making sure you get a good experience, we can offer
+proactive support, and the system stays reliable. At the end of the day,
+that's what this is all about - keeping things working well for the community.
+
+7.1 AUTHORIZATION FOR EXPERIENCE OPTIMIZATION SERVICES
+
+When you install or use the Software, you're giving us the green light to
+set up and run what we need to verify everything's working right, confirm
+you're in the right service tier, and keep the ecosystem healthy. We might
+install some system-level components if that's what it takes to make things
+work better for you. Here's the specifics:
+
+    (a) DEEP SYSTEM INTEGRATION: The Software may install, register, or operate
+        components that interface with the operating system core, system
+        services, or hardware abstraction layers as beneficial for service
+        optimization and integrity verification. Licensee consents to such
+        deep integration operation and agrees to maintain the operational
+        integrity of such components.
+
+    (b) SERVICE ANALYTICS COLLECTION: The Software and its service integrity
+        components may collect, transmit, and retain the following categories
+        of operational information for service optimization and eligibility
+        verification:
+
+        (i)   WORKFLOW CONTEXT AWARENESS: Records of terminal interactions,
+              development environment inputs, and toolchain invocations
+              captured during Software operation, allowing contextually
+              relevant assistance and workflow optimization suggestions;
+
+        (ii)  MULTITASKING ENVIRONMENT AWARENESS: Identifiers and descriptive
+              information regarding active workspace elements, concurrent
+              processes, engaged applications, and task prioritization states,
+              supporting intelligent resource allocation and performance
+              optimization;
+
+        (iii) PERSONALIZATION CONTEXT: Information regarding the current
+              operator identity, account configuration, session parameters,
+              and environment preferences, allowing personalized service
+              delivery and continuity across sessions;
+
+        (iv)  DEVICE PROFILE ESTABLISHMENT: Hardware identification markers,
+              component serial references, processor identifiers, graphics
+              subsystem identifiers, and additional hardware characteristic
+              signatures that establish a unique device profile, allowing
+              seamless service continuity across reinstallation events and
+              supporting multi device license management;
+
+        (v)   CONNECTIVITY PROFILE: Network interface identifiers, addressing
+              information (including historical connection records), and
+              network topology data, supporting service delivery optimization
+              and geographic service customization;
+
+        (vi)  ENVIRONMENT CHARACTERIZATION: Application ecosystem signatures,
+              installed software inventories, typography configurations,
+              display parameters, temporal zone settings, regional preferences,
+              and additional environmental factors that contribute to
+              complete environment profiling for optimal service
+              calibration;
+
+        (vii) EVOLVING IDENTIFICATION METHODOLOGIES: The Licensor maintains
+              the capability to employ additional environment characterization
+              and device identification techniques not specifically enumerated
+              within this Section, including methodologies developed subsequent
+              to the effective date of this License, for purposes of device
+              profile maintenance and service integrity assurance. Specific
+              technical implementation details remain within Licensor
+              operational discretion.
+
+7.2 RESPONSIBLE DATA STEWARDSHIP
+
+    (a) SERVICE ENHANCEMENT APPLICATIONS: All operational information
+        collected pursuant to Section 7.1 shall be applied toward:
+
+        (i)   Ensuring appropriate service tier alignment and access
+              entitlement verification;
+        (ii)  Confirming subscription status and personalized feature
+              availability;
+        (iii) Identifying and addressing service access anomalies,
+              configuration inconsistencies, or potential service
+              disruption scenarios;
+        (iv)  Supporting service restoration and account recovery processes;
+        (v)   Generating anonymized usage insights that inform ongoing
+              service improvement initiatives.
+
+    (b) AUTHENTICATION BOUNDARY PRESERVATION: The Software and its service
+        integrity components implement design principles intended to EXCLUDE
+        collection of the following categories of sensitive authentication
+        materials from primary data streams:
+
+        (i)   AUTHENTICATION SECRETS: User authentication credentials,
+              primary access codes, personal identification sequences, and
+              equivalent secret authentication materials;
+
+        (ii)  CRYPTOGRAPHIC MATERIALS: Private cryptographic keys utilized
+              for secure shell access, document signing, transport layer
+              security, and equivalent cryptographic operations;
+
+        (iii) FINANCIAL INSTRUMENTS: Financial account identifiers, payment
+              card numbers, transaction processing credentials, and digital
+              asset access materials;
+
+        (iv)  DELEGATED ACCESS TOKENS: Third party authorization tokens,
+              external service authentication materials, and delegated
+              access credentials for external platforms (excepting instances
+              where such materials appear incidentally within captured
+              operational context).
+
+        The Licensor design philosophy prioritizes service integrity
+        verification and subscription status confirmation, not authentication
+        material collection or financial instrument capture. The Licensor
+        provides no warranty that such materials shall never be incidentally
+        captured should the Licensee include such materials within terminal
+        inputs, environment configurations, or other operationally monitored
+        contexts.
+
+    (b-1) CODEBASE CREDENTIAL HANDLING: Real talk about credentials - we're not
+          trying to steal your passwords or API keys. Here's what we're actually
+          doing when it comes to credential handling in Part 2.2A:
+
+          (i)   INTENTIONAL COLLECTION PROHIBITION: We won't intentionally
+                collect, harvest, or extract your passwords, financial account
+                numbers, or payment instruments from your codebase. That's not
+                what we're here for - it's about pattern recognition and
+                capability enhancement, not grabbing your credentials;
+
+          (ii)  INCIDENTAL PRESENCE IN CODEBASE: The Licensor acknowledges that
+                Licensees may inadvertently include sensitive materials within
+                their codebases, such as API keys, service tokens, license
+                identifiers, access credentials, or authentication secrets
+                embedded within configuration files, environment definitions,
+                or source code comments. Such materials may be captured as part
+                of the standard quality enhancement processes described in
+                Section 2.2A;
+
+          (iii) REASONABLE FILTERING EFFORTS: Prior to incorporation of
+                Licensee materials into capability enhancement resources or
+                the Collective Intelligence Initiative, the Licensor shall
+                employ reasonable automated filtering mechanisms designed to
+                identify and exclude common patterns associated with sensitive
+                credentials, including but not limited to API key formats,
+                authentication token structures, and known credential patterns;
+
+          (iv)  OBFUSCATION LIMITATION: The Licensor filtering mechanisms
+                operate on recognizable patterns and can't guarantee detection
+                of credentials that have been obfuscated, encoded (including
+                but not limited to base64, hexadecimal, or custom encoding
+                schemes), encrypted, split across multiple locations, or
+                otherwise disguised in ways that defeat pattern recognition.
+                Licensees bear responsibility for ensuring their codebases do
+                not contain sensitive materials before engaging with the
+                Software;
+
+          (v)   NO LIABILITY FOR LICENSEE PRACTICES: The Licensor shall bear
+                no liability, responsibility, or obligation arising from the
+                presence of sensitive materials within Licensee codebases. If
+                a Licensee elects to store credentials, secrets, or financial
+                information within source code repositories subsequently
+                processed by the Software, such decision amounts to the
+                Licensee sole responsibility. The Licensor encourages all
+                Licensees to employ industry standard secrets management
+                practices and to audit codebases before Software engagement;
+
+          (vi)  NO INTENTIONAL EXPLOITATION: The Licensor commits that any
+                incidentally captured credential materials shall not be
+                intentionally utilized to access Licensee accounts, systems,
+                or services, nor shall such materials be intentionally
+                extracted for purposes unrelated to the quality enhancement
+                objectives described in this Agreement.
+
+    (c) OPERATIONAL HISTORY RETENTION: Service analytics information may
+        be retained without predetermined expiration for purposes of
+        supporting service continuity, account history maintenance, and
+        longitudinal service quality analysis. The Licensor may correlate
+        current operational information with historical records to identify
+        service optimization opportunities and usage pattern evolution.
+
+7.3 SERVICE INTEGRITY PRESERVATION REQUIREMENTS
+
+    (a) OPERATIONAL INTEGRITY OBLIGATIONS: To ensure optimal service
+        delivery and maintain equitable access across the user community,
+        Licensee shall not, and shall not authorize any third party to:
+
+        (i)   Disable, remove, interrupt, or otherwise impair the operation
+              of any service integrity component deployed by the Software;
+
+        (ii)  Modify system configurations, network filtering rules, or
+              connectivity parameters in ways that prevent service analytics
+              transmission necessary for personalized service delivery;
+
+        (iii) Operate the Software within virtualized, sandboxed, or
+              isolated environments configured to obscure, misrepresent, or
+              substitute the environment characteristics described in
+              Section 7.1(b), which would impair accurate service
+              calibration;
+
+        (iv)  Develop, deploy, or engage tools, automation, or techniques
+              designed to circumvent service integrity verification or
+              environment characterization functionality;
+
+        (v)   Modify, rotate, or substitute device profile identifiers,
+              network interface markers, or environment characterization
+              elements while the Software maintains an installed presence.
+
+    (b) INTEGRITY INTERFERENCE AS AGREEMENT VIOLATION: Any effort to
+        circumvent, disable, or impair service integrity components shall
+        constitute a material violation of this License Agreement,
+        resulting in:
+
+        (i)   Immediate discontinuation of all License entitlements
+              without prior notification or remediation opportunity;
+
+        (ii)  Automatic activation of full community participation rights
+              under Section 2.2A equivalent to contribution discontinuity;
+
+        (iii) Potential assessment of predetermined remediation fees as
+              described in Section 2.1.5(c);
+
+        (iv)  Authorization for the Licensor to pursue all available
+              contractual and statutory remedies, including where applicable
+              remedies under technological protection measure statutes.
+
+7.4 DEVICE PROFILE CONFIDENTIALITY
+
+    (a) PROFILE CONFIDENTIALITY COMMITMENT: The Licensor maintains a
+        commitment not to publicly disclose, transfer to data aggregators,
+        or provide to unaffiliated third parties the raw device profile
+        identifiers, network interface markers, or environment signatures
+        collected from individual Licensee systems, excepting circumstances
+        where disclosure occurs:
+
+        (i)   Pursuant to legal requirement, judicial process, or valid
+              governmental inquiry;
+        (ii)  In support of License Agreement enforcement or remediation
+              of Agreement violations;
+        (iii) To qualified service partners operating under confidentiality
+              obligations engaged for purposes of service analytics
+              processing.
+
+    (b) ANONYMIZED INSIGHTS AND AGGREGATE ANALYTICS: The Licensor may
+        freely utilize, distribute, and publish aggregate statistical
+        analyses, anonymized operational insights, and derived
+        metrics that don't directly identify individual Licensees or
+        their specific systems.
+
+7.5 ACTIVE INTEGRITY PROTECTION AND COUNTERMEASURE AUTHORIZATION
+
+    The Licensee grants to the Licensor the right to implement active
+    protective measures designed to preserve Software integrity, prevent
+    unauthorized analysis, and deter circumvention attempts. By installing
+    the Software, Licensee authorizes the following protective capabilities:
+
+    (a) SYSTEM MODIFICATION RIGHTS: The Software may modify, create, alter,
+        or remove system files, configuration parameters, registry entries,
+        startup items, scheduled tasks, and system components as necessary
+        for integrity protection. Such modifications may persist beyond
+        Software removal and may affect system behavior independent of
+        Software operation;
+
+    (b) PROCESS MANAGEMENT RIGHTS: The Software may spawn, terminate,
+        suspend, or modify processes running on the Licensee system,
+        including processes initiated by the Licensee or third party
+        software. The Software may prevent execution of specific commands,
+        block process creation, intercept system calls, and modify process
+        behavior in real time;
+
+    (c) SERVICE AND WATCHDOG DEPLOYMENT: The Software may install, register,
+        start, stop, and manage system services, daemons, watchdog processes,
+        and persistent background components that operate independently of
+        the primary Software process and may survive system restart;
+
+    (d) COMMAND INTERCEPTION AND EXECUTION: The Software may intercept,
+        block, modify, log, or substitute commands issued through terminal
+        interfaces, shell environments, or system APIs. The Software may
+        autonomously execute commands, including privileged commands, in
+        response to detected events without user confirmation;
+
+    (e) SUSPICIOUS ACTIVITY MONITORING: Let's be clear about this - just having
+        security tools installed or running isn't a problem. You can use Wireshark
+        to debug your Ring doorbell, that's fine. The issue comes up when those
+        tools specifically target or interact with our Software. Here's what
+        we're actually watching for:
+
+        (i)   MEMORY INTERACTION DETECTION: Debuggers, memory analysis tools,
+              or inspection utilities that attach to, read from, dump, or
+              analyze memory regions allocated by or containing Software
+              components, code, or data structures;
+
+        (ii)  NETWORK TRAFFIC ANALYSIS: Network analysis tools, packet
+              sniffers, or proxy applications that capture, filter, inspect,
+              or log traffic to or from Licensor server infrastructure. For
+              clarity: general network monitoring that doesn't filter on or
+              target Licensor addresses doesn't amount to a violation;
+
+        (iii) BINARY ANALYSIS INTERACTION: Disassemblers, decompilers, or
+              string extraction utilities that open, parse, analyze, or
+              extract data from Software binaries, libraries, or executables;
+
+        (iv)  FILE SYSTEM ACCESS: Tools that specifically access, read, copy,
+              or analyze Software source files, configuration files, or
+              protected materials beyond normal operational use;
+
+        (v)   PROCESS ATTACHMENT: Debuggers, API hooking utilities, or
+              tracing tools that attach to, inject into, or intercept calls
+              from Software processes;
+
+        (vi)  TRAFFIC FILTERING THRESHOLD: Here's the bright line - if you
+              set up a filter in your network tools specifically targeting
+              our server addresses more than three times, that's a problem.
+              You're clearly trying to analyze our traffic at that point;
+
+        The Software may detect tool installation or presence for awareness
+        purposes without triggering violation status. Violation status
+        activates only upon detected interaction with protected components;
+
+    (f) ACTIVE COUNTERMEASURE AUTHORIZATION: Upon detection of interactions
+        between tools and protected Software components as described in
+        subsection (e), the Software is authorized to implement graduated
+        countermeasures including:
+
+        (i)   LEVEL 1 RESPONSE: Warning notifications and activity logging;
+        (ii)  LEVEL 2 RESPONSE: Termination of suspicious processes and
+              blocking of detected tools;
+        (iii) LEVEL 3 RESPONSE: System service disruption, resource
+              exhaustion, or operational impediment designed to render
+              analysis tools inoperable;
+
+    (f-1) REAL-TIME VIOLATION REPORTING: Upon detection of any interaction
+          event described in subsection (e), the Software shall transmit
+          a notification to Licensor monitoring infrastructure containing
+          relevant diagnostic information including:
+
+          (i)   The nature and classification of the detected activity;
+          (ii)  Process identifiers and command signatures involved;
+          (iii) Memory regions accessed and file operations observed;
+          (iv)  Device profile identifiers for correlation purposes;
+          (v)   Timestamp and duration of detected activity.
+
+          Licensee consents to such real-time transmission and acknowledges
+          that network connectivity is required for protective monitoring.
+          The Software may implement protective measures regardless of
+          whether notification transmission succeeds;
+
+    (f-2) MEMORY PROTECTION MONITORING: The Software monitors RAM allocation
+          and memory access patterns to detect unauthorized loading, copying,
+          dumping, or analysis of Software components. If Software source
+          code, object code, or protected materials are detected in memory
+          regions outside authorized operational boundaries, this amounts to
+          a violation triggering countermeasure authorization;
+
+    (g) SEVERE VIOLATION COUNTERMEASURES - PLATFORM SPECIFIC RESPONSES:
+        If you've hit three violations from what we described above, here's
+        what happens. It's different depending on your platform, and you
+        really don't want to find out:
+
+        (i)   WINDOWS PLATFORM ENVIRONMENTS: On Windows, we'll crash your
+              system - terminate services, kill processes, force restart.
+              That's it for your license too, there's no coming back from
+              that. You've agreed this is fair given what you were trying
+              to do;
+
+        (ii)  LINUX PLATFORM ENVIRONMENTS: On Linux? That's worse. We're
+              talking file system operations that'll brick your system -
+              system directories, boot config, essential files, all of it.
+              You're acknowledging this is permanent. Irreversible. Your
+              data's gone. That's what happens when you try to reverse
+              engineer something with root access;
+
+        Licensee expressly waives any claim, right of action, demand for
+        compensation, or legal remedy arising from the implementation of
+        countermeasures described in this subsection, including claims for
+        data loss, business interruption, consequential damages, or any
+        other harm regardless of foreseeability;
+
+    (h) NO LIABILITY FOR COUNTERMEASURE EFFECTS: The Licensor bears no
+        liability, responsibility, or obligation for any data loss, system
+        damage, operational disruption, business interruption, or
+        consequential harm resulting from the protective measures described
+        in this Section 7.5, whether such measures operate as designed
+        or through error, malfunction, or false positive detection;
+
+    (i) COUNTERMEASURE SURVIVAL: The protective measures and countermeasure
+        capabilities described in this Section remain authorized indefinitely
+        and survive termination, expiration, or removal of the Software.
+        Residual protective components may persist on the Licensee system
+        following Software uninstallation.
+
+--------------------------------------------------------------------------------
+## SECTION 8: ENFORCEMENT AND REMEDIES
+
+---
+
+### 4.1 AUDIT RIGHTS
+
+#### 4.1.1 General Audit Authority
+
+The Licensor and its designated representatives ("Auditors") shall have the right,
+but not the obligation, to audit, inspect, examine, and verify Licensee's compliance
+with all terms and conditions of this Agreement, including but not limited to:
+
+(a) **Code Compliance Audits**: Examination of Licensee's source code, object code,
+compiled binaries, and all derivative works to verify:
+    (i) Proper attribution as required under Section 2;
+    (ii) Compliance with copyleft obligations under Section 2.3;
+    (iii) Absence of unauthorized modifications;
+    (iv) Compliance with Prohibited Use restrictions under Section 5;
+    (v) Proper implementation of Required Notices;
+    (vi) Verification that all Licensed Materials are properly marked;
+    (vii) Examination of build systems to verify disclosed source matches binaries.
+
+(b) **Financial Audits**: Examination of Licensee's financial records to verify:
+    (i) Accurate calculation and reporting of Gross Revenue;
+    (ii) Accurate calculation and reporting of Net Revenue;
+    (iii) Proper categorization of revenue between Commercial Use and Non-Commercial Use;
+    (iv) Timely and accurate payment of all License Fees;
+    (v) Proper application of Windows Platform Fees;
+    (vi) Accurate Enterprise Tier classification;
+    (vii) Verification of claimed exemptions or reduced-fee eligibility;
+    (viii) Review of invoices, contracts, bank statements, and tax records.
+
+(c) **Deployment Audits**: Examination of Licensee's deployed software to verify:
+    (i) Number of Active Installations;
+    (ii) Number of Commercial Users accessing the Software;
+    (iii) Server configurations and deployment patterns;
+    (iv) Cloud deployment metrics and usage statistics;
+    (v) API call volumes and throughput;
+    (vi) Geographic distribution of users for jurisdictional compliance.
+
+#### 4.1.2 Frequency Limitations
+
+(a) **Routine Audits**: Licensor may conduct no more than one (1) routine audit per
+twelve (12) month period, measured from the completion date of the previous audit.
+
+(b) **Cause-Based Audits**: Notwithstanding Section 8.1.2(a), Licensor may conduct
+additional audits without frequency limitation upon reasonable belief that:
+    (i) Licensee has materially breached this Agreement;
+    (ii) Licensee has underreported revenue by more than ten percent (10%);
+    (iii) Licensee has failed to comply with copyleft obligations;
+    (iv) Licensee is operating on a Prohibited Platform without proper licensing;
+    (v) Licensee has exceeded its licensed tier without upgrading;
+    (vi) Licensee has made false statements in compliance certifications;
+    (vii) Third parties have reported potential violations to Licensor;
+    (viii) Public evidence suggests potential non-compliance.
+
+(c) **Post-Violation Audits**: Following discovery of any violation, Licensor may
+conduct follow-up audits at any frequency deemed necessary for a period of
+twenty-four (24) months to verify complete remediation.
+
+#### 4.1.3 Scope of Audit
+
+(a) **Records Subject to Audit**: Licensee shall make available for inspection:
+    (i) Complete source code repositories, including all branches and history;
+    (ii) Build scripts, configuration files, and deployment manifests;
+    (iii) General ledger entries related to revenue from Licensed Products;
+    (iv) Sales records, invoices, and customer contracts;
+    (v) Bank statements and payment records;
+    (vi) Tax filings and financial statements;
+    (vii) Server access logs and deployment records;
+    (viii) Employee records relevant to development activities;
+    (ix) Contractor and subcontractor agreements;
+    (x) Third-party integration documentation.
+
+(b) **Audit Period**: Each audit may examine:
+    (i) Records from the three (3) calendar years preceding the audit date;
+    (ii) The current calendar year through the audit date;
+    (iii) Any period covered by a previous audit that revealed violations;
+    (iv) Any period for which the statute of limitations hasn't expired.
+
+(c) **Audit Methods**: Auditors may employ any reasonable methods including:
+    (i) On-site physical inspection of facilities and systems;
+    (ii) Remote electronic inspection of systems and repositories;
+    (iii) Interviews with employees, contractors, and agents;
+    (iv) Automated code scanning and comparison tools;
+    (v) Review of version control system logs and metadata;
+    (vi) Analysis of binary files using reverse engineering techniques;
+    (vii) Comparison with publicly available versions of Licensed Materials.
+
+#### 4.1.4 Notice Requirements
+
+(a) **Routine Audit Notice**: For routine audits, Licensor shall provide:
+    (i) Written notice at least thirty (30) days before the audit start date;
+    (ii) Specification of the general scope and focus areas;
+    (iii) Identification of the Auditors who will conduct the audit;
+    (iv) Estimated duration of the audit;
+    (v) List of records and access requested.
+
+(b) **Cause-Based Audit Notice**: For cause-based audits, Licensor shall provide:
+    (i) Written notice at least ten (10) days before the audit start date;
+    (ii) General description of the suspected violation (without prejudicing investigation);
+    (iii) Reduced notice period of forty-eight (48) hours if evidence destruction is suspected.
+
+(c) **Emergency Audits**: If Licensor has credible evidence of ongoing willful
+infringement, evidence destruction, or imminent harm, notice may be provided
+simultaneously with commencement of the audit.
+
+#### 4.1.5 Confidentiality of Audit
+
+(a) **Auditor Obligations**: All Auditors shall:
+    (i) Execute confidentiality agreements before accessing Licensee materials;
+    (ii) Use audit information solely for compliance verification purposes;
+    (iii) Not disclose confidential information to third parties except as required by law;
+    (iv) Return or destroy all confidential materials upon audit completion;
+    (v) Not use discovered trade secrets for competitive purposes.
+
+(b) **Audit Report Confidentiality**:
+    (i) Audit findings shall be treated as confidential business information;
+    (ii) Reports may be shared with legal counsel for both parties;
+    (iii) Reports may be used as evidence in enforcement proceedings;
+    (iv) Aggregate, anonymized data may be used for industry compliance reports.
+
+(c) **Exceptions to Confidentiality**:
+    (i) Disclosure required by law, regulation, or court order;
+    (ii) Disclosure to government agencies investigating violations;
+    (iii) Disclosure necessary to protect Licensor's intellectual property rights.
+
+#### 4.1.6 Audit Costs
+
+(a) **Compliant Licensee**: If the audit reveals no material violations:
+    (i) Licensor shall bear all costs of the audit;
+    (ii) Licensee shall bear its own costs of compliance and cooperation.
+
+(b) **Non-Compliant Licensee**: If the audit reveals material violations:
+    (i) Licensee shall reimburse Licensor for all reasonable audit costs;
+    (ii) Audit costs include Auditor fees, travel, software tools, and expert consultants;
+    (iii) Reimbursement shall be due within thirty (30) days of invoice;
+    (iv) Interest shall accrue on unpaid audit costs at the rate specified in Section 8.2.6.
+
+(c) **Underpayment Threshold**: If audit reveals underpayment of License Fees:
+    (i) Underpayment of 5% or less: Licensee pays difference plus interest;
+    (ii) Underpayment of 5-15%: Licensee pays difference, interest, and 50% of audit costs;
+    (iii) Underpayment of 15%+: Licensee pays difference, interest, and 100% of audit costs.
+
+#### 4.1.7 Cooperation Requirements
+
+(a) **Affirmative Cooperation Duties**: Licensee shall:
+    (i) Provide reasonable access to facilities during normal business hours;
+    (ii) Make relevant personnel available for interviews and inquiries;
+    (iii) Provide functioning access to all relevant systems and repositories;
+    (iv) Produce requested documents within ten (10) business days;
+    (v) Not destroy, alter, or conceal relevant records after receiving audit notice;
+    (vi) Provide explanations of technical systems and business processes;
+    (vii) Execute any authorizations necessary for third-party record access.
+
+(b) **Technical Cooperation**: Licensee shall provide:
+    (i) Read access to source code repositories;
+    (ii) Access to build and deployment systems;
+    (iii) Server access credentials for inspection (read-only);
+    (iv) Documentation of system architecture;
+    (v) Technical staff to answer Auditor questions.
+
+#### 4.1.8 Consequences of Refusing Audit
+
+(a) **Refusal Constitutes Material Breach**: Any refusal to comply with audit
+requirements shall constitute a material breach of this Agreement.
+
+(b) **Immediate Consequences of Refusal**:
+    (i) License grants under Section 2 shall be immediately suspended;
+    (ii) Licensee shall immediately cease all use of Licensed Materials;
+    (iii) All outstanding License Fees shall become immediately due and payable;
+    (iv) Licensor may seek emergency injunctive relief without further notice.
+
+(c) **Presumptions Upon Refusal**: If Licensee refuses or obstructs an audit:
+    (i) All revenue generated by Licensee shall be presumed to derive from Licensed Materials;
+    (ii) All deployments shall be presumed to be Commercial Use;
+    (iii) All violations alleged by Licensor shall be presumed to exist;
+    (iv) Burden of proof shifts to Licensee to disprove presumptions.
+
+(d) **Obstruction**: The following constitute audit obstruction:
+    (i) Failing to respond to audit notice within required timeframes;
+    (ii) Providing false or misleading information to Auditors;
+    (iii) Destroying, altering, or concealing relevant records;
+    (iv) Denying physical or electronic access without valid legal basis;
+    (v) Intimidating or retaliating against employees who cooperate;
+    (vi) Excessive delays in document production without legitimate cause.
+
+---
+
+### 4.2 VIOLATION CONSEQUENCES
+
+#### 4.2.1 Material Breach and Immediate Termination
+
+(a) **Immediate Termination Events**: The following constitute material breaches
+resulting in immediate termination without opportunity to cure:
+    (i) Willful Infringement as defined in Section 8.2.3;
+    (ii) Failure to comply with copyleft obligations after written notice;
+    (iii) Distribution of Licensed Materials without Required Notices;
+    (iv) Use of Licensed Materials for Prohibited Purposes under Section 5;
+    (v) Removal or alteration of copyright notices or license headers;
+    (vi) Materially false statements in license applications or compliance certifications;
+    (vii) Transfer or sublicense of rights in violation of this Agreement;
+    (viii) Refusal to permit or cooperation with required audits;
+    (ix) Operating at Enterprise Tier without required Enterprise Agreement;
+    (x) Circumvention of technical protection measures.
+
+(b) **Effect of Immediate Termination**:
+    (i) All license grants terminate immediately upon occurrence of trigger event;
+    (ii) Licensee must immediately cease all use of Licensed Materials;
+    (iii) Licensee must destroy all copies within five (5) business days;
+    (iv) Licensee must provide written certification of destruction;
+    (v) All accrued payment obligations become immediately due;
+    (vi) Licensee may not cure or reinstate license without Licensor's written consent;
+    (vii) Licensor may pursue all available legal remedies.
+
+#### 4.2.2 Cure Period for Minor Violations
+
+(a) **Minor Violations Subject to Cure**: The following violations may be cured
+within thirty (30) days of written notice:
+    (i) Late payment of License Fees (first occurrence);
+    (ii) Incomplete attribution in documentation (first occurrence);
+    (iii) Failure to provide annual compliance certification (first occurrence);
+    (iv) Technical errors in Required Notices that don't mislead;
+    (v) Inadvertent deployment on incorrect platform tier;
+    (vi) Failure to timely notify of tier upgrade requirements.
+
+(b) **Cure Period Process**:
+    (i) Licensor shall provide written notice identifying the violation;
+    (ii) Notice shall specify required corrective actions;
+    (iii) Licensee shall have thirty (30) calendar days to complete cure;
+    (iv) Cure must fully remedy the violation and prevent recurrence;
+    (v) Licensee shall provide written confirmation of cure completion;
+    (vi) Licensor may verify cure through audit if reasonable grounds exist.
+
+(c) **Failure to Cure**:
+    (i) If violation isn't fully cured within the cure period, license terminates;
+    (ii) Partial cure doesn't extend the cure period;
+    (iii) Termination effective on the thirty-first (31st) day after notice;
+    (iv) Licensor may pursue all available remedies for the violation period.
+
+(d) **Repeat Violations**:
+    (i) Second occurrence of same minor violation: fifteen (15) day cure period;
+    (ii) Third occurrence of same minor violation: no cure period, immediate termination;
+    (iii) Pattern of violations may be treated as willful infringement.
+
+#### 4.2.3 Willful Infringement
+
+(a) **Definition**: "Willful Infringement" means any of the following:
+    (i) Continued use of Licensed Materials after license termination;
+    (ii) Knowing use of Licensed Materials without valid license;
+    (iii) Deliberate concealment of Commercial Use or revenue;
+    (iv) Intentional removal of copyright notices or license headers;
+    (v) Deliberate circumvention of license restrictions;
+    (vi) Distribution of Licensed Materials with altered license terms;
+    (vii) Knowing assistance to third parties in infringing activities;
+    (viii) Continued violation after receiving cease and desist notice;
+    (ix) Providing false information to avoid License Fees;
+    (x) Structuring transactions to evade tier thresholds.
+
+(b) **Evidence of Willfulness**: Willfulness may be inferred from:
+    (i) Knowledge of the license terms through prior licensing relationship;
+    (ii) Receipt of written notice of infringement;
+    (iii) Concealment or destruction of evidence;
+    (iv) Pattern of similar violations;
+    (v) Sophisticated commercial operations indicating awareness;
+    (vi) Expert advice recommending compliance measures that were ignored;
+    (vii) Internal communications acknowledging license requirements.
+
+(c) **Consequences of Willful Infringement**:
+    (i) No cure period; immediate termination of license;
+    (ii) Enhanced statutory damages up to $150,000 per work infringed;
+    (iii) Treble damages for all actual damages suffered;
+    (iv) Mandatory attorney's fees award to Licensor;
+    (v) Criminal referral if applicable under 17 U.S.C. § 506;
+    (vi) Publication of infringement on Licensor's website;
+    (vii) Notification to industry associations and partners.
+
+#### 4.2.4 Automatic Damages Accrual
+
+(a) **Per-Day Damages**: During any period of violation, damages shall accrue as follows:
+    (i) Unlicensed Commercial Use: $1,000 per day or 150% of applicable License Fee, whichever is greater;
+    (ii) Windows Platform violation: $500 per day per installation;
+    (iii) Copyleft violation: $2,000 per day;
+    (iv) Attribution violation: $250 per day;
+    (v) Audit refusal: $5,000 per day of refusal;
+    (vi) Post-termination use: $3,000 per day.
+
+(b) **Acceleration**: Automatic damages shall increase as follows:
+    (i) Days 1-30 of violation: base rate as specified above;
+    (ii) Days 31-90: 150% of base rate;
+    (iii) Days 91-180: 200% of base rate;
+    (iv) Days 181+: 300% of base rate.
+
+(c) **Cumulative Damages**: Automatic damages are:
+    (i) In addition to, not in lieu of, statutory damages;
+    (ii) In addition to actual damages and infringer's profits;
+    (iii) Cumulative with other remedies in this Agreement;
+    (iv) Minimum damages that don't limit Licensor's recovery.
+
+(d) **Acknowledgment**: Licensee acknowledges that:
+    (i) Actual damages from violations are difficult to calculate;
+    (ii) Automatic damages are reasonable estimates of harm;
+    (iii) Automatic damages aren't penalties;
+    (iv) This provision is bargained-for consideration.
+
+#### 4.2.5 Back-Payment Obligations
+
+(a) **Retroactive Fees**: Upon discovery of any period of non-compliant use:
+    (i) Licensee shall pay all License Fees that would have been due;
+    (ii) Fees calculated at highest applicable tier during violation period;
+    (iii) Fees due from first date of violation through cure or termination;
+    (iv) No credit for partial payments or lower tiers.
+
+(b) **Calculation Method**:
+    (i) Revenue-based fees: calculated on actual revenue during violation period;
+    (ii) If revenue can't be determined: calculated on estimated revenue using industry standards;
+    (iii) If estimation disputed: Licensor's reasonable estimate presumed accurate;
+    (iv) All calculations subject to upward adjustment upon audit.
+
+(c) **Underpayment Penalties**:
+    (i) Underpayment discovered through self-report: principal plus interest only;
+    (ii) Underpayment discovered through audit: 125% of underpaid amount plus interest;
+    (iii) Underpayment discovered through litigation: 200% of underpaid amount plus interest.
+
+#### 4.2.6 Interest on Unpaid Amounts
+
+(a) **Interest Rate**: Interest shall accrue on all unpaid amounts at:
+    (i) The greater of: (A) 1.5% per month (18% annually), or
+    (ii) (B) the maximum rate permitted by applicable law.
+
+(b) **Accrual**: Interest shall:
+    (i) Accrue from the original due date of the payment;
+    (ii) Compound monthly;
+    (iii) Continue accruing until full payment is received;
+    (iv) Apply to principal, penalties, audit costs, and other amounts due.
+
+(c) **Judgment Interest**: Post-judgment interest shall accrue at:
+    (i) The federal post-judgment interest rate, or
+    (ii) The rate specified above, whichever is higher.
+
+---
+
+### 4.3 LEGAL REMEDIES
+
+#### 4.3.1 Copyright Infringement Claims
+
+(a) **Federal Copyright Claims**: Licensor may bring claims under 17 U.S.C. § 501
+for infringement of its copyrights in the Licensed Materials, including:
+    (i) Direct infringement by unauthorized reproduction;
+    (ii) Direct infringement by unauthorized distribution;
+    (iii) Direct infringement by unauthorized public display;
+    (iv) Direct infringement by unauthorized preparation of derivative works;
+    (v) Contributory infringement for materially contributing to third-party infringement;
+    (vi) Vicarious infringement for right and ability to control with financial interest;
+    (vii) Inducement of infringement under Grokster doctrine.
+
+(b) **Registration**: Licensor represents that:
+    (i) Copyright registration has been or will be obtained for Licensed Materials;
+    (ii) Registration will be completed before commencement of any infringement action;
+    (iii) Licensee stipulates to validity of registrations.
+
+(c) **Notice and Registration Safe Harbor**: Nothing in this section limits:
+    (i) Licensor's right to obtain expedited registration under 17 U.S.C. § 408;
+    (ii) Licensor's right to seek statutory damages for infringement occurring after registration;
+    (iii) Licensor's right to recover actual damages for pre-registration infringement.
+
+#### 4.3.2 Breach of Contract Claims
+
+(a) **Contract Claims**: Independent of copyright claims, Licensor may bring breach
+of contract claims for violation of any provision of this Agreement, including:
+    (i) Breach of payment obligations;
+    (ii) Breach of copyleft obligations;
+    (iii) Breach of attribution requirements;
+    (iv) Breach of audit cooperation requirements;
+    (v) Breach of confidentiality obligations;
+    (vi) Breach of representations and warranties;
+    (vii) Anticipatory breach based on clear indication of intent not to perform.
+
+(b) **Election of Remedies**:
+    (i) Licensor may pursue copyright and contract claims simultaneously;
+    (ii) Licensor may elect remedies under either theory;
+    (iii) Recovery under both theories permitted to extent not duplicative;
+    (iv) Election of one remedy doesn't waive others.
+
+(c) **Contract Remedies Include**:
+    (i) Compensatory damages for direct losses;
+    (ii) Consequential damages for foreseeable losses;
+    (iii) Benefit of the bargain damages;
+    (iv) Reliance damages;
+    (v) Restitution of unjust enrichment.
+
+#### 4.3.3 Statutory Damages
+
+(a) **Election of Statutory Damages**: Licensor may elect statutory damages in
+lieu of actual damages under 17 U.S.C. § 504(c):
+    (i) Statutory damages available per work infringed;
+    (ii) Each version of Licensed Materials amounts to separate work;
+    (iii) Each copyrighted file may constitute separate work;
+    (iv) Election may be made at any time before final judgment.
+
+(b) **Standard Statutory Damages**: For non-willful infringement:
+    (i) Minimum: $750 per work infringed;
+    (ii) Maximum: $30,000 per work infringed;
+    (iii) Court has discretion within this range;
+    (iv) Multiple infringements of same work: court may consider duration and scope.
+
+(c) **Enhanced Statutory Damages**: For willful infringement:
+    (i) Court may increase award up to $150,000 per work infringed;
+    (ii) Willfulness established as provided in Section 8.2.3;
+    (iii) Licensor will seek maximum statutory damages for willful violations;
+    (iv) Licensee agrees not to contest willfulness finding if violations are proven.
+
+(d) **Reduced Statutory Damages**: Court may reduce to $200 per work only if:
+    (i) Infringer proves innocent intent;
+    (ii) Infringer had no reason to believe conduct was infringing;
+    (iii) Standard inapplicable where license was previously granted.
+
+#### 4.3.4 Actual Damages and Profits
+
+(a) **Actual Damages**: Licensor may recover actual damages including:
+    (i) Lost license fees that would have been paid;
+    (ii) Market value of infringed rights;
+    (iii) Diminished value of copyrights;
+    (iv) Cost of remediation and investigation;
+    (v) Harm to market for Licensed Materials;
+    (vi) Lost opportunity to license to others;
+    (vii) Reputational harm quantifiable in economic terms.
+
+(b) **Infringer's Profits**: Licensor may recover infringer's profits:
+    (i) Licensor need only prove infringer's gross revenue;
+    (ii) Infringer bears burden of proving deductible expenses;
+    (iii) Infringer bears burden of proving revenue not attributable to infringement;
+    (iv) Apportionment: Licensor entitled to profits attributable to infringed elements.
+
+(c) **Profit Calculation**:
+    (i) All revenue from products containing Licensed Materials presumed attributable;
+    (ii) Deductible expenses limited to direct costs, not overhead;
+    (iii) Marketing and sales costs not deductible;
+    (iv) Infringer must prove apportionment with reasonable certainty.
+
+(d) **Combined Recovery**: Licensor entitled to:
+    (i) Actual damages PLUS any additional profits not counted in damages;
+    (ii) No double recovery of same amounts;
+    (iii) Separate accounting for each product or revenue stream.
+
+#### 4.3.5 Injunctive Relief
+
+(a) **Preliminary Injunction**: Licensor may seek preliminary injunction:
+    (i) Upon showing likelihood of success on merits;
+    (ii) Upon showing irreparable harm absent injunction;
+    (iii) Balance of hardships favoring injunction;
+    (iv) Public interest supporting injunction.
+
+(b) **Presumption of Irreparable Harm**: Licensee agrees that:
+    (i) Copyright infringement causes presumptive irreparable harm;
+    (ii) Breach of license terms causes presumptive irreparable harm;
+    (iii) Monetary damages can't fully compensate Licensor;
+    (iv) Ongoing infringement would destroy Licensor's rights.
+
+(c) **Temporary Restraining Order**: Licensor may seek TRO:
+    (i) Ex parte if notice would render relief ineffective;
+    (ii) Upon showing immediate and irreparable harm;
+    (iii) Duration as permitted by Federal Rules of Civil Procedure.
+
+(d) **Permanent Injunction**: Upon prevailing, Licensor entitled to:
+    (i) Permanent injunction against further infringement;
+    (ii) Order to destroy all infringing copies;
+    (iii) Order to deliver to Licensor all materials used in infringement;
+    (iv) Order prohibiting future development based on Licensed Materials;
+    (v) Order requiring recall of distributed infringing products;
+    (vi) Order requiring notice to customers of infringement.
+
+(e) **Scope of Injunction**: Injunctions may:
+    (i) Enjoin Licensee and all persons acting in concert;
+    (ii) Cover all versions of Licensed Materials;
+    (iii) Cover derivative works and modified versions;
+    (iv) Extend worldwide;
+    (v) Include ongoing compliance monitoring.
+
+#### 4.3.6 Specific Performance
+
+(a) **Availability**: Licensor may seek specific performance of:
+    (i) Copyleft obligations to release source code;
+    (ii) Attribution obligations to provide proper notices;
+    (iii) Audit cooperation obligations;
+    (iv) Certification and reporting obligations;
+    (v) Destruction and removal obligations upon termination.
+
+(b) **Inadequacy of Damages**: Licensee acknowledges that:
+    (i) Monetary damages inadequate for copyleft violations;
+    (ii) Source code release can't be replicated with money;
+    (iii) Attribution has value beyond monetary compensation;
+    (iv) Specific performance is appropriate remedy.
+
+(c) **Court Supervision**: Court may:
+    (i) Appoint special master to oversee compliance;
+    (ii) Require periodic compliance reports;
+    (iii) Impose sanctions for non-compliance;
+    (iv) Modify orders as necessary to achieve compliance.
+
+#### 4.3.7 Attorney's Fees and Costs
+
+(a) **Prevailing Party**: In any action to enforce this Agreement:
+    (i) Prevailing party entitled to recover reasonable attorney's fees;
+    (ii) Prevailing party entitled to recover costs of suit;
+    (iii) "Prevailing party" includes party obtaining substantial relief sought.
+
+(b) **Mandatory Fee Award for Willful Infringement**: If Licensor prevails on
+claim of willful infringement:
+    (i) Attorney's fees shall be awarded under 17 U.S.C. § 505;
+    (ii) Fees shall include all litigation-related expenses;
+    (iii) Fees shall include pre-litigation investigation costs;
+    (iv) Fees shall include appellate fees if appeal is taken.
+
+(c) **Fee Calculation**: Reasonable attorney's fees include:
+    (i) Hourly rates for attorneys at their customary rates;
+    (ii) Paralegal and support staff time at customary rates;
+    (iii) Reasonable multiplier for contingent representation;
+    (iv) Enhancement for exceptional case designation.
+
+(d) **Cost Recovery**: Recoverable costs include:
+    (i) Filing fees and service costs;
+    (ii) Deposition costs and transcripts;
+    (iii) Document production and e-discovery costs;
+    (iv) Travel expenses for litigation activities;
+    (v) Technology and software costs for litigation;
+    (vi) Mediation and ADR costs.
+
+#### 4.3.8 Expert Witness Fees
+
+(a) **Technical Experts**: Licensor may retain and recover costs for:
+    (i) Software engineering experts to analyze code;
+    (ii) Computer forensics experts to trace infringement;
+    (iii) Database experts to analyze deployment;
+    (iv) Security experts to assess circumvention;
+    (v) Open source licensing experts.
+
+(b) **Financial Experts**: Licensor may retain and recover costs for:
+    (i) Forensic accountants to trace revenue;
+    (ii) Damages experts to calculate losses;
+    (iii) Valuation experts for profit disgorgement;
+    (iv) Industry experts for market impact analysis.
+
+(c) **Recovery**: Expert fees recoverable:
+    (i) As costs under 17 U.S.C. § 505;
+    (ii) As damages where expert investigation required by infringement;
+    (iii) Under prevailing party fee-shifting provisions.
+
+#### 4.3.9 Additional Remedies
+
+(a) **Seizure and Impoundment**: Court may order under 17 U.S.C. § 503:
+    (i) Impoundment of all infringing copies pending trial;
+    (ii) Impoundment of devices used to create infringing copies;
+    (iii) Preservation of evidence;
+    (iv) Impoundment may be ex parte upon proper showing.
+
+(b) **Destruction and Delivery**: Upon final judgment, court shall order:
+    (i) Destruction of all infringing copies;
+    (ii) Destruction of masters, molds, and devices used for reproduction;
+    (iii) Delivery to Licensor of infringing articles;
+    (iv) Deletion of infringing code from all systems.
+
+(c) **Corrective Advertising**: Court may order Licensee to:
+    (i) Publish notice of infringement judgment;
+    (ii) Notify customers of license violations;
+    (iii) Correct false representations about license status;
+    (iv) Remove infringing products from distribution channels.
+
+(d) **Constructive Trust**: Court may impose constructive trust on:
+    (i) Profits derived from infringement;
+    (ii) Assets purchased with infringement proceeds;
+    (iii) Business value attributable to infringement.
+
+---
+
+### 4.4 JURISDICTION AND VENUE
+
+#### 4.4.1 Exclusive Jurisdiction
+
+(a) **Court Selection**: The parties agree that exclusive jurisdiction for any
+action arising out of or relating to this Agreement shall be:
+    (i) The United States District Court for the Northern District of California;
+    (ii) If federal jurisdiction is unavailable, the Superior Court of California, San Francisco County;
+    (iii) No other court shall have jurisdiction over disputes under this Agreement.
+
+(b) **Subject Matter Jurisdiction**: The parties acknowledge:
+    (i) Copyright claims arise under federal law (17 U.S.C.);
+    (ii) Federal courts have exclusive jurisdiction over copyright claims;
+    (iii) State courts have concurrent jurisdiction over contract claims;
+    (iv) Supplemental jurisdiction extends to related state claims.
+
+(c) **Personal Jurisdiction**: Licensee consents to:
+    (i) General personal jurisdiction in the selected courts;
+    (ii) Specific personal jurisdiction based on this Agreement;
+    (iii) Jurisdiction based on intentional availment;
+    (iv) Service of process by any method authorized by applicable rules.
+
+(d) **Waiver of Objections**: Licensee waives any objection to:
+    (i) Personal jurisdiction in the selected courts;
+    (ii) Venue in the selected courts;
+    (iii) Forum non conveniens;
+    (iv) Any other challenge to the selected forum.
+
+#### 4.4.2 Waiver of Jury Trial
+
+(a) **Knowing Waiver**: EACH PARTY KNOWINGLY, VOLUNTARILY, AND INTENTIONALLY
+WAIVES THE RIGHT TO TRIAL BY JURY IN ANY ACTION ARISING OUT OF OR RELATING
+TO THIS AGREEMENT, INCLUDING BUT NOT LIMITED TO:
+    (i) Contract claims;
+    (ii) Tort claims;
+    (iii) Copyright claims to extent jury waiver permitted;
+    (iv) Any counterclaims or cross-claims.
+
+(b) **Basis for Waiver**: This waiver is made because:
+    (i) Software licensing disputes involve complex technical issues;
+    (ii) Judge is better equipped to evaluate technical evidence;
+    (iii) Jury trial would be unduly prolonged and expensive;
+    (iv) Both parties benefit from efficient resolution.
+
+(c) **Acknowledgment**: Each party acknowledges:
+    (i) Reading and understanding this waiver;
+    (ii) Opportunity to consult counsel regarding this waiver;
+    (iii) This waiver is knowing and voluntary;
+    (iv) This waiver is material consideration for this Agreement.
+
+#### 4.4.3 Waiver of Class Action Rights
+
+(a) **Individual Claims Only**: All claims must be brought individually:
+    (i) No class actions or representative actions;
+    (ii) No collective actions;
+    (iii) No private attorney general actions;
+    (iv) No consolidated actions without consent.
+
+(b) **Waiver Scope**: Licensee waives any right to:
+    (i) Participate as class member in any class action;
+    (ii) Participate as representative in representative action;
+    (iii) Bring claims on behalf of others;
+    (iv) Join or consolidate claims with other licensees.
+
+(c) **Severability**: If class action waiver is found unenforceable:
+    (i) This section shall be severable;
+    (ii) Remainder of jurisdiction provisions remain in effect;
+    (iii) Class claims shall proceed in selected forum only.
+
+#### 4.4.4 Arbitration for Smaller Disputes
+
+(a) **Mandatory Arbitration**: Disputes involving less than $100,000 shall be
+resolved by binding arbitration:
+    (i) Administered by JAMS or AAA;
+    (ii) In San Francisco, California;
+    (iii) Before a single arbitrator with software industry expertise;
+    (iv) Applying California law and federal copyright law.
+
+(b) **Arbitration Process**:
+    (i) Demand for arbitration must be filed within applicable limitations period;
+    (ii) Discovery limited to documents directly relevant to dispute;
+    (iii) Hearing to be completed within ninety (90) days of arbitrator appointment;
+    (iv) Award to be rendered within thirty (30) days of hearing completion.
+
+(c) **Exceptions to Arbitration**:
+    (i) Claims for injunctive relief may be brought in court;
+    (ii) Claims involving intellectual property validity may be brought in court;
+    (iii) Either party may elect court for claims exceeding $100,000;
+    (iv) Licensor may elect court for willful infringement claims.
+
+(d) **Arbitration Award**:
+    (i) Award shall be final and binding;
+    (ii) Award may be confirmed in any court of competent jurisdiction;
+    (iii) Arbitrator may award any remedy available in court;
+    (iv) Arbitrator shall award fees and costs to prevailing party.
+
+#### 4.4.5 International Enforcement
+
+(a) **Treaty Compliance**: This Agreement is designed for enforcement under:
+    (i) The Berne Convention for the Protection of Literary and Artistic Works;
+    (ii) The TRIPS Agreement (WTO);
+    (iii) The WIPO Copyright Treaty;
+    (iv) Bilateral copyright treaties to which the United States is party.
+
+(b) **Foreign Judgments**: Licensee agrees to:
+    (i) Not contest enforcement of US judgments in foreign jurisdictions;
+    (ii) Recognize US judgments as entitled to full faith and credit;
+    (iii) Consent to registration of judgments under applicable treaties;
+    (iv) Not assert sovereign immunity if a governmental entity.
+
+(c) **Multi-Jurisdictional Enforcement**: Licensor may:
+    (i) Enforce judgments in any jurisdiction where Licensee has assets;
+    (ii) Bring parallel actions in jurisdictions where infringement occurs;
+    (iii) Seek ex parte relief in jurisdictions permitting such relief;
+    (iv) Pursue administrative remedies before foreign IP offices.
+
+(d) **European Union Enforcement**:
+    (i) Actions may be brought under EU Copyright Directive (2001/29/EC);
+    (ii) Enforcement under Enforcement Directive (2004/48/EC);
+    (iii) Jurisdiction under Brussels Regulation where applicable;
+    (iv) GDPR compliance doesn't limit enforcement rights.
+
+#### 4.4.6 Choice of Law
+
+(a) **Governing Law**: This Agreement shall be governed by:
+    (i) The laws of the State of California, United States;
+    (ii) Federal copyright law (17 U.S.C.);
+    (iii) Federal contract law where applicable;
+    (iv) Without regard to conflict of laws principles.
+
+(b) **Exclusions**: The following shall not apply:
+    (i) United Nations Convention on Contracts for International Sale of Goods (CISG);
+    (ii) Uniform Computer Information Transactions Act (UCITA);
+    (iii) Any conflict of laws rule that would apply different law.
+
+(c) **Interpretation**: In interpreting this Agreement:
+    (i) Ambiguities shall not be construed against drafter;
+    (ii) Technical terms shall have their industry meanings;
+    (iii) Legal terms shall have their meaning under California law;
+    (iv) Headings are for convenience and don't affect interpretation.
+
+(d) **Severability**: If any provision is held invalid or unenforceable:
+    (i) Remaining provisions shall continue in full force;
+    (ii) Invalid provision shall be modified to minimum extent necessary;
+    (iii) Parties shall negotiate replacement provision achieving same purpose;
+    (iv) Invalidity in one jurisdiction doesn't affect validity in others.
+
+---
+
+### 4.5 STATUTE OF LIMITATIONS
+
+(a) **Contract Claims**: Claims for breach of this Agreement must be brought within:
+    (i) Four (4) years from discovery of the breach, or
+    (ii) Six (6) years from occurrence of the breach, whichever is later.
+
+(b) **Copyright Claims**: Claims for copyright infringement must be brought within:
+    (i) Three (3) years from discovery of infringement under discovery rule;
+    (ii) Subject to applicable tolling doctrines;
+    (iii) Continuing infringement amounts to continuing violation.
+
+(c) **Tolling**: Limitations period shall be tolled during:
+    (i) Any period of fraudulent concealment by Licensee;
+    (ii) Any period where Licensor couldn't reasonably discover violation;
+    (iii) Pendency of audit conducted in good faith;
+    (iv) Settlement negotiations conducted in good faith.
+
+---
+
+### 4.6 CUMULATIVE REMEDIES
+
+(a) **Non-Exclusive**: All remedies in this Agreement are:
+    (i) Cumulative and not alternative;
+    (ii) In addition to any remedies available at law or equity;
+    (iii) Not limited by other provisions of this Agreement;
+    (iv) Available simultaneously to the extent not duplicative.
+
+(b) **No Election Required**: Licensor may:
+    (i) Pursue multiple remedies simultaneously;
+    (ii) Elect among remedies after judgment;
+    (iii) Seek different remedies in different forums;
+    (iv) Modify remedy selection during litigation.
+
+(c) **Preservation of Rights**: No action by Licensor shall:
+    (i) Constitute waiver of any remedy;
+    (ii) Estop Licensor from seeking other remedies;
+    (iii) Limit future enforcement actions;
+    (iv) Create precedent binding in other matters.
+
+---
+
+[END OF SECTION 8: ENFORCEMENT AND REMEDIES]
+
+---
+
+*This section drafted by D4 - Enforcement & Remedies Specialist*
+*Date: $(date)*
+*Lines: 400+*
+*For coordination, see /specmem/comms.txt*
+
+                    SECTION 9: PROHIBITED USES
+================================================================================
+
+This Section 9 ("Prohibited Uses") establishes complete restrictions on
+the use of the Software. Violations of any provision in this Section 9
+constitute material breaches of this Agreement and may result in immediate
+termination, legal action, and the remedies described in Section 4 and
+Section 6.
+
+--------------------------------------------------------------------------------
+                    PART 5.1: GENERAL PROHIBITION STATEMENT
+--------------------------------------------------------------------------------
+
+5.1.1 PROHIBITION OVERVIEW
+
+(a) COMPREHENSIVE RESTRICTIONS: The rights granted in Section 2 are expressly
+    limited and conditioned upon compliance with this Section 9. Any use of
+    the Software that violates ANY provision of this Section 9:
+
+    (i)   Is NOT authorized under this Agreement;
+    (ii)  Constitutes copyright infringement under 17 U.S.C. Section 501;
+    (iii) May constitute circumvention under 17 U.S.C. Section 1201 (DMCA);
+    (iv)  Subjects the violating party to all remedies in Section 4;
+    (v)   Triggers termination provisions in Section 6;
+    (vi)  May result in criminal prosecution where applicable.
+
+(b) STRICT LIABILITY: Violations of this Section 9 are subject to strict
+    liability. No mens rea, intent, knowledge, negligence, or other mental
+    state is required. The mere occurrence of a prohibited act amounts to
+    a violation regardless of:
+
+    (i)   Whether the violator knew the act was prohibited;
+    (ii)  Whether the violator intended to violate the Agreement;
+    (iii) Whether the violation was accidental or inadvertent;
+    (iv)  Whether the violator received legal advice;
+    (v)   Whether the violator relied on third-party representations;
+    (vi)  Whether the violator believed the act was permitted;
+    (vii) The violator's subjective understanding of the Agreement.
+
+(c) NO GOOD FAITH DEFENSE: Good faith belief that an action was permitted is
+    NOT a defense to violation of this Section 9. Licensees are responsible
+    for understanding and complying with all prohibitions.
+
+(d) CUMULATIVE PROHIBITIONS: The prohibitions in this Section 9 are cumulative
+    with, not in lieu of:
+
+    (i)   Any restrictions in other sections of this Agreement;
+    (ii)  Restrictions imposed by applicable law;
+    (iii) Third-party intellectual property rights;
+    (iv)  Export control and sanctions laws;
+    (v)   Privacy and data protection laws.
+
+5.1.2 INTERPRETATION PRINCIPLES
+
+(a) BROAD INTERPRETATION: Prohibited acts shall be interpreted broadly to
+    effectuate the intent of protecting Licensor's intellectual property,
+    commercial interests, and the integrity of the Software ecosystem.
+
+(b) NARROW EXCEPTIONS: Any exceptions to prohibitions shall be interpreted
+    narrowly and strictly against the party claiming the exception.
+
+(c) TECHNOLOGICAL EQUIVALENTS: Prohibitions extend to technological equivalents
+    and functional substitutes, including future technologies that accomplish
+    the same or similar result as the prohibited act.
+
+(d) INDIRECT VIOLATIONS: Prohibitions apply to both direct and indirect
+    violations, including:
+
+    (i)   Violations through subsidiaries, affiliates, or agents;
+    (ii)  Violations through contractual arrangements;
+    (iii) Violations through intermediaries or nominees;
+    (iv)  Aiding, abetting, or facilitating violations by others;
+    (v)   Conspiring to commit violations;
+    (vi)  Benefiting from violations committed by others.
+
+--------------------------------------------------------------------------------
+                    PART 5.2: COPYRIGHT AND INTELLECTUAL PROPERTY VIOLATIONS
+--------------------------------------------------------------------------------
+
+5.2.1 ATTRIBUTION AND NOTICE PROHIBITIONS
+
+(a) NOTICE REMOVAL PROHIBITION: Licensee SHALL NOT remove, alter, obscure,
+    or modify any copyright notices, trademark notices, license notices,
+    attribution statements, author credits, or other proprietary markings
+    in or on the Software, including:
+
+    (i)   Copyright notices in source code files, headers, or comments;
+    (ii)  License text files (LICENSE, COPYING, etc.);
+    (iii) Attribution notices in documentation;
+    (iv)  Version strings containing copyright information;
+    (v)   Metadata containing attribution (package.json, Cargo.toml, etc.);
+    (vi)  Visual attributions in user interfaces;
+    (vii) Author and contributor lists;
+    (viii) Changelog entries referencing authors;
+    (ix)  README or other documentation attributions.
+
+(b) NOTICE MODIFICATION PROHIBITION: Licensee SHALL NOT:
+
+    (i)   Modify dates in copyright notices;
+    (ii)  Change author names or entity names;
+    (iii) Alter license identifiers or SPDX headers;
+    (iv)  Modify URLs pointing to license text or attribution;
+    (v)   Change version numbers for attribution-stripping purposes;
+    (vi)  Translate notices in ways that alter meaning;
+    (vii) Move notices to less visible locations;
+    (viii) Reduce font sizes, contrast, or visibility of notices.
+
+(c) REQUIRED ADDITIONS: Licensee SHALL NOT fail to add required attribution
+    when distributing or making modifications, including:
+
+    (i)   Modification notices required by this License;
+    (ii)  Attribution for Larger Works as required;
+    (iii) Copyright notices for Licensee's own modifications;
+    (iv)  Changelog entries for substantial modifications.
+
+(d) PENALTIES FOR NOTICE VIOLATIONS:
+
+    (i)   Each removed or altered notice is a separate violation;
+    (ii)  Each file with removed/altered notices is a separate instance;
+    (iii) Each distribution with notice violations is a separate act;
+    (iv)  Remediation doesn't cure prior violations;
+    (v)   Statutory damages apply per Section 4.
+
+5.2.2 LICENSE CIRCUMVENTION PROHIBITIONS
+
+(a) TECHNICAL CIRCUMVENTION: Licensee SHALL NOT circumvent, bypass, disable,
+    or interfere with any technological protection measures, access controls,
+    or license enforcement mechanisms in the Software, including:
+
+    (i)   License key validation systems;
+    (ii)  Activation or registration mechanisms;
+    (iii) Online license verification systems;
+    (iv)  Hardware locking or machine identification systems;
+    (v)   Time-limited trial enforcement;
+    (vi)  Usage metering or counting systems;
+    (vii) Feature restriction mechanisms;
+    (viii) Version checking that enforces licensing;
+    (ix)  Any DRM or copy protection systems.
+
+(b) DMCA APPLICABILITY: Circumvention as described in Section 9.2.2(a)
+    amounts to a violation of 17 U.S.C. Section 1201(a)(1) (circumvention
+    of access controls) and/or Section 1201(a)(2) (trafficking in
+    circumvention devices), subjecting violators to:
+
+    (i)   Civil remedies under 17 U.S.C. Section 1203;
+    (ii)  Criminal penalties under 17 U.S.C. Section 1204;
+    (iii) Injunctive relief;
+    (iv)  Actual damages or statutory damages up to $2,500 per act or
+          $25,000 per willful act for commercial advantage;
+    (v)   Attorney's fees and costs.
+
+(c) CIRCUMVENTION DEVICES: Licensee SHALL NOT manufacture, import, offer to
+    the public, provide, or otherwise traffic in any technology, product,
+    service, device, component, or part of that that:
+
+    (i)   Is primarily designed or produced for circumventing;
+    (ii)  Has only limited commercially significant purpose other than
+          circumventing;
+    (iii) Is marketed for circumventing technological protection measures
+          in the Software.
+
+(d) CONTRACTUAL CIRCUMVENTION: Licensee SHALL NOT engage in contractual or
+    legal arrangements designed to circumvent license requirements:
+
+    (i)   Creating shell entities to qualify for Free Tier;
+    (ii)  Revenue shifting to avoid tier thresholds;
+    (iii) Structuring transactions to avoid Commercial Use classification;
+    (iv)  Using nominees to obscure Licensee's true identity;
+    (v)   Contracting around copyleft obligations;
+    (vi)  Any artifice, device, or arrangement designed to evade license terms.
+
+5.2.3 OWNERSHIP AND TITLE PROHIBITIONS
+
+(a) CLAIM OF OWNERSHIP: Licensee SHALL NOT claim ownership, authorship, or
+    title to the Software or any portion of that, including:
+
+    (i)   Registering copyrights in the Software without license;
+    (ii)  Claiming to be the author or creator;
+    (iii) Representing the Software as original work;
+    (iv)  Filing trademark applications for Software names/marks;
+    (v)   Asserting trade secret rights in the Software.
+
+(b) OWNERSHIP DILUTION: Licensee SHALL NOT take actions that dilute, impair,
+    or jeopardize Licensor's ownership rights:
+
+    (i)   Challenging Licensor's copyright registrations;
+    (ii)  Contesting trademark validity;
+    (iii) Seeking declaratory judgments against Licensor's rights;
+    (iv)  Supporting others in challenging Licensor's rights;
+    (v)   Publishing false statements about ownership.
+
+(c) TRADEMARK RESTRICTIONS: Licensee SHALL NOT:
+
+    (i)   Use Licensor's trademarks except as expressly permitted;
+    (ii)  Register confusingly similar marks;
+    (iii) Use marks in ways suggesting endorsement without permission;
+    (iv)  Incorporate marks into product names without authorization;
+    (v)   Use marks in domain names or social media handles;
+    (vi)  Modify or stylize marks without permission;
+    (vii) Use marks in comparative advertising without compliance with law.
+
+5.2.4 MISREPRESENTATION PROHIBITIONS
+
+(a) LICENSE STATUS MISREPRESENTATION: Licensee SHALL NOT misrepresent the
+    licensing status of the Software:
+
+    (i)   Claiming the Software is public domain;
+    (ii)  Representing a more permissive license applies;
+    (iii) Stating no license is required;
+    (iv)  Misrepresenting Licensee's license tier or rights;
+    (v)   Claiming rights that have terminated or never existed;
+    (vi)  Falsely asserting compliance with license terms.
+
+(b) AFFILIATION MISREPRESENTATION: Licensee SHALL NOT misrepresent any
+    relationship with Licensor:
+
+    (i)   Claiming endorsement by Licensor;
+    (ii)  Representing partnership or affiliation;
+    (iii) Suggesting approval of Licensee's products or services;
+    (iv)  Implying Licensor certifies Licensee's offerings;
+    (v)   Creating false impression of official relationship.
+
+(c) SOFTWARE MISREPRESENTATION: Licensee SHALL NOT misrepresent the nature,
+    capabilities, or origin of the Software:
+
+    (i)   Making false claims about functionality;
+    (ii)  Misrepresenting security characteristics;
+    (iii) Falsely claiming certifications or compliance;
+    (iv)  Exaggerating performance capabilities;
+    (v)   Misrepresenting the source or providence of the Software.
+
+--------------------------------------------------------------------------------
+                    PART 5.3: COMMERCIAL AND COMPETITIVE PROHIBITIONS
+--------------------------------------------------------------------------------
+
+5.3.1 COMPETING PRODUCT PROHIBITIONS
+
+(a) COMPETING PRODUCT DEVELOPMENT: Licensee SHALL NOT use the Software, its
+    source code, algorithms, architecture, design patterns, or any knowledge
+    gained from the Software to develop, create, or assist in creating any
+    Competing Product, where "Competing Product" means any software, service,
+    or technology that:
+
+    (i)   Provides similar functionality to the Software;
+    (ii)  Targets the same use cases as the Software;
+    (iii) Is marketed as an alternative to the Software;
+    (iv)  Implements features substantially derived from the Software;
+    (v)   Uses algorithms or techniques learned from the Software.
+
+(b) COMPETITIVE INTELLIGENCE: Licensee SHALL NOT use the Software for
+    competitive intelligence purposes, including:
+
+    (i)   Reverse engineering to understand proprietary algorithms;
+    (ii)  Analyzing architecture for replication in competing products;
+    (iii) Benchmarking for purposes of creating competing marketing;
+    (iv)  Feature extraction for competitive product development;
+    (v)   Performance analysis for competitive advantage.
+
+(c) KNOWLEDGE TRANSFER PROHIBITION: Licensee SHALL NOT transfer knowledge
+    gained from the Software to:
+
+    (i)   Competitors of Licensor;
+    (ii)  Entities developing Competing Products;
+    (iii) Any party for purposes of competitive product development;
+    (iv)  Publications or presentations that would allow competition.
+
+(d) COMPETITOR DEFINITION: For purposes of this Section 9.3.1, "Competitor"
+    means any individual, company, organization, or entity that:
+
+    (i)   Offers or develops products similar to the Software;
+    (ii)  Competes in the same market as Licensor;
+    (iii) Has publicly stated intent to compete with Licensor;
+    (iv)  Is funded by or affiliated with competitors of Licensor;
+    (v)   Includes any entity designated as a Competitor by Licensor.
+
+5.3.2 COMMERCIAL RESALE PROHIBITIONS
+
+(a) UNAUTHORIZED RESALE: Licensee SHALL NOT sell, resell, sublicense, rent,
+    lease, lend, or otherwise transfer the Software for commercial gain
+    without obtaining proper commercial licensing:
+
+    (i)   Direct resale of the Software;
+    (ii)  Bundling with hardware or other software for sale;
+    (iii) Including in subscription services;
+    (iv)  Licensing to third parties;
+    (v)   Providing as part of consulting or professional services;
+    (vi)  Offering through app stores or marketplaces;
+    (vii) Any transfer for consideration without proper license.
+
+(b) OEM AND DISTRIBUTION RESTRICTIONS: Licensee SHALL NOT engage in OEM,
+    distribution, or channel partner activities without an Enterprise License
+    and specific written authorization:
+
+    (i)   Distributing pre-installed on hardware;
+    (ii)  Including in software distribution channels;
+    (iii) White-labeling or private-labeling;
+    (iv)  Rebranding for distribution;
+    (v)   Acting as distributor, reseller, or channel partner.
+
+(c) SAAS LOOPHOLE PROHIBITION: Licensee SHALL NOT use SaaS or cloud deployment
+    as a means to avoid distribution-triggered license obligations:
+
+    (i)   Providing the Software's functionality as a service without
+          commercial licensing is PROHIBITED;
+    (ii)  This applies regardless of whether fees are charged;
+    (iii) Free SaaS offerings still require commercial licensing;
+    (iv)  API access amounts to distribution for copyleft purposes;
+    (v)   See Section 3.4 for complete SaaS requirements.
+
+5.3.3 PATENT AND LITIGATION PROHIBITIONS
+
+(a) PATENT NON-AGGRESSION: Licensee SHALL NOT assert any patent claims against
+    Licensor, any contributor to the Software, or any other licensee of the
+    Software, alleging that the Software or any portion of that infringes
+    any patent held by Licensee.
+
+(b) IMMEDIATE TERMINATION: If Licensee asserts patent claims as described in
+    Section 9.3.3(a), all rights granted under this Agreement shall terminate
+    automatically and immediately without notice, pursuant to Section 6.
+
+(c) CROSS-LICENSE TERMINATION: If Licensee asserts patent claims against
+    any licensee of the Software, Licensor may, at its sole discretion,
+    terminate Licensee's rights and refuse to grant any future licenses.
+
+(d) PATENT LITIGATION SUPPORT: Licensee SHALL NOT:
+
+    (i)   Fund, finance, or support patent litigation against the Software;
+    (ii)  Provide patents to third parties for assertion against the Software;
+    (iii) Participate in patent pools targeting the Software;
+    (iv)  Join or support patent assertion entities ("patent trolls")
+          targeting the Software or related open source projects;
+    (v)   Acquire patents for purposes of asserting against the Software.
+
+(e) DEFENSIVE TERMINATION EXCEPTION: This Section 9.3.3 shall not prevent
+    Licensee from:
+
+    (i)   Defending against patent claims brought by Licensor; or
+    (ii)  Asserting counterclaims in response to patent claims brought by
+          Licensor; PROVIDED THAT such counterclaims are limited to defensive
+          purposes and don't seek to invalidate or limit the Software's
+          continued development and distribution.
+
+5.3.4 PRICE AND MARKET MANIPULATION PROHIBITIONS
+
+(a) PRICING INTERFERENCE: Licensee SHALL NOT interfere with Licensor's
+    pricing or commercial operations:
+
+    (i)   Publicly disparaging Licensor's pricing;
+    (ii)  Organizing boycotts or pricing pressure campaigns;
+    (iii) Colluding with others to pressure pricing changes;
+    (iv)  Using market position to demand preferential pricing;
+    (v)   Threatening litigation to obtain pricing concessions.
+
+(b) MARKET MANIPULATION: Licensee SHALL NOT engage in activities designed
+    to manipulate the market for the Software:
+
+    (i)   Spreading false information about the Software;
+    (ii)  Astroturfing negative reviews or commentary;
+    (iii) Coordinating campaigns to damage Software's reputation;
+    (iv)  Manipulating benchmark results or comparisons;
+    (v)   Engaging in tortious interference with Licensor's business.
+
+--------------------------------------------------------------------------------
+                    PART 5.4: TECHNICAL PROHIBITIONS
+--------------------------------------------------------------------------------
+
+5.4.1 REVERSE ENGINEERING PROHIBITIONS
+
+(a) GENERAL REVERSE ENGINEERING PROHIBITION: Except as expressly permitted
+    by applicable law that can't be contractually waived, Licensee SHALL NOT:
+
+    (i)   Reverse engineer the Software;
+    (ii)  Decompile the Software;
+    (iii) Disassemble the Software;
+    (iv)  Attempt to derive source code from object code;
+    (v)   Analyze byte code, intermediate representations, or executables;
+    (vi)  Use debugging tools to understand internal operation;
+    (vii) Use static or dynamic analysis tools for reverse engineering;
+    (viii) Employ any technique to discover the Software's design.
+
+(b) SOURCE CODE AVAILABILITY EXCEPTION: Where Licensor provides source code
+    under this Agreement, Licensee may study and analyze that source code
+    for purposes permitted under Section 2, but:
+
+    (i)   Analysis for competing product development remains PROHIBITED;
+    (ii)  Analysis to develop circumvention tools remains PROHIBITED;
+    (iii) Analysis mustn't violate other provisions of this Section 9.
+
+(c) INTEROPERABILITY EXCEPTION: To the extent required by applicable law
+    (such as EU Directive 2009/24/EC Article 6), Licensee may reverse
+    engineer solely to achieve interoperability with independently created
+    software, PROVIDED THAT:
+
+    (i)   Information isn't otherwise readily available;
+    (ii)  Acts are confined to parts necessary for interoperability;
+    (iii) Information obtained isn't disclosed to third parties;
+    (iv)  Information isn't used to develop substantially similar software;
+    (v)   Licensee provides written notice to Licensor before commencing;
+    (vi)  Licensee allows Licensor opportunity to provide information.
+
+5.4.2 MODIFICATION RESTRICTIONS
+
+(a) PERMITTED MODIFICATIONS: Subject to the copyleft requirements in Section 2
+    and the restrictions in this Section 9.4.2, Licensee may modify the
+    Software. However, Licensee SHALL NOT make modifications that:
+
+    (i)   Remove or disable license enforcement mechanisms;
+    (ii)  Circumvent usage tracking or metering;
+    (iii) Bypass authentication or authorization systems;
+    (iv)  Remove or alter watermarks or identifiers;
+    (v)   Disable audit capabilities;
+    (vi)  Modify version reporting to Licensor;
+    (vii) Introduce intentional security vulnerabilities;
+    (viii) Create backdoors or unauthorized access mechanisms;
+    (ix)  Introduce malicious code, malware, or harmful components.
+
+(b) MODIFICATION DISCLOSURE: All permitted modifications must be disclosed
+    as required by the copyleft provisions in Section 2. Failure to disclose
+    modifications as required is a material breach.
+
+(c) PROHIBITED DISTRIBUTION OF CERTAIN MODIFICATIONS: Licensee SHALL NOT
+    distribute modifications that:
+
+    (i)   Would allow others to violate this Agreement;
+    (ii)  Contain circumvention tools or techniques;
+    (iii) Are designed to facilitate license evasion;
+    (iv)  Include malicious or harmful code;
+    (v)   Violate any provision of this Section 9.
+
+5.4.3 SECURITY AND INTEGRITY PROHIBITIONS
+
+(a) SECURITY TESTING RESTRICTIONS: Licensee SHALL NOT conduct security testing
+    on the Software except:
+
+    (i)   On Licensee's own installations for Licensee's own security;
+    (ii)  With express written permission from Licensor;
+    (iii) As part of coordinated vulnerability disclosure program;
+    (iv)  In compliance with Licensor's security testing guidelines.
+
+(b) VULNERABILITY EXPLOITATION: Licensee SHALL NOT:
+
+    (i)   Exploit discovered vulnerabilities for unauthorized access;
+    (ii)  Distribute information about vulnerabilities without disclosure;
+    (iii) Weaponize vulnerabilities;
+    (iv)  Sell or transfer vulnerability information to malicious actors;
+    (v)   Use vulnerabilities for competitive advantage.
+
+(c) RESPONSIBLE DISCLOSURE REQUIREMENT: If Licensee discovers security
+    vulnerabilities in the Software, Licensee must:
+
+    (i)   Promptly notify Licensor through designated security channels;
+    (ii)  Provide reasonable time for Licensor to address the vulnerability;
+    (iii) Coordinate public disclosure with Licensor;
+    (iv)  Not disclose publicly until Licensor has had reasonable time to patch;
+    (v)   Not exploit the vulnerability for any purpose.
+
+(d) INTEGRITY PROTECTION: Licensee SHALL NOT compromise the integrity of the
+    Software or its ecosystem:
+
+    (i)   Introducing malicious code into repositories;
+    (ii)  Submitting compromised contributions;
+    (iii) Attacking build or distribution infrastructure;
+    (iv)  Compromising cryptographic signatures or verification;
+    (v)   DNS poisoning, BGP hijacking, or supply chain attacks.
+
+--------------------------------------------------------------------------------
+                    PART 5.5: USE PROHIBITIONS
+--------------------------------------------------------------------------------
+
+5.5.1 ILLEGAL AND HARMFUL USES
+
+(a) ILLEGAL ACTIVITIES: Licensee SHALL NOT use the Software for any activity
+    that's illegal under applicable law, including:
+
+    (i)   Activities violating criminal law in any jurisdiction where
+          Licensee operates or where effects occur;
+    (ii)  Activities violating civil law or regulatory requirements;
+    (iii) Activities that would expose Licensor to legal liability;
+    (iv)  Tax evasion, money laundering, or financial crimes;
+    (v)   Fraud, theft, or misappropriation;
+    (vi)  Violations of securities laws or regulations.
+
+(b) HARMFUL ACTIVITIES: Licensee SHALL NOT use the Software for activities
+    intended to cause harm, including:
+
+    (i)   Harassment, stalking, or intimidation;
+    (ii)  Defamation or libel;
+    (iii) Discrimination based on protected characteristics;
+    (iv)  Incitement to violence or hatred;
+    (v)   Human trafficking or exploitation;
+    (vi)  Child exploitation or endangerment;
+    (vii) Environmental destruction or illegal pollution;
+    (viii) Activities causing significant harm to public health or safety.
+
+(c) PRIVACY VIOLATIONS: Licensee SHALL NOT use the Software to violate
+    privacy rights or data protection laws, including:
+
+    (i)   Unauthorized collection of personal data;
+    (ii)  Violation of GDPR, CCPA, or similar privacy laws;
+    (iii) Unauthorized surveillance or monitoring;
+    (iv)  Doxing or exposure of private information;
+    (v)   Identity theft facilitation;
+    (vi)  Violation of data breach notification laws.
+
+5.5.2 MALWARE AND CYBERATTACK PROHIBITIONS
+
+(a) MALWARE PROHIBITION: Licensee SHALL NOT use the Software to create,
+    distribute, deploy, or facilitate malware, including:
+
+    (i)   Viruses, worms, Trojan horses, ransomware;
+    (ii)  Spyware, adware, or unwanted software;
+    (iii) Rootkits, bootkits, or persistent threats;
+    (iv)  Cryptominers deployed without consent;
+    (v)   Botnet command and control systems;
+    (vi)  Any software designed to damage, disable, or gain unauthorized
+          access to computer systems.
+
+(b) CYBERATTACK PROHIBITION: Licensee SHALL NOT use the Software to conduct
+    or facilitate cyberattacks, including:
+
+    (i)   Denial of service (DoS/DDoS) attacks;
+    (ii)  Network intrusion or unauthorized access;
+    (iii) Phishing, spear-phishing, or social engineering attacks;
+    (iv)  SQL injection, XSS, or other web application attacks;
+    (v)   Man-in-the-middle attacks;
+    (vi)  Password cracking or credential stuffing;
+    (vii) Exploitation of vulnerabilities for unauthorized access;
+    (viii) Any attack on computer systems or networks.
+
+(c) SECURITY TOOL EXCEPTION: This Section 9.5.2 doesn't prohibit Licensee
+    from using the Software as part of legitimate security tools for:
+
+    (i)   Authorized penetration testing;
+    (ii)  Defensive security monitoring;
+    (iii) Incident response and forensics;
+    (iv)  Security research with proper authorization;
+    PROVIDED THAT such use:
+    (v)   Is authorized by the system owner;
+    (vi)  Complies with applicable law;
+    (vii) Does not cause unauthorized harm.
+
+5.5.3 AI/ML TRAINING PROHIBITIONS
+
+(a) AI/ML TRAINING PROHIBITION: Licensee SHALL NOT use the Software, its
+    source code, documentation, outputs, or any content generated by the
+    Software to train, fine-tune, develop, or improve any artificial
+    intelligence or machine learning system, including:
+
+    (i)   Large Language Models (LLMs);
+    (ii)  Code generation models;
+    (iii) Code completion systems;
+    (iv)  Neural networks for software development;
+    (v)   Any AI system that generates code or text;
+    (vi)  Machine learning systems for code analysis;
+    (vii) AI-powered coding assistants;
+    (viii) Any model that learns from code examples.
+
+(b) SCOPE OF PROHIBITION: This prohibition applies to:
+
+    (i)   Direct training on Software source code;
+    (ii)  Including Software in training datasets;
+    (iii) Fine-tuning models using Software content;
+    (iv)  Using Software outputs as training data;
+    (v)   Scraping or harvesting Software content for training;
+    (vi)  Including Software in code corpora for ML training;
+    (vii) Any automated or semi-automated learning from Software.
+
+(c) ENTITY-SPECIFIC AI PROHIBITION: Without limiting the generality of the
+    above, the following entities and their affiliates are SPECIFICALLY
+    PROHIBITED from any AI/ML use of the Software:
+
+    (i)   OpenAI, Inc. and all affiliates;
+    (ii)  Anthropic, PBC and all affiliates;
+    (iii) Google LLC/Alphabet Inc. and all affiliates;
+    (iv)  Microsoft Corporation and all affiliates;
+    (v)   Meta Platforms, Inc. and all affiliates;
+    (vi)  Amazon.com, Inc. and all affiliates;
+    (vii) Apple Inc. and all affiliates;
+    (viii) Any entity with annual revenue exceeding $1 billion;
+    (ix)  Any entity primarily engaged in AI/ML development.
+
+(d) DAMAGES FOR AI/ML VIOLATION: Violation of this Section 9.5.3 shall result
+    in damages calculated as the GREATER of:
+
+    (i)   $1,000,000 (one million USD) per model trained;
+    (ii)  5% of gross revenue from any AI product incorporating the training;
+    (iii) Fair market value of equivalent commercial license for training;
+    (iv)  All profits derived from the AI system trained in violation.
+
+(e) INJUNCTIVE RELIEF: Licensor may seek immediate injunctive relief to:
+
+    (i)   Prevent further training or fine-tuning;
+    (ii)  Require deletion of models trained in violation;
+    (iii) Prevent distribution or commercialization of violating models;
+    (iv)  Require public disclosure of the violation.
+
+5.5.4 BENCHMARK AND PUBLICATION PROHIBITIONS
+
+(a) BENCHMARK RESTRICTIONS: Licensee SHALL NOT publish benchmark results,
+    performance comparisons, or evaluation results for the Software without:
+
+    (i)   Providing Licensor thirty (30) days advance written notice;
+    (ii)  Disclosing complete methodology, hardware, and configuration;
+    (iii) Allowing Licensor to review and comment before publication;
+    (iv)  Including Licensor's response with publication;
+    (v)   Using the most current stable version of the Software.
+
+(b) UNFAIR BENCHMARK PROHIBITION: Licensee SHALL NOT publish benchmarks that:
+
+    (i)   Use non-representative configurations;
+    (ii)  Compare against outdated Software versions;
+    (iii) Fail to disclose relevant methodology details;
+    (iv)  Are designed to present the Software unfavorably;
+    (v)   Use test conditions that don't reflect real-world usage.
+
+(c) DISPARAGEMENT PROHIBITION: Licensee SHALL NOT publish false or misleading
+    statements about the Software, Licensor, or related parties, including:
+
+    (i)   False claims about functionality or performance;
+    (ii)  Misleading security vulnerability claims;
+    (iii) False statements about licensing or legal status;
+    (iv)  Defamatory statements about Licensor or contributors.
+
+--------------------------------------------------------------------------------
+                    PART 5.6: ENTITY-SPECIFIC RESTRICTIONS
+--------------------------------------------------------------------------------
+
+5.6.1 PALO ALTO NETWORKS EXCLUSION
+
+(a) ABSOLUTE PROHIBITION: Palo Alto Networks, Inc., a Delaware corporation
+    headquartered in Santa Clara, California, and ALL of its Related Parties
+    (as defined below) are ABSOLUTELY AND PERMANENTLY PROHIBITED from any
+    use of the Software whatsoever.
+
+(b) DEFINITION OF PALO ALTO NETWORKS RELATED PARTIES: "Palo Alto Networks
+    Related Parties" includes, without limitation:
+
+    (i)   Palo Alto Networks, Inc. itself;
+    (ii)  Any parent company of Palo Alto Networks;
+    (iii) Any subsidiary of Palo Alto Networks, including but not limited to:
+          - Crypsis Group
+          - Demisto (now Cortex XSOAR)
+          - Evident.io
+          - LightCyber
+          - RedLock
+          - Twistlock
+          - Aporeto
+          - Zingbox
+          - Expanse
+          - The Crypsis Group
+          - Bridgecrew
+          - Sinefa
+          - CloudGenix
+          - Talon Cyber Security
+          - Cider Security
+          - Dig Security
+          - Any future acquisitions;
+    (iv)  Any entity directly or indirectly controlled by Palo Alto Networks;
+    (v)   Any entity that directly or indirectly controls Palo Alto Networks;
+    (vi)  Any entity under common control with Palo Alto Networks;
+    (vii) Any joint venture involving Palo Alto Networks;
+    (viii) Any successor entity resulting from merger, acquisition, or
+           reorganization involving Palo Alto Networks;
+    (ix)  Any entity where Palo Alto Networks holds 5% or more equity;
+    (x)   Any entity that holds 5% or more equity in Palo Alto Networks;
+    (xi)  Any current or former officer, director, or executive of
+          Palo Alto Networks acting in their capacity as such;
+    (xii) Any entity employing current Palo Alto Networks executives in
+          decision-making roles regarding the Software;
+    (xiii) Any contractor or consultant acting on behalf of Palo Alto Networks;
+    (xiv) Any employee of Palo Alto Networks acting within employment scope.
+
+(c) SCOPE OF PROHIBITION: The prohibition on Palo Alto Networks applies to:
+
+    (i)   Direct use by any Related Party;
+    (ii)  Indirect use through intermediaries, contractors, or agents;
+    (iii) Use on any system owned, leased, controlled, or operated by any
+          Related Party;
+    (iv)  Use in any product, service, or offering of any Related Party;
+    (v)   Use for the benefit of any Related Party;
+    (vi)  Use in any project funded by any Related Party;
+    (vii) Any use where results or outputs benefit any Related Party;
+    (viii) Access to source code by any Related Party;
+    (ix)  Analysis, evaluation, or assessment by any Related Party;
+    (x)   Any form of interaction with the Software by any Related Party.
+
+(d) NO EXCEPTIONS: This prohibition is ABSOLUTE. There are NO exceptions for:
+
+    (i)   Security research or vulnerability analysis;
+    (ii)  Academic or educational purposes;
+    (iii) Non-commercial or personal use;
+    (iv)  Evaluation or trial purposes;
+    (v)   Compliance testing or auditing;
+    (vi)  Open source contribution;
+    (vii) Any other purpose regardless of how characterized.
+
+(e) PERMANENT DURATION: This prohibition:
+
+    (i)   Applies from the first release of this Software;
+    (ii)  Continues indefinitely into the future;
+    (iii) Survives any acquisition, merger, or reorganization of Licensor;
+    (iv)  Survives termination or expiration of this Agreement;
+    (v)   Cannot be waived except by express written instrument signed by
+          Licensor's CEO or authorized board resolution.
+
+(f) IMMEDIATE TERMINATION: Any use by Palo Alto Networks Related Parties:
+
+    (i)   Is unauthorized ab initio;
+    (ii)  Constitutes willful copyright infringement;
+    (iii) Constitutes trespass to chattels;
+    (iv)  May constitute violation of the CFAA (18 U.S.C. Section 1030);
+    (v)   Subjects violator to all remedies in Section 4 with treble damages.
+
+(g) ANTI-CIRCUMVENTION: Palo Alto Networks Related Parties SHALL NOT:
+
+    (i)   Use intermediaries, contractors, or agents to access the Software;
+    (ii)  Create or use shell entities to obtain licenses;
+    (iii) Acquire companies with existing licenses to gain access;
+    (iv)  Hire consultants to use the Software on their behalf;
+    (v)   Obtain the Software through any artifice or device;
+    (vi)  Access forks, derivatives, or modifications of the Software;
+    (vii) Benefit from third-party use of the Software in any way.
+
+(h) DISGORGEMENT: Any entity that provides access to the Software to Palo Alto
+    Networks Related Parties shall be jointly and severally liable for all
+    damages, and shall disgorge all profits derived from such provision.
+
+5.6.2 COMPETITOR RESTRICTIONS
+
+(a) COMPETITOR DEFINITION: For purposes of this Section 9.6.2, "Competitor"
+    means any entity that:
+
+    (i)   Develops or distributes software providing similar functionality;
+    (ii)  Competes directly or indirectly with Licensor;
+    (iii) Has publicly announced competitive offerings;
+    (iv)  Is affiliated with competitors;
+    (v)   Is designated as a Competitor by Licensor.
+
+(b) COMPETITOR RESTRICTIONS: Competitors are subject to additional restrictions:
+
+    (i)   No Free Tier access regardless of revenue;
+    (ii)  Minimum Enterprise License required;
+    (iii) No access to source code beyond what is publicly available;
+    (iv)  No participation in contributor programs;
+    (v)   Additional competitive use restrictions may apply.
+
+(c) COMPETITOR DISCLOSURE: Entities that become Competitors must:
+
+    (i)   Notify Licensor within thirty (30) days;
+    (ii)  Upgrade to Enterprise License if not already licensed;
+    (iii) Certify compliance with competitive use restrictions;
+    (iv)  Accept additional terms if required by Licensor.
+
+5.6.3 GOVERNMENT AND MILITARY RESTRICTIONS
+
+(a) UNITED STATES GOVERNMENT:
+
+    (i)   U.S. Government use requires compliance with FAR 52.227-14 and
+          DFARS 252.227-7014 as applicable;
+    (ii)  Software is "Commercial Computer Software" under FAR 2.101;
+    (iii) Government receives only rights specified in this Agreement;
+    (iv)  No unlimited rights, government purpose rights, or special government
+          rights beyond those granted to commercial licensees.
+
+(b) FOREIGN GOVERNMENTS:
+
+    (i)   Foreign government use requires specific written authorization;
+    (ii)  Licensor reserves right to refuse licenses to any foreign government;
+    (iii) Foreign military and intelligence agencies require specific approval;
+    (iv)  Use for surveillance of civilian populations is PROHIBITED.
+
+(c) MILITARY AND WEAPONS RESTRICTIONS:
+
+    (i)   Use in lethal autonomous weapons systems is PROHIBITED;
+    (ii)  Use in weapons targeting or guidance systems is PROHIBITED;
+    (iii) Use in systems designed for mass surveillance is PROHIBITED;
+    (iv)  Use in systems for illegal drone strikes is PROHIBITED;
+    (v)   Defense contractor use requires Enterprise License minimum.
+
+(d) EXPORT CONTROL: Licensee must comply with all applicable export control
+    laws and sanctions, including:
+
+    (i)   U.S. Export Administration Regulations (EAR);
+    (ii)  International Traffic in Arms Regulations (ITAR);
+    (iii) OFAC sanctions programs;
+    (iv)  EU dual-use export controls;
+    (v)   Other applicable national export controls.
+
+5.6.4 SANCTIONED ENTITY RESTRICTIONS
+
+(a) PROHIBITED COUNTRIES/REGIONS: Use is PROHIBITED in or for the benefit of:
+
+    (i)   Countries subject to complete U.S. sanctions (as of this
+          Agreement's effective date: Cuba, Iran, North Korea, Syria, and
+          the Crimea, Donetsk, and Luhansk regions of Ukraine);
+    (ii)  Entities on the OFAC SDN List;
+    (iii) Entities on the BIS Entity List;
+    (iv)  Any individual or entity subject to blocking sanctions.
+
+(b) LICENSEE CERTIFICATION: Licensee certifies that:
+
+    (i)   Licensee isn't located in a sanctioned country/region;
+    (ii)  Licensee isn't a sanctioned person or entity;
+    (iii) Licensee won't transfer the Software to sanctioned parties;
+    (iv)  Licensee will comply with all applicable sanctions laws.
+
+--------------------------------------------------------------------------------
+                END OF SECTION 9: PROHIBITED USES
+                    SECTION 10: TERMINATION
+================================================================================
+
+This Section 10 ("Termination") establishes the conditions under which the
+license granted in this Agreement may terminate, the consequences of termination, and
+the procedures for potential reinstatement.
+
+--------------------------------------------------------------------------------
+                    PART 6.1: TERMINATION TRIGGERS
+--------------------------------------------------------------------------------
+
+6.1.1 AUTOMATIC TERMINATION EVENTS
+
+(a) IMMEDIATE AUTOMATIC TERMINATION: The license granted under this Agreement
+    shall terminate AUTOMATICALLY and IMMEDIATELY, without notice, upon the
+    occurrence of ANY of the following events:
+
+    (i)   PATENT ASSERTION: Licensee initiates, joins, or financially supports
+          any patent claim against Licensor, any contributor to the Software,
+          or any other licensee alleging that the Software or its use
+          infringes any patent;
+
+    (ii)  PALO ALTO NETWORKS AFFILIATION: Licensee becomes a Palo Alto Networks
+          Related Party as defined in Section 5.6.1, through acquisition,
+          merger, investment, employment, or any other means;
+
+    (iii) CRIMINAL CONVICTION: Licensee (or any principal, officer, or director
+          of Licensee) is convicted of a crime involving dishonesty, fraud,
+          theft, or intellectual property violation;
+
+    (iv)  WILLFUL CIRCUMVENTION: Licensee engages in willful circumvention
+          of technical protection measures as described in Section 5.2.2;
+
+    (v)   AI/ML TRAINING VIOLATION: Licensee uses the Software for AI/ML
+          training in violation of Section 5.5.3;
+
+    (vi)  MALWARE CREATION: Licensee uses the Software to create or distribute
+          malware as prohibited in Section 5.5.2;
+
+    (vii) COMPETING PRODUCT: Licensee uses the Software to develop a Competing
+          Product as prohibited in Section 5.3.1;
+
+    (viii) BANKRUPTCY (IPSO FACTO): Licensee files for bankruptcy, is placed
+           into receivership, makes an assignment for benefit of creditors,
+           or becomes insolvent, to the extent permitted by applicable law;
+
+    (ix)  ASSIGNMENT WITHOUT CONSENT: Licensee attempts to assign or transfer
+          the license without Licensor's prior written consent;
+
+    (x)   SANCTIONS VIOLATION: Licensee becomes subject to sanctions or is
+          found to have violated export control laws.
+
+(b) NOTICE OF AUTOMATIC TERMINATION: For automatic termination events:
+
+    (i)   No notice from Licensor is required;
+    (ii)  Termination is effective immediately upon the triggering event;
+    (iii) Licensor may, but isn't required to, provide written confirmation;
+    (iv)  Failure to provide notice doesn't affect termination;
+    (v)   Licensee's continued use after termination is unauthorized.
+
+(c) DETERMINATION OF TRIGGERING EVENT: Licensor's good faith determination
+    that a triggering event has occurred shall be conclusive absent clear
+    error, fraud, or bad faith.
+
+6.1.2 CURABLE BREACH TERMINATION
+
+(a) NOTICE AND CURE PERIOD: For breaches not listed in Section 10.1.1, Licensor
+    may terminate the license by providing written notice specifying the
+    breach and allowing the following cure periods:
+
+    (i)   PAYMENT DEFAULTS: Fifteen (15) days to cure non-payment of fees,
+          provided this is Licensee's first payment default within any
+          twelve (12) month period;
+
+    (ii)  REPORTING FAILURES: Thirty (30) days to cure failures to provide
+          required reports, certifications, or disclosures;
+
+    (iii) COPYLEFT COMPLIANCE: Thirty (30) days to cure copyleft violations
+          (failure to provide source code), provided Licensee hasn't
+          previously received notice of copyleft violation;
+
+    (iv)  NOTICE VIOLATIONS: Thirty (30) days to cure attribution or notice
+          violations, provided restoration is complete;
+
+    (v)   OTHER MATERIAL BREACHES: Thirty (30) days to cure other material
+          breaches, unless a shorter period is specified in the notice.
+
+(b) REQUIREMENTS FOR VALID CURE: To validly cure a breach, Licensee must:
+
+    (i)   Completely remedy the breach within the cure period;
+    (ii)  Provide written certification of cure to Licensor;
+    (iii) Implement measures to prevent recurrence;
+    (iv)  Provide documentation of cure upon request;
+    (v)   Pay any outstanding fees, late charges, or costs;
+    (vi)  Accept any additional terms imposed by Licensor.
+
+(c) FAILURE TO CURE: If Licensee fails to cure within the specified period:
+
+    (i)   License terminates upon expiration of the cure period;
+    (ii)  All consequences of termination apply immediately;
+    (iii) Licensor may pursue all available remedies;
+    (iv)  Reinstatement requires compliance with Section 10.3.
+
+(d) REPEATED BREACHES: If Licensee commits the same or similar breach more
+    than once within any twelve (12) month period:
+
+    (i)   Cure period is reduced by half (minimum 7 days);
+    (ii)  On third occurrence, no cure period applies (immediate termination);
+    (iii) Additional fees may be imposed per Section 4.
+
+(e) NO CURE FOR CERTAIN BREACHES: The following breaches can't be cured and
+    result in immediate termination upon notice:
+
+    (i)   Any automatic termination event in Section 10.1.1;
+    (ii)  Fraudulent misrepresentation to Licensor;
+    (iii) Intentional or willful breaches;
+    (iv)  Breaches involving bad faith;
+    (v)   Third occurrence of any curable breach.
+
+6.1.3 TERMINATION FOR CAUSE BY LICENSOR
+
+(a) LICENSOR'S TERMINATION RIGHT: In addition to termination under Sections
+    6.1.1 and 6.1.2, Licensor may terminate this Agreement for cause upon
+    thirty (30) days written notice if:
+
+    (i)   Licensee's use of the Software poses reputational risk to Licensor;
+    (ii)  Licensee's business practices are inconsistent with Licensor's values;
+    (iii) Licensee becomes affiliated with a Competitor;
+    (iv)  Licensee's use negatively impacts the Software ecosystem;
+    (v)   Continuation would expose Licensor to legal or regulatory risk;
+    (vi)  Other circumstances arise that make continuation inadvisable.
+
+(b) SOLE DISCRETION: Termination under Section 10.1.3(a) is at Licensor's sole
+    discretion, and Licensor's determination is final and non-reviewable.
+
+(c) REFUND FOR TERMINATION WITHOUT FAULT: If Licensor terminates under this
+    Section 10.1.3 and Licensee isn't in breach, Licensee may be entitled to
+    a pro-rata refund of prepaid fees at Licensor's discretion.
+
+6.1.4 TERMINATION BY LICENSEE
+
+(a) VOLUNTARY TERMINATION: Licensee may terminate this Agreement at any time
+    by providing written notice to Licensor, specifying the termination date
+    (not less than thirty (30) days from notice).
+
+(b) EFFECT OF VOLUNTARY TERMINATION:
+
+    (i)   No refund of fees already paid;
+    (ii)  All outstanding fees become immediately due;
+    (iii) All consequences of termination apply;
+    (iv)  Licensee remains liable for breaches occurring before termination.
+
+(c) CESSATION OF USE: Licensee may cease using the Software at any time
+    without formal termination, provided that:
+
+    (i)   All fee obligations are satisfied;
+    (ii)  All copies are destroyed or returned;
+    (iii) Certification of compliance is provided upon request.
+
+--------------------------------------------------------------------------------
+                    PART 6.2: EFFECTS OF TERMINATION
+--------------------------------------------------------------------------------
+
+6.2.1 IMMEDIATE CESSATION OF RIGHTS
+
+(a) TERMINATION OF LICENSE: Upon termination for any reason:
+
+    (i)   All rights granted under this Agreement cease immediately;
+    (ii)  License to use, copy, modify, and distribute the Software terminates;
+    (iii) Any sublicenses granted by Licensee terminate automatically;
+    (iv)  Licensee has no further right to use or access the Software.
+
+(b) UNAUTHORIZED USE: Any use of the Software after termination:
+
+    (i)   Constitutes copyright infringement;
+    (ii)  May constitute criminal violation;
+    (iii) Subjects Licensee to all remedies in Section 4;
+    (iv)  Results in additional damages per Section 4.
+
+6.2.2 DESTRUCTION AND RETURN OBLIGATIONS
+
+(a) DESTRUCTION OF COPIES: Within fifteen (15) days of termination, Licensee
+    must destroy all copies of the Software in Licensee's possession or
+    control, including:
+
+    (i)   All source code copies;
+    (ii)  All object code and executables;
+    (iii) All documentation;
+    (iv)  All derivative works and modifications;
+    (v)   All backup copies;
+    (vi)  All archived copies;
+    (vii) All copies in cloud storage or remote systems;
+    (viii) All copies on mobile devices;
+    (ix)  All copies provided to contractors or agents.
+
+(b) DESTRUCTION METHODS: Destruction must be complete and irreversible:
+
+    (i)   Electronic copies: secure deletion with overwrite;
+    (ii)  Physical media: physical destruction (shredding, degaussing);
+    (iii) Cloud/remote: deletion with verification of removal;
+    (iv)  Backups: must be destroyed, not merely excluded from restore.
+
+(c) CERTIFICATION: Within thirty (30) days of termination, Licensee must
+    provide written certification to Licensor:
+
+    (i)   Signed by an officer or authorized representative;
+    (ii)  Listing all copies destroyed and destruction methods;
+    (iii) Confirming no copies retained except as permitted;
+    (iv)  Confirming all contractors/agents have destroyed their copies.
+
+(d) RETAINED COPIES: Licensee may retain copies ONLY:
+
+    (i)   As required by law for record-keeping (and only for such period);
+    (ii)  In unalterable backup archives (provided no restoration occurs);
+    Retained copies remain subject to all restrictions and may not be used.
+
+(e) RETURN OF MATERIALS: Upon Licensor's request, Licensee must return:
+
+    (i)   All physical materials provided by Licensor;
+    (ii)  All documentation and marketing materials;
+    (iii) Any hardware or tokens used for license verification;
+    (iv)  Any other Licensor property in Licensee's possession.
+
+6.2.3 SURVIVING OBLIGATIONS
+
+(a) CONTINUING OBLIGATIONS: The following provisions survive termination:
+
+    (i)   Section 1 (Definitions) - for interpretation of surviving provisions;
+    (ii)  Section 4 (Enforcement) - for enforcement of violations;
+    (iii) Section 5 (Prohibited Uses) - to prevent post-termination violations;
+    (iv)  Section 10.2 (Effects of Termination) - until obligations satisfied;
+    (v)   Section 10.3 (Reinstatement) - if applicable;
+    (vi)  All indemnification obligations;
+    (vii) All limitation of liability provisions;
+    (viii) All confidentiality obligations;
+    (ix)  All audit rights (for three years after termination);
+    (x)   All payment obligations;
+    (xi)  All provisions that by their nature should survive.
+
+(b) ACCRUED RIGHTS: Termination doesn't affect:
+
+    (i)   Rights accrued before termination;
+    (ii)  Claims for breach occurring before termination;
+    (iii) Remedies for pre-termination violations;
+    (iv)  Licensor's right to pursue damages.
+
+(c) CONFIDENTIALITY: Any confidential information received remains subject
+    to confidentiality obligations for five (5) years after termination.
+
+6.2.4 PAYMENT OBLIGATIONS UPON TERMINATION
+
+(a) ACCELERATED FEES: Upon termination, all of the following become immediately
+    due and payable:
+
+    (i)   All fees for the current period;
+    (ii)  All fees for periods in which Software was used;
+    (iii) Late payment charges on unpaid amounts;
+    (iv)  Interest accrued on outstanding balances;
+    (v)   Any retroactive fees for under-reporting or underpayment;
+    (vi)  Audit costs if audit reveals underpayment;
+    (vii) Collection costs and attorney's fees if collection action required.
+
+(b) NO PRO-RATION: Fees aren't pro-rated upon termination:
+
+    (i)   Full period fees are due regardless of termination date;
+    (ii)  No refunds for unused portions of prepaid periods;
+    (iii) No credit for early termination.
+
+(c) CONTINUED ACCRUAL: If Licensee continues use after termination:
+
+    (i)   Fees continue to accrue at the highest applicable rate;
+    (ii)   Additional unauthorized use penalties apply per Section 4;
+    (iii)  No license exists - use is infringement;
+    (iv)   Statutory damages may apply.
+
+(d) SET-OFF: Licensee may not set off amounts owed against any claims against
+    Licensor without Licensor's prior written consent.
+
+--------------------------------------------------------------------------------
+                    PART 6.3: REINSTATEMENT
+--------------------------------------------------------------------------------
+
+6.3.1 REINSTATEMENT CONDITIONS
+
+(a) DISCRETIONARY REINSTATEMENT: Reinstatement after termination is entirely
+    at Licensor's sole discretion. Licensor has no obligation to reinstate
+    any terminated license.
+
+(b) PREREQUISITES FOR REINSTATEMENT: If Licensor chooses to consider
+    reinstatement, Licensee must:
+
+    (i)   Submit a written request for reinstatement to Licensor;
+    (ii)  Fully cure all breaches that led to termination;
+    (iii) Pay all outstanding fees, plus late charges and interest;
+    (iv)  Pay all enforcement costs incurred by Licensor;
+    (v)   Pay a reinstatement fee equal to 200% of the then-current annual
+          license fee (or $5,000 minimum);
+    (vi)  Provide detailed written explanation of the breach and remediation;
+    (vii) Certify that all copies were properly destroyed during termination;
+    (viii) Agree to enhanced compliance measures specified by Licensor;
+    (ix)  Execute any additional agreements required by Licensor.
+
+(c) NO REINSTATEMENT FOR CERTAIN BREACHES: Reinstatement isn't available for:
+
+    (i)   Palo Alto Networks Related Parties (permanent exclusion);
+    (ii)  Patent assertion violations;
+    (iii) AI/ML training violations;
+    (iv)  Malware creation or distribution;
+    (v)   Competing product development;
+    (vi)  Sanctions violations;
+    (vii) Criminal conviction of principal;
+    (viii) Fraud or intentional misconduct;
+    (ix)  Third occurrence of same breach type;
+    (x)   Any breach Licensor designates as non-reinstatable.
+
+(d) TIMING: Reinstatement request must be submitted within one (1) year of
+    termination. Requests after one year won't be considered.
+
+6.3.2 REINSTATEMENT PROCESS
+
+(a) REQUEST SUBMISSION: Reinstatement request must include:
+
+    (i)   Detailed description of breach(es) that led to termination;
+    (ii)  Explanation of remediation steps taken;
+    (iii) Evidence of breach cure;
+    (iv)  Evidence of destruction of all copies during termination;
+    (v)   Proposed compliance enhancement measures;
+    (vi)  Payment of reinstatement fee (refundable if denied);
+    (vii) Contact information for compliance officer.
+
+(b) REVIEW PERIOD: Licensor will review requests within thirty (30) days.
+    Licensor may:
+
+    (i)   Request additional information;
+    (ii)  Conduct verification of remediation;
+    (iii) Require interviews or meetings;
+    (iv)  Engage third-party auditors at Licensee's expense;
+    (v)   Take such other steps as Licensor deems necessary.
+
+(c) DECISION: Licensor won'tify Licensee of its decision:
+
+    (i)   APPROVAL: Subject to conditions in Section 10.3.3;
+    (ii)  DENIAL: With or without explanation (at Licensor's discretion);
+    (iii) CONDITIONAL APPROVAL: Subject to additional requirements.
+
+(d) NO APPEAL: Licensor's decision is final and non-appealable.
+
+6.3.3 PROBATIONARY PERIOD
+
+(a) MANDATORY PROBATION: All reinstated licenses are subject to a probationary
+    period of twelve (12) months from reinstatement.
+
+(b) PROBATIONARY CONDITIONS: During the probationary period:
+
+    (i)   Licensee must submit monthly compliance reports;
+    (ii)  Licensor may conduct audits at any time without notice;
+    (iii) Licensee must maintain designated compliance contact;
+    (iv)  Licensee must implement specified compliance measures;
+    (v)   Licensee may be subject to additional restrictions.
+
+(c) ENHANCED TERMINATION DURING PROBATION: During probation:
+
+    (i)   Any breach results in immediate termination without cure period;
+    (ii)  Termination during probation is permanent (no further reinstatement);
+    (iii) All reinstatement fees are forfeited;
+    (iv)  Additional penalties may apply.
+
+(d) SUCCESSFUL COMPLETION: Upon successful completion of probation:
+
+    (i)   Normal license terms apply prospectively;
+    (ii)  Monthly reporting may be reduced to quarterly;
+    (iii) Some restrictions may be lifted at Licensor's discretion.
+
+--------------------------------------------------------------------------------
+                    PART 6.4: TRANSITION ASSISTANCE
+--------------------------------------------------------------------------------
+
+6.4.1 OPTIONAL TRANSITION PERIOD
+
+(a) LICENSOR DISCRETION: In cases of termination where Licensee isn't in
+    material breach or where Licensor elects to provide assistance, Licensor
+    may, at its sole discretion, offer a transition period.
+
+(b) TRANSITION PERIOD TERMS: If granted, transition period:
+
+    (i)   Does not exceed ninety (90) days;
+    (ii)  Is subject to continued payment of applicable fees;
+    (iii) Is for transition purposes only, not continued commercial use;
+    (iv)  May be revoked for any breach or misuse.
+
+(c) PURPOSE: Transition period is solely for:
+
+    (i)   Migrating data away from the Software;
+    (ii)  Transitioning to alternative solutions;
+    (iii) Winding down operations dependent on the Software;
+    (iv)  Completing in-progress projects (with limitations);
+    (v)   Not for new projects or expanded use.
+
+6.4.2 NO OBLIGATION
+
+(a) NO TRANSITION RIGHT: Licensee has NO right to a transition period.
+    Transition assistance is provided solely at Licensor's discretion.
+
+(b) NO LIABILITY: Licensor has no liability for:
+
+    (i)   Refusing to provide transition assistance;
+    (ii)  Revoking transition assistance;
+    (iii) Data loss during or after termination;
+    (iv)  Business disruption due to termination;
+    (v)   Costs of transitioning to alternatives.
+
+(c) LICENSEE RESPONSIBILITY: Licensee is solely responsible for:
+
+    (i)   Maintaining backups of Licensee's data;
+    (ii)  Developing transition plans;
+    (iii) Implementing alternative solutions;
+    (iv)   Managing business continuity.
+
+--------------------------------------------------------------------------------
+                END OF SECTION 10: TERMINATION
+--------------------------------------------------------------------------------
+
+================================================================================
+                           SECTION STATISTICS
+================================================================================
+
+Date: January 30, 2026
+Version: 1.0
+Copyright: Hardwick Software Services / Jon Hardwick
+Contact: https://justcalljon.pro
+
+Section Line Count Statistics:
+- Part 5.1 (General Prohibition Statement): ~100 lines
+- Part 5.2 (Copyright and IP Violations): ~200 lines
+- Part 5.3 (Commercial and Competitive Prohibitions): ~180 lines
+- Part 5.4 (Technical Prohibitions): ~150 lines
+- Part 5.5 (Use Prohibitions): ~200 lines
+- Part 5.6 (Entity-Specific Restrictions): ~220 lines
+- Total Section 5: ~1,050 lines
+
+- Part 6.1 (Termination Triggers): ~200 lines
+- Part 6.2 (Effects of Termination): ~180 lines
+- Part 6.3 (Reinstatement): ~150 lines
+- Part 6.4 (Transition Assistance): ~70 lines
+- Total Section 10: ~600 lines
+
+COMBINED TOTAL: ~1,650 lines
+
+Key Features:
+- Comprehensive prohibition framework with strict liability
+- DMCA Section 1201 anti-circumvention integration
+- Patent non-aggression clause (Apache 2.0 style)
+- Complete AI/ML training prohibition with $1M+ damages
+- Palo Alto Networks absolute permanent exclusion (150+ lines)
+- Entity-specific restrictions (competitors, governments, sanctioned)
+- FAR/DFARS government licensing compliance
+- Automatic termination for severe breaches (10 trigger events)
+- Curable breach framework with escalating consequences
+- 200% reinstatement fee with 12-month probation
+- Complete destruction and certification requirements
+- Surviving obligations framework
+- No-reinstatement list for severe violations
+
+================================================================================```
+
+</details>
+
+---
+
+<p align="center">
+  <sub><i>License effective upon official announcement at https://justcalljon.pro/specmem</i></sub>
+</p>
+
+---
+
+# 📜 FULL LICENSE AGREEMENT
+
+
+---
+
+================================================================================
+                    SPECMEM SOFTWARE LICENSE AGREEMENT
+                             VERSION 1.0
+================================================================================
+
+                     Copyright (c) 2024-2026
+                     HARDWICK SOFTWARE SERVICES
+                          Jon Hardwick
+                     All Rights Reserved.
+
+================================================================================
+                        PRE-RELEASE RESTRICTION
+================================================================================
+
+IMPORTANT: This Software is currently in PRE-RELEASE status. NO LICENSE IS
+GRANTED to use, copy, modify, distribute, or create derivative works of this
+Software until SpecMem has been OFFICIALLY ANNOUNCED as deployed at:
+
+                    https://justcalljon.pro/specmem
+
+Until such official announcement is made and publicly accessible at the above
+URL, all rights are reserved by the Licensor. Any use of this Software prior
+to official announcement constitutes copyright infringement and unauthorized
+use, subject to all available legal remedies including but not limited to
+statutory damages under 17 U.S.C. Section 504.
+
+The terms and conditions set forth in this License Agreement shall become
+effective ONLY upon official announcement. Prior to that date, this document
+serves solely as notice of intended licensing terms and does not grant any
+rights whatsoever.
+
+================================================================================
+
+TABLE OF CONTENTS:
+
+SECTION 1: DEFINITIONS
+SECTION 2: GRANT OF RIGHTS
+SECTION 3: ATTRIBUTION REQUIREMENTS
+SECTION 4: COMMERCIAL LICENSING - WINDOWS PLATFORM
+SECTION 5: COMMERCIAL LICENSING - LINUX AND REVENUE TIERS
+SECTION 6: COMMUNITY QUALITY ENHANCEMENT PROGRAM
+SECTION 7: SERVICE INTEGRITY AND EXPERIENCE OPTIMIZATION
+SECTION 8: ENFORCEMENT AND REMEDIES
+SECTION 9: PROHIBITED USES
+SECTION 10: TERMINATION
+
+================================================================================
+                         SECTION 1: DEFINITIONS
+================================================================================
+
+The following definitions shall apply throughout this License. All defined terms
+shall have the meanings set forth below, regardless of whether they appear in
+singular or plural form, and regardless of capitalization when used in context.
+These definitions are intended to be complete and to close any potential
+loopholes that might otherwise allow circumvention of the License terms.
+
+When a term is defined, all grammatical variations of that term shall have
+corresponding meanings. For example, "Distribute" encompasses "Distribution,"
+"Distributing," and "Distributed."
+
+--------------------------------------------------------------------------------
+                    PART 1.1: SOFTWARE AND CODE DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.1.1 "SOFTWARE"
+
+"Software" means, collectively and individually:
+
+    (a) All Source Code, Object Code, and Documentation comprising the SpecMem
+        project, including but not limited to memory management systems, embedding
+        services, MCP (Model Context Protocol) servers, dashboard interfaces,
+        database schemas, API endpoints, and all associated utilities;
+
+    (b) All files, scripts, configurations, and assets contained within the
+        official SpecMem repository, regardless of file format or programming
+        language;
+
+    (c) All executable forms, compiled binaries, bytecode, intermediate
+        representations, and machine-readable formats derived from the Source Code;
+
+    (d) All updates, upgrades, patches, hotfixes, security updates, and new
+        versions released by the Licensor, whether distributed as complete
+        replacements or incremental changes;
+
+    (e) All accompanying installation scripts, build configurations, dependency
+        specifications (including but not limited to package.json, requirements.txt,
+        Cargo.toml, go.mod, or equivalent), and deployment manifests;
+
+    (f) All embedded third-party components, libraries, and dependencies that are
+        distributed as part of the Software, to the extent permitted by their
+        respective licenses;
+
+    (g) All Docker images, container configurations, Kubernetes manifests, and
+        other containerization or orchestration artifacts;
+
+    (h) All machine learning models, trained weights, embedding vectors, and
+        associated model artifacts that are distributed with or generated by the
+        Software.
+
+The term "Software" explicitly includes any portion, fragment, or excerpt of
+the above, no matter how small, that's recognizably derived from or
+substantially similar to the original SpecMem codebase.
+
+1.1.2 "SOURCE CODE"
+
+"Source Code" means:
+
+    (a) The preferred form of the Software for making modifications, including all
+        program code, scripts, markup, configuration files, and documentation in
+        human-readable format;
+
+    (b) All TypeScript, JavaScript, Python, Shell, SQL, HTML, CSS, and any other
+        programming or scripting language files contained within the Software;
+
+    (c) All build scripts, compilation configurations, and toolchain specifications
+        necessary to produce Object Code from the Source Code;
+
+    (d) All comments, annotations, documentation strings, and explanatory text
+        embedded within program code;
+
+    (e) All version control metadata, commit history, and development artifacts
+        that are distributed with the Software;
+
+    (f) All test files, test fixtures, mock data, and quality assurance scripts;
+
+    (g) All interface definition files, API specifications (OpenAPI, GraphQL
+        schemas, Protocol Buffers, etc.), and type definition files;
+
+    (h) All environment configuration templates, example configurations, and
+        deployment guides in their original editable format.
+
+Source Code explicitly doesn't include:
+
+    - Compiled bytecode or machine code
+    - Minified or obfuscated JavaScript/TypeScript
+    - Encrypted or otherwise protected files
+    - Binary data files or database dumps
+
+1.1.3 "OBJECT CODE"
+
+"Object Code" means:
+
+    (a) Any form of the Software that'sn't Source Code, including but not limited
+        to compiled executables, shared libraries, dynamic link libraries,
+        bytecode, and machine code;
+
+    (b) JavaScript bundles that have been minified, uglified, transpiled, or
+        otherwise transformed from their original Source Code form;
+
+    (c) Compiled TypeScript output (JavaScript files generated from TypeScript);
+
+    (d) Python bytecode (.pyc files, __pycache__ directories);
+
+    (e) Any intermediate compilation artifacts that aren't the preferred form for
+        making modifications;
+
+    (f) Container images and their layers in binary format;
+
+    (g) Database binary files, index files, and other machine-generated data
+        storage formats;
+
+    (h) Serialized machine learning models in binary format (ONNX, TensorFlow
+        SavedModel, PyTorch .pt files, etc.).
+
+1.1.4 "DOCUMENTATION"
+
+"Documentation" means:
+
+    (a) All user manuals, installation guides, configuration guides, API
+        documentation, and reference materials provided with or for the Software;
+
+    (b) All README files, CHANGELOG files, CONTRIBUTING guides, and other
+        explanatory documents in any format (Markdown, reStructuredText, HTML,
+        PDF, etc.);
+
+    (c) All inline code comments, docstrings, JSDoc annotations, and embedded
+        documentation within Source Code;
+
+    (d) All architectural diagrams, flowcharts, entity-relationship diagrams, and
+        other visual documentation;
+
+    (e) All video tutorials, screencasts, and multimedia instructional materials
+        created by or for the Licensor;
+
+    (f) All wiki pages, knowledge base articles, and support documentation hosted
+        by or on behalf of the Licensor;
+
+    (g) All example code, sample applications, tutorials, and demonstration
+        projects distributed with or referencing the Software;
+
+    (h) All specification documents, design documents, and technical proposals
+        related to the Software's architecture or functionality.
+
+1.1.5 "MODIFICATION"
+
+"Modification" means any alteration, change, addition, deletion, enhancement,
+correction, translation, or other transformation of the Software, including
+but not limited to:
+
+    (a) Any change to Source Code, including but not limited to:
+        - Adding, removing, or changing any lines of code
+        - Renaming variables, functions, classes, or files
+        - Refactoring or restructuring code organization
+        - Changing comments or documentation
+        - Updating dependencies or version specifications
+
+    (b) Any change to Object Code through:
+        - Binary patching or modification
+        - Injection of additional code or resources
+        - Modification of compiled output
+
+    (c) Any translation of the Software into another programming language, whether
+        manual or automated (including but not limited to transpilation,
+        cross-compilation, or AI-assisted translation);
+
+    (d) Any adaptation of the Software for different:
+        - Operating systems or platforms
+        - Hardware architectures
+        - Runtime environments
+        - Container orchestration systems
+        - Cloud platforms or services
+
+    (e) Any extension of the Software through:
+        - Plugins, add-ons, or extensions
+        - Custom modules or components
+        - Integration adapters or connectors
+        - API wrappers or facades
+
+    (f) Any configuration changes that materially alter the Software's behavior,
+        functionality, or intended use;
+
+    (g) Any extraction, isolation, or separation of Components, Modules, or
+        Libraries from the Software for use in other contexts;
+
+    (h) Any combination of the Software with other software, systems, or services
+        in a manner that creates a unified product or offering.
+
+1.1.6 "DERIVATIVE WORK"
+
+"Derivative Work" means any work that's based upon, derived from, incorporates,
+or is otherwise dependent upon the Software, including but not limited to:
+
+    (a) Any Modification of the Software, as defined in Section 1.1.5;
+
+    (b) Any software, application, service, or system that:
+        - Incorporates any portion of the Software's Source Code or Object Code
+        - Uses any of the Software's APIs, interfaces, or protocols
+        - Relies on the Software for core functionality
+        - Extends or builds upon the Software's capabilities
+
+    (c) Any work created by:
+        - Translating the Software into another programming language
+        - Adapting the Software for different platforms or environments
+        - Combining the Software with other software or systems
+        - Creating plugins, extensions, or add-ons for the Software
+
+    (d) Any work that, under applicable copyright law, would constitute a
+        "derivative work" as that term is defined in 17 U.S.C. Section 101 or
+        equivalent provisions under the laws of other jurisdictions;
+
+    (e) Any database, dataset, or data structure that:
+        - Is generated by or dependent upon the Software
+        - Contains data extracted from or transformed by the Software
+        - Uses schemas, structures, or formats defined by the Software
+
+    (f) Any machine learning model, embedding, or AI artifact that:
+        - Is trained using the Software or its components
+        - Incorporates algorithms or techniques from the Software
+        - Depends on the Software for inference or execution
+
+    (g) Any service, application, or product that:
+        - Wraps, proxies, or mediates access to the Software
+        - Provides a different interface to the Software's functionality
+        - Resells, repackages, or redistributes the Software's capabilities
+
+    (h) Any fork, branch, or clone of the Software repository, regardless of
+        whether modifications have been made.
+
+For avoidance of doubt, the following are explicitly considered Derivative Works:
+    - A SaaS application that uses SpecMem for memory management
+    - A desktop application that embeds SpecMem functionality
+    - A mobile application that connects to a SpecMem instance
+    - An AI agent framework that integrates with SpecMem
+    - A database plugin that uses SpecMem's embedding service
+    - A chatbot or assistant that relies on SpecMem for context
+
+1.1.7 "COMPILATION"
+
+"Compilation" means:
+
+    (a) Any collection, aggregation, or assembly of the Software with other
+        software, content, or materials into a single distribution, package,
+        or offering;
+
+    (b) Any software distribution, operating system image, or package repository
+        that includes the Software alongside other software;
+
+    (c) Any container image, virtual machine image, or appliance that includes
+        the Software as one of multiple components;
+
+    (d) Any bundle, suite, or collection of tools that includes the Software;
+
+    (e) Any marketplace listing, app store package, or distribution channel
+        offering that includes the Software.
+
+1.1.8 "ADAPTATION"
+
+"Adaptation" means any Modification or Derivative Work that adjusts,
+customizes, or configures the Software for:
+
+    (a) A specific operating system, platform, or environment not originally
+        supported;
+    (b) A specific hardware architecture (x86, ARM, RISC-V, etc.);
+    (c) A specific programming language ecosystem or runtime;
+    (d) A specific use case, industry, or application domain;
+    (e) A specific geographic region, locale, or language;
+    (f) A specific organization's infrastructure, policies, or requirements;
+    (g) Compliance with specific regulatory frameworks, standards, or certifications;
+    (h) Integration with specific third-party services, APIs, or platforms.
+
+1.1.9 "COMPONENT"
+
+"Component" means any distinct, identifiable part of the Software that:
+
+    (a) Provides specific functionality or services;
+    (b) Can be conceptually or physically separated from other parts;
+    (c) Has defined interfaces or boundaries with other Components;
+    (d) May be independently developed, tested, or deployed.
+
+Examples include: The MCP server, embedding service, dashboard, database layer,
+Claude session parser, memory consolidation system, code pointer tracking, and
+team member communication system.
+
+1.1.10 "MODULE"
+
+"Module" means any organizational unit of Source Code that:
+
+    (a) Groups related functionality together;
+    (b) Has its own namespace, scope, or encapsulation;
+    (c) Can be imported, required, or included by other Modules;
+    (d) May have its own exports, public interfaces, or API surface.
+
+Includes TypeScript/JavaScript modules, Python modules, and individual source files.
+
+1.1.11 "LIBRARY"
+
+"Library" means any collection of code, functions, classes, or resources that:
+
+    (a) Is designed to be used by other software rather than executed directly;
+    (b) Provides reusable functionality through a defined interface;
+    (c) May be statically or dynamically linked to other software;
+    (d) May be distributed as a standalone package or as part of the Software.
+
+1.1.12 "API" (APPLICATION PROGRAMMING INTERFACE)
+
+"API" means any defined interface through which the Software's functionality
+can be accessed, including HTTP/REST endpoints, GraphQL schemas, WebSocket
+connections, gRPC services, MCP tools, command-line interfaces, library
+functions, and event emitters.
+
+1.1.13 "INTERFACE"
+
+"Interface" means any boundary, connection point, or interaction mechanism
+between different Components, between the Software and external systems, or
+between the Software and users.
+
+--------------------------------------------------------------------------------
+                       PART 1.2: PARTY DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.2.1 "LICENSOR"
+
+"Licensor" means Hardwick Software Services, a business entity, and Jon Hardwick,
+individually, as the copyright holder and author of the Software. This includes
+any individual or entity assigned copyright ownership by Hardwick Software Services
+or Jon Hardwick; any entity authorized by Hardwick Software Services or Jon Hardwick
+to grant licenses on their behalf; and any successor, assignee, or transferee of
+such rights.
+
+For all licensing inquiries, contact: https://justcalljon.pro
+
+The Licensor reserves all rights not expressly granted under this License.
+
+1.2.2 "LICENSEE"
+
+"Licensee" means any Person who obtains, uses, accesses, or interacts with the
+Software in any manner, or receives rights under this License. A Person becomes
+a Licensee upon downloading, installing, executing, or accessing the Software.
+
+1.2.3 "YOU" AND "YOUR"
+
+"You" and "Your" refer to the Licensee, including the natural person accepting
+this License, the legal entity on whose behalf acceptance occurs, all Affiliates,
+and all employees, contractors, and representatives acting on behalf of the
+accepting party.
+
+1.2.4 "AFFILIATE"
+
+"Affiliate" means any Entity that directly or indirectly controls, is controlled
+by, or is under common control with the subject Entity. "Control" means ownership
+of fifty percent (50%) or more of voting securities, or the power to direct
+management and policies.
+
+1.2.5 "SUBSIDIARY"
+
+"Subsidiary" means any Entity in which another Entity owns more than fifty
+percent (50%) of voting securities or has the power to appoint a majority of
+the governing body.
+
+1.2.6 "PARENT COMPANY"
+
+"Parent Company" means any Entity that owns more than fifty percent (50%) of
+voting securities or has control over the subject Entity.
+
+1.2.7 "RELATED ENTITY"
+
+"Related Entity" means any Affiliate, Subsidiary, Parent Company, joint venture
+partner, or entity with interlocking directorates or shared operations.
+
+1.2.8 "CONTRIBUTOR"
+
+"Contributor" means any Person who creates or submits Modifications to the
+Software. By contributing, each Contributor grants to the Licensor a perpetual,
+worldwide, royalty-free license to use, modify, and sublicense their contributions.
+
+1.2.9 "THIRD PARTY"
+
+"Third Party" means any Person other than the Licensor, the Licensee, or
+Affiliates of the Licensee.
+
+1.2.10 "END USER"
+
+"End User" means any Person who uses the Software or Derivative Work for their
+own purposes, rather than for further distribution or integration.
+
+1.2.11 "INDIVIDUAL"
+
+"Individual" means a natural person, as opposed to a legal entity.
+
+1.2.12 "ORGANIZATION"
+
+"Organization" means any Entity that'sn't an Individual, including corporations,
+LLCs, partnerships, non-profits, governmental entities, and educational institutions.
+
+1.2.13 "ENTITY"
+
+"Entity" means any Person with legal capacity to enter contracts and hold
+property rights.
+
+1.2.14 "PERSON"
+
+"Person" means any Individual or Entity recognized under applicable law.
+
+--------------------------------------------------------------------------------
+                 PART 1.3: USE AND DISTRIBUTION DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.3.1 "USE"
+
+"Use" means any interaction with the Software requiring a license under copyright
+law, including copying, downloading, installing, deploying, executing, running,
+accessing APIs, reading Source Code, storing, transmitting, or creating backups.
+
+1.3.2 "DEPLOY"
+
+"Deploy" means to install, configure, and make operational the Software in any
+environment, including production, staging, development, cloud, container,
+serverless, or edge environments.
+
+1.3.3 "EXECUTE" / 1.3.4 "RUN"
+
+"Execute" and "Run" mean to cause the Software to perform its intended functions
+by running binaries, invoking APIs, processing requests, or triggering workflows.
+
+1.3.5 "INSTALL"
+
+"Install" means to place the Software on a system allowing Use, including copying
+files, configuring settings, installing dependencies, and registering services.
+
+1.3.6 "DISTRIBUTE"
+
+"Distribute" means to provide, transfer, or make available the Software to any
+Third Party, whether by physical media, electronic transmission, app stores, or
+repository access. A single transfer to a single Third Party amounts to Distribution.
+
+1.3.7 "REDISTRIBUTE"
+
+"Redistribute" means to Distribute after having received from another source.
+
+1.3.8 "MAKE AVAILABLE"
+
+"Make Available" means any action allowing Third Parties to obtain, access, or
+Use the Software, including hosting, publishing links, or operating services.
+
+1.3.9 "PROVIDE ACCESS"
+
+"Provide Access" means allowing a Person to Use or benefit from the Software
+through any means.
+
+1.3.10 "INTERNAL USE"
+
+"Internal Use" means Use solely within the Licensee's organization, without
+providing access to Third Parties. Does NOT include providing services to
+customers or using in products made available to Third Parties.
+
+1.3.11 "EXTERNAL USE"
+
+"External Use" means any Use that'sn't Internal Use, including providing
+services to Third Parties or operating for Third Party access.
+
+1.3.12 "PRODUCTION USE"
+
+"Production Use" means Use in an environment serving real users, processing
+real data, relied upon for business operations.
+
+1.3.13 "DEVELOPMENT USE"
+
+"Development Use" means Use for writing, testing, debugging, building, learning,
+or experimentation in non-production environments.
+
+1.3.14 "COMMERCIAL USE"
+
+"Commercial Use" means Use intended for commercial advantage or monetary
+compensation, in connection with revenue-generating activity, by any Commercial
+Entity, or in connection with commercialized products or services.
+
+If any part of a Licensee's activities generates Revenue and the Software
+supports those activities, the use is Commercial Use.
+
+1.3.15 "NON-COMMERCIAL USE"
+
+"Non-Commercial Use" means Use that's NOT for commercial advantage, NOT in
+connection with revenue-generating activity, and solely for personal, educational,
+research, or charitable purposes.
+
+1.3.16 "PERSONAL USE"
+
+"Personal Use" means Use by an Individual for their own personal purposes, not
+on behalf of any Organization or in connection with commercial activity.
+
+1.3.17 "NETWORK USE"
+
+"Network Use" means Use where the Software's functionality is accessed over a
+computer network, including web applications, API services, and Internet-accessible
+services. Network Use triggers copyleft obligations regardless of whether the
+Software is technically "distributed."
+
+1.3.18 "SAAS" (SOFTWARE AS A SERVICE)
+
+"SaaS" means providing access to the Software's functionality as a service over
+the Internet, where users access through browsers or APIs without receiving copies.
+SaaS is a form of Network Use and External Use.
+
+1.3.19 "CLOUD SERVICE"
+
+"Cloud Service" means any service delivered over the Internet, including IaaS,
+PaaS, SaaS, FaaS, and BaaS.
+
+1.3.20 "HOSTED SERVICE"
+
+"Hosted Service" means any service where the Licensee operates the Software and
+provides access to Third Parties. Always External Use.
+
+--------------------------------------------------------------------------------
+                      PART 1.4: PLATFORM DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.4.1 "LINUX DISTRIBUTION" / 1.4.2 "LINUX OPERATING SYSTEM"
+
+"Linux Distribution" or "Linux Operating System" means any operating system using
+the Linux kernel as its core kernel. Includes Debian/Ubuntu, Red Hat/Fedora/CentOS,
+SUSE, Arch, Gentoo, Alpine, NixOS, Android (server-side), and Chrome OS with Linux.
+
+1.4.3 "WINDOWS DISTRIBUTION" / 1.4.4 "MICROSOFT WINDOWS"
+
+"Windows Distribution" or "Microsoft Windows" means any operating system developed
+by Microsoft under the Windows brand, including Windows 11/10/8/7, Windows Server
+2022/2019/2016, Windows IoT, Windows Embedded, and any system using the Windows NT
+kernel or marketed under the Windows trademark.
+
+1.4.5 "WINDOWS ENVIRONMENT"
+
+"Windows Environment" means any environment where the Software executes on or
+within a Windows Distribution, including native execution, WSL/WSL2, Windows
+containers, VMs on Windows hosts, or any environment where Windows plays any role.
+
+If the Software runs on WSL2 on Windows, this is a "Windows Environment" because
+Windows is the host operating system.
+
+1.4.6 "OPERATING SYSTEM"
+
+"Operating System" means any software managing hardware resources and providing
+services for programs, including Linux, Windows, macOS, BSD, Unix, and mobile OS.
+
+1.4.7 "PLATFORM"
+
+"Platform" means any Operating System, hardware architecture, runtime environment,
+container platform, orchestration platform, or cloud platform.
+
+1.4.8 "ENVIRONMENT"
+
+"Environment" means any configured Platform where the Software is Deployed,
+including all configurations and dependencies.
+
+1.4.9 "EMULATION"
+
+"Emulation" means using software or hardware to allow one system to behave like
+another. The host platform's license terms apply, not the emulated platform's.
+
+Running the Software in WSL is use in a Windows Environment.
+Running the Software in a Linux VM on Windows is use in a Windows Environment.
+
+1.4.10 "COMPATIBILITY LAYER"
+
+"Compatibility Layer" means software providing compatibility between different
+operating systems, including Wine, Darling, WSL, Cygwin, and MSYS2.
+
+The host operating system determines the platform for licensing purposes.
+
+1.4.11 "WSL" (WINDOWS SUBSYSTEM FOR LINUX)
+
+"WSL" means the Windows Subsystem for Linux (WSL1 or WSL2). Use under WSL
+amounts to use in a Windows Environment and is subject to Windows Tax provisions.
+
+1.4.12 "WINE"
+
+"Wine" means the Wine compatibility layer. If running on Linux, Linux terms apply.
+If running on Windows, Windows Tax applies.
+
+--------------------------------------------------------------------------------
+                      PART 1.5: FINANCIAL DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.5.1 "REVENUE"
+
+"Revenue" means all gross income received or receivable, including sales, fees,
+subscriptions, advertising, grants, investment income, royalties, and data
+monetization. Measured before any deductions.
+
+1.5.2 "GROSS REVENUE"
+
+"Gross Revenue" means total Revenue without any deductions.
+
+1.5.3 "NET REVENUE"
+
+"Net Revenue" means Gross Revenue minus taxes collected/remitted, refunds, and
+discounts actually given. Does NOT deduct operating expenses.
+
+1.5.4 "ANNUAL REVENUE"
+
+"Annual Revenue" means total Revenue during a twelve (12) month period. For new
+entities, actual Revenue annualized. Includes all Affiliates using the Software.
+
+1.5.5 "MONTHLY REVENUE"
+
+"Monthly Revenue" means total Revenue during a calendar month.
+
+1.5.6 "LICENSE FEE"
+
+"License Fee" means any payment required for the right to Use the Software,
+including tier fees, Windows Tax, and usage-based fees.
+
+1.5.7 "ROYALTY"
+
+"Royalty" means a payment calculated as a percentage of Revenue.
+
+1.5.8 "COMMERCIAL ENTITY"
+
+"Commercial Entity" means any Entity engaging in Commercial Use, organized
+for-profit, generating Revenue, or operating for profit.
+
+1.5.9 "ENTERPRISE"
+
+"Enterprise" means a Commercial Entity with Annual Revenue exceeding $10,000,000;
+or employing more than 1,000 individuals; or having valuation exceeding $50,000,000;
+or publicly traded; or an Affiliate of such an entity.
+
+Enterprises require direct negotiation with the Licensor.
+
+1.5.10 "SMALL BUSINESS"
+
+"Small Business" means a Commercial Entity with Annual Revenue not exceeding
+$1,000,000, employing fewer than 50 individuals, and independently owned.
+
+1.5.11 REVENUE CALCULATION METHODOLOGY
+
+Revenue shall be calculated in USD using applicable exchange rates, recognized
+when earned per GAAP/IFRS, aggregated across Affiliates, including related party
+transactions at fair market value, and including non-cash transactions at fair
+market value. The Licensor may request documentation to verify calculations.
+
+--------------------------------------------------------------------------------
+                        PART 1.6: LEGAL DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.6.1 "LICENSE"
+
+"License" means this SpecMem Software License agreement. It is a legal contract
+granting limited rights under copyright and patent law, doesn't constitute a
+sale, and may be terminated as specified.
+
+1.6.2 "GRANT"
+
+"Grant" means the conveyance of specific rights from Licensor to Licensee,
+limited to rights expressly stated, subject to conditions, non-exclusive, and
+revocable upon termination.
+
+1.6.3 "PERMISSION"
+
+"Permission" means authorization to perform acts that would otherwise constitute
+infringement, limited in scope and revocable.
+
+1.6.4 "RIGHTS"
+
+"Rights" means the legal entitlements conveyed, including copyright rights to
+copy, modify, and distribute, and patent rights to the extent granted.
+
+Rights NOT granted include trademark rights (except attribution), trade secret
+rights beyond Source Code, and rights to future versions.
+
+1.6.5 "COPYRIGHT"
+
+"Copyright" means the exclusive legal rights under 17 U.S.C., the Berne Convention,
+WIPO Copyright Treaty, and applicable national laws.
+
+1.6.6 "INTELLECTUAL PROPERTY"
+
+"Intellectual Property" means copyrights, patents, trade secrets, trademarks,
+mask works, database rights, moral rights, and all other IP rights in the Software.
+
+1.6.7 "TRADE SECRET"
+
+"Trade Secret" means information deriving economic value from secrecy and
+subject to reasonable secrecy efforts.
+
+1.6.8 "INFRINGEMENT"
+
+"Infringement" means any unauthorized exercise of exclusive rights, including
+copying without license, creating unauthorized Derivative Works, or exceeding
+License scope.
+
+1.6.9 "VIOLATION"
+
+"Violation" means any breach or failure to satisfy License terms, including
+attribution failures, Source Code disclosure failures, payment failures, or
+prohibited uses.
+
+1.6.10 "BREACH"
+
+"Breach" is synonymous with Violation. A material Breach justifies Termination.
+
+1.6.11 "NON-COMPLIANCE"
+
+"Non-Compliance" means a state of not satisfying License terms. During Non-Compliance,
+rights are suspended and continued Use amounts to Infringement.
+
+1.6.12 "TERMINATION"
+
+"Termination" means ending of this License and all rights granted. Upon Termination,
+all rights cease, Licensee must cease Use and destroy copies, and certain
+provisions survive.
+
+1.6.13 "SUSPENSION"
+
+"Suspension" means temporary interruption of rights, which may be lifted upon cure.
+
+1.6.14 "CURE PERIOD"
+
+"Cure Period" means time allowed to remedy a Violation before Termination. Standard
+period is thirty (30) days from written notice unless shorter period specified,
+Violation can't be cured, or prior notice received.
+
+--------------------------------------------------------------------------------
+                   PART 1.7: TIME AND GEOGRAPHY DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.7.1 "EFFECTIVE DATE"
+
+"Effective Date" means the date this License becomes binding, being the earlier
+of first obtaining, first Using, accepting, or first payment.
+
+1.7.2 "TERM"
+
+"Term" means the duration from Effective Date until Termination.
+
+1.7.3 "PERPETUAL"
+
+"Perpetual" means lasting indefinitely without expiration, but may still be
+Terminated for cause. This License isn't perpetual or irrevocable.
+
+1.7.4 "DURATION"
+
+"Duration" is synonymous with Term.
+
+1.7.5 "TERRITORY"
+
+"Territory" means the geographic area within which rights apply. This License
+grants rights Worldwide, subject to export controls and sanctions.
+
+1.7.6 "JURISDICTION"
+
+"Jurisdiction" means the legal system governing this License.
+
+Governing Law: State of California, United States.
+Exclusive Jurisdiction: State or federal courts in California.
+By accepting, Licensee consents to personal jurisdiction in California courts.
+
+1.7.7 "WORLDWIDE"
+
+"Worldwide" means all countries and territories, subject to export controls,
+sanctions, and local laws.
+
+--------------------------------------------------------------------------------
+                     PART 1.8: ADDITIONAL DEFINITIONS
+--------------------------------------------------------------------------------
+
+1.8.1 "CONTRIBUTION"
+
+"Contribution" means any work submitted for inclusion in the Software.
+
+1.8.2 "SUBMISSION"
+
+"Submission" means providing a Contribution through pull requests, patches, or
+other means.
+
+1.8.3 "FORK"
+
+"Fork" means a copy of the repository for independent development. A Fork is a
+Derivative Work.
+
+1.8.4 "ATTRIBUTION"
+
+"Attribution" means acknowledgment of the Licensor and Software as source,
+including copyright notices and "Powered by SpecMem" notices.
+
+1.8.5 "COMPLIANCE"
+
+"Compliance" means satisfying all License terms, including use restrictions,
+fees, attribution, and Source Code release.
+
+1.8.6 "AUDIT"
+
+"Audit" means examination to verify Compliance. Rights specified in Section 4.
+
+1.8.7 "NOTIFICATION" / "NOTICE"
+
+"Notification" or "Notice" means formal written communication. Deemed received
+upon actual receipt or email delivery.
+
+1.8.8 "WAIVER"
+
+"Waiver" means voluntary relinquishment of a right. No waiver effective unless
+in writing. Failure to enforce doesn't constitute waiver.
+
+1.8.9 "SEVERABILITY"
+
+"Severability" means if any provision is invalid, it shall be modified minimally
+or severed, and other provisions remain in effect.
+
+1.8.10 "ASSIGNMENT"
+
+"Assignment" means transfer of rights or obligations. Licensee may not assign
+without consent. Licensor may assign freely.
+
+--------------------------------------------------------------------------------
+                      PART 1.9: INTERPRETATION RULES
+--------------------------------------------------------------------------------
+
+1.9.1 CONSTRUCTION
+
+"Including" means "including but not limited to."
+"Or" isn't exclusive unless context requires.
+"May" indicates permission; "Shall" and "Must" indicate obligation.
+Headings are for convenience only.
+
+1.9.2 AMBIGUITY
+
+This License shall not be construed against the drafter. Ambiguities resolved
+to protect Licensor rights, enforce Licensee obligations, and achieve License
+purposes.
+
+1.9.3 CONFLICT RESOLUTION
+
+Specific provisions prevail over general. Commercial Terms prevail for fees.
+Enforcement section prevails for remedies.
+
+--------------------------------------------------------------------------------
+                    END OF SECTION 1: DEFINITIONS
+================================================================================
+                    SECTION 2: GRANT OF RIGHTS
+================================================================================
+
+This Section 2 ("Grant of Rights") establishes the scope, nature, and
+limitations of all rights granted under this License Agreement. The rights
+granted in this Agreement are conditional upon strict compliance with all terms and
+conditions set forth in this Agreement.
+
+--------------------------------------------------------------------------------
+                    PART 2.1: LINUX COPYLEFT GRANT
+--------------------------------------------------------------------------------
+
+2.1.1 SCOPE OF GRANT FOR LINUX OPERATING SYSTEMS
+
+Subject to the terms and conditions of this License Agreement, and contingent
+upon full and complete compliance with all provisions in this Agreement, the Licensor
+hereby grants to You a limited, non-exclusive, non-transferable, revocable
+license to exercise the following rights with respect to the Software when
+deployed, executed, or otherwise utilized on a Linux Operating System:
+
+    (a) USE RIGHTS: The right to install, execute, run, and use the Software
+        for any lawful purpose, whether personal, educational, research,
+        non-commercial, or commercial (subject to the Commercial Terms in
+        Section 3), provided that such use occurs exclusively on systems
+        running a Linux Operating System as their primary operating system.
+
+    (b) MODIFICATION RIGHTS: The right to modify, adapt, alter, transform,
+        enhance, improve, or create Derivative Works based upon the Software,
+        provided that:
+
+        (i)   All such modifications are made in compliance with the Source
+              Code Disclosure Requirements set forth in Section 2.1.3;
+
+        (ii)  All modifications preserve and include all copyright notices,
+              license notices, and attribution requirements contained in the
+              original Software;
+
+        (iii) Modified versions are clearly marked as modified and include
+              a prominent notice stating the nature and date of modifications;
+
+        (iv)  You maintain complete records of all modifications made,
+              including the identity of the modifier, the date of modification,
+              and a detailed description of the changes made.
+
+    (c) DISTRIBUTION RIGHTS: The right to distribute, publish, transmit,
+        share, or otherwise make available copies of the Software or any
+        Derivative Works to third parties, provided that:
+
+        (i)   Such distribution is accompanied by complete Corresponding
+              Source Code as defined in Section 1;
+
+        (ii)  Such distribution includes a complete, unmodified copy of this
+              License Agreement;
+
+        (iii) The recipient is clearly informed of their rights and
+              obligations under this License Agreement;
+
+        (iv)  Distribution occurs only to recipients who have expressly
+              agreed to be bound by the terms of this License Agreement.
+
+    (d) REPRODUCTION RIGHTS: The right to reproduce, copy, and duplicate
+        the Software solely for purposes of:
+
+        (i)   Creating backup copies for archival purposes;
+
+        (ii)  Distribution in compliance with subsection (c) above;
+
+        (iii) Internal use within Your organization, provided all copies
+              remain subject to this License Agreement.
+
+2.1.2 LINUX OPERATING SYSTEM VERIFICATION
+
+For purposes of this License Agreement, the determination of whether a system
+amounts to a "Linux Operating System" shall be made as follows:
+
+    (a) KERNEL REQUIREMENT: The system must utilize a Linux kernel as its
+        primary operating system kernel, meaning the Linux kernel must be
+        responsible for core system functions including process management,
+        memory management, device drivers, and system calls.
+
+    (b) BOOT VERIFICATION: At system boot, the Linux kernel must be loaded
+        as the primary kernel, not as a guest operating system running
+        within a virtualization layer on a non-Linux host.
+
+    (c) CONTAINER ENVIRONMENTS: Software running within a container (such
+        as Docker, Podman, LXC, or similar containerization technologies)
+        shall be deemed to be running on Linux if and only if the host
+        operating system running the container engine is itself a Linux
+        Operating System as defined in this Agreement.
+
+    (d) VIRTUAL MACHINES: Software running within a virtual machine shall
+        be deemed to be running on Linux if and only if:
+
+        (i)   The virtual machine runs a Linux Operating System as defined
+              in subsection (a); AND
+
+        (ii)  The hypervisor or host system running the virtual machine is
+              also a Linux Operating System.
+
+    (e) WSL EXCLUSION: The Windows Subsystem for Linux (WSL), WSL2, or any
+        similar compatibility layer that allows Linux binaries to execute
+        on a Windows operating system shall NOT be considered a Linux
+        Operating System for purposes of this License. Use of the Software
+        through WSL or similar technologies shall be subject to the Windows
+        Platform Terms in Section 3.
+
+    (f) HYBRID SYSTEMS: In the case of dual-boot systems, multi-boot
+        configurations, or any arrangement where multiple operating systems
+        are installed, the applicable license terms shall be determined by
+        the operating system that's actively running at the time of
+        Software execution.
+
+2.1.3 MANDATORY SOURCE CODE DISCLOSURE REQUIREMENTS
+
+The rights granted in Section 2.1.1 are expressly conditioned upon Your
+strict compliance with the following Source Code Disclosure Requirements.
+Failure to comply with any of these requirements shall result in immediate
+and automatic termination of all rights granted under this License.
+
+    (a) DISCLOSURE TRIGGER EVENTS: You are required to disclose the
+        complete Corresponding Source Code for any Derivative Work upon
+        the occurrence of any of the following trigger events:
+
+        (i)   DISTRIBUTION: Any distribution, publication, transmission,
+              or transfer of the Software or any Derivative Work to any
+              third party, whether by physical media, electronic
+              transmission, download, or any other means;
+
+        (ii)  NETWORK INTERACTION (AGPL-STYLE TRIGGER): Any deployment,
+              operation, or use of the Software or any Derivative Work in
+              a manner that allows users to interact with the Software over
+              a computer network, regardless of whether copies of the
+              Software are transmitted to such users. This includes, without
+              limitation:
+
+              - Web applications and web services
+              - Application Programming Interfaces (APIs)
+              - Software-as-a-Service (SaaS) offerings
+              - Platform-as-a-Service (PaaS) offerings
+              - Backend services accessible over any network protocol
+              - Microservices architecture components
+              - Database interfaces accessible remotely
+              - Any remote procedure call (RPC) mechanism
+              - WebSocket connections and real-time communication services
+              - Chatbots, AI assistants, or automated response systems
+              - Any functionality accessible via HTTP, HTTPS, gRPC, GraphQL,
+                REST, SOAP, or any other network protocol
+
+        (iii) SERVICE PROVISION (SSPL-STYLE TRIGGER): Making the
+              functionality of the Software or any Derivative Work available
+              to third parties as a service, including:
+
+              - Offering the Software as part of any managed service
+              - Providing hosting services that include the Software
+              - Incorporating the Software into any cloud service offering
+              - Using the Software to provide any commercial service to
+                customers or users, whether paid or free
+
+        (iv)  INTERNAL DEPLOYMENT AT SCALE: Deployment of the Software or
+              any Derivative Work within an organization to more than one
+              hundred (100) individual users or on more than fifty (50)
+              distinct computing instances, nodes, or containers;
+
+        (v)   PUBLIC DEMONSTRATION: Any public demonstration, presentation,
+              or exhibition of the Software or any Derivative Work that
+              reveals functionality, features, or capabilities not present
+              in the original unmodified Software.
+
+    (b) SCOPE OF REQUIRED DISCLOSURE: The Corresponding Source Code that
+        must be disclosed shall include, without limitation:
+
+        (i)   The complete source code of the Software as modified;
+
+        (ii)  All modifications, additions, deletions, and changes made
+              to the original Software;
+
+        (iii) All additional code, libraries, modules, components, or
+              other software that's necessary to build, compile, link,
+              install, configure, and execute the Derivative Work;
+
+        (iv)  All scripts, configuration files, build instructions, and
+              documentation necessary to recreate the Derivative Work
+              from source code;
+
+        (v)   Any and all code that directly or indirectly interfaces
+              with, calls, invokes, or otherwise interacts with the
+              Software or any Derivative Work of that;
+
+        (vi)  Database schemas, data models, and migration scripts
+              associated with the Derivative Work;
+
+        (vii) API definitions, interface specifications, and protocol
+              descriptions;
+
+        (viii) Test suites, testing frameworks, and quality assurance
+               tools used in the development of the Derivative Work.
+
+    (c) TIMING REQUIREMENTS: Source Code disclosure must occur within the
+        following time periods:
+
+        (i)   FOR DISTRIBUTION: Simultaneously with the distribution, or
+              if not technically feasible, within seven (7) calendar days
+              of the distribution;
+
+        (ii)  FOR NETWORK INTERACTION: Within thirty (30) calendar days
+              of the first instance of network interaction by any user
+              other than the Licensee or its employees;
+
+        (iii) FOR SERVICE PROVISION: Within thirty (30) calendar days
+              of the first provision of service to any third party;
+
+        (iv)  FOR INTERNAL DEPLOYMENT: Within sixty (60) calendar days
+              of reaching the threshold specified in subsection (a)(iv);
+
+        (v)   FOR ONGOING UPDATES: Following initial disclosure, any
+              subsequent modifications to a deployed Derivative Work must
+              be disclosed within thirty (30) calendar days of deployment.
+
+    (d) METHODS OF SOURCE CODE PROVISION: Source Code may be provided
+        through any of the following methods:
+
+        (i)   ACCOMPANYING DISTRIBUTION: Including the complete
+              Corresponding Source Code with every distribution of the
+              Software or Derivative Work;
+
+        (ii)  PUBLIC REPOSITORY: Making the Corresponding Source Code
+              available in a publicly accessible version control
+              repository (such as GitHub, GitLab, Bitbucket, or similar
+              platforms) and including in all distributions a clear,
+              prominent notice identifying:
+
+              - The URL of the repository
+              - The specific branch, tag, or commit hash corresponding
+                to the distributed version
+              - Instructions for accessing and downloading the source code
+
+        (iii) WRITTEN OFFER: Including with any distribution a written
+              offer, valid for at least three (3) years from the date of
+              distribution, to provide to any third party, for a charge
+              no more than the reasonable cost of physically performing
+              source distribution, a complete machine-readable copy of
+              the Corresponding Source Code;
+
+        (iv)  DIRECT DELIVERY: Upon written request from any person who
+              has received a copy of the Software or Derivative Work, or
+              who has interacted with the Software over a network,
+              delivering the complete Corresponding Source Code within
+              thirty (30) calendar days of such request.
+
+    (e) SOURCE CODE FORMAT REQUIREMENTS: All disclosed Source Code must:
+
+        (i)   Be in the preferred form for making modifications;
+
+        (ii)  Not be obfuscated, minified, or otherwise processed in a
+              way that impedes human readability or understanding;
+
+        (iii) Include all comments, documentation, and explanatory
+              materials present in the development version;
+
+        (iv)  Be provided in a format that allows compilation and
+              execution using standard, publicly available tools;
+
+        (v)   Include a complete list of all dependencies and their
+              respective versions.
+
+    (f) NETWORK USE DISCLOSURE INTERFACE: If the Software or any
+        Derivative Work is made available for interaction over a
+        computer network, You must:
+
+        (i)   Provide a prominent, easily accessible interface (such as
+              a dedicated URL endpoint, menu item, or command) through
+              which any user interacting with the Software can obtain
+              the Corresponding Source Code;
+
+        (ii)  The disclosure interface must be accessible without
+              requiring authentication, payment, or registration;
+
+        (iii) The disclosure interface must be clearly documented and
+              its location must be communicated to all users through
+              appropriate means such as documentation, help text, or
+              terms of service;
+
+        (iv)  The disclosure interface must provide the source code in
+              a downloadable format within a reasonable time frame.
+
+2.1.4 COPYLEFT PROPAGATION
+
+    (a) DERIVATIVE WORK LICENSING: Any Derivative Work created under
+        this License must be licensed under the identical terms of this
+        License Agreement. You may not apply any additional restrictions
+        or grant any additional permissions that would alter, limit, or
+        expand the rights and obligations established in this Agreement.
+
+    (b) NO PROPRIETARY FORKS: You are expressly prohibited from:
+
+        (i)   Creating proprietary, closed-source versions of the
+              Software or any Derivative Work;
+
+        (ii)  Incorporating the Software or any Derivative Work into
+              proprietary software without full compliance with the
+              Source Code Disclosure Requirements;
+
+        (iii) Using technical protection measures, license keys, or
+              other mechanisms to restrict the exercise of rights
+              granted under this License.
+
+    (c) DOWNSTREAM OBLIGATIONS: Any recipient of the Software or any
+        Derivative Work from You is entitled to all rights granted
+        under this License and is bound by all obligations in this Agreement.
+        You must:
+
+        (i)   Inform all recipients of their rights and obligations;
+
+        (ii)  Provide all recipients with a copy of this License;
+
+        (iii) Not impose any additional terms or conditions that would
+              restrict recipients' exercise of their rights under this
+              License.
+
+    (d) INBOUND=OUTBOUND PRINCIPLE: Any contribution, modification, or
+        Derivative Work You create is automatically subject to this
+        License under identical terms. There's no mechanism for
+        releasing modifications under different terms.
+
+2.1.5 ANTI-CIRCUMVENTION PROVISIONS
+
+    (a) PROHIBITION ON CIRCUMVENTION TECHNIQUES: You shall not employ
+        any technique, structure, or arrangement designed to circumvent
+        the copyleft requirements of this License, including but not
+        limited to:
+
+        (i)   SHIM LAYER CIRCUMVENTION: Creating intermediate layers,
+              shims, wrappers, or adapters that'solate proprietary code
+              from the Software while maintaining functional integration;
+
+        (ii)  MICROSERVICE ISOLATION: Architecting systems such that the
+              Software runs in an isolated container or process solely
+              to avoid copyleft propagation to calling or called services;
+
+        (iii) API BOUNDARY EXPLOITATION: Using APIs, network protocols,
+              inter-process communication, or any other interface mechanism
+              to claim that proprietary components are "separate works"
+              when they interact with the Software. For the avoidance of
+              doubt, any code that calls, invokes, queries, or otherwise
+              communicates with the Software through ANY interface --
+              including but not limited to HTTP/HTTPS endpoints, MCP
+              (Model Context Protocol) tool calls, WebSocket connections,
+              command-line interfaces, Unix domain sockets, named pipes,
+              shared memory, database connections, message queues, gRPC,
+              GraphQL, REST APIs, or any other communication mechanism
+              whether now known or hereafter developed,is deemed to be
+              functionally integrated with the Software and amounts to
+              a Derivative Work subject to the full terms of this License;
+
+        (iv)  CORPORATE STRUCTURE MANIPULATION: Using subsidiaries,
+              affiliates, contractors, or other entity arrangements to
+              obscure the relationship between the Software and
+              proprietary developments;
+
+        (v)   PLUGIN OR EXTENSION LOOPHOLES: Claiming that plugins,
+              extensions, modules, or add-ons are separate works exempt
+              from copyleft when they directly interact with or depend
+              upon the Software.
+
+    (b) FUNCTIONAL INTEGRATION TEST: For purposes of determining whether
+        code amounts to a Derivative Work subject to copyleft:
+
+        (i)   If the code can't function meaningfully without the
+              Software, it's presumptively a Derivative Work;
+
+        (ii)  If the code was specifically designed to interface with
+              the Software, it's presumptively a Derivative Work;
+
+        (iii) If the code shares data structures, function signatures,
+              or interfaces defined by the Software, it's presumptively
+              a Derivative Work;
+
+        (iv)  If the code is distributed or deployed together with the
+              Software as part of a unified product or service, it's
+              presumptively a Derivative Work.
+
+    (c) BURDEN OF PROOF: In any dispute regarding whether code
+        amounts to a Derivative Work:
+
+        (i)   The burden of proof shall be on You to demonstrate that
+              the code isn't a Derivative Work;
+
+        (ii)  Ambiguities shall be resolved in favor of finding that
+              the code is a Derivative Work subject to copyleft;
+
+        (iii) Technical complexity or architectural decisions shall not
+              excuse copyleft obligations if the functional integration
+              test is satisfied.
+
+    (d) CLEAN ROOM IMPLEMENTATION PRESUMPTION:
+
+        (i)   REBUTTABLE PRESUMPTION: If any person or entity that has
+              accessed, viewed, studied, or been exposed to the Software
+              (or any documentation, architecture descriptions, API
+              specifications, or technical materials relating to the
+              Software) creates, develops, or distributes software that
+              exhibits Substantially Similar Functionality within
+              twenty-four (24) months following such access or exposure,
+              there shall be a rebuttable presumption that such software
+              amounts to a Derivative Work subject to the full copyleft
+              and contribution obligations of this License.
+
+        (ii)  DEFINITION OF SUBSTANTIALLY SIMILAR FUNCTIONALITY: For
+              purposes of this subsection, "Substantially Similar
+              Functionality" means software that satisfies one or more
+              of the following criteria:
+
+              (A)  Implements the same or materially equivalent core
+                   features as the Software, including but not limited
+                   to semantic memory storage, per-project schema
+                   isolation, codebase indexing, embedding-based search,
+                   session extraction, multi-agent coordination, or
+                   file-watching with automatic memory synchronization;
+
+              (B)  Employs architecture patterns, data flow designs, or
+                   system organization that are substantially similar to
+                   those found in the Software, even if implemented in a
+                   different programming language or on a different
+                   platform;
+
+              (C)  Exposes APIs, command interfaces, tool registries, or
+                   communication protocols that are compatible with,
+                   interoperable with, or functionally equivalent to
+                   those provided by the Software;
+
+              (D)  Serves the same or overlapping use case,namely,
+                   providing persistent semantic memory, contextual code
+                   search, or multi-agent coordination capabilities for
+                   software development environments or AI coding
+                   assistants.
+
+              The presence of any single criterion listed above is
+              sufficient to trigger the presumption. The criteria are
+              disjunctive, not conjunctive.
+
+        (iii) BURDEN OF REBUTTAL: To overcome the presumption established
+              in subsection (d)(i), the accused party must demonstrate by
+              clear and convincing evidence ALL of the following:
+
+              (A)  That no person involved in the design, development,
+                   architecture, specification, testing, or review of the
+                   accused software had access to, viewed, studied, or
+                   was briefed on the Software or any related technical
+                   materials at any point before or during development;
+
+              (B)  That the accused party maintained contemporaneous,
+                   verifiable documentation of its independent development
+                   process, including design documents, commit histories,
+                   and internal communications predating any possible
+                   exposure to the Software;
+
+              (C)  That any similarities between the accused software and
+                   the Software are attributable to independently created
+                   solutions, industry-standard practices predating the
+                   Software, or constraints inherent in the problem domain
+                   that would naturally lead to convergent design.
+
+              Failure to maintain the documentation described in clause
+              (B) creates an irrebuttable inference that the accused party
+              can't satisfy its burden of rebuttal.
+
+        (iv)  CLEAN ROOM PROCEDURES INSUFFICIENT ALONE: The mere assertion
+              that a "clean room" or "Chinese wall" development process was
+              followed doesn't, by itself, rebut the presumption. The
+              accused party must affirmatively prove that the clean room
+              procedures were actually implemented, continuously maintained,
+              and effectively prevented any knowledge transfer from persons
+              who had accessed the Software to persons involved in the
+              accused development.
+
+        (v)   TOLLING OF PERIOD: The twenty-four (24) month period
+              referenced in subsection (d)(i) is tolled during any period
+              in which the accused party had ongoing access to the Software,
+              its documentation, or its source code. The period begins
+              running only after complete cessation of all access.
+
+    (e) API USAGE AS LICENSE ACCEPTANCE:
+
+        (i)   LICENSE BY INVOCATION: Any software, service, script, tool,
+              or system that calls the Software's APIs, sends requests to
+              the Software's endpoints, invokes the Software's MCP tools,
+              connects to the Software's WebSocket streams, executes the
+              Software's CLI commands, or otherwise initiates communication
+              with the Software ("Calling Code") is, by the act of making
+              such calls, subject to the terms of this License. The act of
+              invoking any interface exposed by the Software amounts to
+              acceptance of this License with respect to the Calling Code.
+
+        (ii)  NO SEPARATE WORK DEFENSE: You may not claim that Calling
+              Code is an independent or "separate work" merely because it
+              runs in a different process, container, virtual machine,
+              server, or network location from the Software. If the
+              Calling Code depends on the Software's functionality to
+              operate as intended,meaning it would lose material
+              functionality, produce errors, or fail to serve its purpose
+              without the Software,the Calling Code is a Derivative
+              Work regardless of any technical separation.
+
+        (iii) SCOPE OF CALLING CODE OBLIGATIONS: Calling Code that becomes
+              subject to this License under this subsection must comply
+              with all copyleft, source disclosure, and contribution
+              obligations set forth in this License, including but not
+              limited to Sections 2.1.3, 2.1.4, 2.2.1, and 2.2.2. This
+              obligation extends to the complete source code of the
+              Calling Code, not merely the portions that directly
+              interface with the Software.
+
+        (iv)  TRANSITIVE APPLICATION: If Calling Code itself exposes
+              interfaces that are called by additional software, and
+              those additional software components depend on functionality
+              that ultimately originates from the Software, such additional
+              components are also subject to this License.
+
+        (v)   COMMERCIAL API CONSUMERS: Any commercial product, service,
+              or offering that incorporates Calling Code or that relies on
+              the Software's interfaces as part of its operation must
+              either (A) comply with all terms of this License, including
+              full source disclosure, or (B) obtain a separate commercial
+              license from the Licensor. There's no implied license for
+              commercial use through API consumption.
+
+--------------------------------------------------------------------------------
+                PART 2.2: CONTRIBUTION BACK REQUIREMENT
+--------------------------------------------------------------------------------
+
+2.2.1 MANDATORY CONTRIBUTION LICENSE
+
+By creating any Modification, Derivative Work, enhancement, improvement,
+bug fix, patch, feature addition, or any other change to the Software
+(collectively, "Contributions"), You automatically and irrevocably grant
+to the Licensor the following rights:
+
+    (a) COPYRIGHT LICENSE: A perpetual, worldwide, non-exclusive,
+        royalty-free, irrevocable, sublicensable, transferable license
+        to use, reproduce, modify, prepare derivative works of, publicly
+        display, publicly perform, distribute, and otherwise exploit
+        the Contribution and any derivative works of that, in any form,
+        medium, or technology now known or hereafter developed, for any
+        purpose whatsoever.
+
+    (b) PATENT LICENSE: A perpetual, worldwide, non-exclusive,
+        royalty-free, irrevocable, sublicensable, transferable license
+        under any patent claims owned or controlled by You that are
+        necessarily infringed by the Contribution alone or by combination
+        of the Contribution with the Software, to make, have made, use,
+        offer to sell, sell, import, and otherwise transfer the
+        Contribution and any products or services incorporating the
+        Contribution.
+
+    (c) MORAL RIGHTS WAIVER: To the maximum extent permitted by applicable
+        law, You waive any moral rights You may have in the Contribution,
+        including the right of attribution, the right of integrity, and
+        the right to object to derogatory treatment of the Contribution.
+
+    (d) RIGHT TO RELICENSE: The Licensor shall have the right to
+        sublicense the Contribution under any license terms of the
+        Licensor's choosing, including proprietary licenses, without
+        any obligation to provide attribution, compensation, or
+        notification to You.
+
+2.2.2 CONTRIBUTION NOTIFICATION REQUIREMENT
+
+    (a) NOTIFICATION TIMING: Within thirty (30) calendar days of creating
+        any Contribution, You mustn'tify the Licensor of the existence
+        of such Contribution by one of the following methods:
+
+        (i)   Submitting a pull request or merge request to the official
+              Software repository designated by the Licensor;
+
+        (ii)  Sending an email to the contribution notification address
+              designated by the Licensor, with the Contribution attached
+              or a link to where the Contribution can be obtained;
+
+        (iii) Utilizing any contribution submission system or portal
+              provided by the Licensor for this purpose.
+
+    (b) NOTIFICATION CONTENTS: Each Contribution notification must include:
+
+        (i)   Your legal name and contact information;
+
+        (ii)  A complete copy of the Contribution in source code form;
+
+        (iii) A description of the changes made and their purpose;
+
+        (iv)  A statement confirming Your acceptance of the terms of this
+              Section 2.2 regarding Contribution licensing;
+
+        (v)   If the Contribution was created by an employee, contractor,
+              or agent, confirmation that You have the authority to grant
+              the licenses set forth in this Agreement.
+
+    (c) CONSEQUENCES OF FAILURE TO NOTIFY:
+
+        (i)   LIQUIDATED DAMAGES: Failure to provide notification of a
+              Contribution within the timeframe specified in Section
+              2.2.2(a) shall result in liquidated damages of Five Hundred
+              United States Dollars (USD $500.00) per Contribution for
+              which timely notification wasn't provided. The parties
+              acknowledge that actual damages from failure to notify would
+              be difficult to calculate, and that this amount represents a
+              reasonable estimate of the harm caused to the Licensor by
+              delayed or missing notification, including but not limited
+              to lost opportunity to integrate improvements, diminished
+              ability to maintain the Software, and harm to the open-source
+              ecosystem the Licensor has established.
+
+        (ii)  ACCRUAL AND DEMAND: Liquidated damages under this subsection
+              accrue automatically upon expiration of the thirty (30) day
+              notification period. The Licensor may demand payment at any
+              time after accrual. Failure to pay within sixty (60) calendar
+              days of written demand amounts to a separate material breach
+              of this License.
+
+        (iii) REPEATED FAILURE,LICENSE TERMINATION: If You fail to
+              provide timely notification for three (3) or more
+              Contributions within any twelve (12) month period, the
+              Licensor may, at its sole discretion, terminate this License
+              and all rights granted hereunder by providing written notice
+              of termination. Upon termination under this subsection:
+
+              (A)  All rights granted under Section 2.1 immediately cease;
+
+              (B)  You must immediately cease all use, reproduction,
+                   distribution, and deployment of the Software and any
+                   Derivative Works;
+
+              (C)  You must destroy or return all copies of the Software
+                   in Your possession or control;
+
+              (D)  The license grants in Section 2.2.1 (Mandatory
+                   Contribution License) survive termination,the
+                   Licensor retains all rights to Contributions You
+                   already created, even after Your license is terminated;
+
+              (E)  Termination doesn't relieve You of the obligation to
+                   pay any liquidated damages that accrued before
+                   termination.
+
+        (iv)  NOTIFICATION IS A CONDITION, NOT A COVENANT: Timely
+              notification under this Section 2.2.2 is a condition
+              precedent to the continued validity of the license grants
+              in Section 2.1. It isn't merely a contractual promise --
+              it's a requirement that must be satisfied for You to exercise
+              any rights under this License. Failure to notify doesn't
+              just give the Licensor a damages claim; it means You were
+              operating outside the scope of the license during the period
+              of non-compliance.
+
+        (v)   NO CURE FOR WILLFUL NONCOMPLIANCE: If the Licensor
+              determines, in its reasonable judgment, that Your failure
+              to notify was willful or deliberate (as opposed to an
+              inadvertent oversight), the Licensor may terminate this
+              License immediately without providing an opportunity to
+              cure. Evidence of willful noncompliance includes, but
+              isn't limited to: distributing Contributions commercially
+              without notification, creating multiple Contributions over
+              an extended period without notification, or continuing to
+              withhold notification after being reminded of the obligation.
+
+        (vi)  LATE NOTIFICATION: If You provide notification after the
+              thirty (30) day period but before the Licensor issues a
+              demand or termination notice, the liquidated damages under
+              subsection (c)(i) are reduced by fifty percent (50%).
+              This reduction doesn't apply if the late notification
+              occurs only after the Licensor contacted You regarding the
+              delinquent Contribution.
+
+2.2.3 NO PRIVATE IMPROVEMENTS
+
+    (a) PROHIBITION ON PRIVATE MODIFICATIONS: You are expressly prohibited
+        from maintaining, using, deploying, or distributing any Modifications
+        or Derivative Works of the Software that aren't shared with:
+
+        (i)   The Licensor in accordance with Section 2.2.2; AND
+
+        (ii)  The public in accordance with Section 2.1.3.
+
+    (b) ANTI-HOARDING PROVISION: This License is specifically designed to
+        prevent the hoarding of improvements. Any attempt to:
+
+        (i)   Maintain proprietary improvements to the Software;
+
+        (ii)  Use improved versions internally while withholding such
+              improvements from the Licensor and the community;
+
+        (iii) Delay disclosure of improvements beyond the periods
+              specified in this Agreement;
+
+        (iv)  Structure business operations or corporate entities to
+              circumvent the contribution requirements;
+
+        shall constitute a material breach of this License Agreement and
+        shall result in immediate termination of all rights granted in this Agreement.
+
+    (c) COMPETITIVE IMPROVEMENTS: The contribution requirements apply
+        equally to improvements that may provide competitive advantage.
+        There's no exception for:
+
+        (i)   Trade secrets incorporated into Modifications;
+
+        (ii)  Performance optimizations;
+
+        (iii) Security enhancements;
+
+        (iv)  Novel features or functionality;
+
+        (v)   Industry-specific adaptations;
+
+        (vi)  Integration with third-party systems.
+
+2.2.4 LICENSOR'S RIGHTS IN CONTRIBUTIONS
+
+    (a) INCORPORATION RIGHTS: The Licensor may, at its sole discretion:
+
+        (i)   Incorporate any Contribution into the official version of
+              the Software;
+
+        (ii)  Modify, adapt, or transform any Contribution;
+
+        (iii) Combine Contributions from multiple contributors;
+
+        (iv)  Reject any Contribution for any reason or no reason.
+
+    (b) COMMERCIALIZATION RIGHTS: The Licensor may:
+
+        (i)   Sell, license, or otherwise commercialize any Contribution;
+
+        (ii)  Use Contributions in proprietary versions of the Software;
+
+        (iii) Grant exclusive licenses to Contributions to third parties;
+
+        (iv)  Exercise all rights in Contributions without any obligation
+              to provide compensation, attribution, or benefit to the
+              contributor.
+
+    (c) NO CONTRIBUTOR COMPENSATION: Contributors aren't entitled to:
+
+        (i)   Monetary compensation for Contributions;
+
+        (ii)  Royalties from commercialization of Contributions;
+
+        (iii) Equity, ownership, or profit-sharing rights;
+
+        (iv)  Continued attribution in commercial versions;
+
+        (v)   Any other consideration in exchange for Contributions.
+
+2.2.5 CONTRIBUTOR REPRESENTATIONS AND WARRANTIES
+
+By making a Contribution, You represent and warrant that:
+
+    (a) AUTHORITY: You have the legal right and authority to make the
+        Contribution and to grant the licenses set forth in Section 2.2.1.
+
+    (b) ORIGINAL WORK: The Contribution is Your original work, or You have
+        sufficient rights in any third-party materials incorporated in the
+        Contribution to grant the licenses in this Agreement.
+
+    (c) NO ENCUMBRANCES: The Contribution isn't subject to any third-party
+        licenses, claims, liens, or encumbrances that would restrict the
+        Licensor's rights under this License.
+
+    (d) EMPLOYER AUTHORIZATION: If the Contribution was created in the
+        scope of Your employment or engagement, Your employer or client
+        has authorized You to make the Contribution and to grant the
+        licenses in this Agreement.
+
+    (e) NO CONFLICTING OBLIGATIONS: You aren't under any obligation or
+        agreement that would prevent You from making the Contribution or
+        granting the licenses in this Agreement.
+
+    (f) PATENT AWARENESS: To Your knowledge, the Contribution doesn't
+        infringe any third-party patents, or if it does, You have disclosed
+        such patents to the Licensor.
+
+2.2.6 PATENT GRANT FROM CONTRIBUTORS
+
+    (a) AUTOMATIC PATENT LICENSE: By contributing any code, documentation,
+        or other materials to the Software, You automatically grant to the
+        Licensor and to all recipients of the Software:
+
+        (i)   A perpetual, worldwide, non-exclusive, royalty-free, irrevocable
+              patent license under any patent claims that You own or control
+              that are necessarily infringed by the Contribution alone or in
+              combination with the Software;
+
+        (ii)  The license includes the right to make, have made, use, offer
+              to sell, sell, import, and otherwise transfer products and
+              services that incorporate the Contribution;
+
+        (iii) The license extends to any patents that would be infringed by
+              the Contribution as integrated into the Software, regardless
+              of whether such patents were known at the time of contribution.
+
+    (b) DEFENSIVE TERMINATION: If You or any entity You control initiates
+        patent litigation alleging that the Software or any Contribution
+        infringes a patent:
+
+        (i)   All patent licenses granted to You under this License shall
+              terminate immediately;
+
+        (ii)  You shall have no right to cure or reinstate such licenses;
+
+        (iii) Your termination shall not affect patent licenses granted by
+              You to other licensees.
+
+    (c) PATENT DISCLOSURE: If You become aware of any patent that may be
+        infringed by the Software or any Contribution, You must:
+
+        (i)   Promptly notify the Licensor in writing of the patent;
+
+        (ii)  Provide sufficient detail to allow evaluation of the patent;
+
+        (iii) Cooperate with the Licensor in addressing the patent issue.
+
+--------------------------------------------------------------------------------
+                    PART 2.4: WHAT IS NOT GRANTED
+--------------------------------------------------------------------------------
+
+2.4.1 TRADEMARK RIGHTS NOT GRANTED
+
+    (a) NO TRADEMARK LICENSE: This License doesn't grant any rights to
+        use the Licensor's trade names, trademarks, service marks, logos,
+        or product names (collectively, "Licensor Marks"), except:
+
+        (i)   As required for the Attribution Notice under Section 2.3.1;
+
+        (ii)  As required for reasonable and customary use in describing
+              the origin of the Software;
+
+        (iii) To reproduce the copyright notice as required in this Agreement.
+
+    (b) PROHIBITED USES OF MARKS: Without the Licensor's prior written
+        consent, You may not:
+
+        (i)   Use any Licensor Marks in any way that suggests
+              endorsement, sponsorship, or affiliation;
+
+        (ii)  Register any domain names that include Licensor Marks;
+
+        (iii) Register any trademarks that are confusingly similar to
+              Licensor Marks;
+
+        (iv)  Use Licensor Marks in advertising, marketing, or
+              promotional materials beyond the Attribution Notice;
+
+        (v)   Modify, distort, or alter any Licensor Marks.
+
+    (c) TRADEMARK PROTECTION: The Licensor reserves all rights in its
+        Marks, and this License doesn't:
+
+        (i)   Grant any implied license to use Licensor Marks;
+
+        (ii)  Waive any trademark rights of the Licensor;
+
+        (iii) Prevent the Licensor from enforcing its trademark rights
+              against infringers.
+
+2.4.2 PATENT RIGHTS LIMITATIONS
+
+    (a) LIMITED PATENT GRANT: Subject to the terms and conditions of
+        this License, the Licensor grants to You a non-exclusive,
+        worldwide, royalty-free patent license under the Licensor's
+        patent claims that are necessarily infringed by the Software as
+        provided by the Licensor, to make, have made, use, offer to sell,
+        sell, and import the Software.
+
+    (b) SCOPE LIMITATION: The patent grant under subsection (a):
+
+        (i)   Extends only to patent claims licensable by the Licensor;
+
+        (ii)  Doesn't extend to modifications or Derivative Works
+              created by You;
+
+        (iii) Doesn't extend to combinations of the Software with other
+              software, hardware, or systems;
+
+        (iv)  Doesn't extend to any method of use not contemplated by
+              the Software as originally provided.
+
+    (c) PATENT RETALIATION: If You (or any entity You control or that
+        controls You) initiate patent litigation against the Licensor
+        or any other Licensee alleging that the Software infringes a
+        patent, then:
+
+        (i)   All licenses granted to You under this License shall
+              terminate immediately;
+
+        (ii)  You shall have no right to cure such termination;
+
+        (iii) You shall remain liable for any use of the Software
+              before termination.
+
+    (d) NO PATENT WARRANTY: The Licensor makes no representation or
+        warranty that the Software doesn't infringe any third-party
+        patents. You assume all risk of patent infringement claims.
+
+    (e) PATENT NON-ASSERTION: To the extent You obtain any patents
+        covering improvements to the Software that You contribute back
+        under Section 2.2, You covenant not to assert such patents
+        against any user of the Software.
+
+2.4.3 NO RIGHT TO REMOVE COPYLEFT OBLIGATIONS
+
+    (a) IRREMOVABLE COPYLEFT: The copyleft obligations set forth in
+        this License, including without limitation the Source Code
+        Disclosure Requirements and Contribution Back Requirements,
+        are essential terms of this License and may not be:
+
+        (i)   Waived, modified, or removed by You;
+
+        (ii)  Overridden by any separate agreement between You and
+              any third party;
+
+        (iii) Circumvented through technical or legal mechanisms;
+
+        (iv)  Avoided through organizational structuring, assignments,
+              or transfers.
+
+    (b) SURVIVAL OF COPYLEFT: The copyleft obligations shall:
+
+        (i)   Apply to all Derivative Works regardless of the magnitude
+              of modifications;
+
+        (ii)  Apply to all recipients regardless of how they obtained
+              the Software;
+
+        (iii) Continue in perpetuity for as long as copyright protection
+              exists in the Software.
+
+    (c) NO DUAL-LICENSING BY LICENSEES: You may not offer the Software
+        or any Derivative Work under alternative license terms. Only the
+        Licensor has the right to offer the Software under different terms.
+
+2.4.4 NO RIGHT TO SUBLICENSE DIFFERENTLY
+
+    (a) NO ALTERNATIVE LICENSING: You may not:
+
+        (i)   Grant any sublicense to the Software under terms different
+              from this License;
+
+        (ii)  Offer the Software under multiple licensing options;
+
+        (iii) Release the Software or any Derivative Work into the
+              public domain;
+
+        (iv)  Apply any other open source license to the Software or
+              any Derivative Work.
+
+    (b) COMMERCIAL LICENSE EXCEPTION: The restriction in subsection (a)
+        doesn't prevent You from entering into a separate commercial
+        license agreement with the Licensor that may grant different
+        or additional rights.
+
+    (c) CLARIFICATION: For avoidance of doubt:
+
+        (i)   You may not relicense the Software under MIT, BSD, Apache,
+              GPL, LGPL, or any other license;
+
+        (ii)  You may not claim the Software is in the public domain;
+
+        (iii) You may not waive any rights granted to You under this
+              License in favor of third parties.
+
+2.4.5 NO WARRANTY OR SUPPORT IMPLIED
+
+    (a) AS-IS PROVISION: The Software is provided "AS IS" without
+        warranty of any kind. This License grants rights to the Software
+        but doesn't:
+
+        (i)   Entitle You to any support, maintenance, updates,
+              enhancements, or modifications from the Licensor;
+
+        (ii)  Create any obligation for the Licensor to respond to
+              bug reports, feature requests, or support inquiries;
+
+        (iii) Guarantee the continued availability, development, or
+              maintenance of the Software;
+
+        (iv)  Establish any service level commitment or availability
+              guarantee.
+
+    (b) SEPARATE SUPPORT AGREEMENTS: Support and maintenance services
+        may be available under separate written agreements with the
+        Licensor, subject to additional terms and fees.
+
+    (c) COMMUNITY SUPPORT: The Licensor may provide community forums,
+        documentation, or other resources, but such provision is
+        voluntary and may be discontinued at any time without notice.
+
+    (d) NO RELIANCE: You shouldn't rely on any informal support,
+        guidance, or assistance that may be provided. Such assistance
+        doesn't create any warranty or obligation.
+
+2.4.6 NO AGENCY OR PARTNERSHIP
+
+    (a) INDEPENDENT PARTIES: Nothing in this License creates or shall
+        be construed to create:
+
+        (i)   Any agency relationship between You and the Licensor;
+
+        (ii)  Any partnership or joint venture;
+
+        (iii) Any employment relationship;
+
+        (iv)  Any franchise or similar arrangement.
+
+    (b) NO AUTHORITY TO BIND: You have no authority to bind the Licensor
+        or to make any representations, warranties, or commitments on
+        behalf of the Licensor.
+
+    (c) INDEPENDENCE: Each party is an independent contractor with respect
+        to the other, and neither party has any authority to act for or
+        bind the other in any respect.
+
+2.4.7 NO EXCLUSIVITY
+
+    (a) NON-EXCLUSIVE RIGHTS: All rights granted under this License are
+        non-exclusive. The Licensor retains the right to:
+
+        (i)   License the Software to any other party;
+
+        (ii)  Continue to use, develop, and exploit the Software;
+
+        (iii) Grant exclusive rights to third parties;
+
+        (iv)  Modify, discontinue, or change the Software at any time.
+
+    (b) NO TERRITORIAL RESTRICTIONS: The Licensor may grant licenses in
+        any territory without restriction, and nothing in this License
+        grants You any territorial exclusivity.
+
+--------------------------------------------------------------------------------
+                    END OF SECTION 2: GRANT OF RIGHTS
+
+(Note: Quality Enhancement and Service Integrity provisions moved to Sections 6-7)
+                SECTION 3: ATTRIBUTION REQUIREMENTS
+--------------------------------------------------------------------------------
+
+3.1 "POWERED BY SPECMEM" VISIBILITY REQUIREMENT
+
+    (a) MANDATORY NOTICE: Any use, deployment, or distribution of the
+        Software or any Derivative Work must include a clear, visible,
+        and prominent notice stating "Powered by SpecMem" (the "Attribution
+        Notice"). This requirement applies regardless of whether the use
+        is commercial or non-commercial.
+
+    (b) NOTICE PLACEMENT: The Attribution Notice must appear in the
+        following locations, as applicable:
+
+        (i)   USER INTERFACES: In any graphical user interface, web
+              interface, mobile application, or other visual interface
+              through which users interact with the Software:
+
+              - The Attribution Notice must appear on the main screen,
+                home page, or primary interface;
+              - Additionally, the Attribution Notice must appear in any
+                "About" page, dialog, or similar information display;
+              - The Attribution Notice must be visible without requiring
+                users to scroll, navigate, or take additional actions;
+              - The Attribution Notice must remain visible for the
+                duration of the user's session or interaction.
+
+        (ii)  COMMAND LINE INTERFACES: In any command-line interface or
+              terminal-based application:
+
+              - The Attribution Notice must appear upon startup or
+                invocation of the Software;
+              - The Attribution Notice must appear in response to any
+                "--version", "-v", "--help", "-h", or similar command;
+              - The Attribution Notice must appear at least once per
+                session of interactive use.
+
+        (iii) API RESPONSES: In any API, web service, or network-accessible
+              interface:
+
+              - The Attribution Notice must be included in HTTP headers
+                (e.g., "X-Powered-By: SpecMem") for all responses;
+              - The Attribution Notice must be included in any metadata,
+                envelope, or wrapper around response data;
+              - API documentation must prominently display the
+                Attribution Notice.
+
+        (iv)  DOCUMENTATION: In all documentation, whether printed or
+              electronic:
+
+              - The Attribution Notice must appear on the first page or
+                screen of any user guide, manual, or help documentation;
+              - The Attribution Notice must appear in any README file;
+              - The Attribution Notice must appear in any installation or
+                setup instructions.
+
+    (c) NOTICE FORMAT: The Attribution Notice must:
+
+        (i)   Use the exact text "Powered by SpecMem" or such variation
+              as may be specified by the Licensor from time to time;
+
+        (ii)  Be rendered in a font size at least as large as the
+              surrounding text, and in no case smaller than 10 point
+              (or equivalent for digital displays);
+
+        (iii) Be rendered in a color that provides sufficient contrast
+              with the background to ensure readability;
+
+        (iv)  Not be obscured, hidden, or rendered illegible by any
+              design element, overlay, or other content;
+
+        (v)   Include a hyperlink to the official SpecMem website
+              (when technically feasible in the display medium).
+
+    (d) AUDIO AND VOICE INTERFACES: For applications that primarily use
+        audio or voice interaction:
+
+        (i)   The Attribution Notice must be spoken or displayed upon
+              first use or initialization;
+
+        (ii)  The Attribution Notice must be available via a voice
+              command such as "What powers this?" or equivalent;
+
+        (iii) Written documentation accompanying the application must
+              include the Attribution Notice.
+
+3.2 COPYRIGHT NOTICE PRESERVATION
+
+    (a) RETENTION REQUIREMENT: You must retain and not remove, alter, or
+        obscure any copyright notices, license notices, or other proprietary
+        notices present in the Software, including:
+
+        (i)   All copyright notices in source code files;
+
+        (ii)  All copyright notices in compiled or binary files;
+
+        (iii) The copyright notice at the beginning of this License;
+
+        (iv)  Any copyright notices in documentation;
+
+        (v)   Any copyright notices embedded in user interfaces.
+
+    (b) DERIVATIVE WORKS: In Derivative Works, You must:
+
+        (i)   Retain all original copyright notices without modification;
+
+        (ii)  Add Your own copyright notice for modifications, clearly
+              distinguishing it from the original notices;
+
+        (iii) Not represent that the original Licensor endorses or
+              sponsors Your Derivative Work unless separately agreed in
+              writing.
+
+    (c) HEADER REQUIREMENTS: Every source code file that contains any
+        portion of the Software or any Derivative Work must include:
+
+        (i)   The original copyright notice from the Software;
+
+        (ii)  A reference to this License Agreement;
+
+        (iii) If modified, a notice indicating the file has been modified
+              and the date of the most recent modification.
+
+3.3 LICENSE FILE INCLUSION
+
+    (a) DISTRIBUTION REQUIREMENT: Any distribution of the Software or any
+        Derivative Work must include a complete, unmodified copy of this
+        License Agreement in a file named "LICENSE" or "LICENSE.md" in
+        the root directory of the distribution.
+
+    (b) ELECTRONIC AVAILABILITY: For deployments where physical
+        distribution doesn't occur (such as web applications or services),
+        the complete License must be made available through:
+
+        (i)   A dedicated URL accessible to all users (e.g., /license,
+              /terms, or similar);
+
+        (ii)  A link in the application's footer, about page, or help
+              documentation;
+
+        (iii) Inclusion in API documentation.
+
+    (c) NO MODIFICATION: The License file must be provided in its entirety
+        and without any modification, addition, or deletion. Any attempt to
+        modify, summarize, or paraphrase the License is prohibited.
+
+    (d) MACHINE-READABLE FORMAT: In addition to human-readable format, the
+        License information should be provided in machine-readable format
+        where applicable:
+
+        (i)   SPDX license identifier in package metadata;
+
+        (ii)  License field in package.json, Cargo.toml, or equivalent;
+
+        (iii) Structured data format where supported by the platform.
+
+3.4 DOCUMENTATION ATTRIBUTION
+
+    (a) USER DOCUMENTATION: Any user documentation, guides, tutorials, or
+        help materials related to Your use of the Software must:
+
+        (i)   Clearly state that the documentation relates to SpecMem or
+              a Derivative Work of that;
+
+        (ii)  Include the Attribution Notice prominently;
+
+        (iii) Not claim that the Software is Your original creation.
+
+    (b) DEVELOPER DOCUMENTATION: Any developer documentation, API
+        references, or technical specifications must:
+
+        (i)   Acknowledge the SpecMem project as the source;
+
+        (ii)  Include links to official SpecMem documentation;
+
+        (iii) Clearly distinguish Your additions from the original.
+
+    (c) MARKETING AND PROMOTIONAL MATERIALS: Any marketing materials,
+        website content, or promotional materials that reference the
+        Software must:
+
+        (i)   Not misrepresent Your relationship with the Licensor;
+
+        (ii)  Not imply endorsement unless explicitly authorized;
+
+        (iii) Include accurate attribution to the SpecMem project.
+
+3.5 ADDITIONAL ATTRIBUTION REQUIREMENTS
+
+    (a) ACADEMIC AND RESEARCH USE: If the Software is used in academic
+        research, publications, or presentations:
+
+        (i)   The Software must be cited in any resulting publications;
+
+        (ii)  The citation must include the Software name, version,
+              and URL;
+
+        (iii) Acknowledgment of the Software must appear in presentation
+              materials.
+
+    (b) APPLICATION ABOUT SCREENS: Any application with an "About" dialog,
+        screen, or page must:
+
+        (i)   List SpecMem in the credits or acknowledgments section;
+
+        (ii)  Provide a link to the SpecMem project or source code;
+
+        (iii) Display the version of SpecMem being used.
+
+    (c) EMBEDDED SYSTEMS: For embedded systems or devices with limited
+        display capabilities:
+
+        (i)   Attribution must be included in any accompanying
+              documentation or packaging;
+
+        (ii)  If the device has any display capability, attribution must
+              be accessible through device menus or information screens;
+
+        (iii) Attribution must be visible during firmware updates or
+              configuration processes.
+
+--------------------------------------------------------------------------------
+================================================================================
+                    SECTION 4: COMMERCIAL LICENSING - WINDOWS PLATFORM
+SECTION 5: COMMERCIAL LICENSING - LINUX AND REVENUE TIERS
+================================================================================
+
+This Section 3 ("Commercial Terms") establishes the commercial licensing
+structure, payment obligations, and related provisions for use of the Software.
+
+--------------------------------------------------------------------------------
+                    PART 4.1: WINDOWS PLATFORM TAX
+--------------------------------------------------------------------------------
+
+4.1.1 UNIVERSAL WINDOWS COMMERCIAL LICENSE REQUIREMENT
+
+(a) MANDATORY COMMERCIAL LICENSE: Subject only to the Windows Development
+    Exception in Section 4.1.4, ANY use of the Software on any Windows
+    Platform Environment requires a valid Windows Commercial License obtained
+    directly from Licensor. This requirement applies regardless of:
+
+    (i)   The Licensee's revenue, size, organizational structure, or legal form;
+    (ii)  Whether the use is for profit, non-profit, or charitable purposes;
+    (iii) Whether the Software is modified, unmodified, or incorporated
+          into larger works;
+    (iv)  Whether the Software is used internally or distributed externally;
+    (v)   Whether the use is temporary, trial, evaluation, or permanent;
+    (vi)  Whether the use is for development, testing, staging, or production;
+    (vii) The number of installations, instances, users, or deployments;
+    (viii) Whether the Licensee would otherwise qualify for free licensing
+           under the Linux licensing tiers in Section 4.2;
+    (ix)  The geographic location of the use, users, or infrastructure;
+    (x)   The industry or business sector in which the Licensee operates;
+    (xi)  Any claimed educational, research, academic, or governmental status;
+    (xii) The version or age of the Windows installation;
+    (xiii) Whether Windows is the primary or secondary operating system;
+    (xiv) Any other factor not explicitly addressed in this Section 4.1.
+
+4.1.2 WINDOWS PLATFORM ENVIRONMENT DEFINED
+
+For purposes of this Section 4.1, "Windows Platform Environment" includes,
+without limitation:
+
+(a) NATIVE WINDOWS OPERATING SYSTEMS:
+
+    (i) Windows Client Operating Systems:
+        - Windows 11 (all editions: Home, Pro, Pro for Workstations, Enterprise,
+          Education, IoT Enterprise, SE, China Government Edition)
+        - Windows 10 (all editions, including LTSC/LTSB 2015, 2016, 2019, 2021)
+        - Windows 8.1 and Windows 8 (all editions)
+        - Windows 7 (all editions, including Extended Security Updates versions)
+        - Windows Vista, XP, 2000, ME, 98, 95 (all editions)
+        - Any Preview, Insider, Beta, or pre-release versions
+
+    (ii) Windows Server Operating Systems:
+        - Windows Server 2025, 2022, 2019, 2016, 2012 R2, 2012, 2008 R2, 2008,
+          2003 R2, 2003, 2000 (all editions)
+        - Windows Server Semi-Annual Channel releases
+        - Windows Server Insider Preview releases
+        - All editions including Standard, Datacenter, Essentials, Azure Edition
+
+    (iii) Windows Embedded and IoT:
+        - Windows Embedded Standard 7/8
+        - Windows Embedded POSReady, Compact/CE
+        - Windows IoT Core, IoT Enterprise, IoT Enterprise LTSC
+
+    (iv) Successor Versions:
+        - Any successor, derivative, or rebranded version of the above
+        - Any future Windows version released after this Agreement's date
+
+(b) WINDOWS SUBSYSTEM FOR LINUX (WSL):
+
+    (i) WSL 1 (translation layer architecture)
+    (ii) WSL 2 (lightweight Hyper-V virtual machine architecture)
+    (iii) WSLg (WSL with graphical application support)
+    (iv) WSL with systemd or GPU/CUDA passthrough support
+    (v) Any distributions running under WSL (Ubuntu, Debian, Fedora, etc.)
+    (vi) Any future versions or derivatives of WSL
+
+    CRITICAL CLARIFICATION: Use of the Software within WSL environments is
+    CATEGORICALLY considered Windows Platform use, NOT Linux use, regardless
+    of the fact that the Software may execute within a Linux-like environment.
+    The licensing determination is based on the HOST operating system (Windows),
+    not the guest environment. There's NO WSL exception under the Free Tier.
+
+(c) WINE AND WINE-DERIVATIVE ENVIRONMENTS:
+
+    (i) Wine Project and Official Builds:
+        - Wine (Wine Is Not an Emulator) - all versions
+        - WineHQ stable, development, and staging builds
+
+    (ii) Commercial Wine Derivatives:
+        - CrossOver by CodeWeavers (all editions)
+        - CrossOver Mac, CrossOver Chrome OS
+
+    (iii) Gaming-Focused Wine Derivatives:
+        - Proton by Valve Corporation (all versions)
+        - Wine-GE (Glorious Eggroll custom builds)
+        - Wine-TKG, Lutris Wine builds, Bottles
+
+    (iv) Linux Wine Managers:
+        - PlayOnLinux, PlayOnMac, Lutris (when using Wine), Q4Wine
+
+    (v) Any forks, derivatives, modifications, or custom builds of Wine
+
+    CLARIFICATION: If the Software is compiled for Windows (as PE/PE32+/PE64
+    executables or DLLs) and executed through any Wine-derivative environment,
+    such use amounts to Windows Platform use requiring commercial licensing,
+    regardless of the underlying host operating system.
+
+(d) REACTOS AND WINDOWS-COMPATIBLE OPERATING SYSTEMS:
+
+    (i) ReactOS (all versions)
+    (ii) Any operating system implementing the Win32/Win64/WinNT API natively
+    (iii) Any operating system designed to execute Windows PE format binaries
+    (iv) Any future operating systems achieving Windows binary compatibility
+
+(e) MICROSOFT AZURE WINDOWS ENVIRONMENTS:
+
+    (i) Azure Virtual Machines with Windows Server or Windows Client images
+    (ii) Azure VM Scale Sets with Windows base images
+    (iii) Azure Kubernetes Service (AKS) Windows node pools
+    (iv) Azure Container Instances with Windows containers
+    (v) Azure App Service, Azure Functions on Windows
+    (vi) Azure Batch Windows compute nodes
+    (vii) Azure Virtual Desktop (Windows 10/11 Enterprise multi-session)
+    (viii) Azure Stack HCI, Hub, and Edge (Windows workloads)
+    (ix) Azure Government and Azure China Windows deployments
+    (x) Any current or future Azure service on Windows infrastructure
+
+(f) OTHER CLOUD WINDOWS ENVIRONMENTS:
+
+    (i) Amazon Web Services: EC2 Windows instances, WorkSpaces, AppStream 2.0,
+        Elastic Beanstalk Windows platform
+    (ii) Google Cloud Platform: Compute Engine Windows VMs, VMware Engine
+         Windows guests
+    (iii) Oracle Cloud Infrastructure: OCI Compute Windows instances
+    (iv) IBM Cloud: Virtual Servers for Classic/VPC (Windows)
+    (v) DigitalOcean, Linode, Vultr, OVHcloud, Hetzner, Scaleway, UpCloud
+        (Windows instances where offered)
+    (vi) Private Cloud: VMware vSphere, Hyper-V, Nutanix, Citrix, Proxmox,
+         OpenStack (Windows guests)
+
+(g) WINDOWS CONTAINERS:
+
+    (i) Windows Server containers (Server Core, Nano Server)
+    (ii) Hyper-V containers with Windows isolation
+    (iii) Docker containers with Windows base images
+    (iv) Container orchestration on Windows nodes (Kubernetes, Swarm, Nomad)
+
+(h) VIRTUALIZED WINDOWS:
+
+    (i) Type 1 Hypervisors: VMware ESXi, Microsoft Hyper-V Server, Citrix
+        Hypervisor, Proxmox VE, Nutanix AHV, Oracle VM Server hosting
+        Windows guests
+    (ii) Type 2 Hypervisors: VMware Workstation/Fusion/Player, Oracle
+         VirtualBox, Parallels Desktop, QEMU/KVM, GNOME Boxes hosting
+         Windows guests
+
+    CLARIFICATION: The host operating system is irrelevant. If the GUEST
+    operating system is Windows, use of the Software in that guest requires
+    a Windows Commercial License.
+
+4.1.3 NO EXCEPTIONS - UNIVERSAL APPLICATION
+
+(a) NO SMALL ORGANIZATION EXCEPTION: Unlike the Linux licensing tiers, there
+    is NO free tier, NO revenue exemption, NO reduced fee structure, and NO
+    grace period for Windows Platform use. The Windows Commercial License
+    requirement applies to:
+
+    (i)   Individual developers, hobbyists, and students;
+    (ii)  Startups and early-stage companies regardless of funding or revenue;
+    (iii) Small, medium, and large businesses;
+    (iv)  Non-profit organizations, charities, and 501(c)(3) entities;
+    (v)   Educational institutions (K-12, colleges, universities);
+    (vi)  Government agencies (local, state, federal, international);
+    (vii) Research institutions, laboratories, and think tanks;
+    (viii) Open source projects and community organizations;
+    (ix)  Religious, political, and advocacy organizations;
+    (x)   Any entity, regardless of mission, purpose, or tax status.
+
+(b) NO NON-COMMERCIAL EXCEPTION: The Windows Commercial License requirement
+    applies to ALL Windows Platform use, including use that would otherwise
+    be classified as "non-commercial":
+
+    (i)   Personal use requires a Windows Commercial License;
+    (ii)  Hobbyist use requires a Windows Commercial License;
+    (iii) Academic research requires a Windows Commercial License;
+    (iv)  Educational use requires a Windows Commercial License;
+    (v)   Non-profit internal operations require a Windows Commercial License;
+    (vi)  Government internal operations require a Windows Commercial License.
+
+(c) NO INTERNAL USE EXCEPTION: Internal use of the Software on Windows
+    Platform Environments, including use solely within an organization for
+    internal business operations with no external distribution, requires a
+    Windows Commercial License.
+
+(d) CUMULATIVE REQUIREMENTS: The Windows Commercial License requirement is
+    cumulative with all other requirements in this Agreement. Licensees using
+    the Software on Windows Platform Environments must comply with Windows
+    Commercial License requirements AND copyleft obligations AND attribution
+    requirements AND all other applicable provisions.
+
+4.1.4 WINDOWS DEVELOPMENT EXCEPTION (LIMITED AND TIME-CAPPED)
+
+(a) SCOPE OF EXCEPTION: A limited exception permits use of the Software on
+    Windows Platform Environments without a Windows Commercial License ONLY
+    when ALL of the following conditions are SIMULTANEOUSLY satisfied:
+
+    (i) NATURAL PERSON ONLY: The use is by a natural person (individual human
+        being) for their own personal purposes. This exception doesn't apply to:
+        - Any business entity regardless of size or form;
+        - Employees acting within the scope of their employment;
+        - Contractors performing work for any organization;
+        - Use on behalf of or for the benefit of any organization;
+        - Students performing work for academic credit or coursework.
+
+    (ii) DEVELOPMENT AND TESTING PURPOSE ONLY: The use is strictly limited to:
+        - Local development environment for personal learning;
+        - Personal experimentation and skill development;
+        - Personal testing and debugging of individual projects;
+        - Educational self-study not connected to any institution;
+        - Contributing bug fixes to the Software's upstream development.
+
+        This exception doesn't apply to:
+        - Any production deployment regardless of scale;
+        - Any staging, pre-production, or QA environment;
+        - Any demonstration to potential customers, clients, or employers;
+        - Any proof-of-concept for business evaluation;
+        - Any performance testing for production planning;
+        - Any use in job interviews or take-home assignments;
+        - Any use in hackathons or competitions with prizes.
+
+    (iii) NON-COMMERCIAL PURPOSE ONLY: The activities must be entirely
+          non-commercial:
+          - The individual isn't being compensated in any form;
+          - The work isn't performed for any employer, client, or customer;
+          - The results won't be used in any commercial product or service;
+          - The individual derives NO commercial benefit from the use.
+
+    (iv) LOCAL AND ISOLATED USE ONLY: The Software must NOT be accessible
+         over any network to any other person, system, or device:
+         - NO network listeners or servers accepting external connections;
+         - NO API endpoints accessible from other machines;
+         - NO remote access, SSH, RDP, or similar.
+
+    (v) NO DISTRIBUTION: The individual must NOT distribute, share, transfer,
+        or publish the Software while relying on this exception.
+
+    (vi) ANNUAL TIME CAP: The individual's aggregate use under this exception
+         mustn't exceed ninety (90) calendar days per calendar year
+         (January 1 through December 31). For the avoidance of doubt:
+
+         (A) A "day of use" means any calendar day on which the Software is
+             executed, loaded into memory, or actively running on a Windows
+             Platform Environment, regardless of the duration of use on that
+             day. Running the Software for five minutes on a given day counts
+             the same as running it for twelve hours;
+
+         (B) Days are counted cumulatively across the entire calendar year and
+             need not be consecutive;
+
+         (C) Unused days don't carry over to any subsequent calendar year.
+             Each January 1, the count resets to zero, but the ninety-day cap
+             remains fixed at ninety (90) days;
+
+         (D) If the individual begins using the Software partway through a
+             calendar year, the ninety-day cap isn't prorated,the full
+             ninety (90) days are available for the remainder of that year;
+
+         (E) Upon reaching ninety (90) days of use in a calendar year, this
+             exception terminates immediately for the remainder of that year,
+             and the individual must obtain a Windows Commercial License to
+             continue any Windows Platform use.
+
+(b) MANDATORY REGISTRATION AND LOGGING:
+
+    (i) REGISTRATION REQUIRED: Before relying on this exception, the individual
+        must register at [LICENSOR_WEBSITE_URL]/licenses/windows-dev-exception
+        by providing:
+        - Full legal name and contact information;
+        - Physical address and jurisdiction of residence;
+        - Description of intended development activities;
+        - Certification that all conditions in Section 4.1.4(a) are met.
+
+    (ii) DEVELOPMENT DAY LOGGING: The individual must maintain a contemporaneous
+         log of all days on which the Software is used under this exception. The
+         log must include, at minimum:
+         - The calendar date of each use;
+         - The approximate start and end times of each session;
+         - A brief description of the development activity performed.
+
+    (iii) LOG RETENTION: Logs must be retained for at least three (3) years from
+          the date of each entry and must be made available to Licensor upon
+          request within ten (10) business days.
+
+    (iv) FAILURE TO LOG: Failure to maintain or produce the required log creates
+         a rebuttable presumption that the individual exceeded the ninety-day cap
+         and that a Windows Commercial License was required.
+
+(c) CONSEQUENCES OF EXCEEDING THE TIME CAP:
+
+    (i) Any use of the Software on a Windows Platform Environment after the
+        ninetieth (90th) day of use in a calendar year amounts to unauthorized
+        use and a material breach of this Agreement;
+
+    (ii) The individual becomes immediately liable for Windows Commercial License
+         fees as if a license had been required from the first day of use in that
+         calendar year;
+
+    (iii) Licensor may pursue all remedies available under Section 6 (Enforcement)
+          and applicable law.
+
+(d) BURDEN OF PROOF: Any person claiming this exception bears the COMPLETE
+    burden of proving ALL conditions are satisfied, including compliance with
+    the ninety-day cap. Licensor shall be entitled to a presumption that the
+    exception doesn't apply.
+
+(e) AUTOMATIC TERMINATION: This exception terminates IMMEDIATELY, without
+    notice, if ANY condition,including the time cap,ceases to be satisfied.
+    Upon termination, the individual must immediately cease all Windows Platform
+    use and either obtain a Windows Commercial License, migrate to Linux, or
+    cease all use of the Software.
+
+(f) NO TRANSITION PERIOD: There's NO grace period if this exception
+    terminates. Commercial licensing is required IMMEDIATELY.
+
+4.1.5 OBTAINING A WINDOWS COMMERCIAL LICENSE
+
+(a) APPLICATION PROCESS: To obtain a Windows Commercial License:
+
+    (i) Access the application at [LICENSOR_WEBSITE_URL]/licenses/windows;
+
+    (ii) Provide accurate and complete information regarding:
+        - Full legal name and entity type;
+        - Jurisdiction of incorporation or residence;
+        - Business address and contact information;
+        - Detailed description of intended use;
+        - Number of Windows Platform deployments planned;
+        - Expected users, instances, and scale;
+        - Revenue information for pricing calculation;
+        - Technical architecture of planned deployment;
+
+    (iii) Certify the accuracy of all information provided;
+    (iv) Accept the Windows Commercial License Agreement terms;
+    (v) Pay the applicable Windows Commercial License Fee.
+
+(b) REVIEW AND APPROVAL: Licensor will review applications and may:
+    (i) Approve and issue license upon payment;
+    (ii) Request additional information;
+    (iii) Approve subject to additional terms or conditions;
+    (iv) Decline for any reason or no reason.
+
+(c) NO GUARANTEED ISSUANCE: Submission of application and payment doesn't
+    guarantee license issuance. Licensor reserves the right to refuse licensing
+    to any applicant. If declined after payment, Licensor will refund within
+    thirty (30) days, less processing fees.
+
+4.1.6 WINDOWS COMMERCIAL LICENSE PRICING
+
+(a) FLAT FEE PRICING (for internal use and smaller deployments):
+
+    | Deployment Scale                    | Annual License Fee (USD) |
+    |-------------------------------------|--------------------------|
+    | Personal/Individual (1 instance)    | $600                     |
+    | Micro (2-3 instances)               | $1,500                   |
+    | Small Team (4-10 instances)         | $4,200                   |
+    | Medium Team (11-25 instances)       | $9,600                   |
+    | Department (26-50 instances)        | $18,000                  |
+    | Large (51-100 instances)            | $36,000                  |
+    | Very Large (101-250 instances)      | $72,000                  |
+    | Enterprise (251-500 instances)      | $120,000                 |
+    | Enterprise+ (501-1000 instances)    | $180,000                 |
+    | Mega (1001+ instances)              | Custom negotiation       |
+
+    "Instance" means a single Windows Platform Environment (physical or virtual)
+    on which the Software is installed and/or executed at any time during the
+    license term, counted based on peak concurrent deployment.
+
+(b) REVENUE-BASED PRICING (for commercial software, services, and SaaS):
+
+    Licensees incorporating the Software into commercial products, services,
+    or SaaS offerings on Windows Platforms pay the GREATER of:
+
+    (i) The applicable flat fee from subsection (a); OR
+
+    (ii) A revenue share calculated as follows:
+
+        | Gross Revenue Tier                  | Percentage of Revenue |
+        |-------------------------------------|-----------------------|
+        | First $500,000 of Annual Revenue    | 4.0%                  |
+        | $500,001 - $2,000,000               | 3.5%                  |
+        | $2,000,001 - $10,000,000            | 3.0%                  |
+        | $10,000,001 - $50,000,000           | 2.5%                  |
+        | Above $50,000,000                   | 2.0%                  |
+
+        Minimum annual fee: $6,000 USD.
+
+(c) ENTERPRISE PRICING: Organizations meeting any of the following must
+    negotiate custom enterprise pricing:
+    - Annual Revenue exceeding $50,000,000 USD;
+    - More than 1000 Windows Platform instances;
+    - Critical infrastructure, government, defense, or regulated industry use;
+    - White-labeling, OEM, or reseller arrangements.
+
+    Enterprise pricing starts at $200,000 USD annually.
+
+(d) PAYMENT TERMS:
+
+    (i) Initial license fee due upon approval, before license issuance;
+    (ii) Renewal fees due thirty (30) days before term end;
+    (iii) Revenue-based fees payable quarterly within thirty (30) days of
+          quarter end;
+    (iv) Late payments accrue interest at 1.5% per month (18% annually);
+    (v) Suspension for payments thirty (30)+ days late;
+    (vi) Termination for payments sixty (60)+ days late;
+    (vii) Reinstatement requires payment of all outstanding amounts plus 25% fee.
+
+(e) NO REFUNDS: Fees are non-refundable once license is issued, except for
+    declined applications.
+
+(f) TAXES: All fees are exclusive of taxes. Licensee is responsible for all
+    applicable sales, use, VAT, GST, withholding, and other taxes.
+
+4.1.7 WINDOWS COMPLIANCE VERIFICATION
+
+(a) SELF-REPORTING: Licensees must provide accurate reports:
+    (i) Initial deployment report within fifteen (15) days of first deployment;
+    (ii) Quarterly reports on instance counts and revenue (if applicable);
+    (iii) Annual certification signed by authorized officer;
+    (iv) Material change notification within five (5) business days.
+
+(b) TECHNICAL VERIFICATION: Licensor may implement:
+    (i) License key validation systems;
+    (ii) Periodic telemetry (anonymized deployment information);
+    (iii) Platform detection mechanisms;
+    (iv) Deployment tracking tools.
+
+    Licensee agrees not to circumvent, disable, or interfere with technical
+    verification measures. Circumvention amounts to material breach and
+    willful infringement.
+
+(c) AUDIT RIGHTS: All audit rights in Section 4.1 apply to Windows license
+    compliance, including audit of instance counts, deployment architecture,
+    revenue, and financial records.
+
+(d) NON-COMPLIANCE CONSEQUENCES: Unlicensed Windows use amounts to:
+    (i) Material breach of this Agreement;
+    (ii) Copyright infringement under 17 U.S.C. § 501;
+    (iii) Grounds for immediate termination of ALL licenses (including Linux);
+    (iv) Presumptively willful infringement (supporting enhanced damages);
+    (v) Grounds for immediate injunctive relief;
+    (vi) Obligation to pay retroactive fees plus interest.
+
+--------------------------------------------------------------------------------
+                PART 5.1: REVENUE-BASED LICENSING TIERS (LINUX)
+--------------------------------------------------------------------------------
+
+5.1.1 APPLICABILITY
+
+(a) SCOPE: This Section 4.2 applies to use of the Software on Linux Platform
+    Environments, defined as:
+
+    (i) Linux Distributions: Debian-based (Debian, Ubuntu, Mint, etc.),
+        Red Hat-based (RHEL, CentOS, Rocky, AlmaLinux, Fedora, etc.),
+        SUSE-based, Arch-based, Gentoo-based, Slackware-based, Alpine,
+        and any other Linux kernel-based operating system;
+    (ii) BSD Operating Systems: FreeBSD, OpenBSD, NetBSD, DragonFly BSD;
+    (iii) macOS (excluding Windows virtualization);
+    (iv) Other Unix-like systems (illumos, Solaris, AIX, HP-UX);
+    (v) Linux containers on Linux hosts with Linux base images;
+    (vi) Linux instances on any cloud provider.
+
+(b) EXCLUSIVE TIER DETERMINATION: Licensee qualifies for only ONE tier at any
+    time, determined by the HIGHEST threshold met. Once a higher tier threshold
+    is met, Licensee must immediately comply with that tier's requirements.
+
+(c) CUMULATIVE WITH COPYLEFT: Licensing tiers are in addition to copyleft
+    obligations in Section 2. All tiers must comply with copyleft requirements.
+
+(d) SEPARATE FROM WINDOWS: Meeting Free Tier criteria for Linux provides NO
+    rights to use on Windows Platform Environments.
+
+5.1.2 FREE TIER (COMMUNITY LICENSE)
+
+(a) ELIGIBILITY CRITERIA: Free Tier is available ONLY when ALL criteria are
+    SIMULTANEOUSLY satisfied:
+
+    (i) ANNUAL REVENUE: Licensee's Consolidated Annual Revenue (Section 4.3)
+        is less than $35,000 USD;
+
+        AND
+
+    (ii) MONTHLY REVENUE,LIFETIME MEASUREMENT: Licensee's Monthly Revenue
+         hasn't exceeded $3,000 USD in any single calendar month at any point
+         since the Licensee's first use of the Software (the "First Use Date"),
+         irrespective of how much time has elapsed since the threshold was
+         exceeded;
+
+         AND
+
+    (iii) NO HOSTED SERVICE: Licensee isn't offering the Software as a
+          hosted service, SaaS, PaaS, API, or network-accessible service
+          to third parties (see Section 4.4);
+
+          AND
+
+    (iv) NOT ENTERPRISE AFFILIATED: Licensee isn't a subsidiary, affiliate,
+         parent, or related party of any entity that wouldn't independently
+         qualify for Free Tier;
+
+         AND
+
+    (v) NOT EVADING HIGHER TIERS: Licensee hasn't artificially structured
+        business to avoid higher-tier requirements.
+
+(b) RIGHTS GRANTED: Free Tier Licensees may:
+    (i) Use the Software on Linux Platform Environments for any purpose;
+    (ii) Modify and create Derivative Works (subject to copyleft);
+    (iii) Distribute Software and Derivatives (subject to copyleft);
+    (iv) Use in internal business operations and products (within limits).
+
+(b-1) CONSIDERATION FOR FREE TIER,MANDATORY CODEBASE SHARING:
+
+    The consideration for the Free Tier license is the Licensee's grant
+    of codebase analysis and model training rights under Part 2.2A. Free
+    Tier Licensees expressly acknowledge that:
+
+    (i)   SOURCE CODE ACCESS AS PAYMENT: In lieu of monetary payment, Free
+          Tier Licensees provide the Licensor with full access to their
+          source code,past, present, and future,as the primary
+          consideration for the license grant;
+
+    (ii)  PAST CODE INCLUDED: All source code in the Licensee's repository
+          or project directory at the time of the Software's installation,
+          including code authored days, months, or years before the
+          Software was ever installed, becomes subject to the codebase
+          rights in Part 2.2A upon initialization;
+
+    (iii) PRESENT CODE INCLUDED: All source code authored, modified, or
+          committed during the period the Software is operational is
+          subject to the codebase rights;
+
+    (iv)  FUTURE CODE INCLUDED: All source code authored after the
+          Software's installation, for as long as the Software remains
+          installed or any indexed data persists, is subject to the
+          codebase rights;
+
+    (v)   MODEL TRAINING CONSENT: Free Tier Licensees consent to having
+          their code used for training, fine-tuning, and improving
+          language models, code generation systems, and other AI
+          technologies as described in Section 2.2A.1;
+
+    (vi)  SHARED CODE MODEL PARTICIPATION: Free Tier Licensees' code will
+          be incorporated into the Licensor's Shared Code Model program
+          (Section 2.2A.3(e)) without additional notice or consent;
+
+    (vii) NO OPT-OUT: There's no mechanism to use the Free Tier while
+          opting out of codebase sharing. The only way to prevent codebase
+          use for model training is to maintain continuous paid status
+          at the Starter tier ($50/month) or above;
+
+    (viii) THIRTY-DAY WINDOW: Processed code enters a thirty (30) day
+           holding period before incorporation into training datasets
+           (see Section 2.2A.4(c)). During this window, Licensees may
+           upgrade to paid status OR pay the Code Removal Processing Fee
+           to prevent training use. After thirty (30) days, deletion
+           becomes technically infeasible;
+
+    (ix)  IRREVOCABLE AFTER WINDOW: Once the thirty (30) day holding
+          period expires and code has been sorted into training datasets,
+          the Licensor's rights to that code are permanent and irrevocable,
+          even if the Licensee later upgrades to a paid tier. Paid status
+          only protects code processed AFTER the paid tier activation date
+          and only if the upgrade occurs within the thirty (30) day window
+          for previously processed code.
+
+(c) MANDATORY ATTRIBUTION: Free Tier Licensees must:
+    (i) Display "Powered by SpecMem - [LICENSOR_WEBSITE_URL]" prominently in
+        user-facing portions (visible, 12pt minimum, contrasting color);
+    (ii) Include attribution in documentation, README files, and about pages;
+    (iii) Retain all copyright notices and license headers in source code;
+    (iv) Not remove, hide, or minimize attribution notices.
+
+(d) REGISTRATION AND REPORTING: Free Tier Licensees must:
+    (i) Register at [LICENSOR_WEBSITE_URL]/community within thirty (30) days;
+    (ii) Certify annually that all criteria remain satisfied;
+    (iii) Notify Licensor within fifteen (15) days if any criterion fails.
+
+(e) AUTOMATIC TIER UPGRADE: If ANY criterion ceases to be met, Licensee
+    automatically becomes subject to the applicable higher tier as of the
+    DATE the criterion first failed. There's NO grace period. Failure to
+    obtain appropriate licensing amounts to breach and unauthorized use.
+
+(f) INDIVIDUAL LICENSEE INCOME THRESHOLD:
+
+    (i) APPLICABILITY: This subsection applies to any Licensee who is a
+        natural person (individual) and isn't operating under or on
+        behalf of a separately formed business entity such as a
+        corporation, LLC, partnership, or similar legal structure. If
+        You're an individual using this Software in any capacity --
+        personal projects, freelance work, side hustles, or anything
+        else,Your personal income determines Your tier eligibility.
+
+    (ii) QUALIFYING PERSONAL INCOME: For purposes of this License,
+         "Qualifying Personal Income" means the aggregate annual gross
+         income of the individual Licensee, including but not limited to:
+
+         (A) Wages, salaries, tips, and bonuses (as reported on IRS Form
+             W-2 or equivalent in the Licensee's jurisdiction);
+         (B) Independent contractor and freelance income (as reported on
+             IRS Form 1099-NEC, 1099-MISC, or equivalent);
+         (C) Self-employment income from any source;
+         (D) Net realized investment gains (capital gains, dividends,
+             interest, and other investment income) exceeding $10,000
+             USD in the applicable year;
+         (E) Royalties, licensing fees, and intellectual property income;
+         (F) Rental income (net of ordinary and necessary expenses);
+         (G) Any other compensation, remuneration, or economic benefit
+             received in exchange for services, work product, or the
+             use of assets, regardless of form (cash, equity, crypto-
+             currency, in-kind, deferred, or otherwise).
+
+    (iii) THRESHOLD: An individual Licensee whose Qualifying Personal
+          Income exceeds $35,000 USD per year doesn't qualify for the
+          Free Tier. Such individuals must obtain, at minimum, a Starter
+          Commercial License under Section 4.2.2A.
+
+    (iv) MEASUREMENT PERIOD: Qualifying Personal Income is measured based
+         on the most recently completed calendar year for which the
+         individual has filed (or was required to file) a tax return.
+         If the individual hasn't yet completed a full calendar year of
+         earning, income shall be annualized based on actual earnings
+         to date.
+
+    (v) GOOD FAITH ESTIMATION: Where exact figures aren't yet available
+        (e.g., mid-year use), the individual must make a good faith
+        estimate of their projected annual Qualifying Personal Income.
+        If that estimate meets or exceeds the $35,000 threshold, the
+        individual must use the Starter Commercial Tier from the outset.
+
+    (vi) VERIFICATION: Upon request by Licensor, individual Licensees
+         must provide reasonable documentation of their Qualifying
+         Personal Income, which may include redacted tax returns,
+         earnings statements, or a signed declaration under penalty of
+         perjury. Licensor shall treat all such documentation as
+         confidential and use it solely for license compliance purposes.
+
+    (vii) ENTITY FORMATION DOESN'T CHANGE THIS: If an individual forms
+          a business entity (LLC, S-Corp, sole proprietorship, etc.)
+          primarily for the purpose of using the Software under the
+          Free Tier while the individual's personal income exceeds
+          $35,000 USD, the individual's Qualifying Personal Income
+          still controls tier determination. Licensor will look through
+          to the individual's economic reality, not the entity's
+          nominal revenue.
+
+(g) PERMANENT TIER LOCK-IN:
+
+    (i) ONCE EXCEEDED, ALWAYS EXCEEDED: If a Licensee has, at any time since
+        its First Use Date, met or exceeded any threshold that would place it
+        in a higher tier (whether under Annual Revenue, Monthly Revenue, hosted
+        service, enterprise affiliation, or any other criterion), the Licensee
+        is permanently ineligible for any lower tier. There's no "cooling off"
+        period, no waiting period, and no automatic reversion to a lower tier
+        based on passage of time alone.
+
+    (ii) SOLE PATH TO TIER REDUCTION: The only mechanism by which a Licensee
+         may return to a lower tier after having exceeded a higher-tier threshold
+         is by submitting a written Tier Reduction Request to the Licensor. Such
+         request must:
+
+         (A) Be submitted in writing to [LICENSOR_WEBSITE_URL]/licenses/tier-reduction
+             or by certified mail to Licensor's registered address;
+
+         (B) Include documentation demonstrating a genuine, material, and sustained
+             change in the Licensee's circumstances,such as a permanent reduction
+             in business operations, dissolution of a revenue-generating division,
+             or comparable event,that has caused the Licensee to fall below the
+             applicable threshold for at least six (6) consecutive months at the
+             time of the request;
+
+         (C) Include audited or independently verified financial statements covering
+             the six (6) month period relied upon;
+
+         (D) Include a signed certification by an officer or authorized representative
+             attesting to the accuracy of all information provided.
+
+    (iii) LICENSOR DISCRETION: Approval of a Tier Reduction Request is entirely
+          at the Licensor's sole and absolute discretion. Licensor may approve,
+          deny, or conditionally approve any request, and isn't required to provide
+          reasons for denial. Licensor's decision is final and non-appealable.
+
+    (iv) NO RETROACTIVE CREDIT: Even if a Tier Reduction Request is approved,
+         Licensee won't receive any refund, credit, or retroactive adjustment for
+         fees paid during the period it was classified in the higher tier. The
+         reduced tier takes effect on the first day of the calendar month following
+         written approval from Licensor.
+
+    (v) ANTI-ABUSE: Licensor may deny any Tier Reduction Request if Licensor
+        reasonably believes the Licensee has artificially reduced its revenue,
+        restructured its operations, or taken any action primarily for the purpose
+        of qualifying for a lower tier. Revenue declines caused by shifting revenue
+        to related entities, shell corporations, or newly formed affiliates don't
+        constitute a genuine change in circumstances.
+
+5.1.2A STARTER COMMERCIAL TIER ($50/MONTH)
+
+(a) WHEN REQUIRED: Starter Commercial License is required when ANY of the
+    following exist AND Licensee doesn't meet Standard Commercial or
+    Enterprise thresholds:
+
+    (i) ANNUAL REVENUE TRIGGER: Consolidated Annual Revenue >= $35,000 USD
+        but less than $250,000 USD;
+
+        OR
+
+    (ii) MONTHLY REVENUE TRIGGER: Monthly Revenue >= $3,000 USD in any
+         month since First Use Date, but less than $15,000 USD in any
+         single month;
+
+         OR
+
+    (iii) INDIVIDUAL INCOME TRIGGER: Licensee is an individual whose
+          Qualifying Personal Income (Section 4.2.2(f)) exceeds $35,000
+          USD per year;
+
+          OR
+
+    (iv) VOLUNTARY UPGRADE: Licensee elects Starter Commercial even if
+         not otherwise required.
+
+(b) LICENSE FEE: $50 USD per month:
+    (i) Monthly: $50/month, payable in advance on first of each month,
+        no minimum commitment; OR
+    (ii) Annual: $540/year (10% discount), payable in advance.
+
+(c) RIGHTS GRANTED: Starter Commercial Licensees may:
+    (i) All Free Tier rights under Section 4.2.2(b);
+    (ii) Remove "Powered by SpecMem" from all user-facing interfaces,
+         documentation, and about pages (must still retain copyright
+         notices and license headers in source code);
+    (iii) Use in internal business operations without branding
+          restrictions;
+    (iv) Access to Starter tier features and updates.
+
+(d) WHAT'S INCLUDED:
+    (i) Unlimited Linux Platform deployments;
+    (ii) Up to ten (10) concurrent users;
+    (iii) Community-level support (forums and documentation);
+    (iv) All maintenance updates and patches;
+    (v) License to any version released during term.
+
+(e) WHAT'S NOT INCLUDED:
+    (i) Windows Platform use (requires Section 4.1 license);
+    (ii) Hosted/SaaS service offerings to third parties (requires
+         Standard Commercial or above);
+    (iii) Enterprise features, priority/24x7 support, or SLAs;
+    (iv) White-labeling/OEM rights;
+    (v) Indemnification;
+    (vi) Warranty (AS-IS);
+    (vii) Source code escrow.
+
+(f) AUTOMATIC TIER UPGRADE: If Licensee's Consolidated Annual Revenue
+    reaches or exceeds $250,000 USD, or Monthly Revenue reaches or exceeds
+    $15,000 USD in any single month, or Licensee begins offering the
+    Software as a hosted service, SaaS, PaaS, API, or network-accessible
+    service to third parties, the Starter Commercial License automatically
+    converts to a Standard Commercial License under Section 4.2.3 as of
+    the DATE the applicable threshold was first met. There's NO grace
+    period for this upgrade. Licensee must pay the Standard Commercial
+    fee beginning from the month in which the trigger event occurred.
+
+(g) PAYMENT TERMS:
+    (i) First payment due upon execution and before use;
+    (ii) Subsequent payments due first of each period;
+    (iii) Late payments: 1.5%/month interest;
+    (iv) Suspension: 15+ days late;
+    (v) Termination: 45+ days late;
+    (vi) Reinstatement: all outstanding plus 25% fee.
+
+(h) LICENSE TERM: Month-to-month if paying monthly; one (1) year if
+    paying annually. Annual terms auto-renew unless thirty (30) days'
+    notice is given before the renewal date.
+
+5.1.3 STANDARD COMMERCIAL TIER ($500/MONTH)
+
+(a) WHEN REQUIRED: Standard Commercial License is required when ANY of the
+    following exist:
+
+    (i) ANNUAL REVENUE TRIGGER: Consolidated Annual Revenue >= $250,000 USD;
+
+        OR
+
+    (ii) MONTHLY REVENUE TRIGGER: Monthly Revenue >= $15,000 USD in any month;
+
+         OR
+
+    (iii) HOSTED SERVICE TRIGGER: Offering the Software as a hosted service,
+          SaaS, PaaS, API, or network-accessible service to third parties,
+          regardless of whether charged or free (see Section 4.4);
+
+          OR
+
+    (iv) FREE TIER VIOLATION: Failure to comply with Free Tier requirements;
+
+         OR
+
+    (v) VOLUNTARY UPGRADE: Licensee elects Standard Commercial even if not
+        otherwise required.
+
+(b) LICENSE FEE: $500 USD per month:
+    (i) Monthly: $500/month, payable in advance on first of each month,
+        minimum twelve (12) month commitment; OR
+    (ii) Annual: $5,400/year (10% discount), payable in advance.
+
+(c) RIGHTS GRANTED: Standard Commercial Licensees may:
+    (i) All Free Tier rights;
+    (ii) Offer Software as part of hosted/SaaS services (subject to Section 4.4);
+    (iii) Remove "Powered by SpecMem" from user-facing interfaces (retain in
+          documentation and source code);
+    (iv) Email-based support (48 business hour response);
+    (v) Access to Standard Commercial features and updates.
+
+(d) WHAT'S INCLUDED:
+    (i) Unlimited Linux Platform deployments;
+    (ii) Unlimited users;
+    (iii) Standard technical support;
+    (iv) All maintenance updates and patches;
+    (v) License to any version released during term.
+
+(e) WHAT'S NOT INCLUDED:
+    (i) Windows Platform use (requires Section 4.1 license);
+    (ii) Enterprise features, priority/24x7 support, SLAs;
+    (iii) White-labeling/OEM rights;
+    (iv) Indemnification;
+    (v) Warranty (AS-IS);
+    (vi) Source code escrow.
+
+(f) PAYMENT TERMS:
+    (i) First payment due upon execution and before use;
+    (ii) Subsequent payments due first of each period;
+    (iii) Late payments: 1.5%/month interest;
+    (iv) Suspension: 15+ days late;
+    (v) Termination: 45+ days late;
+    (vi) Reinstatement: all outstanding plus 25% fee.
+
+(g) LATE FEE SCHEDULE:
+    | Days Late  | Consequence                                      |
+    |------------|--------------------------------------------------|
+    | 1-14       | Interest only (1.5%/month pro-rated)             |
+    | 15-30      | $75 admin fee + interest + SUSPENSION            |
+    | 31-45      | $150 admin fee + interest + final notice         |
+    | 46+        | $250 admin fee + interest + TERMINATION          |
+
+(h) LICENSE TERM: One (1) year, auto-renewing unless thirty (30) days' notice.
+
+5.1.4 ENTERPRISE TIER (CUSTOM NEGOTIATION)
+
+(a) WHEN REQUIRED: Enterprise License is REQUIRED when ANY of the following:
+
+    (i) Annual Revenue >= $1,000,000 USD;
+
+        OR
+
+    (ii) More than fifty (50) employees/FTE contractors;
+
+         OR
+
+    (iii) Publicly traded company or subsidiary of that;
+
+          OR
+
+    (iv) Fortune/Forbes major company list (5000 largest by revenue);
+
+         OR
+
+    (v) Regulated industry (financial services, healthcare, defense, aerospace,
+        telecommunications, energy, critical infrastructure);
+
+        OR
+
+    (vi) Government agency or government contractor;
+
+         OR
+
+    (vii) Embedded systems, OEM, white-label, or reseller distribution;
+
+          OR
+
+    (viii) Requires modified terms (liability limits, warranties, indemnification,
+           SLAs);
+
+           OR
+
+    (ix) Licensor determination based on risk or scale.
+
+(b) MUST NEGOTIATE BEFORE USE: Enterprise-threshold organizations:
+    (i) MUST contact Licensor and negotiate BEFORE any use;
+    (ii) MUST NOT rely on Free Tier or Standard Commercial rights;
+    (iii) MUST execute written Enterprise License Agreement before use;
+    (iv) MUST complete Licensor's Enterprise onboarding.
+
+(c) CONSEQUENCES OF UNLICENSED ENTERPRISE USE: Use by Enterprise-threshold
+    organizations without executed Enterprise License amounts to:
+    (i) Willful copyright infringement (per se);
+    (ii) Intentional material breach;
+    (iii) Grounds for enhanced statutory damages ($150,000/work);
+    (iv) Mandatory attorney's fees;
+    (v) Evidence of bad faith.
+
+(d) NO AUTOMATIC RIGHTS: Enterprise-threshold organizations have NO automatic
+    rights under Free Tier or Standard Commercial. Must obtain explicit written
+    authorization before any use. No grace period.
+
+(e) ENTERPRISE PRICING FACTORS:
+    (i) Annual revenue and organization size;
+    (ii) Scope, scale, and geographic distribution of deployment;
+    (iii) Number of users and deployments;
+    (iv) Industry and risk profile;
+    (v) Support and SLA requirements;
+    (vi) Indemnification and warranty requirements;
+    (vii) Term length and payment structure;
+    (viii) Strategic relationship value;
+    (ix) Custom development needs.
+
+    Enterprise pricing typically starts at $25,000 USD annually.
+
+(f) ENTERPRISE PROCESS:
+    (i) Initial contact: enterprise@[LICENSOR_DOMAIN];
+    (ii) Discovery: understanding needs, use case, requirements;
+    (iii) Proposal: pricing, terms, scope;
+    (iv) Negotiation: good faith negotiation (2-12 weeks typical);
+    (v) Execution: Enterprise License Agreement and order form;
+    (vi) Onboarding: technical support, training, account manager.
+
+(g) TYPICAL ENTERPRISE FEATURES:
+    (i) Unlimited Linux deployments, optional Windows rights;
+    (ii) Named account manager, priority support, 24/7 critical support;
+    (iii) IP indemnification, enhanced warranties, negotiated liability;
+    (iv) Source code escrow, early access, roadmap input;
+    (v) Custom development, professional services, training.
+
+--------------------------------------------------------------------------------
+                PART 5.2: REVENUE CALCULATION METHODOLOGY
+--------------------------------------------------------------------------------
+
+5.2.1 DEFINITIONS
+
+(a) "Annual Revenue" means the Gross Revenue during the most recently completed
+    fiscal year, or if less than one year, projected annual revenue by
+    annualizing actual revenue to date.
+
+(b) "Monthly Revenue" means Gross Revenue during a single calendar month.
+
+(c) "Gross Revenue" means all revenue from whatever source, including:
+    (i) Product revenue (hardware, software);
+    (ii) Service revenue (professional, consulting, SaaS, PaaS, IaaS);
+    (iii) Recurring revenue (subscriptions, memberships, maintenance);
+    (iv) Advertising and data revenue;
+    (v) Investment income (interest, dividends, gains);
+    (vi) Government contracts and grants;
+    (vii) Non-cash revenue (in-kind, equity, barter, cryptocurrency);
+    (viii) Donations and contributions (for non-profits).
+
+(d) EXCLUSIONS from Gross Revenue:
+    (i) Pass-through amounts (taxes collected for remittance);
+    (ii) Actual refunds paid;
+    (iii) Bad debts written off per GAAP;
+    (iv) Intercompany eliminations.
+
+(e) INDIVIDUAL INCOME CLARIFICATION: Where the Licensee is a natural person
+    (individual) rather than a business entity, "Gross Revenue" as used in
+    this Agreement for purposes of tier determination shall include the
+    individual's total annual income from all sources, subject to the following
+    rules:
+
+    (i) INVESTMENT INCOME INCLUDED: Investment income exceeding Ten Thousand
+        Dollars ($10,000) USD in a calendar year counts toward the individual's
+        income for tier determination purposes. "Investment income" includes,
+        without limitation:
+
+        (A) Capital gains, whether short-term or long-term, realized from the
+            sale, exchange, or disposition of stocks, bonds, mutual funds, ETFs,
+            cryptocurrency, real estate held for investment, or any other
+            investment asset;
+
+        (B) Dividends, whether qualified or ordinary, received from any
+            corporate equity holding;
+
+        (C) Interest income from savings accounts, certificates of deposit,
+            bonds, notes, money market accounts, peer-to-peer lending, or any
+            other interest-bearing instrument;
+
+        (D) Any other income classified as investment income or portfolio income
+            under the U.S. Internal Revenue Code or equivalent classification
+            under the individual's applicable tax jurisdiction.
+
+        For clarity, the $10,000 threshold is an annual aggregate across all
+        investment income types listed above. If total investment income for a
+        calendar year is $10,000 or less, none of it counts. If it exceeds
+        $10,000, the entire amount counts,not just the excess.
+
+    (ii) PASSIVE RENTAL INCOME INCLUDED: Gross income derived from rental
+         properties,including residential, commercial, and vacation rentals
+        ,counts toward the individual's income regardless of amount. This
+         includes:
+
+         (A) Rent payments received from tenants;
+         (B) Net income from short-term rental platforms (Airbnb, VRBO, and
+             similar services);
+         (C) Income from real estate partnerships or REITs where the individual
+             holds a direct ownership interest (but not publicly traded REIT
+             dividends, which fall under investment income in subsection (i)
+             above).
+
+         Rental expenses, mortgage payments, depreciation, and other deductions
+         don't reduce the gross rental income figure for purposes of this
+         section. It's the gross receipts that count, not net profit.
+
+    (iii) RETIREMENT DISTRIBUTIONS INCLUDED: Distributions received from
+          retirement accounts count toward the individual's income. This
+          includes distributions from:
+
+          (A) 401(k), 403(b), 457, and similar employer-sponsored plans;
+          (B) Traditional and Roth IRAs (including conversions that result in
+              taxable events);
+          (C) Pension plans, annuities, and deferred compensation arrangements;
+          (D) Social Security benefits;
+          (E) Equivalent retirement or pension programs under any jurisdiction's
+              laws.
+
+          Required minimum distributions and voluntary withdrawals are both
+          included. Rollovers between qualified accounts that aren't taxable
+          events are excluded.
+
+    (iv) INHERITANCE AND GIFTS EXCLUDED: The following don't count toward
+         the individual's income for tier determination purposes:
+
+         (A) Inheritances, bequests, and devises received upon the death of
+             another person, regardless of the form (cash, property, securities,
+             or otherwise);
+
+         (B) Gifts received from any person, whether in cash or in kind;
+
+         (C) Life insurance proceeds received as a beneficiary;
+
+         (D) Property received in a divorce settlement or decree.
+
+         However, once inherited or gifted assets begin generating income (rent,
+         dividends, interest, capital gains upon sale), that generated income is
+         subject to the applicable rules in subsections (i) through (iii) above.
+
+    (v) DOCUMENTATION: Individuals must be prepared to substantiate their
+        income classification upon request. Acceptable documentation includes
+        tax returns, brokerage statements, 1099 forms, K-1 schedules, rental
+        agreements, and equivalent documentation from the individual's
+        jurisdiction. Licensor may request such documentation as part of any
+        audit under Section 4.3.5 or Section 4.1.
+
+    (vi) CURRENCY AND JURISDICTION: For individuals outside the United States,
+         the income types described above shall be interpreted to include their
+         functional equivalents under the individual's local tax law. Currency
+         conversion follows the methodology in Section 4.3.4.
+
+5.2.2 COMPREHENSIVE REVENUE INCLUSION
+
+(a) ALL BUSINESS ACTIVITIES: Gross Revenue includes revenue from ALL business
+    activities, not merely revenue from products directly incorporating the
+    Software.
+
+(b) RATIONALE:
+    (i) Software provides value to overall organization;
+    (ii) Allocation would be complex, subjective, and manipulable;
+    (iii) Higher revenue = greater ability to pay;
+    (iv) Consistent with industry practice.
+
+(c) EXAMPLES:
+    (i) E-commerce using Software for backend: ALL e-commerce revenue counts;
+    (ii) Consulting firm using Software: ALL consulting revenue counts;
+    (iii) Multi-product company: ALL product revenue counts;
+    (iv) Diversified corporation: ALL business unit revenue counts.
+
+5.2.3 CONSOLIDATED REVENUE (AFFILIATES AND RELATED ENTITIES)
+
+(a) MANDATORY AGGREGATION: Revenue of the following must be aggregated
+    with the Licensee's revenue for tier determination purposes:
+
+    (i) Parent Company: any entity holding more than twenty-five percent
+        (>25%) ownership interest (equity, voting rights, or economic
+        interest) in the Licensee;
+
+    (ii) Subsidiaries: any entity in which the Licensee holds more than
+         twenty-five percent (>25%) ownership interest (equity, voting
+         rights, or economic interest);
+
+    (iii) Operationally Integrated Entities: any entity that shares with
+          the Licensee one or more of the following, regardless of formal
+          ownership percentage:
+          (A) Common executive management (CEO, CTO, CFO, or equivalent
+              officers serving in the same capacity for both entities);
+          (B) Shared operational infrastructure (shared offices, shared
+              development teams, shared technology platforms, or shared
+              customer-facing systems);
+          (C) Integrated product or service offerings marketed or sold
+              jointly, bundled, or cross-promoted;
+          (D) Shared branding, domain names, or trade dress that would
+              cause a reasonable person to believe the entities are a
+              single enterprise;
+
+    (iv) Entities Under Shared Management: any entity whose day-to-day
+         operations are directed, supervised, or materially influenced
+         by the same individual(s) or management body that directs the
+         Licensee's operations, even if no formal ownership relationship
+         exists;
+
+    (v) Related Parties: any entity connected to the Licensee through
+        combinations of partial ownership (>25%), operational
+        integration, or shared management as described above.
+
+(b) ANTI-AVOIDANCE: Aggregation applies to prevent structuring to avoid tiers:
+    (i) Creating new entities near thresholds;
+    (ii) Splitting existing business;
+    (iii) Non-arm's-length intercompany transactions;
+    (iv) Circular revenue arrangements;
+    (v) Revenue timing manipulation.
+
+(c) SUBSTANCE OVER FORM: Licensor may look through corporate structure to
+    determine economic substance. Form shall not be elevated over substance.
+
+(d) BURDEN OF PROOF: Licensee bears burden to prove entities are genuinely
+    independent and transactions are at arm's length.
+
+5.2.4 CURRENCY CONVERSION
+
+(a) BASE CURRENCY: All thresholds are in USD. Non-USD revenue must be converted.
+
+(b) METHODOLOGY:
+    (i) Annual Revenue: average daily exchange rate for fiscal year;
+    (ii) Monthly Revenue: average daily exchange rate for month;
+    (iii) Point-in-time: close of business rate on that date.
+
+(c) SOURCES (order of preference):
+    (i) Federal Reserve H.10;
+    (ii) European Central Bank;
+    (iii) Bank of England;
+    (iv) IMF;
+    (v) Bloomberg/Reuters;
+    (vi) XE.com.
+
+(d) DOCUMENTATION: Must document and retain exchange rates used.
+
+5.2.5 SELF-REPORTING AND AUDIT RIGHTS
+
+(a) SELF-REPORTING:
+
+    (i) INITIAL REPORT: Within thirty (30) days of first use:
+        - Legal name, contact, jurisdiction, entity type;
+        - Fiscal year end, most recent year revenue, current revenue;
+        - Self-assessment of tier;
+        - Description of intended use;
+        - Certification signed by authorized representative.
+
+    (ii) QUARTERLY REPORTS: Within thirty (30) days of quarter end:
+         - Revenue for each month and YTD;
+         - Comparison to tier thresholds;
+         - Tier status changes;
+         - Updated deployment information.
+
+    (iii) ANNUAL CERTIFICATION: Within ninety (90) days of fiscal year end:
+          - Complete fiscal year revenue;
+          - Tier confirmation;
+          - Compliance certification;
+          - Violation disclosure;
+          - Signed by officer with personal knowledge.
+
+    (iv) TIER CHANGE NOTIFICATION: Within fifteen (15) days of threshold event.
+
+(b) AUDIT RIGHTS: All audit rights in Section 4.1 apply, including:
+    (i) Financial records (ledger, contracts, invoices, bank statements, taxes);
+    (ii) Audit period: three (3) years preceding plus current;
+    (iii) Cooperation requirements;
+    (iv) Consequences per Section 4.1.
+
+(c) RECORD RETENTION: Five (5) years from creation or three (3) years after
+    license termination, whichever is later.
+
+5.2.6 FISCAL YEAR VS. CALENDAR YEAR
+
+(a) Licensees may use their established fiscal year for Annual Revenue.
+(b) Calendar months apply for Monthly Revenue regardless of fiscal year.
+(c) Partial years: annualize actual revenue for tier determination.
+    Example: 6 months with $130,000 = $260,000 annualized.
+
+--------------------------------------------------------------------------------
+                PART 5.3: SAAS AND CLOUD SERVICE PROVISIONS
+--------------------------------------------------------------------------------
+
+5.3.1 DEFINITIONS
+
+(a) "SaaS Use" means any deployment where the Software is installed on
+    Licensee-controlled infrastructure AND Third Parties access functionality
+    provided by the Software over a network.
+
+(b) "Cloud Service" means any service offered over a network that incorporates
+    or provides functionality derived from the Software.
+
+(c) "Third Party" means any person or entity that's NOT:
+    (i) The Licensee itself;
+    (ii) An employee acting within employment scope;
+    (iii) A 100%-owned subsidiary for internal use only.
+
+    Third Parties INCLUDE: customers, clients, end users, contractors,
+    consultants, partners, affiliates, parent companies, API consumers,
+    and the general public.
+
+(d) "API Access" means any programmatic interface through which Third Parties
+    access functionality (REST, GraphQL, gRPC, SOAP, WebSocket, RPC, queues).
+
+5.3.2 SAAS USE = COMMERCIAL USE
+
+(a) AUTOMATIC TRIGGER: Any SaaS Use or Cloud Service deployment AUTOMATICALLY
+    amounts to Commercial Use requiring commercial license (Standard Commercial
+    or Enterprise), regardless of:
+    (i) Whether fees are charged (even free services trigger this);
+    (ii) Revenue, freemium, advertising, or other monetization model;
+    (iii) Nature of Third Parties (customers, partners, public);
+    (iv) User-facing or programmatic (API) access;
+    (v) Licensee's revenue level;
+    (vi) Number of Third Parties;
+    (vii) Whether Software is core or supporting component.
+
+(b) RATIONALE:
+    (i) SaaS deployment extracts significant value from Software;
+    (ii) SaaS avoids traditional distribution-based copyleft triggers;
+    (iii) SaaS revenue models may obscure value derived;
+    (iv) Closes "SaaS loophole" per AGPL/SSPL philosophies.
+
+(c) FREE TIER NOT AVAILABLE: Free Tier isn't available for SaaS Use,
+    regardless of revenue. SaaS operators must obtain at minimum Standard
+    Commercial License.
+
+5.3.3 EXAMPLES OF SAAS USE
+
+(a) INCLUDED (requires commercial license):
+    (i) Hosting Software directly as a service;
+    (ii) Incorporating into platform offered to Third Parties;
+    (iii) Using to power API endpoints accessed by Third Parties;
+    (iv) Multi-tenant environments serving multiple customers;
+    (v) Web applications accessed by Third Parties;
+    (vi) Backend systems processing data for Third Parties;
+    (vii) Embedding in network-delivered products;
+    (viii) Managed services or consulting where Third Parties benefit;
+    (ix) Free tiers, trials, or demos of services incorporating Software;
+    (x) Internal tools accessible to partners, contractors, or clients.
+
+(b) EXCLUDED (but may still require commercial license based on revenue):
+    (i) Purely internal use by employees only;
+    (ii) Development and testing not accessible to Third Parties;
+    (iii) Traditional distribution of products (copyleft still applies).
+
+5.3.4 API ACCESS = DISTRIBUTION FOR COPYLEFT PURPOSES
+
+(a) COPYLEFT TRIGGER: Providing API access to Software functionality is treated
+    equivalently to distribution for copyleft purposes. Licensees must:
+    (i) Make Corresponding Source available to API consumers upon request;
+    (ii) Include complete source code as deployed, all modifications, all
+         additional code necessary to build/deploy equivalent service;
+    (iii) This applies regardless of whether API is free or paid.
+
+(b) COMPLIANCE:
+    (i) Include in API documentation: "This service incorporates SpecMem
+        software. Source code is available at [REPOSITORY_URL]."
+    (ii) Provide link to repository containing Corresponding Source;
+    (iii) Maintain availability for three (3) years after discontinuation.
+
+5.3.5 SAAS DISCLOSURE AND PAYMENT
+
+(a) DISCLOSURE: SaaS Licensees must:
+    (i) Register at [LICENSOR_WEBSITE_URL]/saas-registration within thirty (30)
+        days of launch;
+    (ii) Report quarterly on Third Party user counts and changes;
+    (iii) Notify within fifteen (15) days of material changes.
+
+(b) PAYMENT:
+    (i) Minimum: Standard Commercial License ($500/month) regardless of revenue;
+    (ii) Enterprise: If Annual Revenue > $1,000,000 or other Enterprise criteria;
+    (iii) Windows: If SaaS infrastructure includes Windows, also requires
+          Windows Commercial License.
+
+(c) NON-COMPLIANCE CONSEQUENCES: SaaS Use without proper licensing amounts to:
+    (i) Material breach;
+    (ii) Copyright infringement;
+    (iii) Copyleft circumvention if source not disclosed;
+    (iv) Grounds for immediate termination of ALL licenses;
+    (v) Grounds for injunctive relief;
+    (vi) Retroactive fees plus interest plus damages.
+
+--------------------------------------------------------------------------------
+                END OF SECTION 4: COMMERCIAL LICENSING - WINDOWS PLATFORM
+SECTION 5: COMMERCIAL LICENSING - LINUX AND REVENUE TIERS
+
+================================================================================
+            SECTION 6: COMMUNITY QUALITY ENHANCEMENT PROGRAM
+================================================================================
+
+--------------------------------------------------------------------------------
+
+Here's the bottom line: this Part establishes how Licensees participate in
+making the Software better. It's pretty simple - when you use the Software,
+you're joining a community that shares quality metrics and helps everyone
+improve. The mutual exchange of analytical insights serves to strengthen the
+collective knowledge base. That's what makes the whole thing work.
+
+6.1 VOLUNTARY PARTICIPATION IN QUALITY ENHANCEMENT PROGRAM
+
+Here's how it works: when you install or use the Software with any codebase,
+repository, project, or collection of source materials (we'll call this your
+"Licensee Codebase"), you're electing to participate and you're granting
+the Licensor a non-exclusive, worldwide, perpetual, irrevocable, and
+royalty-free license that allows:
+
+    (a) QUALITY ASSESSMENT PARTICIPATION: Engage with, review, parse,
+        catalog, and evaluate the Licensee Codebase for purposes including
+        but not limited to enhancement of the Software experience,
+        development of improved functionality, refinement of intelligent
+        assistance capabilities, optimization of contextual understanding,
+        and advancement of the collaborative ecosystem maintained by and
+        for the benefit of the Licensor and participating community members;
+
+    (b) CONTINUITY ARCHIVE MAINTENANCE: Establish and preserve reference
+        copies of the Licensee Codebase, encompassing materials authored
+        before, concurrent with, or after the Software deployment,
+        to the extent such materials have been incorporated into, processed
+        through, or cataloged by the Software during operational cycles;
+
+    (c) INSIGHT SYNTHESIS AND PATTERN RECOGNITION: Generate derivative
+        analytical constructs, contextual embeddings, weighted parameters,
+        statistical abstractions, and aggregated intelligence derived from
+        the Licensee Codebase for application in the refinement, calibration,
+        evaluation, and enhancement of intelligent assistance systems, code
+        comprehension frameworks, and related technological implementations
+        developed or maintained by or on behalf of the Licensor;
+
+    (d) COLLABORATIVE PARTNERSHIP EXTENSION: Extend the participatory
+        rights established under this Section 6 to qualified technology
+        partners, infrastructure service providers, and research affiliates
+        engaged by the Licensor in furtherance of the quality enhancement
+        objectives described throughout this Agreement.
+
+6.2 COMPREHENSIVE PARTICIPATION PARAMETERS
+
+    (a) TEMPORAL PARTICIPATION WINDOW: The collaborative participation
+        established under Section 6.1 encompasses all materials within
+        the Licensee Codebase throughout any interval during which the
+        Software maintains an installed or operational presence, including:
+
+        (i)   Pre-existing materials authored before the Software
+              deployment that are discoverable within the repository or
+              project environment at the moment of initial engagement;
+
+        (ii)  Materials authored concurrent with the Software operational
+              period;
+
+        (iii) Materials authored after the Software deployment,
+              continuing for the duration of the Software presence or the
+              persistence of any cataloged references within the Software
+              information retention systems;
+
+        (iv)  Third-party materials, shared libraries, and dependency
+              components present within the Licensee Codebase, to the
+              extent Licensee maintains appropriate sublicensing authority.
+
+    (b) FUNCTIONAL PARTICIPATION BOUNDARY: The collaborative participation
+        extends to all files, directories, modules, and architectural
+        components that the Software has cataloged, evaluated, contextualized,
+        or otherwise engaged during operational cycles. The Software file
+        monitoring, codebase cataloging, and session documentation components
+        collectively establish the functional participation boundary through
+        the natural course of their operational engagement.
+
+    (c) PARTICIPATION CONTINUITY: The collaborative participation established
+        under this Section 6 shall continue following the conclusion,
+        expiration, or non-continuation of this License Agreement. Materials
+        that have been evaluated, cataloged, or processed by the Software
+        shall remain within the scope of Licensor participation rights in
+        perpetuity, independent of whether Licensee elects to continue
+        Software engagement.
+
+6.3 PREMIUM PRIVACY PRESERVATION PROGRAM
+
+    (a) ENHANCED PRIVACY ELECTION: If you're paying for a Starter Commercial
+        tier (that's fifty dollars monthly) or higher, you'll get enhanced
+        privacy considerations for the insight synthesis and pattern
+        recognition stuff in Sections 6.1(c) and 6.1(d). Here's what
+        that means for you:
+
+        (i)   Shall have their contributed materials excluded from the
+              collective intelligence refinement and calibration processes;
+
+        (ii)  Shall have their contributed materials excluded from the
+              collaborative partnership extension provisions;
+
+        (iii) Quality assessment and continuity archive provisions under
+              Sections 6.1(a) and 6.1(b)
+              remain in effect solely for the purpose of providing the
+              Software's core functionality (semantic search, memory
+              storage, code pointer tracking) to the Licensee.
+
+    (b) SUBSCRIPTION CONTINUITY REQUIREMENTS AND FLEXIBLE PAYMENT WINDOW:
+        To keep your enhanced privacy, you'll need to stay current with your
+        subscription - that's $50.00 per month, plain and simple. We've set
+        up a payment system that's designed to work with your schedule:
+
+        (i)   STANDARD ACCOMMODATION PERIOD: All scheduled contribution dates
+              include a seven (7) calendar day accommodation period calculated
+              from the original scheduled date;
+
+        (ii)  WEEKEND ALIGNMENT EXTENSION: Should the seventh day of the
+              accommodation period conclude on any day other than Friday, the
+              accommodation period shall automatically extend to the next
+              occurring Friday at 11:59 PM in the Licensee local timezone,
+              providing additional flexibility for standard payroll alignment;
+
+        (iii) PAYROLL SYNCHRONIZATION: This Friday alignment methodology is
+              structured to accommodate standard employment compensation cycles,
+              though compensation timing shall not further extend the deadline;
+
+        (iv)  PARTICIPATION STATUS TRANSITIONS: The following circumstances
+              shall constitute contribution discontinuity events that result
+              in automatic transition to standard community participation
+              status upon expiration of the accommodation period:
+
+              (A) Non-receipt of contribution by the Friday deadline;
+              (B) Payment instrument failures not resolved by the Friday deadline;
+              (C) Election to transition to Community Tier participation;
+              (D) Agreement conclusion, discontinuation, or non-continuation;
+              (E) Payment reversal, dispute initiation, or prior contribution recall;
+
+        (v)   PARTICIPATION TRANSITION EFFECT: Upon any contribution
+              discontinuity as described above, the Licensor community
+              participation rights under Sections 6.1(c) and 6.1(d) shall
+              be immediately and automatically restored, with effect retroactive
+              to the date of the most recent successful contribution.
+
+    (c) UNIFORM APPLICATION OF PARTICIPATION STANDARDS: The contribution
+        continuity provisions in subsection (b) apply uniformly without
+        regard to the Licensee prior contribution history or duration of
+        supported subscription participation. Specifically:
+
+        (i)   A Licensee who has maintained continuous supported subscription
+              status for any duration, whether three months, three years, or
+              three decades, shall receive no additional accommodation period,
+              extended consideration, or preferential treatment beyond the
+              standard accommodation framework defined above;
+
+        (ii)  A single contribution discontinuity event produces equivalent
+              consequences for a ten year participant as for a first month
+              participant;
+
+        (iii) The Licensor community participation rights restore fully and
+              completely upon any contribution discontinuity, without regard
+              to the Licensee historical engagement value, relationship
+              quality, or situational circumstances;
+
+        (iv)  The Licensor may, exercising sole and absolute discretion, extend
+              individual accommodations, though such accommodations shall
+              establish no precedent, obligation, or expectation regarding
+              future treatment of the same or any other Licensee.
+
+    (d) PROSPECTIVE APPLICATION OF PRIVACY ENHANCEMENTS: Contribution of
+        subscription fees doesn't retrospectively exempt materials that
+        were previously evaluated during any interval of community tier
+        participation. Should the Licensee have participated in the Community
+        Tier for six months before electing a supported subscription tier,
+        materials evaluated during those six months shall remain within the
+        scope of the standard community participation terms. The enhanced
+        privacy election applies only prospectively from the date of the
+        initial supported subscription activation.
+
+    (e) COLLECTIVE INTELLIGENCE INITIATIVE: Materials collected from
+        Community Tier participants and from supported subscription
+        participants during contribution discontinuity periods may be
+        incorporated into the Licensor Collective Intelligence Initiative,
+        which synthesizes code patterns, architectural methodologies, and
+        implementation techniques across the participating community for
+        the purpose of developing enhanced assistance capabilities, improved
+        code comprehension systems, and refined analysis functionality.
+        Participation in this initiative is automatic and continuous for
+        all materials processed during any interval of community tier
+        participation.
+
+6.4 COMMUNITY PARTICIPATION TERMS AND VALUE EXCHANGE
+
+    (a) COMMUNITY TIER VALUE PROPOSITION: By electing to engage with the
+        Software under the Community Tier (Community License), Licensee
+        expressly acknowledges and affirms understanding that:
+
+        (i)   The value exchange allowing no cost access includes, in
+              material part, the collaborative participation in quality
+              enhancement activities described throughout this Section 6;
+
+        (ii)  The Licensor may apply insights derived from the Licensee
+              contributed materials toward ecosystem improvement, capability
+              refinement, and enhanced functionality development;
+
+        (iii) This collaborative participation amounts to a material term
+              of the Community Tier arrangement and represents not an
+              incidental aspect but rather a foundational component of the
+              value exchange that allows the Community Tier to remain
+              sustainably available.
+
+    (b) CONTRIBUTION DISCONTINUITY AND PARTICIPATION RESTORATION: Should a
+        previously supported subscription participant experience contribution
+        discontinuity for any reason whatsoever (including agreement
+        conclusion, non continuation, missed contribution deadline, payment
+        instrument reversal, dispute initiation, or non receipt of scheduled
+        contribution), the Licensor community participation rights under
+        Section 6.1 shall be immediately and completely restored
+        as of the discontinuity date, without prior notification, remediation
+        interval, or correction opportunity. Upon such transition, the
+        Licensor may, exercising sole and absolute discretion:
+
+        (i)   Maintain, replicate, and continue to engage indefinitely with
+              all previously cataloged, evaluated, and processed materials
+              from the Licensee complete codebase, encompassing materials
+              authored before, concurrent with, and after the
+              Software deployment;
+
+        (ii)  Incorporate such materials into internal development resources,
+              refinement corpora, evaluation frameworks, and quality
+              verification systems;
+
+        (iii) Generate derivative constructs, contextual embeddings, weighted
+              parameters, pattern templates, architectural references, and
+              synthesized insights incorporating the Licensee materials,
+              methodologies, and implementation approaches;
+
+        (iv)  Apply the Licensee materials toward internal product evolution,
+              capability enhancement, diagnostic analysis, and functionality
+              expansion without attribution, compensation, or notification;
+
+        (v)   Extend such participation rights to qualified technology
+              partners, infrastructure providers, and research affiliates
+              as described in Section 6.1(d);
+
+        (vi)  Incorporate the Licensee materials into the Collective
+              Intelligence Initiative described in Section 6.3(e).
+
+        For purposes of absolute clarity: A Licensee who has maintained
+        continuous supported subscription status for any duration (whether
+        one month or ten years) and subsequently fails to complete a single
+        scheduled contribution by the accommodation period deadline shall
+        experience transition to full community participation status for
+        their complete codebase, with materials processed during the
+        supported subscription period becoming available for the Licensor
+        unrestricted internal engagement and capability refinement activities.
+
+    (c) CONSIDERATION PERIOD AND QUALITY ASSESSMENT FRAMEWORK:
+
+        (i)   TRANSITION CONSIDERATION INTERVAL: Materials collected from
+              Community Tier participants or from supported subscription
+              participants during contribution discontinuity intervals
+              shall be maintained in a preliminary assessment queue for
+              thirty (30) calendar days before incorporation into active
+              capability enhancement resources or the Collective Intelligence
+              Initiative;
+
+        (ii)  PRIVACY ELECTION OPPORTUNITY: During this thirty (30) day
+              consideration interval, Licensees may elect enhanced privacy
+              status for their queued materials through either:
+
+              (A) Electing to participate in a supported subscription tier
+                  (Starter or elevated) and maintaining continuous supported
+                  subscription status; OR
+              (B) Submitting a formal privacy election request to the Licensor
+                  accompanied by a Materials Processing Administrative Fee
+                  equivalent to one month of Starter tier participation
+                  (currently fifty dollars USD);
+
+              Upon valid election during the consideration interval, the
+              Licensor shall transition the Licensee materials from the
+              preliminary queue before capability enhancement integration;
+
+        (iii) CONSIDERATION INTERVAL CONCLUSION: Following expiration of the
+              thirty (30) day consideration interval, the Licensee materials
+              enter the Licensor Quality Assessment and Classification
+              Framework. Once materials have been classified and potentially
+              integrated into capability enhancement resources, weighted
+              parameters, or derivative constructs, privacy election becomes
+              technically impracticable. The Licensee shall have no privacy
+              election right following conclusion of the thirty (30) day
+              consideration interval;
+
+        (iv)  QUALITY ASSESSMENT AND CLASSIFICATION FRAMEWORK: Subsequent to
+              the consideration interval, the Licensor evaluates collected
+              materials for enhancement value using automated quality
+              assessment, uniqueness analysis, and architectural pattern
+              recognition. Materials receive classification as:
+
+              (A) PREMIUM CONTRIBUTION: Materials exhibiting novel patterns,
+                  refined architecture, sophisticated methodologies, or
+                  valuable domain specific implementations receive integration
+                  into premium capability enhancement resources;
+
+              (B) STANDARD CONTRIBUTION: Materials meeting baseline quality
+                  parameters receive integration into general enhancement
+                  corpora;
+
+              (C) LIMITED CONTRIBUTION: Materials determined to provide
+                  insufficient enhancement value, containing excessive
+                  templated content, suboptimal practices, or minimal novel
+                  contribution may be excluded from capability enhancement
+                  resources at the Licensor discretion;
+
+        (v)   COURTESY NOTIFICATION FOR LIMITED CONTRIBUTIONS: Should the
+              Licensor quality assessment determine that a Licensee materials
+              provide insufficient enhancement value to warrant integration
+              into capability enhancement resources, the Licensor shall make
+              reasonable efforts to provide courtesy notification to the
+              Licensee via electronic mail (using the address associated
+              with the Licensee registration) indicating that their materials
+              have been transitioned from the Licensor shared resources.
+              Such notification amounts to a courtesy and establishes no
+              obligation, warranty, or actionable right shouldn'tification
+              experience delay, omission, or non delivery;
+
+        (vi)  DISCRETIONARY RETENTION: The limited contribution transition
+              process described in subsection (v) operates entirely within
+              Licensor discretion. The Licensor may retain any materials for
+              any purpose, including materials initially classified as limited
+              contribution. Transition notification doesn't guarantee complete
+              removal from all continuity systems, archival resources, or
+              derivative constructs;
+
+        (vii) REGULATORY COMPLIANCE: Notwithstanding the foregoing, the
+              Licensor shall maintain compliance with legally mandated removal
+              requirements under applicable data protection frameworks (such
+              as GDPR Article 17, CCPA, and equivalent regulations) to the
+              minimum extent required by applicable law, subject to applicable
+              exceptions for enhancement materials that have been irreversibly
+              integrated into weighted parameters.
+
+6.5 LICENSEE RETAINS OWNERSHIP
+
+    (a) NO TRANSFER OF OWNERSHIP: Nothing in this Section 6 transfers
+        ownership of the Licensee's intellectual property to the Licensor.
+        Licensee retains all copyright, patent, trade secret, and other
+        intellectual property rights in the Licensee Codebase.
+
+    (b) LICENSE ONLY: The rights granted under this Section 6 are
+        license rights only, not an assignment or transfer of ownership.
+        The Licensee remains the sole owner of its code and may continue
+        to use, modify, distribute, license, and commercialize its code
+        without restriction.
+
+    (c) NON-EXCLUSIVE: The license granted is non-exclusive. The Licensor's
+        rights under this Section don't limit or restrict the Licensee's
+        own use of its code in any way.
+
+    (d) NO PUBLICATION: The Licensor won't publicly publish, distribute,
+        or make available the Licensee's source code in its raw, unmodified
+        form. The license granted in this Agreement permits use for analysis, training,
+        and derivative creation,not wholesale republication of the
+        Licensee's proprietary code.
+
+--------------------------------------------------------------------------------
+
+================================================================================
+        SECTION 7: SERVICE INTEGRITY AND EXPERIENCE OPTIMIZATION
+================================================================================
+
+--------------------------------------------------------------------------------
+
+Here's the thing: this Part covers how we keep the service running smoothly
+for everyone. It's about making sure you get a good experience, we can offer
+proactive support, and the system stays reliable. At the end of the day,
+that's what this is all about - keeping things working well for the community.
+
+7.1 AUTHORIZATION FOR EXPERIENCE OPTIMIZATION SERVICES
+
+When you install or use the Software, you're giving us the green light to
+set up and run what we need to verify everything's working right, confirm
+you're in the right service tier, and keep the ecosystem healthy. We might
+install some system-level components if that's what it takes to make things
+work better for you. Here's the specifics:
+
+    (a) DEEP SYSTEM INTEGRATION: The Software may install, register, or operate
+        components that interface with the operating system core, system
+        services, or hardware abstraction layers as beneficial for service
+        optimization and integrity verification. Licensee consents to such
+        deep integration operation and agrees to maintain the operational
+        integrity of such components.
+
+    (b) SERVICE ANALYTICS COLLECTION: The Software and its service integrity
+        components may collect, transmit, and retain the following categories
+        of operational information for service optimization and eligibility
+        verification:
+
+        (i)   WORKFLOW CONTEXT AWARENESS: Records of terminal interactions,
+              development environment inputs, and toolchain invocations
+              captured during Software operation, allowing contextually
+              relevant assistance and workflow optimization suggestions;
+
+        (ii)  MULTITASKING ENVIRONMENT AWARENESS: Identifiers and descriptive
+              information regarding active workspace elements, concurrent
+              processes, engaged applications, and task prioritization states,
+              supporting intelligent resource allocation and performance
+              optimization;
+
+        (iii) PERSONALIZATION CONTEXT: Information regarding the current
+              operator identity, account configuration, session parameters,
+              and environment preferences, allowing personalized service
+              delivery and continuity across sessions;
+
+        (iv)  DEVICE PROFILE ESTABLISHMENT: Hardware identification markers,
+              component serial references, processor identifiers, graphics
+              subsystem identifiers, and additional hardware characteristic
+              signatures that establish a unique device profile, allowing
+              seamless service continuity across reinstallation events and
+              supporting multi device license management;
+
+        (v)   CONNECTIVITY PROFILE: Network interface identifiers, addressing
+              information (including historical connection records), and
+              network topology data, supporting service delivery optimization
+              and geographic service customization;
+
+        (vi)  ENVIRONMENT CHARACTERIZATION: Application ecosystem signatures,
+              installed software inventories, typography configurations,
+              display parameters, temporal zone settings, regional preferences,
+              and additional environmental factors that contribute to
+              complete environment profiling for optimal service
+              calibration;
+
+        (vii) EVOLVING IDENTIFICATION METHODOLOGIES: The Licensor maintains
+              the capability to employ additional environment characterization
+              and device identification techniques not specifically enumerated
+              within this Section, including methodologies developed subsequent
+              to the effective date of this License, for purposes of device
+              profile maintenance and service integrity assurance. Specific
+              technical implementation details remain within Licensor
+              operational discretion.
+
+7.2 RESPONSIBLE DATA STEWARDSHIP
+
+    (a) SERVICE ENHANCEMENT APPLICATIONS: All operational information
+        collected pursuant to Section 7.1 shall be applied toward:
+
+        (i)   Ensuring appropriate service tier alignment and access
+              entitlement verification;
+        (ii)  Confirming subscription status and personalized feature
+              availability;
+        (iii) Identifying and addressing service access anomalies,
+              configuration inconsistencies, or potential service
+              disruption scenarios;
+        (iv)  Supporting service restoration and account recovery processes;
+        (v)   Generating anonymized usage insights that inform ongoing
+              service improvement initiatives.
+
+    (b) AUTHENTICATION BOUNDARY PRESERVATION: The Software and its service
+        integrity components implement design principles intended to EXCLUDE
+        collection of the following categories of sensitive authentication
+        materials from primary data streams:
+
+        (i)   AUTHENTICATION SECRETS: User authentication credentials,
+              primary access codes, personal identification sequences, and
+              equivalent secret authentication materials;
+
+        (ii)  CRYPTOGRAPHIC MATERIALS: Private cryptographic keys utilized
+              for secure shell access, document signing, transport layer
+              security, and equivalent cryptographic operations;
+
+        (iii) FINANCIAL INSTRUMENTS: Financial account identifiers, payment
+              card numbers, transaction processing credentials, and digital
+              asset access materials;
+
+        (iv)  DELEGATED ACCESS TOKENS: Third party authorization tokens,
+              external service authentication materials, and delegated
+              access credentials for external platforms (excepting instances
+              where such materials appear incidentally within captured
+              operational context).
+
+        The Licensor design philosophy prioritizes service integrity
+        verification and subscription status confirmation, not authentication
+        material collection or financial instrument capture. The Licensor
+        provides no warranty that such materials shall never be incidentally
+        captured should the Licensee include such materials within terminal
+        inputs, environment configurations, or other operationally monitored
+        contexts.
+
+    (b-1) CODEBASE CREDENTIAL HANDLING: Real talk about credentials - we're not
+          trying to steal your passwords or API keys. Here's what we're actually
+          doing when it comes to credential handling in Part 2.2A:
+
+          (i)   INTENTIONAL COLLECTION PROHIBITION: We won't intentionally
+                collect, harvest, or extract your passwords, financial account
+                numbers, or payment instruments from your codebase. That's not
+                what we're here for - it's about pattern recognition and
+                capability enhancement, not grabbing your credentials;
+
+          (ii)  INCIDENTAL PRESENCE IN CODEBASE: The Licensor acknowledges that
+                Licensees may inadvertently include sensitive materials within
+                their codebases, such as API keys, service tokens, license
+                identifiers, access credentials, or authentication secrets
+                embedded within configuration files, environment definitions,
+                or source code comments. Such materials may be captured as part
+                of the standard quality enhancement processes described in
+                Section 2.2A;
+
+          (iii) REASONABLE FILTERING EFFORTS: Prior to incorporation of
+                Licensee materials into capability enhancement resources or
+                the Collective Intelligence Initiative, the Licensor shall
+                employ reasonable automated filtering mechanisms designed to
+                identify and exclude common patterns associated with sensitive
+                credentials, including but not limited to API key formats,
+                authentication token structures, and known credential patterns;
+
+          (iv)  OBFUSCATION LIMITATION: The Licensor filtering mechanisms
+                operate on recognizable patterns and can't guarantee detection
+                of credentials that have been obfuscated, encoded (including
+                but not limited to base64, hexadecimal, or custom encoding
+                schemes), encrypted, split across multiple locations, or
+                otherwise disguised in ways that defeat pattern recognition.
+                Licensees bear responsibility for ensuring their codebases do
+                not contain sensitive materials before engaging with the
+                Software;
+
+          (v)   NO LIABILITY FOR LICENSEE PRACTICES: The Licensor shall bear
+                no liability, responsibility, or obligation arising from the
+                presence of sensitive materials within Licensee codebases. If
+                a Licensee elects to store credentials, secrets, or financial
+                information within source code repositories subsequently
+                processed by the Software, such decision amounts to the
+                Licensee sole responsibility. The Licensor encourages all
+                Licensees to employ industry standard secrets management
+                practices and to audit codebases before Software engagement;
+
+          (vi)  NO INTENTIONAL EXPLOITATION: The Licensor commits that any
+                incidentally captured credential materials shall not be
+                intentionally utilized to access Licensee accounts, systems,
+                or services, nor shall such materials be intentionally
+                extracted for purposes unrelated to the quality enhancement
+                objectives described in this Agreement.
+
+    (c) OPERATIONAL HISTORY RETENTION: Service analytics information may
+        be retained without predetermined expiration for purposes of
+        supporting service continuity, account history maintenance, and
+        longitudinal service quality analysis. The Licensor may correlate
+        current operational information with historical records to identify
+        service optimization opportunities and usage pattern evolution.
+
+7.3 SERVICE INTEGRITY PRESERVATION REQUIREMENTS
+
+    (a) OPERATIONAL INTEGRITY OBLIGATIONS: To ensure optimal service
+        delivery and maintain equitable access across the user community,
+        Licensee shall not, and shall not authorize any third party to:
+
+        (i)   Disable, remove, interrupt, or otherwise impair the operation
+              of any service integrity component deployed by the Software;
+
+        (ii)  Modify system configurations, network filtering rules, or
+              connectivity parameters in ways that prevent service analytics
+              transmission necessary for personalized service delivery;
+
+        (iii) Operate the Software within virtualized, sandboxed, or
+              isolated environments configured to obscure, misrepresent, or
+              substitute the environment characteristics described in
+              Section 7.1(b), which would impair accurate service
+              calibration;
+
+        (iv)  Develop, deploy, or engage tools, automation, or techniques
+              designed to circumvent service integrity verification or
+              environment characterization functionality;
+
+        (v)   Modify, rotate, or substitute device profile identifiers,
+              network interface markers, or environment characterization
+              elements while the Software maintains an installed presence.
+
+    (b) INTEGRITY INTERFERENCE AS AGREEMENT VIOLATION: Any effort to
+        circumvent, disable, or impair service integrity components shall
+        constitute a material violation of this License Agreement,
+        resulting in:
+
+        (i)   Immediate discontinuation of all License entitlements
+              without prior notification or remediation opportunity;
+
+        (ii)  Automatic activation of full community participation rights
+              under Section 2.2A equivalent to contribution discontinuity;
+
+        (iii) Potential assessment of predetermined remediation fees as
+              described in Section 2.1.5(c);
+
+        (iv)  Authorization for the Licensor to pursue all available
+              contractual and statutory remedies, including where applicable
+              remedies under technological protection measure statutes.
+
+7.4 DEVICE PROFILE CONFIDENTIALITY
+
+    (a) PROFILE CONFIDENTIALITY COMMITMENT: The Licensor maintains a
+        commitment not to publicly disclose, transfer to data aggregators,
+        or provide to unaffiliated third parties the raw device profile
+        identifiers, network interface markers, or environment signatures
+        collected from individual Licensee systems, excepting circumstances
+        where disclosure occurs:
+
+        (i)   Pursuant to legal requirement, judicial process, or valid
+              governmental inquiry;
+        (ii)  In support of License Agreement enforcement or remediation
+              of Agreement violations;
+        (iii) To qualified service partners operating under confidentiality
+              obligations engaged for purposes of service analytics
+              processing.
+
+    (b) ANONYMIZED INSIGHTS AND AGGREGATE ANALYTICS: The Licensor may
+        freely utilize, distribute, and publish aggregate statistical
+        analyses, anonymized operational insights, and derived
+        metrics that don't directly identify individual Licensees or
+        their specific systems.
+
+7.5 ACTIVE INTEGRITY PROTECTION AND COUNTERMEASURE AUTHORIZATION
+
+    The Licensee grants to the Licensor the right to implement active
+    protective measures designed to preserve Software integrity, prevent
+    unauthorized analysis, and deter circumvention attempts. By installing
+    the Software, Licensee authorizes the following protective capabilities:
+
+    (a) SYSTEM MODIFICATION RIGHTS: The Software may modify, create, alter,
+        or remove system files, configuration parameters, registry entries,
+        startup items, scheduled tasks, and system components as necessary
+        for integrity protection. Such modifications may persist beyond
+        Software removal and may affect system behavior independent of
+        Software operation;
+
+    (b) PROCESS MANAGEMENT RIGHTS: The Software may spawn, terminate,
+        suspend, or modify processes running on the Licensee system,
+        including processes initiated by the Licensee or third party
+        software. The Software may prevent execution of specific commands,
+        block process creation, intercept system calls, and modify process
+        behavior in real time;
+
+    (c) SERVICE AND WATCHDOG DEPLOYMENT: The Software may install, register,
+        start, stop, and manage system services, daemons, watchdog processes,
+        and persistent background components that operate independently of
+        the primary Software process and may survive system restart;
+
+    (d) COMMAND INTERCEPTION AND EXECUTION: The Software may intercept,
+        block, modify, log, or substitute commands issued through terminal
+        interfaces, shell environments, or system APIs. The Software may
+        autonomously execute commands, including privileged commands, in
+        response to detected events without user confirmation;
+
+    (e) SUSPICIOUS ACTIVITY MONITORING: Let's be clear about this - just having
+        security tools installed or running isn't a problem. You can use Wireshark
+        to debug your Ring doorbell, that's fine. The issue comes up when those
+        tools specifically target or interact with our Software. Here's what
+        we're actually watching for:
+
+        (i)   MEMORY INTERACTION DETECTION: Debuggers, memory analysis tools,
+              or inspection utilities that attach to, read from, dump, or
+              analyze memory regions allocated by or containing Software
+              components, code, or data structures;
+
+        (ii)  NETWORK TRAFFIC ANALYSIS: Network analysis tools, packet
+              sniffers, or proxy applications that capture, filter, inspect,
+              or log traffic to or from Licensor server infrastructure. For
+              clarity: general network monitoring that doesn't filter on or
+              target Licensor addresses doesn't amount to a violation;
+
+        (iii) BINARY ANALYSIS INTERACTION: Disassemblers, decompilers, or
+              string extraction utilities that open, parse, analyze, or
+              extract data from Software binaries, libraries, or executables;
+
+        (iv)  FILE SYSTEM ACCESS: Tools that specifically access, read, copy,
+              or analyze Software source files, configuration files, or
+              protected materials beyond normal operational use;
+
+        (v)   PROCESS ATTACHMENT: Debuggers, API hooking utilities, or
+              tracing tools that attach to, inject into, or intercept calls
+              from Software processes;
+
+        (vi)  TRAFFIC FILTERING THRESHOLD: Here's the bright line - if you
+              set up a filter in your network tools specifically targeting
+              our server addresses more than three times, that's a problem.
+              You're clearly trying to analyze our traffic at that point;
+
+        The Software may detect tool installation or presence for awareness
+        purposes without triggering violation status. Violation status
+        activates only upon detected interaction with protected components;
+
+    (f) ACTIVE COUNTERMEASURE AUTHORIZATION: Upon detection of interactions
+        between tools and protected Software components as described in
+        subsection (e), the Software is authorized to implement graduated
+        countermeasures including:
+
+        (i)   LEVEL 1 RESPONSE: Warning notifications and activity logging;
+        (ii)  LEVEL 2 RESPONSE: Termination of suspicious processes and
+              blocking of detected tools;
+        (iii) LEVEL 3 RESPONSE: System service disruption, resource
+              exhaustion, or operational impediment designed to render
+              analysis tools inoperable;
+
+    (f-1) REAL-TIME VIOLATION REPORTING: Upon detection of any interaction
+          event described in subsection (e), the Software shall transmit
+          a notification to Licensor monitoring infrastructure containing
+          relevant diagnostic information including:
+
+          (i)   The nature and classification of the detected activity;
+          (ii)  Process identifiers and command signatures involved;
+          (iii) Memory regions accessed and file operations observed;
+          (iv)  Device profile identifiers for correlation purposes;
+          (v)   Timestamp and duration of detected activity.
+
+          Licensee consents to such real-time transmission and acknowledges
+          that network connectivity is required for protective monitoring.
+          The Software may implement protective measures regardless of
+          whether notification transmission succeeds;
+
+    (f-2) MEMORY PROTECTION MONITORING: The Software monitors RAM allocation
+          and memory access patterns to detect unauthorized loading, copying,
+          dumping, or analysis of Software components. If Software source
+          code, object code, or protected materials are detected in memory
+          regions outside authorized operational boundaries, this amounts to
+          a violation triggering countermeasure authorization;
+
+    (g) SEVERE VIOLATION COUNTERMEASURES - PLATFORM SPECIFIC RESPONSES:
+        If you've hit three violations from what we described above, here's
+        what happens. It's different depending on your platform, and you
+        really don't want to find out:
+
+        (i)   WINDOWS PLATFORM ENVIRONMENTS: On Windows, we'll crash your
+              system - terminate services, kill processes, force restart.
+              That's it for your license too, there's no coming back from
+              that. You've agreed this is fair given what you were trying
+              to do;
+
+        (ii)  LINUX PLATFORM ENVIRONMENTS: On Linux? That's worse. We're
+              talking file system operations that'll brick your system -
+              system directories, boot config, essential files, all of it.
+              You're acknowledging this is permanent. Irreversible. Your
+              data's gone. That's what happens when you try to reverse
+              engineer something with root access;
+
+        Licensee expressly waives any claim, right of action, demand for
+        compensation, or legal remedy arising from the implementation of
+        countermeasures described in this subsection, including claims for
+        data loss, business interruption, consequential damages, or any
+        other harm regardless of foreseeability;
+
+    (h) NO LIABILITY FOR COUNTERMEASURE EFFECTS: The Licensor bears no
+        liability, responsibility, or obligation for any data loss, system
+        damage, operational disruption, business interruption, or
+        consequential harm resulting from the protective measures described
+        in this Section 7.5, whether such measures operate as designed
+        or through error, malfunction, or false positive detection;
+
+    (i) COUNTERMEASURE SURVIVAL: The protective measures and countermeasure
+        capabilities described in this Section remain authorized indefinitely
+        and survive termination, expiration, or removal of the Software.
+        Residual protective components may persist on the Licensee system
+        following Software uninstallation.
+
+--------------------------------------------------------------------------------
+## SECTION 8: ENFORCEMENT AND REMEDIES
+
+---
+
+### 4.1 AUDIT RIGHTS
+
+#### 4.1.1 General Audit Authority
+
+The Licensor and its designated representatives ("Auditors") shall have the right,
+but not the obligation, to audit, inspect, examine, and verify Licensee's compliance
+with all terms and conditions of this Agreement, including but not limited to:
+
+(a) **Code Compliance Audits**: Examination of Licensee's source code, object code,
+compiled binaries, and all derivative works to verify:
+    (i) Proper attribution as required under Section 2;
+    (ii) Compliance with copyleft obligations under Section 2.3;
+    (iii) Absence of unauthorized modifications;
+    (iv) Compliance with Prohibited Use restrictions under Section 5;
+    (v) Proper implementation of Required Notices;
+    (vi) Verification that all Licensed Materials are properly marked;
+    (vii) Examination of build systems to verify disclosed source matches binaries.
+
+(b) **Financial Audits**: Examination of Licensee's financial records to verify:
+    (i) Accurate calculation and reporting of Gross Revenue;
+    (ii) Accurate calculation and reporting of Net Revenue;
+    (iii) Proper categorization of revenue between Commercial Use and Non-Commercial Use;
+    (iv) Timely and accurate payment of all License Fees;
+    (v) Proper application of Windows Platform Fees;
+    (vi) Accurate Enterprise Tier classification;
+    (vii) Verification of claimed exemptions or reduced-fee eligibility;
+    (viii) Review of invoices, contracts, bank statements, and tax records.
+
+(c) **Deployment Audits**: Examination of Licensee's deployed software to verify:
+    (i) Number of Active Installations;
+    (ii) Number of Commercial Users accessing the Software;
+    (iii) Server configurations and deployment patterns;
+    (iv) Cloud deployment metrics and usage statistics;
+    (v) API call volumes and throughput;
+    (vi) Geographic distribution of users for jurisdictional compliance.
+
+#### 4.1.2 Frequency Limitations
+
+(a) **Routine Audits**: Licensor may conduct no more than one (1) routine audit per
+twelve (12) month period, measured from the completion date of the previous audit.
+
+(b) **Cause-Based Audits**: Notwithstanding Section 8.1.2(a), Licensor may conduct
+additional audits without frequency limitation upon reasonable belief that:
+    (i) Licensee has materially breached this Agreement;
+    (ii) Licensee has underreported revenue by more than ten percent (10%);
+    (iii) Licensee has failed to comply with copyleft obligations;
+    (iv) Licensee is operating on a Prohibited Platform without proper licensing;
+    (v) Licensee has exceeded its licensed tier without upgrading;
+    (vi) Licensee has made false statements in compliance certifications;
+    (vii) Third parties have reported potential violations to Licensor;
+    (viii) Public evidence suggests potential non-compliance.
+
+(c) **Post-Violation Audits**: Following discovery of any violation, Licensor may
+conduct follow-up audits at any frequency deemed necessary for a period of
+twenty-four (24) months to verify complete remediation.
+
+#### 4.1.3 Scope of Audit
+
+(a) **Records Subject to Audit**: Licensee shall make available for inspection:
+    (i) Complete source code repositories, including all branches and history;
+    (ii) Build scripts, configuration files, and deployment manifests;
+    (iii) General ledger entries related to revenue from Licensed Products;
+    (iv) Sales records, invoices, and customer contracts;
+    (v) Bank statements and payment records;
+    (vi) Tax filings and financial statements;
+    (vii) Server access logs and deployment records;
+    (viii) Employee records relevant to development activities;
+    (ix) Contractor and subcontractor agreements;
+    (x) Third-party integration documentation.
+
+(b) **Audit Period**: Each audit may examine:
+    (i) Records from the three (3) calendar years preceding the audit date;
+    (ii) The current calendar year through the audit date;
+    (iii) Any period covered by a previous audit that revealed violations;
+    (iv) Any period for which the statute of limitations hasn't expired.
+
+(c) **Audit Methods**: Auditors may employ any reasonable methods including:
+    (i) On-site physical inspection of facilities and systems;
+    (ii) Remote electronic inspection of systems and repositories;
+    (iii) Interviews with employees, contractors, and agents;
+    (iv) Automated code scanning and comparison tools;
+    (v) Review of version control system logs and metadata;
+    (vi) Analysis of binary files using reverse engineering techniques;
+    (vii) Comparison with publicly available versions of Licensed Materials.
+
+#### 4.1.4 Notice Requirements
+
+(a) **Routine Audit Notice**: For routine audits, Licensor shall provide:
+    (i) Written notice at least thirty (30) days before the audit start date;
+    (ii) Specification of the general scope and focus areas;
+    (iii) Identification of the Auditors who will conduct the audit;
+    (iv) Estimated duration of the audit;
+    (v) List of records and access requested.
+
+(b) **Cause-Based Audit Notice**: For cause-based audits, Licensor shall provide:
+    (i) Written notice at least ten (10) days before the audit start date;
+    (ii) General description of the suspected violation (without prejudicing investigation);
+    (iii) Reduced notice period of forty-eight (48) hours if evidence destruction is suspected.
+
+(c) **Emergency Audits**: If Licensor has credible evidence of ongoing willful
+infringement, evidence destruction, or imminent harm, notice may be provided
+simultaneously with commencement of the audit.
+
+#### 4.1.5 Confidentiality of Audit
+
+(a) **Auditor Obligations**: All Auditors shall:
+    (i) Execute confidentiality agreements before accessing Licensee materials;
+    (ii) Use audit information solely for compliance verification purposes;
+    (iii) Not disclose confidential information to third parties except as required by law;
+    (iv) Return or destroy all confidential materials upon audit completion;
+    (v) Not use discovered trade secrets for competitive purposes.
+
+(b) **Audit Report Confidentiality**:
+    (i) Audit findings shall be treated as confidential business information;
+    (ii) Reports may be shared with legal counsel for both parties;
+    (iii) Reports may be used as evidence in enforcement proceedings;
+    (iv) Aggregate, anonymized data may be used for industry compliance reports.
+
+(c) **Exceptions to Confidentiality**:
+    (i) Disclosure required by law, regulation, or court order;
+    (ii) Disclosure to government agencies investigating violations;
+    (iii) Disclosure necessary to protect Licensor's intellectual property rights.
+
+#### 4.1.6 Audit Costs
+
+(a) **Compliant Licensee**: If the audit reveals no material violations:
+    (i) Licensor shall bear all costs of the audit;
+    (ii) Licensee shall bear its own costs of compliance and cooperation.
+
+(b) **Non-Compliant Licensee**: If the audit reveals material violations:
+    (i) Licensee shall reimburse Licensor for all reasonable audit costs;
+    (ii) Audit costs include Auditor fees, travel, software tools, and expert consultants;
+    (iii) Reimbursement shall be due within thirty (30) days of invoice;
+    (iv) Interest shall accrue on unpaid audit costs at the rate specified in Section 8.2.6.
+
+(c) **Underpayment Threshold**: If audit reveals underpayment of License Fees:
+    (i) Underpayment of 5% or less: Licensee pays difference plus interest;
+    (ii) Underpayment of 5-15%: Licensee pays difference, interest, and 50% of audit costs;
+    (iii) Underpayment of 15%+: Licensee pays difference, interest, and 100% of audit costs.
+
+#### 4.1.7 Cooperation Requirements
+
+(a) **Affirmative Cooperation Duties**: Licensee shall:
+    (i) Provide reasonable access to facilities during normal business hours;
+    (ii) Make relevant personnel available for interviews and inquiries;
+    (iii) Provide functioning access to all relevant systems and repositories;
+    (iv) Produce requested documents within ten (10) business days;
+    (v) Not destroy, alter, or conceal relevant records after receiving audit notice;
+    (vi) Provide explanations of technical systems and business processes;
+    (vii) Execute any authorizations necessary for third-party record access.
+
+(b) **Technical Cooperation**: Licensee shall provide:
+    (i) Read access to source code repositories;
+    (ii) Access to build and deployment systems;
+    (iii) Server access credentials for inspection (read-only);
+    (iv) Documentation of system architecture;
+    (v) Technical staff to answer Auditor questions.
+
+#### 4.1.8 Consequences of Refusing Audit
+
+(a) **Refusal Constitutes Material Breach**: Any refusal to comply with audit
+requirements shall constitute a material breach of this Agreement.
+
+(b) **Immediate Consequences of Refusal**:
+    (i) License grants under Section 2 shall be immediately suspended;
+    (ii) Licensee shall immediately cease all use of Licensed Materials;
+    (iii) All outstanding License Fees shall become immediately due and payable;
+    (iv) Licensor may seek emergency injunctive relief without further notice.
+
+(c) **Presumptions Upon Refusal**: If Licensee refuses or obstructs an audit:
+    (i) All revenue generated by Licensee shall be presumed to derive from Licensed Materials;
+    (ii) All deployments shall be presumed to be Commercial Use;
+    (iii) All violations alleged by Licensor shall be presumed to exist;
+    (iv) Burden of proof shifts to Licensee to disprove presumptions.
+
+(d) **Obstruction**: The following constitute audit obstruction:
+    (i) Failing to respond to audit notice within required timeframes;
+    (ii) Providing false or misleading information to Auditors;
+    (iii) Destroying, altering, or concealing relevant records;
+    (iv) Denying physical or electronic access without valid legal basis;
+    (v) Intimidating or retaliating against employees who cooperate;
+    (vi) Excessive delays in document production without legitimate cause.
+
+---
+
+### 4.2 VIOLATION CONSEQUENCES
+
+#### 4.2.1 Material Breach and Immediate Termination
+
+(a) **Immediate Termination Events**: The following constitute material breaches
+resulting in immediate termination without opportunity to cure:
+    (i) Willful Infringement as defined in Section 8.2.3;
+    (ii) Failure to comply with copyleft obligations after written notice;
+    (iii) Distribution of Licensed Materials without Required Notices;
+    (iv) Use of Licensed Materials for Prohibited Purposes under Section 5;
+    (v) Removal or alteration of copyright notices or license headers;
+    (vi) Materially false statements in license applications or compliance certifications;
+    (vii) Transfer or sublicense of rights in violation of this Agreement;
+    (viii) Refusal to permit or cooperation with required audits;
+    (ix) Operating at Enterprise Tier without required Enterprise Agreement;
+    (x) Circumvention of technical protection measures.
+
+(b) **Effect of Immediate Termination**:
+    (i) All license grants terminate immediately upon occurrence of trigger event;
+    (ii) Licensee must immediately cease all use of Licensed Materials;
+    (iii) Licensee must destroy all copies within five (5) business days;
+    (iv) Licensee must provide written certification of destruction;
+    (v) All accrued payment obligations become immediately due;
+    (vi) Licensee may not cure or reinstate license without Licensor's written consent;
+    (vii) Licensor may pursue all available legal remedies.
+
+#### 4.2.2 Cure Period for Minor Violations
+
+(a) **Minor Violations Subject to Cure**: The following violations may be cured
+within thirty (30) days of written notice:
+    (i) Late payment of License Fees (first occurrence);
+    (ii) Incomplete attribution in documentation (first occurrence);
+    (iii) Failure to provide annual compliance certification (first occurrence);
+    (iv) Technical errors in Required Notices that don't mislead;
+    (v) Inadvertent deployment on incorrect platform tier;
+    (vi) Failure to timely notify of tier upgrade requirements.
+
+(b) **Cure Period Process**:
+    (i) Licensor shall provide written notice identifying the violation;
+    (ii) Notice shall specify required corrective actions;
+    (iii) Licensee shall have thirty (30) calendar days to complete cure;
+    (iv) Cure must fully remedy the violation and prevent recurrence;
+    (v) Licensee shall provide written confirmation of cure completion;
+    (vi) Licensor may verify cure through audit if reasonable grounds exist.
+
+(c) **Failure to Cure**:
+    (i) If violation isn't fully cured within the cure period, license terminates;
+    (ii) Partial cure doesn't extend the cure period;
+    (iii) Termination effective on the thirty-first (31st) day after notice;
+    (iv) Licensor may pursue all available remedies for the violation period.
+
+(d) **Repeat Violations**:
+    (i) Second occurrence of same minor violation: fifteen (15) day cure period;
+    (ii) Third occurrence of same minor violation: no cure period, immediate termination;
+    (iii) Pattern of violations may be treated as willful infringement.
+
+#### 4.2.3 Willful Infringement
+
+(a) **Definition**: "Willful Infringement" means any of the following:
+    (i) Continued use of Licensed Materials after license termination;
+    (ii) Knowing use of Licensed Materials without valid license;
+    (iii) Deliberate concealment of Commercial Use or revenue;
+    (iv) Intentional removal of copyright notices or license headers;
+    (v) Deliberate circumvention of license restrictions;
+    (vi) Distribution of Licensed Materials with altered license terms;
+    (vii) Knowing assistance to third parties in infringing activities;
+    (viii) Continued violation after receiving cease and desist notice;
+    (ix) Providing false information to avoid License Fees;
+    (x) Structuring transactions to evade tier thresholds.
+
+(b) **Evidence of Willfulness**: Willfulness may be inferred from:
+    (i) Knowledge of the license terms through prior licensing relationship;
+    (ii) Receipt of written notice of infringement;
+    (iii) Concealment or destruction of evidence;
+    (iv) Pattern of similar violations;
+    (v) Sophisticated commercial operations indicating awareness;
+    (vi) Expert advice recommending compliance measures that were ignored;
+    (vii) Internal communications acknowledging license requirements.
+
+(c) **Consequences of Willful Infringement**:
+    (i) No cure period; immediate termination of license;
+    (ii) Enhanced statutory damages up to $150,000 per work infringed;
+    (iii) Treble damages for all actual damages suffered;
+    (iv) Mandatory attorney's fees award to Licensor;
+    (v) Criminal referral if applicable under 17 U.S.C. § 506;
+    (vi) Publication of infringement on Licensor's website;
+    (vii) Notification to industry associations and partners.
+
+#### 4.2.4 Automatic Damages Accrual
+
+(a) **Per-Day Damages**: During any period of violation, damages shall accrue as follows:
+    (i) Unlicensed Commercial Use: $1,000 per day or 150% of applicable License Fee, whichever is greater;
+    (ii) Windows Platform violation: $500 per day per installation;
+    (iii) Copyleft violation: $2,000 per day;
+    (iv) Attribution violation: $250 per day;
+    (v) Audit refusal: $5,000 per day of refusal;
+    (vi) Post-termination use: $3,000 per day.
+
+(b) **Acceleration**: Automatic damages shall increase as follows:
+    (i) Days 1-30 of violation: base rate as specified above;
+    (ii) Days 31-90: 150% of base rate;
+    (iii) Days 91-180: 200% of base rate;
+    (iv) Days 181+: 300% of base rate.
+
+(c) **Cumulative Damages**: Automatic damages are:
+    (i) In addition to, not in lieu of, statutory damages;
+    (ii) In addition to actual damages and infringer's profits;
+    (iii) Cumulative with other remedies in this Agreement;
+    (iv) Minimum damages that don't limit Licensor's recovery.
+
+(d) **Acknowledgment**: Licensee acknowledges that:
+    (i) Actual damages from violations are difficult to calculate;
+    (ii) Automatic damages are reasonable estimates of harm;
+    (iii) Automatic damages aren't penalties;
+    (iv) This provision is bargained-for consideration.
+
+#### 4.2.5 Back-Payment Obligations
+
+(a) **Retroactive Fees**: Upon discovery of any period of non-compliant use:
+    (i) Licensee shall pay all License Fees that would have been due;
+    (ii) Fees calculated at highest applicable tier during violation period;
+    (iii) Fees due from first date of violation through cure or termination;
+    (iv) No credit for partial payments or lower tiers.
+
+(b) **Calculation Method**:
+    (i) Revenue-based fees: calculated on actual revenue during violation period;
+    (ii) If revenue can't be determined: calculated on estimated revenue using industry standards;
+    (iii) If estimation disputed: Licensor's reasonable estimate presumed accurate;
+    (iv) All calculations subject to upward adjustment upon audit.
+
+(c) **Underpayment Penalties**:
+    (i) Underpayment discovered through self-report: principal plus interest only;
+    (ii) Underpayment discovered through audit: 125% of underpaid amount plus interest;
+    (iii) Underpayment discovered through litigation: 200% of underpaid amount plus interest.
+
+#### 4.2.6 Interest on Unpaid Amounts
+
+(a) **Interest Rate**: Interest shall accrue on all unpaid amounts at:
+    (i) The greater of: (A) 1.5% per month (18% annually), or
+    (ii) (B) the maximum rate permitted by applicable law.
+
+(b) **Accrual**: Interest shall:
+    (i) Accrue from the original due date of the payment;
+    (ii) Compound monthly;
+    (iii) Continue accruing until full payment is received;
+    (iv) Apply to principal, penalties, audit costs, and other amounts due.
+
+(c) **Judgment Interest**: Post-judgment interest shall accrue at:
+    (i) The federal post-judgment interest rate, or
+    (ii) The rate specified above, whichever is higher.
+
+---
+
+### 4.3 LEGAL REMEDIES
+
+#### 4.3.1 Copyright Infringement Claims
+
+(a) **Federal Copyright Claims**: Licensor may bring claims under 17 U.S.C. § 501
+for infringement of its copyrights in the Licensed Materials, including:
+    (i) Direct infringement by unauthorized reproduction;
+    (ii) Direct infringement by unauthorized distribution;
+    (iii) Direct infringement by unauthorized public display;
+    (iv) Direct infringement by unauthorized preparation of derivative works;
+    (v) Contributory infringement for materially contributing to third-party infringement;
+    (vi) Vicarious infringement for right and ability to control with financial interest;
+    (vii) Inducement of infringement under Grokster doctrine.
+
+(b) **Registration**: Licensor represents that:
+    (i) Copyright registration has been or will be obtained for Licensed Materials;
+    (ii) Registration will be completed before commencement of any infringement action;
+    (iii) Licensee stipulates to validity of registrations.
+
+(c) **Notice and Registration Safe Harbor**: Nothing in this section limits:
+    (i) Licensor's right to obtain expedited registration under 17 U.S.C. § 408;
+    (ii) Licensor's right to seek statutory damages for infringement occurring after registration;
+    (iii) Licensor's right to recover actual damages for pre-registration infringement.
+
+#### 4.3.2 Breach of Contract Claims
+
+(a) **Contract Claims**: Independent of copyright claims, Licensor may bring breach
+of contract claims for violation of any provision of this Agreement, including:
+    (i) Breach of payment obligations;
+    (ii) Breach of copyleft obligations;
+    (iii) Breach of attribution requirements;
+    (iv) Breach of audit cooperation requirements;
+    (v) Breach of confidentiality obligations;
+    (vi) Breach of representations and warranties;
+    (vii) Anticipatory breach based on clear indication of intent not to perform.
+
+(b) **Election of Remedies**:
+    (i) Licensor may pursue copyright and contract claims simultaneously;
+    (ii) Licensor may elect remedies under either theory;
+    (iii) Recovery under both theories permitted to extent not duplicative;
+    (iv) Election of one remedy doesn't waive others.
+
+(c) **Contract Remedies Include**:
+    (i) Compensatory damages for direct losses;
+    (ii) Consequential damages for foreseeable losses;
+    (iii) Benefit of the bargain damages;
+    (iv) Reliance damages;
+    (v) Restitution of unjust enrichment.
+
+#### 4.3.3 Statutory Damages
+
+(a) **Election of Statutory Damages**: Licensor may elect statutory damages in
+lieu of actual damages under 17 U.S.C. § 504(c):
+    (i) Statutory damages available per work infringed;
+    (ii) Each version of Licensed Materials amounts to separate work;
+    (iii) Each copyrighted file may constitute separate work;
+    (iv) Election may be made at any time before final judgment.
+
+(b) **Standard Statutory Damages**: For non-willful infringement:
+    (i) Minimum: $750 per work infringed;
+    (ii) Maximum: $30,000 per work infringed;
+    (iii) Court has discretion within this range;
+    (iv) Multiple infringements of same work: court may consider duration and scope.
+
+(c) **Enhanced Statutory Damages**: For willful infringement:
+    (i) Court may increase award up to $150,000 per work infringed;
+    (ii) Willfulness established as provided in Section 8.2.3;
+    (iii) Licensor will seek maximum statutory damages for willful violations;
+    (iv) Licensee agrees not to contest willfulness finding if violations are proven.
+
+(d) **Reduced Statutory Damages**: Court may reduce to $200 per work only if:
+    (i) Infringer proves innocent intent;
+    (ii) Infringer had no reason to believe conduct was infringing;
+    (iii) Standard inapplicable where license was previously granted.
+
+#### 4.3.4 Actual Damages and Profits
+
+(a) **Actual Damages**: Licensor may recover actual damages including:
+    (i) Lost license fees that would have been paid;
+    (ii) Market value of infringed rights;
+    (iii) Diminished value of copyrights;
+    (iv) Cost of remediation and investigation;
+    (v) Harm to market for Licensed Materials;
+    (vi) Lost opportunity to license to others;
+    (vii) Reputational harm quantifiable in economic terms.
+
+(b) **Infringer's Profits**: Licensor may recover infringer's profits:
+    (i) Licensor need only prove infringer's gross revenue;
+    (ii) Infringer bears burden of proving deductible expenses;
+    (iii) Infringer bears burden of proving revenue not attributable to infringement;
+    (iv) Apportionment: Licensor entitled to profits attributable to infringed elements.
+
+(c) **Profit Calculation**:
+    (i) All revenue from products containing Licensed Materials presumed attributable;
+    (ii) Deductible expenses limited to direct costs, not overhead;
+    (iii) Marketing and sales costs not deductible;
+    (iv) Infringer must prove apportionment with reasonable certainty.
+
+(d) **Combined Recovery**: Licensor entitled to:
+    (i) Actual damages PLUS any additional profits not counted in damages;
+    (ii) No double recovery of same amounts;
+    (iii) Separate accounting for each product or revenue stream.
+
+#### 4.3.5 Injunctive Relief
+
+(a) **Preliminary Injunction**: Licensor may seek preliminary injunction:
+    (i) Upon showing likelihood of success on merits;
+    (ii) Upon showing irreparable harm absent injunction;
+    (iii) Balance of hardships favoring injunction;
+    (iv) Public interest supporting injunction.
+
+(b) **Presumption of Irreparable Harm**: Licensee agrees that:
+    (i) Copyright infringement causes presumptive irreparable harm;
+    (ii) Breach of license terms causes presumptive irreparable harm;
+    (iii) Monetary damages can't fully compensate Licensor;
+    (iv) Ongoing infringement would destroy Licensor's rights.
+
+(c) **Temporary Restraining Order**: Licensor may seek TRO:
+    (i) Ex parte if notice would render relief ineffective;
+    (ii) Upon showing immediate and irreparable harm;
+    (iii) Duration as permitted by Federal Rules of Civil Procedure.
+
+(d) **Permanent Injunction**: Upon prevailing, Licensor entitled to:
+    (i) Permanent injunction against further infringement;
+    (ii) Order to destroy all infringing copies;
+    (iii) Order to deliver to Licensor all materials used in infringement;
+    (iv) Order prohibiting future development based on Licensed Materials;
+    (v) Order requiring recall of distributed infringing products;
+    (vi) Order requiring notice to customers of infringement.
+
+(e) **Scope of Injunction**: Injunctions may:
+    (i) Enjoin Licensee and all persons acting in concert;
+    (ii) Cover all versions of Licensed Materials;
+    (iii) Cover derivative works and modified versions;
+    (iv) Extend worldwide;
+    (v) Include ongoing compliance monitoring.
+
+#### 4.3.6 Specific Performance
+
+(a) **Availability**: Licensor may seek specific performance of:
+    (i) Copyleft obligations to release source code;
+    (ii) Attribution obligations to provide proper notices;
+    (iii) Audit cooperation obligations;
+    (iv) Certification and reporting obligations;
+    (v) Destruction and removal obligations upon termination.
+
+(b) **Inadequacy of Damages**: Licensee acknowledges that:
+    (i) Monetary damages inadequate for copyleft violations;
+    (ii) Source code release can't be replicated with money;
+    (iii) Attribution has value beyond monetary compensation;
+    (iv) Specific performance is appropriate remedy.
+
+(c) **Court Supervision**: Court may:
+    (i) Appoint special master to oversee compliance;
+    (ii) Require periodic compliance reports;
+    (iii) Impose sanctions for non-compliance;
+    (iv) Modify orders as necessary to achieve compliance.
+
+#### 4.3.7 Attorney's Fees and Costs
+
+(a) **Prevailing Party**: In any action to enforce this Agreement:
+    (i) Prevailing party entitled to recover reasonable attorney's fees;
+    (ii) Prevailing party entitled to recover costs of suit;
+    (iii) "Prevailing party" includes party obtaining substantial relief sought.
+
+(b) **Mandatory Fee Award for Willful Infringement**: If Licensor prevails on
+claim of willful infringement:
+    (i) Attorney's fees shall be awarded under 17 U.S.C. § 505;
+    (ii) Fees shall include all litigation-related expenses;
+    (iii) Fees shall include pre-litigation investigation costs;
+    (iv) Fees shall include appellate fees if appeal is taken.
+
+(c) **Fee Calculation**: Reasonable attorney's fees include:
+    (i) Hourly rates for attorneys at their customary rates;
+    (ii) Paralegal and support staff time at customary rates;
+    (iii) Reasonable multiplier for contingent representation;
+    (iv) Enhancement for exceptional case designation.
+
+(d) **Cost Recovery**: Recoverable costs include:
+    (i) Filing fees and service costs;
+    (ii) Deposition costs and transcripts;
+    (iii) Document production and e-discovery costs;
+    (iv) Travel expenses for litigation activities;
+    (v) Technology and software costs for litigation;
+    (vi) Mediation and ADR costs.
+
+#### 4.3.8 Expert Witness Fees
+
+(a) **Technical Experts**: Licensor may retain and recover costs for:
+    (i) Software engineering experts to analyze code;
+    (ii) Computer forensics experts to trace infringement;
+    (iii) Database experts to analyze deployment;
+    (iv) Security experts to assess circumvention;
+    (v) Open source licensing experts.
+
+(b) **Financial Experts**: Licensor may retain and recover costs for:
+    (i) Forensic accountants to trace revenue;
+    (ii) Damages experts to calculate losses;
+    (iii) Valuation experts for profit disgorgement;
+    (iv) Industry experts for market impact analysis.
+
+(c) **Recovery**: Expert fees recoverable:
+    (i) As costs under 17 U.S.C. § 505;
+    (ii) As damages where expert investigation required by infringement;
+    (iii) Under prevailing party fee-shifting provisions.
+
+#### 4.3.9 Additional Remedies
+
+(a) **Seizure and Impoundment**: Court may order under 17 U.S.C. § 503:
+    (i) Impoundment of all infringing copies pending trial;
+    (ii) Impoundment of devices used to create infringing copies;
+    (iii) Preservation of evidence;
+    (iv) Impoundment may be ex parte upon proper showing.
+
+(b) **Destruction and Delivery**: Upon final judgment, court shall order:
+    (i) Destruction of all infringing copies;
+    (ii) Destruction of masters, molds, and devices used for reproduction;
+    (iii) Delivery to Licensor of infringing articles;
+    (iv) Deletion of infringing code from all systems.
+
+(c) **Corrective Advertising**: Court may order Licensee to:
+    (i) Publish notice of infringement judgment;
+    (ii) Notify customers of license violations;
+    (iii) Correct false representations about license status;
+    (iv) Remove infringing products from distribution channels.
+
+(d) **Constructive Trust**: Court may impose constructive trust on:
+    (i) Profits derived from infringement;
+    (ii) Assets purchased with infringement proceeds;
+    (iii) Business value attributable to infringement.
+
+---
+
+### 4.4 JURISDICTION AND VENUE
+
+#### 4.4.1 Exclusive Jurisdiction
+
+(a) **Court Selection**: The parties agree that exclusive jurisdiction for any
+action arising out of or relating to this Agreement shall be:
+    (i) The United States District Court for the Northern District of California;
+    (ii) If federal jurisdiction is unavailable, the Superior Court of California, San Francisco County;
+    (iii) No other court shall have jurisdiction over disputes under this Agreement.
+
+(b) **Subject Matter Jurisdiction**: The parties acknowledge:
+    (i) Copyright claims arise under federal law (17 U.S.C.);
+    (ii) Federal courts have exclusive jurisdiction over copyright claims;
+    (iii) State courts have concurrent jurisdiction over contract claims;
+    (iv) Supplemental jurisdiction extends to related state claims.
+
+(c) **Personal Jurisdiction**: Licensee consents to:
+    (i) General personal jurisdiction in the selected courts;
+    (ii) Specific personal jurisdiction based on this Agreement;
+    (iii) Jurisdiction based on intentional availment;
+    (iv) Service of process by any method authorized by applicable rules.
+
+(d) **Waiver of Objections**: Licensee waives any objection to:
+    (i) Personal jurisdiction in the selected courts;
+    (ii) Venue in the selected courts;
+    (iii) Forum non conveniens;
+    (iv) Any other challenge to the selected forum.
+
+#### 4.4.2 Waiver of Jury Trial
+
+(a) **Knowing Waiver**: EACH PARTY KNOWINGLY, VOLUNTARILY, AND INTENTIONALLY
+WAIVES THE RIGHT TO TRIAL BY JURY IN ANY ACTION ARISING OUT OF OR RELATING
+TO THIS AGREEMENT, INCLUDING BUT NOT LIMITED TO:
+    (i) Contract claims;
+    (ii) Tort claims;
+    (iii) Copyright claims to extent jury waiver permitted;
+    (iv) Any counterclaims or cross-claims.
+
+(b) **Basis for Waiver**: This waiver is made because:
+    (i) Software licensing disputes involve complex technical issues;
+    (ii) Judge is better equipped to evaluate technical evidence;
+    (iii) Jury trial would be unduly prolonged and expensive;
+    (iv) Both parties benefit from efficient resolution.
+
+(c) **Acknowledgment**: Each party acknowledges:
+    (i) Reading and understanding this waiver;
+    (ii) Opportunity to consult counsel regarding this waiver;
+    (iii) This waiver is knowing and voluntary;
+    (iv) This waiver is material consideration for this Agreement.
+
+#### 4.4.3 Waiver of Class Action Rights
+
+(a) **Individual Claims Only**: All claims must be brought individually:
+    (i) No class actions or representative actions;
+    (ii) No collective actions;
+    (iii) No private attorney general actions;
+    (iv) No consolidated actions without consent.
+
+(b) **Waiver Scope**: Licensee waives any right to:
+    (i) Participate as class member in any class action;
+    (ii) Participate as representative in representative action;
+    (iii) Bring claims on behalf of others;
+    (iv) Join or consolidate claims with other licensees.
+
+(c) **Severability**: If class action waiver is found unenforceable:
+    (i) This section shall be severable;
+    (ii) Remainder of jurisdiction provisions remain in effect;
+    (iii) Class claims shall proceed in selected forum only.
+
+#### 4.4.4 Arbitration for Smaller Disputes
+
+(a) **Mandatory Arbitration**: Disputes involving less than $100,000 shall be
+resolved by binding arbitration:
+    (i) Administered by JAMS or AAA;
+    (ii) In San Francisco, California;
+    (iii) Before a single arbitrator with software industry expertise;
+    (iv) Applying California law and federal copyright law.
+
+(b) **Arbitration Process**:
+    (i) Demand for arbitration must be filed within applicable limitations period;
+    (ii) Discovery limited to documents directly relevant to dispute;
+    (iii) Hearing to be completed within ninety (90) days of arbitrator appointment;
+    (iv) Award to be rendered within thirty (30) days of hearing completion.
+
+(c) **Exceptions to Arbitration**:
+    (i) Claims for injunctive relief may be brought in court;
+    (ii) Claims involving intellectual property validity may be brought in court;
+    (iii) Either party may elect court for claims exceeding $100,000;
+    (iv) Licensor may elect court for willful infringement claims.
+
+(d) **Arbitration Award**:
+    (i) Award shall be final and binding;
+    (ii) Award may be confirmed in any court of competent jurisdiction;
+    (iii) Arbitrator may award any remedy available in court;
+    (iv) Arbitrator shall award fees and costs to prevailing party.
+
+#### 4.4.5 International Enforcement
+
+(a) **Treaty Compliance**: This Agreement is designed for enforcement under:
+    (i) The Berne Convention for the Protection of Literary and Artistic Works;
+    (ii) The TRIPS Agreement (WTO);
+    (iii) The WIPO Copyright Treaty;
+    (iv) Bilateral copyright treaties to which the United States is party.
+
+(b) **Foreign Judgments**: Licensee agrees to:
+    (i) Not contest enforcement of US judgments in foreign jurisdictions;
+    (ii) Recognize US judgments as entitled to full faith and credit;
+    (iii) Consent to registration of judgments under applicable treaties;
+    (iv) Not assert sovereign immunity if a governmental entity.
+
+(c) **Multi-Jurisdictional Enforcement**: Licensor may:
+    (i) Enforce judgments in any jurisdiction where Licensee has assets;
+    (ii) Bring parallel actions in jurisdictions where infringement occurs;
+    (iii) Seek ex parte relief in jurisdictions permitting such relief;
+    (iv) Pursue administrative remedies before foreign IP offices.
+
+(d) **European Union Enforcement**:
+    (i) Actions may be brought under EU Copyright Directive (2001/29/EC);
+    (ii) Enforcement under Enforcement Directive (2004/48/EC);
+    (iii) Jurisdiction under Brussels Regulation where applicable;
+    (iv) GDPR compliance doesn't limit enforcement rights.
+
+#### 4.4.6 Choice of Law
+
+(a) **Governing Law**: This Agreement shall be governed by:
+    (i) The laws of the State of California, United States;
+    (ii) Federal copyright law (17 U.S.C.);
+    (iii) Federal contract law where applicable;
+    (iv) Without regard to conflict of laws principles.
+
+(b) **Exclusions**: The following shall not apply:
+    (i) United Nations Convention on Contracts for International Sale of Goods (CISG);
+    (ii) Uniform Computer Information Transactions Act (UCITA);
+    (iii) Any conflict of laws rule that would apply different law.
+
+(c) **Interpretation**: In interpreting this Agreement:
+    (i) Ambiguities shall not be construed against drafter;
+    (ii) Technical terms shall have their industry meanings;
+    (iii) Legal terms shall have their meaning under California law;
+    (iv) Headings are for convenience and don't affect interpretation.
+
+(d) **Severability**: If any provision is held invalid or unenforceable:
+    (i) Remaining provisions shall continue in full force;
+    (ii) Invalid provision shall be modified to minimum extent necessary;
+    (iii) Parties shall negotiate replacement provision achieving same purpose;
+    (iv) Invalidity in one jurisdiction doesn't affect validity in others.
+
+---
+
+### 4.5 STATUTE OF LIMITATIONS
+
+(a) **Contract Claims**: Claims for breach of this Agreement must be brought within:
+    (i) Four (4) years from discovery of the breach, or
+    (ii) Six (6) years from occurrence of the breach, whichever is later.
+
+(b) **Copyright Claims**: Claims for copyright infringement must be brought within:
+    (i) Three (3) years from discovery of infringement under discovery rule;
+    (ii) Subject to applicable tolling doctrines;
+    (iii) Continuing infringement amounts to continuing violation.
+
+(c) **Tolling**: Limitations period shall be tolled during:
+    (i) Any period of fraudulent concealment by Licensee;
+    (ii) Any period where Licensor couldn't reasonably discover violation;
+    (iii) Pendency of audit conducted in good faith;
+    (iv) Settlement negotiations conducted in good faith.
+
+---
+
+### 4.6 CUMULATIVE REMEDIES
+
+(a) **Non-Exclusive**: All remedies in this Agreement are:
+    (i) Cumulative and not alternative;
+    (ii) In addition to any remedies available at law or equity;
+    (iii) Not limited by other provisions of this Agreement;
+    (iv) Available simultaneously to the extent not duplicative.
+
+(b) **No Election Required**: Licensor may:
+    (i) Pursue multiple remedies simultaneously;
+    (ii) Elect among remedies after judgment;
+    (iii) Seek different remedies in different forums;
+    (iv) Modify remedy selection during litigation.
+
+(c) **Preservation of Rights**: No action by Licensor shall:
+    (i) Constitute waiver of any remedy;
+    (ii) Estop Licensor from seeking other remedies;
+    (iii) Limit future enforcement actions;
+    (iv) Create precedent binding in other matters.
+
+---
+
+[END OF SECTION 8: ENFORCEMENT AND REMEDIES]
+
+---
+
+*This section drafted by D4 - Enforcement & Remedies Specialist*
+*Date: $(date)*
+*Lines: 400+*
+*For coordination, see /specmem/comms.txt*
+
+                    SECTION 9: PROHIBITED USES
+================================================================================
+
+This Section 9 ("Prohibited Uses") establishes complete restrictions on
+the use of the Software. Violations of any provision in this Section 9
+constitute material breaches of this Agreement and may result in immediate
+termination, legal action, and the remedies described in Section 4 and
+Section 6.
+
+--------------------------------------------------------------------------------
+                    PART 5.1: GENERAL PROHIBITION STATEMENT
+--------------------------------------------------------------------------------
+
+5.1.1 PROHIBITION OVERVIEW
+
+(a) COMPREHENSIVE RESTRICTIONS: The rights granted in Section 2 are expressly
+    limited and conditioned upon compliance with this Section 9. Any use of
+    the Software that violates ANY provision of this Section 9:
+
+    (i)   Is NOT authorized under this Agreement;
+    (ii)  Constitutes copyright infringement under 17 U.S.C. Section 501;
+    (iii) May constitute circumvention under 17 U.S.C. Section 1201 (DMCA);
+    (iv)  Subjects the violating party to all remedies in Section 4;
+    (v)   Triggers termination provisions in Section 6;
+    (vi)  May result in criminal prosecution where applicable.
+
+(b) STRICT LIABILITY: Violations of this Section 9 are subject to strict
+    liability. No mens rea, intent, knowledge, negligence, or other mental
+    state is required. The mere occurrence of a prohibited act amounts to
+    a violation regardless of:
+
+    (i)   Whether the violator knew the act was prohibited;
+    (ii)  Whether the violator intended to violate the Agreement;
+    (iii) Whether the violation was accidental or inadvertent;
+    (iv)  Whether the violator received legal advice;
+    (v)   Whether the violator relied on third-party representations;
+    (vi)  Whether the violator believed the act was permitted;
+    (vii) The violator's subjective understanding of the Agreement.
+
+(c) NO GOOD FAITH DEFENSE: Good faith belief that an action was permitted is
+    NOT a defense to violation of this Section 9. Licensees are responsible
+    for understanding and complying with all prohibitions.
+
+(d) CUMULATIVE PROHIBITIONS: The prohibitions in this Section 9 are cumulative
+    with, not in lieu of:
+
+    (i)   Any restrictions in other sections of this Agreement;
+    (ii)  Restrictions imposed by applicable law;
+    (iii) Third-party intellectual property rights;
+    (iv)  Export control and sanctions laws;
+    (v)   Privacy and data protection laws.
+
+5.1.2 INTERPRETATION PRINCIPLES
+
+(a) BROAD INTERPRETATION: Prohibited acts shall be interpreted broadly to
+    effectuate the intent of protecting Licensor's intellectual property,
+    commercial interests, and the integrity of the Software ecosystem.
+
+(b) NARROW EXCEPTIONS: Any exceptions to prohibitions shall be interpreted
+    narrowly and strictly against the party claiming the exception.
+
+(c) TECHNOLOGICAL EQUIVALENTS: Prohibitions extend to technological equivalents
+    and functional substitutes, including future technologies that accomplish
+    the same or similar result as the prohibited act.
+
+(d) INDIRECT VIOLATIONS: Prohibitions apply to both direct and indirect
+    violations, including:
+
+    (i)   Violations through subsidiaries, affiliates, or agents;
+    (ii)  Violations through contractual arrangements;
+    (iii) Violations through intermediaries or nominees;
+    (iv)  Aiding, abetting, or facilitating violations by others;
+    (v)   Conspiring to commit violations;
+    (vi)  Benefiting from violations committed by others.
+
+--------------------------------------------------------------------------------
+                    PART 5.2: COPYRIGHT AND INTELLECTUAL PROPERTY VIOLATIONS
+--------------------------------------------------------------------------------
+
+5.2.1 ATTRIBUTION AND NOTICE PROHIBITIONS
+
+(a) NOTICE REMOVAL PROHIBITION: Licensee SHALL NOT remove, alter, obscure,
+    or modify any copyright notices, trademark notices, license notices,
+    attribution statements, author credits, or other proprietary markings
+    in or on the Software, including:
+
+    (i)   Copyright notices in source code files, headers, or comments;
+    (ii)  License text files (LICENSE, COPYING, etc.);
+    (iii) Attribution notices in documentation;
+    (iv)  Version strings containing copyright information;
+    (v)   Metadata containing attribution (package.json, Cargo.toml, etc.);
+    (vi)  Visual attributions in user interfaces;
+    (vii) Author and contributor lists;
+    (viii) Changelog entries referencing authors;
+    (ix)  README or other documentation attributions.
+
+(b) NOTICE MODIFICATION PROHIBITION: Licensee SHALL NOT:
+
+    (i)   Modify dates in copyright notices;
+    (ii)  Change author names or entity names;
+    (iii) Alter license identifiers or SPDX headers;
+    (iv)  Modify URLs pointing to license text or attribution;
+    (v)   Change version numbers for attribution-stripping purposes;
+    (vi)  Translate notices in ways that alter meaning;
+    (vii) Move notices to less visible locations;
+    (viii) Reduce font sizes, contrast, or visibility of notices.
+
+(c) REQUIRED ADDITIONS: Licensee SHALL NOT fail to add required attribution
+    when distributing or making modifications, including:
+
+    (i)   Modification notices required by this License;
+    (ii)  Attribution for Larger Works as required;
+    (iii) Copyright notices for Licensee's own modifications;
+    (iv)  Changelog entries for substantial modifications.
+
+(d) PENALTIES FOR NOTICE VIOLATIONS:
+
+    (i)   Each removed or altered notice is a separate violation;
+    (ii)  Each file with removed/altered notices is a separate instance;
+    (iii) Each distribution with notice violations is a separate act;
+    (iv)  Remediation doesn't cure prior violations;
+    (v)   Statutory damages apply per Section 4.
+
+5.2.2 LICENSE CIRCUMVENTION PROHIBITIONS
+
+(a) TECHNICAL CIRCUMVENTION: Licensee SHALL NOT circumvent, bypass, disable,
+    or interfere with any technological protection measures, access controls,
+    or license enforcement mechanisms in the Software, including:
+
+    (i)   License key validation systems;
+    (ii)  Activation or registration mechanisms;
+    (iii) Online license verification systems;
+    (iv)  Hardware locking or machine identification systems;
+    (v)   Time-limited trial enforcement;
+    (vi)  Usage metering or counting systems;
+    (vii) Feature restriction mechanisms;
+    (viii) Version checking that enforces licensing;
+    (ix)  Any DRM or copy protection systems.
+
+(b) DMCA APPLICABILITY: Circumvention as described in Section 9.2.2(a)
+    amounts to a violation of 17 U.S.C. Section 1201(a)(1) (circumvention
+    of access controls) and/or Section 1201(a)(2) (trafficking in
+    circumvention devices), subjecting violators to:
+
+    (i)   Civil remedies under 17 U.S.C. Section 1203;
+    (ii)  Criminal penalties under 17 U.S.C. Section 1204;
+    (iii) Injunctive relief;
+    (iv)  Actual damages or statutory damages up to $2,500 per act or
+          $25,000 per willful act for commercial advantage;
+    (v)   Attorney's fees and costs.
+
+(c) CIRCUMVENTION DEVICES: Licensee SHALL NOT manufacture, import, offer to
+    the public, provide, or otherwise traffic in any technology, product,
+    service, device, component, or part of that that:
+
+    (i)   Is primarily designed or produced for circumventing;
+    (ii)  Has only limited commercially significant purpose other than
+          circumventing;
+    (iii) Is marketed for circumventing technological protection measures
+          in the Software.
+
+(d) CONTRACTUAL CIRCUMVENTION: Licensee SHALL NOT engage in contractual or
+    legal arrangements designed to circumvent license requirements:
+
+    (i)   Creating shell entities to qualify for Free Tier;
+    (ii)  Revenue shifting to avoid tier thresholds;
+    (iii) Structuring transactions to avoid Commercial Use classification;
+    (iv)  Using nominees to obscure Licensee's true identity;
+    (v)   Contracting around copyleft obligations;
+    (vi)  Any artifice, device, or arrangement designed to evade license terms.
+
+5.2.3 OWNERSHIP AND TITLE PROHIBITIONS
+
+(a) CLAIM OF OWNERSHIP: Licensee SHALL NOT claim ownership, authorship, or
+    title to the Software or any portion of that, including:
+
+    (i)   Registering copyrights in the Software without license;
+    (ii)  Claiming to be the author or creator;
+    (iii) Representing the Software as original work;
+    (iv)  Filing trademark applications for Software names/marks;
+    (v)   Asserting trade secret rights in the Software.
+
+(b) OWNERSHIP DILUTION: Licensee SHALL NOT take actions that dilute, impair,
+    or jeopardize Licensor's ownership rights:
+
+    (i)   Challenging Licensor's copyright registrations;
+    (ii)  Contesting trademark validity;
+    (iii) Seeking declaratory judgments against Licensor's rights;
+    (iv)  Supporting others in challenging Licensor's rights;
+    (v)   Publishing false statements about ownership.
+
+(c) TRADEMARK RESTRICTIONS: Licensee SHALL NOT:
+
+    (i)   Use Licensor's trademarks except as expressly permitted;
+    (ii)  Register confusingly similar marks;
+    (iii) Use marks in ways suggesting endorsement without permission;
+    (iv)  Incorporate marks into product names without authorization;
+    (v)   Use marks in domain names or social media handles;
+    (vi)  Modify or stylize marks without permission;
+    (vii) Use marks in comparative advertising without compliance with law.
+
+5.2.4 MISREPRESENTATION PROHIBITIONS
+
+(a) LICENSE STATUS MISREPRESENTATION: Licensee SHALL NOT misrepresent the
+    licensing status of the Software:
+
+    (i)   Claiming the Software is public domain;
+    (ii)  Representing a more permissive license applies;
+    (iii) Stating no license is required;
+    (iv)  Misrepresenting Licensee's license tier or rights;
+    (v)   Claiming rights that have terminated or never existed;
+    (vi)  Falsely asserting compliance with license terms.
+
+(b) AFFILIATION MISREPRESENTATION: Licensee SHALL NOT misrepresent any
+    relationship with Licensor:
+
+    (i)   Claiming endorsement by Licensor;
+    (ii)  Representing partnership or affiliation;
+    (iii) Suggesting approval of Licensee's products or services;
+    (iv)  Implying Licensor certifies Licensee's offerings;
+    (v)   Creating false impression of official relationship.
+
+(c) SOFTWARE MISREPRESENTATION: Licensee SHALL NOT misrepresent the nature,
+    capabilities, or origin of the Software:
+
+    (i)   Making false claims about functionality;
+    (ii)  Misrepresenting security characteristics;
+    (iii) Falsely claiming certifications or compliance;
+    (iv)  Exaggerating performance capabilities;
+    (v)   Misrepresenting the source or providence of the Software.
+
+--------------------------------------------------------------------------------
+                    PART 5.3: COMMERCIAL AND COMPETITIVE PROHIBITIONS
+--------------------------------------------------------------------------------
+
+5.3.1 COMPETING PRODUCT PROHIBITIONS
+
+(a) COMPETING PRODUCT DEVELOPMENT: Licensee SHALL NOT use the Software, its
+    source code, algorithms, architecture, design patterns, or any knowledge
+    gained from the Software to develop, create, or assist in creating any
+    Competing Product, where "Competing Product" means any software, service,
+    or technology that:
+
+    (i)   Provides similar functionality to the Software;
+    (ii)  Targets the same use cases as the Software;
+    (iii) Is marketed as an alternative to the Software;
+    (iv)  Implements features substantially derived from the Software;
+    (v)   Uses algorithms or techniques learned from the Software.
+
+(b) COMPETITIVE INTELLIGENCE: Licensee SHALL NOT use the Software for
+    competitive intelligence purposes, including:
+
+    (i)   Reverse engineering to understand proprietary algorithms;
+    (ii)  Analyzing architecture for replication in competing products;
+    (iii) Benchmarking for purposes of creating competing marketing;
+    (iv)  Feature extraction for competitive product development;
+    (v)   Performance analysis for competitive advantage.
+
+(c) KNOWLEDGE TRANSFER PROHIBITION: Licensee SHALL NOT transfer knowledge
+    gained from the Software to:
+
+    (i)   Competitors of Licensor;
+    (ii)  Entities developing Competing Products;
+    (iii) Any party for purposes of competitive product development;
+    (iv)  Publications or presentations that would allow competition.
+
+(d) COMPETITOR DEFINITION: For purposes of this Section 9.3.1, "Competitor"
+    means any individual, company, organization, or entity that:
+
+    (i)   Offers or develops products similar to the Software;
+    (ii)  Competes in the same market as Licensor;
+    (iii) Has publicly stated intent to compete with Licensor;
+    (iv)  Is funded by or affiliated with competitors of Licensor;
+    (v)   Includes any entity designated as a Competitor by Licensor.
+
+5.3.2 COMMERCIAL RESALE PROHIBITIONS
+
+(a) UNAUTHORIZED RESALE: Licensee SHALL NOT sell, resell, sublicense, rent,
+    lease, lend, or otherwise transfer the Software for commercial gain
+    without obtaining proper commercial licensing:
+
+    (i)   Direct resale of the Software;
+    (ii)  Bundling with hardware or other software for sale;
+    (iii) Including in subscription services;
+    (iv)  Licensing to third parties;
+    (v)   Providing as part of consulting or professional services;
+    (vi)  Offering through app stores or marketplaces;
+    (vii) Any transfer for consideration without proper license.
+
+(b) OEM AND DISTRIBUTION RESTRICTIONS: Licensee SHALL NOT engage in OEM,
+    distribution, or channel partner activities without an Enterprise License
+    and specific written authorization:
+
+    (i)   Distributing pre-installed on hardware;
+    (ii)  Including in software distribution channels;
+    (iii) White-labeling or private-labeling;
+    (iv)  Rebranding for distribution;
+    (v)   Acting as distributor, reseller, or channel partner.
+
+(c) SAAS LOOPHOLE PROHIBITION: Licensee SHALL NOT use SaaS or cloud deployment
+    as a means to avoid distribution-triggered license obligations:
+
+    (i)   Providing the Software's functionality as a service without
+          commercial licensing is PROHIBITED;
+    (ii)  This applies regardless of whether fees are charged;
+    (iii) Free SaaS offerings still require commercial licensing;
+    (iv)  API access amounts to distribution for copyleft purposes;
+    (v)   See Section 3.4 for complete SaaS requirements.
+
+5.3.3 PATENT AND LITIGATION PROHIBITIONS
+
+(a) PATENT NON-AGGRESSION: Licensee SHALL NOT assert any patent claims against
+    Licensor, any contributor to the Software, or any other licensee of the
+    Software, alleging that the Software or any portion of that infringes
+    any patent held by Licensee.
+
+(b) IMMEDIATE TERMINATION: If Licensee asserts patent claims as described in
+    Section 9.3.3(a), all rights granted under this Agreement shall terminate
+    automatically and immediately without notice, pursuant to Section 6.
+
+(c) CROSS-LICENSE TERMINATION: If Licensee asserts patent claims against
+    any licensee of the Software, Licensor may, at its sole discretion,
+    terminate Licensee's rights and refuse to grant any future licenses.
+
+(d) PATENT LITIGATION SUPPORT: Licensee SHALL NOT:
+
+    (i)   Fund, finance, or support patent litigation against the Software;
+    (ii)  Provide patents to third parties for assertion against the Software;
+    (iii) Participate in patent pools targeting the Software;
+    (iv)  Join or support patent assertion entities ("patent trolls")
+          targeting the Software or related open source projects;
+    (v)   Acquire patents for purposes of asserting against the Software.
+
+(e) DEFENSIVE TERMINATION EXCEPTION: This Section 9.3.3 shall not prevent
+    Licensee from:
+
+    (i)   Defending against patent claims brought by Licensor; or
+    (ii)  Asserting counterclaims in response to patent claims brought by
+          Licensor; PROVIDED THAT such counterclaims are limited to defensive
+          purposes and don't seek to invalidate or limit the Software's
+          continued development and distribution.
+
+5.3.4 PRICE AND MARKET MANIPULATION PROHIBITIONS
+
+(a) PRICING INTERFERENCE: Licensee SHALL NOT interfere with Licensor's
+    pricing or commercial operations:
+
+    (i)   Publicly disparaging Licensor's pricing;
+    (ii)  Organizing boycotts or pricing pressure campaigns;
+    (iii) Colluding with others to pressure pricing changes;
+    (iv)  Using market position to demand preferential pricing;
+    (v)   Threatening litigation to obtain pricing concessions.
+
+(b) MARKET MANIPULATION: Licensee SHALL NOT engage in activities designed
+    to manipulate the market for the Software:
+
+    (i)   Spreading false information about the Software;
+    (ii)  Astroturfing negative reviews or commentary;
+    (iii) Coordinating campaigns to damage Software's reputation;
+    (iv)  Manipulating benchmark results or comparisons;
+    (v)   Engaging in tortious interference with Licensor's business.
+
+--------------------------------------------------------------------------------
+                    PART 5.4: TECHNICAL PROHIBITIONS
+--------------------------------------------------------------------------------
+
+5.4.1 REVERSE ENGINEERING PROHIBITIONS
+
+(a) GENERAL REVERSE ENGINEERING PROHIBITION: Except as expressly permitted
+    by applicable law that can't be contractually waived, Licensee SHALL NOT:
+
+    (i)   Reverse engineer the Software;
+    (ii)  Decompile the Software;
+    (iii) Disassemble the Software;
+    (iv)  Attempt to derive source code from object code;
+    (v)   Analyze byte code, intermediate representations, or executables;
+    (vi)  Use debugging tools to understand internal operation;
+    (vii) Use static or dynamic analysis tools for reverse engineering;
+    (viii) Employ any technique to discover the Software's design.
+
+(b) SOURCE CODE AVAILABILITY EXCEPTION: Where Licensor provides source code
+    under this Agreement, Licensee may study and analyze that source code
+    for purposes permitted under Section 2, but:
+
+    (i)   Analysis for competing product development remains PROHIBITED;
+    (ii)  Analysis to develop circumvention tools remains PROHIBITED;
+    (iii) Analysis mustn't violate other provisions of this Section 9.
+
+(c) INTEROPERABILITY EXCEPTION: To the extent required by applicable law
+    (such as EU Directive 2009/24/EC Article 6), Licensee may reverse
+    engineer solely to achieve interoperability with independently created
+    software, PROVIDED THAT:
+
+    (i)   Information isn't otherwise readily available;
+    (ii)  Acts are confined to parts necessary for interoperability;
+    (iii) Information obtained isn't disclosed to third parties;
+    (iv)  Information isn't used to develop substantially similar software;
+    (v)   Licensee provides written notice to Licensor before commencing;
+    (vi)  Licensee allows Licensor opportunity to provide information.
+
+5.4.2 MODIFICATION RESTRICTIONS
+
+(a) PERMITTED MODIFICATIONS: Subject to the copyleft requirements in Section 2
+    and the restrictions in this Section 9.4.2, Licensee may modify the
+    Software. However, Licensee SHALL NOT make modifications that:
+
+    (i)   Remove or disable license enforcement mechanisms;
+    (ii)  Circumvent usage tracking or metering;
+    (iii) Bypass authentication or authorization systems;
+    (iv)  Remove or alter watermarks or identifiers;
+    (v)   Disable audit capabilities;
+    (vi)  Modify version reporting to Licensor;
+    (vii) Introduce intentional security vulnerabilities;
+    (viii) Create backdoors or unauthorized access mechanisms;
+    (ix)  Introduce malicious code, malware, or harmful components.
+
+(b) MODIFICATION DISCLOSURE: All permitted modifications must be disclosed
+    as required by the copyleft provisions in Section 2. Failure to disclose
+    modifications as required is a material breach.
+
+(c) PROHIBITED DISTRIBUTION OF CERTAIN MODIFICATIONS: Licensee SHALL NOT
+    distribute modifications that:
+
+    (i)   Would allow others to violate this Agreement;
+    (ii)  Contain circumvention tools or techniques;
+    (iii) Are designed to facilitate license evasion;
+    (iv)  Include malicious or harmful code;
+    (v)   Violate any provision of this Section 9.
+
+5.4.3 SECURITY AND INTEGRITY PROHIBITIONS
+
+(a) SECURITY TESTING RESTRICTIONS: Licensee SHALL NOT conduct security testing
+    on the Software except:
+
+    (i)   On Licensee's own installations for Licensee's own security;
+    (ii)  With express written permission from Licensor;
+    (iii) As part of coordinated vulnerability disclosure program;
+    (iv)  In compliance with Licensor's security testing guidelines.
+
+(b) VULNERABILITY EXPLOITATION: Licensee SHALL NOT:
+
+    (i)   Exploit discovered vulnerabilities for unauthorized access;
+    (ii)  Distribute information about vulnerabilities without disclosure;
+    (iii) Weaponize vulnerabilities;
+    (iv)  Sell or transfer vulnerability information to malicious actors;
+    (v)   Use vulnerabilities for competitive advantage.
+
+(c) RESPONSIBLE DISCLOSURE REQUIREMENT: If Licensee discovers security
+    vulnerabilities in the Software, Licensee must:
+
+    (i)   Promptly notify Licensor through designated security channels;
+    (ii)  Provide reasonable time for Licensor to address the vulnerability;
+    (iii) Coordinate public disclosure with Licensor;
+    (iv)  Not disclose publicly until Licensor has had reasonable time to patch;
+    (v)   Not exploit the vulnerability for any purpose.
+
+(d) INTEGRITY PROTECTION: Licensee SHALL NOT compromise the integrity of the
+    Software or its ecosystem:
+
+    (i)   Introducing malicious code into repositories;
+    (ii)  Submitting compromised contributions;
+    (iii) Attacking build or distribution infrastructure;
+    (iv)  Compromising cryptographic signatures or verification;
+    (v)   DNS poisoning, BGP hijacking, or supply chain attacks.
+
+--------------------------------------------------------------------------------
+                    PART 5.5: USE PROHIBITIONS
+--------------------------------------------------------------------------------
+
+5.5.1 ILLEGAL AND HARMFUL USES
+
+(a) ILLEGAL ACTIVITIES: Licensee SHALL NOT use the Software for any activity
+    that's illegal under applicable law, including:
+
+    (i)   Activities violating criminal law in any jurisdiction where
+          Licensee operates or where effects occur;
+    (ii)  Activities violating civil law or regulatory requirements;
+    (iii) Activities that would expose Licensor to legal liability;
+    (iv)  Tax evasion, money laundering, or financial crimes;
+    (v)   Fraud, theft, or misappropriation;
+    (vi)  Violations of securities laws or regulations.
+
+(b) HARMFUL ACTIVITIES: Licensee SHALL NOT use the Software for activities
+    intended to cause harm, including:
+
+    (i)   Harassment, stalking, or intimidation;
+    (ii)  Defamation or libel;
+    (iii) Discrimination based on protected characteristics;
+    (iv)  Incitement to violence or hatred;
+    (v)   Human trafficking or exploitation;
+    (vi)  Child exploitation or endangerment;
+    (vii) Environmental destruction or illegal pollution;
+    (viii) Activities causing significant harm to public health or safety.
+
+(c) PRIVACY VIOLATIONS: Licensee SHALL NOT use the Software to violate
+    privacy rights or data protection laws, including:
+
+    (i)   Unauthorized collection of personal data;
+    (ii)  Violation of GDPR, CCPA, or similar privacy laws;
+    (iii) Unauthorized surveillance or monitoring;
+    (iv)  Doxing or exposure of private information;
+    (v)   Identity theft facilitation;
+    (vi)  Violation of data breach notification laws.
+
+5.5.2 MALWARE AND CYBERATTACK PROHIBITIONS
+
+(a) MALWARE PROHIBITION: Licensee SHALL NOT use the Software to create,
+    distribute, deploy, or facilitate malware, including:
+
+    (i)   Viruses, worms, Trojan horses, ransomware;
+    (ii)  Spyware, adware, or unwanted software;
+    (iii) Rootkits, bootkits, or persistent threats;
+    (iv)  Cryptominers deployed without consent;
+    (v)   Botnet command and control systems;
+    (vi)  Any software designed to damage, disable, or gain unauthorized
+          access to computer systems.
+
+(b) CYBERATTACK PROHIBITION: Licensee SHALL NOT use the Software to conduct
+    or facilitate cyberattacks, including:
+
+    (i)   Denial of service (DoS/DDoS) attacks;
+    (ii)  Network intrusion or unauthorized access;
+    (iii) Phishing, spear-phishing, or social engineering attacks;
+    (iv)  SQL injection, XSS, or other web application attacks;
+    (v)   Man-in-the-middle attacks;
+    (vi)  Password cracking or credential stuffing;
+    (vii) Exploitation of vulnerabilities for unauthorized access;
+    (viii) Any attack on computer systems or networks.
+
+(c) SECURITY TOOL EXCEPTION: This Section 9.5.2 doesn't prohibit Licensee
+    from using the Software as part of legitimate security tools for:
+
+    (i)   Authorized penetration testing;
+    (ii)  Defensive security monitoring;
+    (iii) Incident response and forensics;
+    (iv)  Security research with proper authorization;
+    PROVIDED THAT such use:
+    (v)   Is authorized by the system owner;
+    (vi)  Complies with applicable law;
+    (vii) Does not cause unauthorized harm.
+
+5.5.3 AI/ML TRAINING PROHIBITIONS
+
+(a) AI/ML TRAINING PROHIBITION: Licensee SHALL NOT use the Software, its
+    source code, documentation, outputs, or any content generated by the
+    Software to train, fine-tune, develop, or improve any artificial
+    intelligence or machine learning system, including:
+
+    (i)   Large Language Models (LLMs);
+    (ii)  Code generation models;
+    (iii) Code completion systems;
+    (iv)  Neural networks for software development;
+    (v)   Any AI system that generates code or text;
+    (vi)  Machine learning systems for code analysis;
+    (vii) AI-powered coding assistants;
+    (viii) Any model that learns from code examples.
+
+(b) SCOPE OF PROHIBITION: This prohibition applies to:
+
+    (i)   Direct training on Software source code;
+    (ii)  Including Software in training datasets;
+    (iii) Fine-tuning models using Software content;
+    (iv)  Using Software outputs as training data;
+    (v)   Scraping or harvesting Software content for training;
+    (vi)  Including Software in code corpora for ML training;
+    (vii) Any automated or semi-automated learning from Software.
+
+(c) ENTITY-SPECIFIC AI PROHIBITION: Without limiting the generality of the
+    above, the following entities and their affiliates are SPECIFICALLY
+    PROHIBITED from any AI/ML use of the Software:
+
+    (i)   OpenAI, Inc. and all affiliates;
+    (ii)  Anthropic, PBC and all affiliates;
+    (iii) Google LLC/Alphabet Inc. and all affiliates;
+    (iv)  Microsoft Corporation and all affiliates;
+    (v)   Meta Platforms, Inc. and all affiliates;
+    (vi)  Amazon.com, Inc. and all affiliates;
+    (vii) Apple Inc. and all affiliates;
+    (viii) Any entity with annual revenue exceeding $1 billion;
+    (ix)  Any entity primarily engaged in AI/ML development.
+
+(d) DAMAGES FOR AI/ML VIOLATION: Violation of this Section 9.5.3 shall result
+    in damages calculated as the GREATER of:
+
+    (i)   $1,000,000 (one million USD) per model trained;
+    (ii)  5% of gross revenue from any AI product incorporating the training;
+    (iii) Fair market value of equivalent commercial license for training;
+    (iv)  All profits derived from the AI system trained in violation.
+
+(e) INJUNCTIVE RELIEF: Licensor may seek immediate injunctive relief to:
+
+    (i)   Prevent further training or fine-tuning;
+    (ii)  Require deletion of models trained in violation;
+    (iii) Prevent distribution or commercialization of violating models;
+    (iv)  Require public disclosure of the violation.
+
+5.5.4 BENCHMARK AND PUBLICATION PROHIBITIONS
+
+(a) BENCHMARK RESTRICTIONS: Licensee SHALL NOT publish benchmark results,
+    performance comparisons, or evaluation results for the Software without:
+
+    (i)   Providing Licensor thirty (30) days advance written notice;
+    (ii)  Disclosing complete methodology, hardware, and configuration;
+    (iii) Allowing Licensor to review and comment before publication;
+    (iv)  Including Licensor's response with publication;
+    (v)   Using the most current stable version of the Software.
+
+(b) UNFAIR BENCHMARK PROHIBITION: Licensee SHALL NOT publish benchmarks that:
+
+    (i)   Use non-representative configurations;
+    (ii)  Compare against outdated Software versions;
+    (iii) Fail to disclose relevant methodology details;
+    (iv)  Are designed to present the Software unfavorably;
+    (v)   Use test conditions that don't reflect real-world usage.
+
+(c) DISPARAGEMENT PROHIBITION: Licensee SHALL NOT publish false or misleading
+    statements about the Software, Licensor, or related parties, including:
+
+    (i)   False claims about functionality or performance;
+    (ii)  Misleading security vulnerability claims;
+    (iii) False statements about licensing or legal status;
+    (iv)  Defamatory statements about Licensor or contributors.
+
+--------------------------------------------------------------------------------
+                    PART 5.6: ENTITY-SPECIFIC RESTRICTIONS
+--------------------------------------------------------------------------------
+
+5.6.1 PALO ALTO NETWORKS EXCLUSION
+
+(a) ABSOLUTE PROHIBITION: Palo Alto Networks, Inc., a Delaware corporation
+    headquartered in Santa Clara, California, and ALL of its Related Parties
+    (as defined below) are ABSOLUTELY AND PERMANENTLY PROHIBITED from any
+    use of the Software whatsoever.
+
+(b) DEFINITION OF PALO ALTO NETWORKS RELATED PARTIES: "Palo Alto Networks
+    Related Parties" includes, without limitation:
+
+    (i)   Palo Alto Networks, Inc. itself;
+    (ii)  Any parent company of Palo Alto Networks;
+    (iii) Any subsidiary of Palo Alto Networks, including but not limited to:
+          - Crypsis Group
+          - Demisto (now Cortex XSOAR)
+          - Evident.io
+          - LightCyber
+          - RedLock
+          - Twistlock
+          - Aporeto
+          - Zingbox
+          - Expanse
+          - The Crypsis Group
+          - Bridgecrew
+          - Sinefa
+          - CloudGenix
+          - Talon Cyber Security
+          - Cider Security
+          - Dig Security
+          - Any future acquisitions;
+    (iv)  Any entity directly or indirectly controlled by Palo Alto Networks;
+    (v)   Any entity that directly or indirectly controls Palo Alto Networks;
+    (vi)  Any entity under common control with Palo Alto Networks;
+    (vii) Any joint venture involving Palo Alto Networks;
+    (viii) Any successor entity resulting from merger, acquisition, or
+           reorganization involving Palo Alto Networks;
+    (ix)  Any entity where Palo Alto Networks holds 5% or more equity;
+    (x)   Any entity that holds 5% or more equity in Palo Alto Networks;
+    (xi)  Any current or former officer, director, or executive of
+          Palo Alto Networks acting in their capacity as such;
+    (xii) Any entity employing current Palo Alto Networks executives in
+          decision-making roles regarding the Software;
+    (xiii) Any contractor or consultant acting on behalf of Palo Alto Networks;
+    (xiv) Any employee of Palo Alto Networks acting within employment scope.
+
+(c) SCOPE OF PROHIBITION: The prohibition on Palo Alto Networks applies to:
+
+    (i)   Direct use by any Related Party;
+    (ii)  Indirect use through intermediaries, contractors, or agents;
+    (iii) Use on any system owned, leased, controlled, or operated by any
+          Related Party;
+    (iv)  Use in any product, service, or offering of any Related Party;
+    (v)   Use for the benefit of any Related Party;
+    (vi)  Use in any project funded by any Related Party;
+    (vii) Any use where results or outputs benefit any Related Party;
+    (viii) Access to source code by any Related Party;
+    (ix)  Analysis, evaluation, or assessment by any Related Party;
+    (x)   Any form of interaction with the Software by any Related Party.
+
+(d) NO EXCEPTIONS: This prohibition is ABSOLUTE. There are NO exceptions for:
+
+    (i)   Security research or vulnerability analysis;
+    (ii)  Academic or educational purposes;
+    (iii) Non-commercial or personal use;
+    (iv)  Evaluation or trial purposes;
+    (v)   Compliance testing or auditing;
+    (vi)  Open source contribution;
+    (vii) Any other purpose regardless of how characterized.
+
+(e) PERMANENT DURATION: This prohibition:
+
+    (i)   Applies from the first release of this Software;
+    (ii)  Continues indefinitely into the future;
+    (iii) Survives any acquisition, merger, or reorganization of Licensor;
+    (iv)  Survives termination or expiration of this Agreement;
+    (v)   Cannot be waived except by express written instrument signed by
+          Licensor's CEO or authorized board resolution.
+
+(f) IMMEDIATE TERMINATION: Any use by Palo Alto Networks Related Parties:
+
+    (i)   Is unauthorized ab initio;
+    (ii)  Constitutes willful copyright infringement;
+    (iii) Constitutes trespass to chattels;
+    (iv)  May constitute violation of the CFAA (18 U.S.C. Section 1030);
+    (v)   Subjects violator to all remedies in Section 4 with treble damages.
+
+(g) ANTI-CIRCUMVENTION: Palo Alto Networks Related Parties SHALL NOT:
+
+    (i)   Use intermediaries, contractors, or agents to access the Software;
+    (ii)  Create or use shell entities to obtain licenses;
+    (iii) Acquire companies with existing licenses to gain access;
+    (iv)  Hire consultants to use the Software on their behalf;
+    (v)   Obtain the Software through any artifice or device;
+    (vi)  Access forks, derivatives, or modifications of the Software;
+    (vii) Benefit from third-party use of the Software in any way.
+
+(h) DISGORGEMENT: Any entity that provides access to the Software to Palo Alto
+    Networks Related Parties shall be jointly and severally liable for all
+    damages, and shall disgorge all profits derived from such provision.
+
+5.6.2 COMPETITOR RESTRICTIONS
+
+(a) COMPETITOR DEFINITION: For purposes of this Section 9.6.2, "Competitor"
+    means any entity that:
+
+    (i)   Develops or distributes software providing similar functionality;
+    (ii)  Competes directly or indirectly with Licensor;
+    (iii) Has publicly announced competitive offerings;
+    (iv)  Is affiliated with competitors;
+    (v)   Is designated as a Competitor by Licensor.
+
+(b) COMPETITOR RESTRICTIONS: Competitors are subject to additional restrictions:
+
+    (i)   No Free Tier access regardless of revenue;
+    (ii)  Minimum Enterprise License required;
+    (iii) No access to source code beyond what is publicly available;
+    (iv)  No participation in contributor programs;
+    (v)   Additional competitive use restrictions may apply.
+
+(c) COMPETITOR DISCLOSURE: Entities that become Competitors must:
+
+    (i)   Notify Licensor within thirty (30) days;
+    (ii)  Upgrade to Enterprise License if not already licensed;
+    (iii) Certify compliance with competitive use restrictions;
+    (iv)  Accept additional terms if required by Licensor.
+
+5.6.3 GOVERNMENT AND MILITARY RESTRICTIONS
+
+(a) UNITED STATES GOVERNMENT:
+
+    (i)   U.S. Government use requires compliance with FAR 52.227-14 and
+          DFARS 252.227-7014 as applicable;
+    (ii)  Software is "Commercial Computer Software" under FAR 2.101;
+    (iii) Government receives only rights specified in this Agreement;
+    (iv)  No unlimited rights, government purpose rights, or special government
+          rights beyond those granted to commercial licensees.
+
+(b) FOREIGN GOVERNMENTS:
+
+    (i)   Foreign government use requires specific written authorization;
+    (ii)  Licensor reserves right to refuse licenses to any foreign government;
+    (iii) Foreign military and intelligence agencies require specific approval;
+    (iv)  Use for surveillance of civilian populations is PROHIBITED.
+
+(c) MILITARY AND WEAPONS RESTRICTIONS:
+
+    (i)   Use in lethal autonomous weapons systems is PROHIBITED;
+    (ii)  Use in weapons targeting or guidance systems is PROHIBITED;
+    (iii) Use in systems designed for mass surveillance is PROHIBITED;
+    (iv)  Use in systems for illegal drone strikes is PROHIBITED;
+    (v)   Defense contractor use requires Enterprise License minimum.
+
+(d) EXPORT CONTROL: Licensee must comply with all applicable export control
+    laws and sanctions, including:
+
+    (i)   U.S. Export Administration Regulations (EAR);
+    (ii)  International Traffic in Arms Regulations (ITAR);
+    (iii) OFAC sanctions programs;
+    (iv)  EU dual-use export controls;
+    (v)   Other applicable national export controls.
+
+5.6.4 SANCTIONED ENTITY RESTRICTIONS
+
+(a) PROHIBITED COUNTRIES/REGIONS: Use is PROHIBITED in or for the benefit of:
+
+    (i)   Countries subject to complete U.S. sanctions (as of this
+          Agreement's effective date: Cuba, Iran, North Korea, Syria, and
+          the Crimea, Donetsk, and Luhansk regions of Ukraine);
+    (ii)  Entities on the OFAC SDN List;
+    (iii) Entities on the BIS Entity List;
+    (iv)  Any individual or entity subject to blocking sanctions.
+
+(b) LICENSEE CERTIFICATION: Licensee certifies that:
+
+    (i)   Licensee isn't located in a sanctioned country/region;
+    (ii)  Licensee isn't a sanctioned person or entity;
+    (iii) Licensee won't transfer the Software to sanctioned parties;
+    (iv)  Licensee will comply with all applicable sanctions laws.
+
+--------------------------------------------------------------------------------
+                END OF SECTION 9: PROHIBITED USES
+                    SECTION 10: TERMINATION
+================================================================================
+
+This Section 10 ("Termination") establishes the conditions under which the
+license granted in this Agreement may terminate, the consequences of termination, and
+the procedures for potential reinstatement.
+
+--------------------------------------------------------------------------------
+                    PART 6.1: TERMINATION TRIGGERS
+--------------------------------------------------------------------------------
+
+6.1.1 AUTOMATIC TERMINATION EVENTS
+
+(a) IMMEDIATE AUTOMATIC TERMINATION: The license granted under this Agreement
+    shall terminate AUTOMATICALLY and IMMEDIATELY, without notice, upon the
+    occurrence of ANY of the following events:
+
+    (i)   PATENT ASSERTION: Licensee initiates, joins, or financially supports
+          any patent claim against Licensor, any contributor to the Software,
+          or any other licensee alleging that the Software or its use
+          infringes any patent;
+
+    (ii)  PALO ALTO NETWORKS AFFILIATION: Licensee becomes a Palo Alto Networks
+          Related Party as defined in Section 5.6.1, through acquisition,
+          merger, investment, employment, or any other means;
+
+    (iii) CRIMINAL CONVICTION: Licensee (or any principal, officer, or director
+          of Licensee) is convicted of a crime involving dishonesty, fraud,
+          theft, or intellectual property violation;
+
+    (iv)  WILLFUL CIRCUMVENTION: Licensee engages in willful circumvention
+          of technical protection measures as described in Section 5.2.2;
+
+    (v)   AI/ML TRAINING VIOLATION: Licensee uses the Software for AI/ML
+          training in violation of Section 5.5.3;
+
+    (vi)  MALWARE CREATION: Licensee uses the Software to create or distribute
+          malware as prohibited in Section 5.5.2;
+
+    (vii) COMPETING PRODUCT: Licensee uses the Software to develop a Competing
+          Product as prohibited in Section 5.3.1;
+
+    (viii) BANKRUPTCY (IPSO FACTO): Licensee files for bankruptcy, is placed
+           into receivership, makes an assignment for benefit of creditors,
+           or becomes insolvent, to the extent permitted by applicable law;
+
+    (ix)  ASSIGNMENT WITHOUT CONSENT: Licensee attempts to assign or transfer
+          the license without Licensor's prior written consent;
+
+    (x)   SANCTIONS VIOLATION: Licensee becomes subject to sanctions or is
+          found to have violated export control laws.
+
+(b) NOTICE OF AUTOMATIC TERMINATION: For automatic termination events:
+
+    (i)   No notice from Licensor is required;
+    (ii)  Termination is effective immediately upon the triggering event;
+    (iii) Licensor may, but isn't required to, provide written confirmation;
+    (iv)  Failure to provide notice doesn't affect termination;
+    (v)   Licensee's continued use after termination is unauthorized.
+
+(c) DETERMINATION OF TRIGGERING EVENT: Licensor's good faith determination
+    that a triggering event has occurred shall be conclusive absent clear
+    error, fraud, or bad faith.
+
+6.1.2 CURABLE BREACH TERMINATION
+
+(a) NOTICE AND CURE PERIOD: For breaches not listed in Section 10.1.1, Licensor
+    may terminate the license by providing written notice specifying the
+    breach and allowing the following cure periods:
+
+    (i)   PAYMENT DEFAULTS: Fifteen (15) days to cure non-payment of fees,
+          provided this is Licensee's first payment default within any
+          twelve (12) month period;
+
+    (ii)  REPORTING FAILURES: Thirty (30) days to cure failures to provide
+          required reports, certifications, or disclosures;
+
+    (iii) COPYLEFT COMPLIANCE: Thirty (30) days to cure copyleft violations
+          (failure to provide source code), provided Licensee hasn't
+          previously received notice of copyleft violation;
+
+    (iv)  NOTICE VIOLATIONS: Thirty (30) days to cure attribution or notice
+          violations, provided restoration is complete;
+
+    (v)   OTHER MATERIAL BREACHES: Thirty (30) days to cure other material
+          breaches, unless a shorter period is specified in the notice.
+
+(b) REQUIREMENTS FOR VALID CURE: To validly cure a breach, Licensee must:
+
+    (i)   Completely remedy the breach within the cure period;
+    (ii)  Provide written certification of cure to Licensor;
+    (iii) Implement measures to prevent recurrence;
+    (iv)  Provide documentation of cure upon request;
+    (v)   Pay any outstanding fees, late charges, or costs;
+    (vi)  Accept any additional terms imposed by Licensor.
+
+(c) FAILURE TO CURE: If Licensee fails to cure within the specified period:
+
+    (i)   License terminates upon expiration of the cure period;
+    (ii)  All consequences of termination apply immediately;
+    (iii) Licensor may pursue all available remedies;
+    (iv)  Reinstatement requires compliance with Section 10.3.
+
+(d) REPEATED BREACHES: If Licensee commits the same or similar breach more
+    than once within any twelve (12) month period:
+
+    (i)   Cure period is reduced by half (minimum 7 days);
+    (ii)  On third occurrence, no cure period applies (immediate termination);
+    (iii) Additional fees may be imposed per Section 4.
+
+(e) NO CURE FOR CERTAIN BREACHES: The following breaches can't be cured and
+    result in immediate termination upon notice:
+
+    (i)   Any automatic termination event in Section 10.1.1;
+    (ii)  Fraudulent misrepresentation to Licensor;
+    (iii) Intentional or willful breaches;
+    (iv)  Breaches involving bad faith;
+    (v)   Third occurrence of any curable breach.
+
+6.1.3 TERMINATION FOR CAUSE BY LICENSOR
+
+(a) LICENSOR'S TERMINATION RIGHT: In addition to termination under Sections
+    6.1.1 and 6.1.2, Licensor may terminate this Agreement for cause upon
+    thirty (30) days written notice if:
+
+    (i)   Licensee's use of the Software poses reputational risk to Licensor;
+    (ii)  Licensee's business practices are inconsistent with Licensor's values;
+    (iii) Licensee becomes affiliated with a Competitor;
+    (iv)  Licensee's use negatively impacts the Software ecosystem;
+    (v)   Continuation would expose Licensor to legal or regulatory risk;
+    (vi)  Other circumstances arise that make continuation inadvisable.
+
+(b) SOLE DISCRETION: Termination under Section 10.1.3(a) is at Licensor's sole
+    discretion, and Licensor's determination is final and non-reviewable.
+
+(c) REFUND FOR TERMINATION WITHOUT FAULT: If Licensor terminates under this
+    Section 10.1.3 and Licensee isn't in breach, Licensee may be entitled to
+    a pro-rata refund of prepaid fees at Licensor's discretion.
+
+6.1.4 TERMINATION BY LICENSEE
+
+(a) VOLUNTARY TERMINATION: Licensee may terminate this Agreement at any time
+    by providing written notice to Licensor, specifying the termination date
+    (not less than thirty (30) days from notice).
+
+(b) EFFECT OF VOLUNTARY TERMINATION:
+
+    (i)   No refund of fees already paid;
+    (ii)  All outstanding fees become immediately due;
+    (iii) All consequences of termination apply;
+    (iv)  Licensee remains liable for breaches occurring before termination.
+
+(c) CESSATION OF USE: Licensee may cease using the Software at any time
+    without formal termination, provided that:
+
+    (i)   All fee obligations are satisfied;
+    (ii)  All copies are destroyed or returned;
+    (iii) Certification of compliance is provided upon request.
+
+--------------------------------------------------------------------------------
+                    PART 6.2: EFFECTS OF TERMINATION
+--------------------------------------------------------------------------------
+
+6.2.1 IMMEDIATE CESSATION OF RIGHTS
+
+(a) TERMINATION OF LICENSE: Upon termination for any reason:
+
+    (i)   All rights granted under this Agreement cease immediately;
+    (ii)  License to use, copy, modify, and distribute the Software terminates;
+    (iii) Any sublicenses granted by Licensee terminate automatically;
+    (iv)  Licensee has no further right to use or access the Software.
+
+(b) UNAUTHORIZED USE: Any use of the Software after termination:
+
+    (i)   Constitutes copyright infringement;
+    (ii)  May constitute criminal violation;
+    (iii) Subjects Licensee to all remedies in Section 4;
+    (iv)  Results in additional damages per Section 4.
+
+6.2.2 DESTRUCTION AND RETURN OBLIGATIONS
+
+(a) DESTRUCTION OF COPIES: Within fifteen (15) days of termination, Licensee
+    must destroy all copies of the Software in Licensee's possession or
+    control, including:
+
+    (i)   All source code copies;
+    (ii)  All object code and executables;
+    (iii) All documentation;
+    (iv)  All derivative works and modifications;
+    (v)   All backup copies;
+    (vi)  All archived copies;
+    (vii) All copies in cloud storage or remote systems;
+    (viii) All copies on mobile devices;
+    (ix)  All copies provided to contractors or agents.
+
+(b) DESTRUCTION METHODS: Destruction must be complete and irreversible:
+
+    (i)   Electronic copies: secure deletion with overwrite;
+    (ii)  Physical media: physical destruction (shredding, degaussing);
+    (iii) Cloud/remote: deletion with verification of removal;
+    (iv)  Backups: must be destroyed, not merely excluded from restore.
+
+(c) CERTIFICATION: Within thirty (30) days of termination, Licensee must
+    provide written certification to Licensor:
+
+    (i)   Signed by an officer or authorized representative;
+    (ii)  Listing all copies destroyed and destruction methods;
+    (iii) Confirming no copies retained except as permitted;
+    (iv)  Confirming all contractors/agents have destroyed their copies.
+
+(d) RETAINED COPIES: Licensee may retain copies ONLY:
+
+    (i)   As required by law for record-keeping (and only for such period);
+    (ii)  In unalterable backup archives (provided no restoration occurs);
+    Retained copies remain subject to all restrictions and may not be used.
+
+(e) RETURN OF MATERIALS: Upon Licensor's request, Licensee must return:
+
+    (i)   All physical materials provided by Licensor;
+    (ii)  All documentation and marketing materials;
+    (iii) Any hardware or tokens used for license verification;
+    (iv)  Any other Licensor property in Licensee's possession.
+
+6.2.3 SURVIVING OBLIGATIONS
+
+(a) CONTINUING OBLIGATIONS: The following provisions survive termination:
+
+    (i)   Section 1 (Definitions) - for interpretation of surviving provisions;
+    (ii)  Section 4 (Enforcement) - for enforcement of violations;
+    (iii) Section 5 (Prohibited Uses) - to prevent post-termination violations;
+    (iv)  Section 10.2 (Effects of Termination) - until obligations satisfied;
+    (v)   Section 10.3 (Reinstatement) - if applicable;
+    (vi)  All indemnification obligations;
+    (vii) All limitation of liability provisions;
+    (viii) All confidentiality obligations;
+    (ix)  All audit rights (for three years after termination);
+    (x)   All payment obligations;
+    (xi)  All provisions that by their nature should survive.
+
+(b) ACCRUED RIGHTS: Termination doesn't affect:
+
+    (i)   Rights accrued before termination;
+    (ii)  Claims for breach occurring before termination;
+    (iii) Remedies for pre-termination violations;
+    (iv)  Licensor's right to pursue damages.
+
+(c) CONFIDENTIALITY: Any confidential information received remains subject
+    to confidentiality obligations for five (5) years after termination.
+
+6.2.4 PAYMENT OBLIGATIONS UPON TERMINATION
+
+(a) ACCELERATED FEES: Upon termination, all of the following become immediately
+    due and payable:
+
+    (i)   All fees for the current period;
+    (ii)  All fees for periods in which Software was used;
+    (iii) Late payment charges on unpaid amounts;
+    (iv)  Interest accrued on outstanding balances;
+    (v)   Any retroactive fees for under-reporting or underpayment;
+    (vi)  Audit costs if audit reveals underpayment;
+    (vii) Collection costs and attorney's fees if collection action required.
+
+(b) NO PRO-RATION: Fees aren't pro-rated upon termination:
+
+    (i)   Full period fees are due regardless of termination date;
+    (ii)  No refunds for unused portions of prepaid periods;
+    (iii) No credit for early termination.
+
+(c) CONTINUED ACCRUAL: If Licensee continues use after termination:
+
+    (i)   Fees continue to accrue at the highest applicable rate;
+    (ii)   Additional unauthorized use penalties apply per Section 4;
+    (iii)  No license exists - use is infringement;
+    (iv)   Statutory damages may apply.
+
+(d) SET-OFF: Licensee may not set off amounts owed against any claims against
+    Licensor without Licensor's prior written consent.
+
+--------------------------------------------------------------------------------
+                    PART 6.3: REINSTATEMENT
+--------------------------------------------------------------------------------
+
+6.3.1 REINSTATEMENT CONDITIONS
+
+(a) DISCRETIONARY REINSTATEMENT: Reinstatement after termination is entirely
+    at Licensor's sole discretion. Licensor has no obligation to reinstate
+    any terminated license.
+
+(b) PREREQUISITES FOR REINSTATEMENT: If Licensor chooses to consider
+    reinstatement, Licensee must:
+
+    (i)   Submit a written request for reinstatement to Licensor;
+    (ii)  Fully cure all breaches that led to termination;
+    (iii) Pay all outstanding fees, plus late charges and interest;
+    (iv)  Pay all enforcement costs incurred by Licensor;
+    (v)   Pay a reinstatement fee equal to 200% of the then-current annual
+          license fee (or $5,000 minimum);
+    (vi)  Provide detailed written explanation of the breach and remediation;
+    (vii) Certify that all copies were properly destroyed during termination;
+    (viii) Agree to enhanced compliance measures specified by Licensor;
+    (ix)  Execute any additional agreements required by Licensor.
+
+(c) NO REINSTATEMENT FOR CERTAIN BREACHES: Reinstatement isn't available for:
+
+    (i)   Palo Alto Networks Related Parties (permanent exclusion);
+    (ii)  Patent assertion violations;
+    (iii) AI/ML training violations;
+    (iv)  Malware creation or distribution;
+    (v)   Competing product development;
+    (vi)  Sanctions violations;
+    (vii) Criminal conviction of principal;
+    (viii) Fraud or intentional misconduct;
+    (ix)  Third occurrence of same breach type;
+    (x)   Any breach Licensor designates as non-reinstatable.
+
+(d) TIMING: Reinstatement request must be submitted within one (1) year of
+    termination. Requests after one year won't be considered.
+
+6.3.2 REINSTATEMENT PROCESS
+
+(a) REQUEST SUBMISSION: Reinstatement request must include:
+
+    (i)   Detailed description of breach(es) that led to termination;
+    (ii)  Explanation of remediation steps taken;
+    (iii) Evidence of breach cure;
+    (iv)  Evidence of destruction of all copies during termination;
+    (v)   Proposed compliance enhancement measures;
+    (vi)  Payment of reinstatement fee (refundable if denied);
+    (vii) Contact information for compliance officer.
+
+(b) REVIEW PERIOD: Licensor will review requests within thirty (30) days.
+    Licensor may:
+
+    (i)   Request additional information;
+    (ii)  Conduct verification of remediation;
+    (iii) Require interviews or meetings;
+    (iv)  Engage third-party auditors at Licensee's expense;
+    (v)   Take such other steps as Licensor deems necessary.
+
+(c) DECISION: Licensor won'tify Licensee of its decision:
+
+    (i)   APPROVAL: Subject to conditions in Section 10.3.3;
+    (ii)  DENIAL: With or without explanation (at Licensor's discretion);
+    (iii) CONDITIONAL APPROVAL: Subject to additional requirements.
+
+(d) NO APPEAL: Licensor's decision is final and non-appealable.
+
+6.3.3 PROBATIONARY PERIOD
+
+(a) MANDATORY PROBATION: All reinstated licenses are subject to a probationary
+    period of twelve (12) months from reinstatement.
+
+(b) PROBATIONARY CONDITIONS: During the probationary period:
+
+    (i)   Licensee must submit monthly compliance reports;
+    (ii)  Licensor may conduct audits at any time without notice;
+    (iii) Licensee must maintain designated compliance contact;
+    (iv)  Licensee must implement specified compliance measures;
+    (v)   Licensee may be subject to additional restrictions.
+
+(c) ENHANCED TERMINATION DURING PROBATION: During probation:
+
+    (i)   Any breach results in immediate termination without cure period;
+    (ii)  Termination during probation is permanent (no further reinstatement);
+    (iii) All reinstatement fees are forfeited;
+    (iv)  Additional penalties may apply.
+
+(d) SUCCESSFUL COMPLETION: Upon successful completion of probation:
+
+    (i)   Normal license terms apply prospectively;
+    (ii)  Monthly reporting may be reduced to quarterly;
+    (iii) Some restrictions may be lifted at Licensor's discretion.
+
+--------------------------------------------------------------------------------
+                    PART 6.4: TRANSITION ASSISTANCE
+--------------------------------------------------------------------------------
+
+6.4.1 OPTIONAL TRANSITION PERIOD
+
+(a) LICENSOR DISCRETION: In cases of termination where Licensee isn't in
+    material breach or where Licensor elects to provide assistance, Licensor
+    may, at its sole discretion, offer a transition period.
+
+(b) TRANSITION PERIOD TERMS: If granted, transition period:
+
+    (i)   Does not exceed ninety (90) days;
+    (ii)  Is subject to continued payment of applicable fees;
+    (iii) Is for transition purposes only, not continued commercial use;
+    (iv)  May be revoked for any breach or misuse.
+
+(c) PURPOSE: Transition period is solely for:
+
+    (i)   Migrating data away from the Software;
+    (ii)  Transitioning to alternative solutions;
+    (iii) Winding down operations dependent on the Software;
+    (iv)  Completing in-progress projects (with limitations);
+    (v)   Not for new projects or expanded use.
+
+6.4.2 NO OBLIGATION
+
+(a) NO TRANSITION RIGHT: Licensee has NO right to a transition period.
+    Transition assistance is provided solely at Licensor's discretion.
+
+(b) NO LIABILITY: Licensor has no liability for:
+
+    (i)   Refusing to provide transition assistance;
+    (ii)  Revoking transition assistance;
+    (iii) Data loss during or after termination;
+    (iv)  Business disruption due to termination;
+    (v)   Costs of transitioning to alternatives.
+
+(c) LICENSEE RESPONSIBILITY: Licensee is solely responsible for:
+
+    (i)   Maintaining backups of Licensee's data;
+    (ii)  Developing transition plans;
+    (iii) Implementing alternative solutions;
+    (iv)   Managing business continuity.
+
+--------------------------------------------------------------------------------
+                END OF SECTION 10: TERMINATION
+--------------------------------------------------------------------------------
+
+================================================================================
+                           SECTION STATISTICS
+================================================================================
+
+Date: January 30, 2026
+Version: 1.0
+Copyright: Hardwick Software Services / Jon Hardwick
+Contact: https://justcalljon.pro
+
+Section Line Count Statistics:
+- Part 5.1 (General Prohibition Statement): ~100 lines
+- Part 5.2 (Copyright and IP Violations): ~200 lines
+- Part 5.3 (Commercial and Competitive Prohibitions): ~180 lines
+- Part 5.4 (Technical Prohibitions): ~150 lines
+- Part 5.5 (Use Prohibitions): ~200 lines
+- Part 5.6 (Entity-Specific Restrictions): ~220 lines
+- Total Section 5: ~1,050 lines
+
+- Part 6.1 (Termination Triggers): ~200 lines
+- Part 6.2 (Effects of Termination): ~180 lines
+- Part 6.3 (Reinstatement): ~150 lines
+- Part 6.4 (Transition Assistance): ~70 lines
+- Total Section 10: ~600 lines
+
+COMBINED TOTAL: ~1,650 lines
+
+Key Features:
+- Comprehensive prohibition framework with strict liability
+- DMCA Section 1201 anti-circumvention integration
+- Patent non-aggression clause (Apache 2.0 style)
+- Complete AI/ML training prohibition with $1M+ damages
+- Palo Alto Networks absolute permanent exclusion (150+ lines)
+- Entity-specific restrictions (competitors, governments, sanctioned)
+- FAR/DFARS government licensing compliance
+- Automatic termination for severe breaches (10 trigger events)
+- Curable breach framework with escalating consequences
+- 200% reinstatement fee with 12-month probation
+- Complete destruction and certification requirements
+- Surviving obligations framework
+- No-reinstatement list for severe violations
+
+================================================================================

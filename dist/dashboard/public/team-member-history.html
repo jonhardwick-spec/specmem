@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECMEM // Team Member History</title>
+    <link rel="stylesheet" href="shared-theme-blue.css">
+    <style>
+        /* ============================================
+         * TEAM MEMBER HISTORY - Session & Conversation Viewer
+         * Professional Design with Glass Morphism
+         * ============================================ */
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 16px;
+            height: 16px;
+            color: white;
+        }
+
+        .logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--primary-blue);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .connection-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 500;
+            color: #10B981;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .connection-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #EF4444;
+        }
+
+        .connection-dot.connected {
+            background: #10B981;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-badge.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #EF4444;
+        }
+
+        /* Main Layout */
+        .main-content {
+            margin-top: 56px;
+            padding: 20px;
+            min-height: calc(100vh - 56px);
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+        }
+
+        .filter-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-title svg {
+            width: 14px;
+            height: 14px;
+            color: var(--primary-blue);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-select {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .filter-select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-primary);
+            padding: 10px 16px;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-accent);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            border-color: transparent;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Session List */
+        .session-panel {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .session-panel-header {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session-panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .session-panel-title svg {
+            width: 14px;
+            height: 14px;
+            color: var(--primary-blue);
+        }
+
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            max-height: calc(100vh - 280px);
+        }
+
+        .session-list::-webkit-scrollbar { width: 6px; }
+        .session-list::-webkit-scrollbar-track { background: transparent; }
+        .session-list::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+        .session-list::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue);
+        }
+
+        /* Session Card */
+        .session-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--text-dim);
+            transition: all var(--transition-fast);
+        }
+
+        .session-card:hover {
+            border-color: var(--border-accent);
+            transform: translateX(4px);
+        }
+
+        .session-card.active {
+            border-color: var(--primary-blue);
+            background: rgba(14, 165, 233, 0.08);
+        }
+
+        .session-card.active::before {
+            background: var(--primary-blue);
+        }
+
+        .session-card.status-running::before { background: #10B981; box-shadow: 0 0 8px #10B981; }
+        .session-card.status-completed::before { background: var(--primary-blue); }
+        .session-card.status-failed::before { background: #EF4444; }
+        .session-card.status-stopped::before { background: #F59E0B; }
+        .session-card.status-pending::before { background: var(--text-dim); }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .session-type-badge {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .session-type-badge.worker {
+            background: rgba(14, 165, 233, 0.15);
+            color: var(--primary-blue);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+
+        .session-type-badge.overseer {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .session-type-badge.qa {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .session-status-badge {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .session-status-badge.pending {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .session-status-badge.running {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .session-status-badge.completed {
+            background: rgba(14, 165, 233, 0.15);
+            color: var(--primary-blue);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+
+        .session-status-badge.failed {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .session-status-badge.stopped {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .session-task {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.5;
+            max-height: 42px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .session-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .session-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .session-meta-item svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Conversation Panel */
+        .conversation-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .conversation-header {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversation-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .conversation-title svg {
+            width: 14px;
+            height: 14px;
+            color: var(--primary-blue);
+        }
+
+        .conversation-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .conversation-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            max-height: calc(100vh - 160px);
+        }
+
+        .conversation-body::-webkit-scrollbar { width: 8px; }
+        .conversation-body::-webkit-scrollbar-track { background: transparent; }
+        .conversation-body::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        .conversation-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue);
+        }
+
+        /* Messages */
+        .message {
+            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            max-width: 85%;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .message.user {
+            background: var(--bg-tertiary);
+            margin-left: auto;
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .message.assistant {
+            background: var(--bg-secondary);
+            margin-right: auto;
+            border-left: 3px solid #10B981;
+        }
+
+        .message.system {
+            background: rgba(245, 158, 11, 0.1);
+            margin: 0 auto;
+            border-left: 3px solid #F59E0B;
+            text-align: center;
+            max-width: 70%;
+        }
+
+        .message.tool {
+            background: rgba(139, 92, 246, 0.1);
+            margin: 0 auto;
+            border-left: 3px solid var(--primary-purple);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .message-role {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .message-role.user { color: var(--primary-blue); }
+        .message-role.assistant { color: #10B981; }
+        .message-role.system { color: #F59E0B; }
+        .message-role.tool { color: var(--primary-purple); }
+
+        .message-content {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .message-tool-calls {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+        }
+
+        .message-tool-calls strong {
+            color: var(--primary-purple);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .message-tool-calls pre {
+            margin: 0;
+            color: var(--text-dim);
+        }
+
+        /* Empty States */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 48px 24px;
+            color: var(--text-dim);
+        }
+
+        .empty-icon {
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .empty-text-sub {
+            font-size: 12px;
+            margin-top: 8px;
+            color: var(--text-dim);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-primary);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-left: 3px solid var(--primary-blue);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.3s ease;
+            min-width: 280px;
+            font-size: 13px;
+        }
+
+        .toast-success { border-left-color: #10B981; }
+        .toast-error { border-left-color: #EF4444; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                max-height: 350px;
+            }
+
+            .session-list {
+                max-height: 250px;
+            }
+
+            .conversation-body {
+                max-height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-stats {
+                display: none;
+            }
+        }
+    </style>
+    <script src="/shared-logger.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+            </div>
+            <span class="logo-text">SPEC<span>MEM</span> // HISTORY</span>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-value" id="totalSessions">-</span>
+                <span class="stat-label">Total Sessions</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="runningSessions">-</span>
+                <span class="stat-label">Running</span>
+            </div>
+        </div>
+
+        <div class="header-nav">
+            <div class="connection-badge disconnected" id="connectionBadge">
+                <span class="connection-dot" id="wsIndicator"></span>
+                <span id="wsStatus">Disconnected</span>
+            </div>
+            <a href="/team-member-spy.html" class="nav-link">Monitor</a>
+            <a href="/team-members.html" class="nav-link">Team Member Ops</a>
+            <a href="/" class="nav-link">Dashboard</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Sidebar: Filters & Session List -->
+        <div class="sidebar">
+            <!-- Filters -->
+            <div class="filter-panel">
+                <div class="filter-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                    </svg>
+                    Filters
+                </div>
+                <div class="filter-row">
+                    <select class="filter-select" id="filterStatus">
+                        <option value="">All Status</option>
+                        <option value="running">Running</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                        <option value="stopped">Stopped</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                    <select class="filter-select" id="filterType">
+                        <option value="">All Types</option>
+                        <option value="worker">Worker</option>
+                        <option value="overseer">Overseer</option>
+                        <option value="qa">QA</option>
+                    </select>
+                </div>
+                <div class="filter-row">
+                    <button class="btn btn-primary" onclick="loadSessions()" style="flex:1">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 6px;">
+                            <path d="M23 4v6h-6M1 20v-6h6"/>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session List -->
+            <div class="session-panel">
+                <div class="session-panel-header">
+                    <span class="session-panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Session Timeline
+                    </span>
+                </div>
+                <div class="session-list" id="sessionList">
+                    <div class="loading-spinner"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Viewer -->
+        <div class="conversation-panel">
+            <div class="conversation-header">
+                <span class="conversation-title" id="conversationTitle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Select a Session
+                </span>
+                <div class="conversation-actions">
+                    <button class="btn" onclick="exportConversation()" id="exportBtn" disabled>Export MD</button>
+                    <button class="btn btn-danger" onclick="deleteSession()" id="deleteBtn" disabled>Delete</button>
+                </div>
+            </div>
+            <div class="conversation-body" id="conversationBody">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <p class="empty-text">Select a session to view the conversation</p>
+                    <p class="empty-text-sub">Sessions contain the full conversation history with the team member</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let currentSessionId = null;
+        let sessions = [];
+        let ws = null;
+        let wsReconnectTimer = null;
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadSessions();
+            connectWebSocket();
+
+            document.getElementById('filterStatus').addEventListener('change', loadSessions);
+            document.getElementById('filterType').addEventListener('change', loadSessions);
+        });
+
+        // ============================================
+        // WEBSOCKET
+        // ============================================
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/team-members/live`;
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    updateConnectionStatus(true);
+                    console.log('WebSocket connected');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleWebSocketMessage(message);
+                    } catch (e) {
+                        console.error('Failed to parse WebSocket message:', e);
+                    }
+                };
+
+                ws.onclose = () => {
+                    updateConnectionStatus(false);
+                    scheduleReconnect();
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    updateConnectionStatus(false);
+                };
+            } catch (e) {
+                console.error('Failed to connect WebSocket:', e);
+                scheduleReconnect();
+            }
+        }
+
+        function scheduleReconnect() {
+            if (wsReconnectTimer) return;
+            wsReconnectTimer = setTimeout(() => {
+                wsReconnectTimer = null;
+                connectWebSocket();
+            }, 5000);
+        }
+
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connectionBadge');
+            const indicator = document.getElementById('wsIndicator');
+            const status = document.getElementById('wsStatus');
+
+            if (connected) {
+                badge.classList.remove('disconnected');
+                indicator.classList.add('connected');
+                status.textContent = 'Live';
+            } else {
+                badge.classList.add('disconnected');
+                indicator.classList.remove('connected');
+                status.textContent = 'Reconnecting...';
+            }
+        }
+
+        function handleWebSocketMessage(message) {
+            switch (message.type) {
+                case 'session_created':
+                    showToast(`New ${message.teamMemberType} session started`, 'success');
+                    loadSessions();
+                    break;
+
+                case 'session_ended':
+                    showToast(`Session ${message.data.finalStatus}`, 'info');
+                    loadSessions();
+                    if (currentSessionId === message.sessionId) {
+                        loadConversation(currentSessionId);
+                    }
+                    break;
+
+                case 'agent_status':
+                    updateSessionInList(message.sessionId, message.data);
+                    break;
+
+                case 'communication':
+                    if (currentSessionId === message.sessionId) {
+                        appendMessage(message.data);
+                    }
+                    break;
+
+                case 'heartbeat':
+                    break;
+            }
+        }
+
+        // ============================================
+        // API FUNCTIONS
+        // ============================================
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/team-members/stats/sessions');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.stats) {
+                        document.getElementById('totalSessions').textContent = data.stats.total;
+                        document.getElementById('runningSessions').textContent = data.stats.byStatus?.running || 0;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function loadSessions() {
+            const list = document.getElementById('sessionList');
+            list.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+            try {
+                const status = document.getElementById('filterStatus').value;
+                const teamMemberType = document.getElementById('filterType').value;
+
+                const params = new URLSearchParams({ limit: '100' });
+                if (status) params.append('status', status);
+                if (teamMemberType) params.append('teamMemberType', teamMemberType);
+
+                const response = await fetch(`/api/team-members/history?${params}`);
+                if (!response.ok) throw new Error('Failed to load sessions');
+
+                const data = await response.json();
+                sessions = data.sessions || [];
+
+                renderSessionList(sessions);
+            } catch (error) {
+                console.error('Failed to load sessions:', error);
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <p class="empty-text" style="color: #EF4444;">Failed to load sessions</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadConversation(sessionId) {
+            currentSessionId = sessionId;
+
+            document.querySelectorAll('.session-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.id === sessionId);
+            });
+
+            const body = document.getElementById('conversationBody');
+            body.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+            document.getElementById('exportBtn').disabled = true;
+            document.getElementById('deleteBtn').disabled = true;
+
+            try {
+                const response = await fetch(`/api/team-members/communications/${sessionId}`);
+                if (!response.ok) throw new Error('Failed to load conversation');
+
+                const data = await response.json();
+                const session = data.session;
+                const communications = data.communications || [];
+
+                document.getElementById('conversationTitle').innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    ${session.teamMemberType.toUpperCase()} - ${session.status.toUpperCase()}
+                `;
+
+                document.getElementById('exportBtn').disabled = false;
+                document.getElementById('deleteBtn').disabled = false;
+
+                if (communications.length === 0) {
+                    body.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <p class="empty-text">No messages in this session yet</p>
+                            ${session.task ? `<p class="empty-text-sub">Task: ${escapeHtml(session.task)}</p>` : ''}
+                        </div>
+                    `;
+                } else {
+                    body.innerHTML = communications.map(renderMessage).join('');
+                    body.scrollTop = body.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Failed to load conversation:', error);
+                body.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <p class="empty-text" style="color: #EF4444;">Failed to load conversation</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function exportConversation() {
+            if (!currentSessionId) return;
+
+            try {
+                const response = await fetch(`/api/team-members/sessions/${currentSessionId}/export`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) throw new Error('Export failed');
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `session-${currentSessionId}.md`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast('Conversation exported', 'success');
+            } catch (error) {
+                console.error('Export failed:', error);
+                showToast('Export failed', 'error');
+            }
+        }
+
+        async function deleteSession() {
+            if (!currentSessionId) return;
+            if (!confirm('Are you sure you want to delete this session and all its messages?')) return;
+
+            try {
+                const response = await fetch(`/api/team-members/sessions/${currentSessionId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Delete failed');
+
+                showToast('Session deleted', 'success');
+                currentSessionId = null;
+                document.getElementById('conversationBody').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <p class="empty-text">Select a session to view the conversation</p>
+                    </div>
+                `;
+                document.getElementById('conversationTitle').innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Select a Session
+                `;
+                document.getElementById('exportBtn').disabled = true;
+                document.getElementById('deleteBtn').disabled = true;
+
+                loadSessions();
+                loadStats();
+            } catch (error) {
+                console.error('Delete failed:', error);
+                showToast('Delete failed', 'error');
+            }
+        }
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        function renderSessionList(sessions) {
+            const list = document.getElementById('sessionList');
+
+            if (sessions.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <p class="empty-text">No sessions found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = sessions.map(session => `
+                <div class="session-card status-${session.status} ${session.id === currentSessionId ? 'active' : ''}"
+                     data-id="${session.id}"
+                     onclick="loadConversation('${session.id}')">
+                    <div class="session-header">
+                        <span class="session-type-badge ${session.teamMemberType}">${session.teamMemberType}</span>
+                        <span class="session-status-badge ${session.status}">${session.status}</span>
+                    </div>
+                    ${session.task ? `<div class="session-task">${escapeHtml(session.task.substring(0, 120))}</div>` : ''}
+                    <div class="session-meta">
+                        <span class="session-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            ${formatDate(session.startTime)}
+                        </span>
+                        <span class="session-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            ${session.messageCount || 0}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMessage(comm) {
+            return `
+                <div class="message ${comm.role}">
+                    <div class="message-header">
+                        <span class="message-role ${comm.role}">${comm.role}</span>
+                        <span>${formatTime(comm.timestamp)}</span>
+                    </div>
+                    <div class="message-content">${escapeHtml(comm.content)}</div>
+                    ${comm.toolCalls && comm.toolCalls.length > 0 ? `
+                        <div class="message-tool-calls">
+                            <strong>Tool Calls:</strong>
+                            <pre>${JSON.stringify(comm.toolCalls, null, 2)}</pre>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function appendMessage(comm) {
+            const body = document.getElementById('conversationBody');
+            const emptyState = body.querySelector('.empty-state');
+            if (emptyState) {
+                body.innerHTML = '';
+            }
+
+            body.insertAdjacentHTML('beforeend', renderMessage(comm));
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function updateSessionInList(sessionId, data) {
+            const card = document.querySelector(`.session-card[data-id="${sessionId}"]`);
+            if (card && data.status) {
+                card.className = `session-card status-${data.status} ${card.classList.contains('active') ? 'active' : ''}`;
+
+                const statusBadge = card.querySelector('.session-status-badge');
+                if (statusBadge) {
+                    statusBadge.className = `session-status-badge ${data.status}`;
+                    statusBadge.textContent = data.status;
+                }
+            }
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatTime(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

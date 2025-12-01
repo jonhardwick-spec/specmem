@@ -1,0 +1,9 @@
+{
+  "project_path": "/specmem/scripts",
+  "specmem_home": "/root/.specmem",
+  "hooks_enabled": true,
+  "search_limit": 5,
+  "threshold": 0.25,
+  "max_content_length": 300,
+  "configured_at": "2026-01-31T04:47:15.729Z"
+}

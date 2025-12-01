@@ -1,0 +1,1 @@
+{"version":3,"file":"setup.d.ts","sourceRoot":"","sources":["../../../src/dashboard/api/setup.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;;;;GAgBG;AAEH,OAAO,EAAE,MAAM,EAAE,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAwKlE,wBAAgB,iBAAiB,CAC/B,WAAW,EAAE,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,EAAE,QAAQ,EAAE,IAAI,EAAE,YAAY,KAAK,IAAI,GACrE,MAAM,CA4gBR;AAsBD,eAAe,iBAAiB,CAAC"}
