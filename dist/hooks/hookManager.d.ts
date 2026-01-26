@@ -3,12 +3,12 @@
  * ====================
  *
  * Dynamic hook discovery, validation, and deployment system.
- * Hooks are auto-discovered from {PROJECT}/specmem/hooks/ and deployed to Claude.
+ * Hooks are auto-discovered from {PROJECT}/specmem/hooks/ and deployed to .
  *
  * PER-PROJECT ISOLATION:
  *   - Each project has its own hooks directory: {PROJECT}/specmem/hooks/
  *   - Each project has its own hooks registry: {PROJECT}/specmem/hooks.json
- *   - Claude's ~/.claude/hooks/ is only used for deployment (shared)
+ *   - 's ~/.claude/hooks/ is only used for deployment (shared)
  *
  * Features:
  *   - Auto-discovery of hooks from project hooks directory
@@ -119,7 +119,7 @@ export declare class HookManager {
         errors: string[];
     };
     /**
-     * Deploy all enabled AND validated hooks to Claude's hooks directory
+     * Deploy all enabled AND validated hooks to 's hooks directory
      */
     deployHooks(): {
         deployed: string[];

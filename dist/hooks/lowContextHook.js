@@ -3,10 +3,10 @@
  * ====================================
  *
  * Intelligent auto-compaction hook that:
- *   1. Detects when Claude is running low on context
+ *   1. Detects when  is running low on context
  *   2. Triggers SpecMem's Chinese Compactor at 5% remaining
  *   3. Uses premium compaction for critical context
- *   4. Self-contained - works with any Claude Code session
+ *   4. Self-contained - works with any  Code session
  *
  * Flow:
  *   1. Hook monitors context usage via prompt size
@@ -19,7 +19,7 @@ import { compactIfEnabled } from '../utils/tokenCompressor.js';
 import { logger } from '../utils/logger.js';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-// Claude context limits (approximate tokens)
+//  context limits (approximate tokens)
 const CONTEXT_LIMITS = {
     opus: 200000,
     sonnet: 200000,

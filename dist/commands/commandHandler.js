@@ -1,5 +1,5 @@
 /**
- * ClaudeCommandHandler - main command processor for Claude interaction
+ * CommandHandler - main command processor for  interaction
  *
  * yo this is where all the slash commands get parsed and dispatched
  * claude says /memory store and we make it happen fr
@@ -22,12 +22,12 @@ import { ContextCommands } from './contextCommands.js';
 import { PromptCommands } from './promptCommands.js';
 import { TeamMemberCommands } from './teamMemberCommands.js';
 /**
- * ClaudeCommandHandler - the brain that parses and routes commands
+ * CommandHandler - the brain that parses and routes commands
  *
  * yooo command parsing go crazy
  * this is where we take /memory store and make magic happen
  */
-export class ClaudeCommandHandler {
+export class CommandHandler {
     db;
     embeddingProvider;
     categories = new Map();
@@ -194,7 +194,7 @@ export class ClaudeCommandHandler {
      */
     getGlobalHelp() {
         const helpLines = [
-            '# Claude Commands - Available Categories',
+            '#  Commands - Available Categories',
             '',
             'Use /<category> <action> [args...] to execute commands',
             ''
@@ -291,6 +291,6 @@ export class ClaudeCommandHandler {
  * Create a command handler instance
  */
 export function createCommandHandler(db, embeddingProvider) {
-    return new ClaudeCommandHandler(db, embeddingProvider);
+    return new CommandHandler(db, embeddingProvider);
 }
 //# sourceMappingURL=commandHandler.js.map

@@ -3,7 +3,7 @@
  * ========================================================
  *
  * MCP tools generate COT (Chain of Thought) reasoning via MiniCOTScorer,
- * but the dashboard reads Claude's terminal - two disconnected systems.
+ * but the dashboard reads 's terminal - two disconnected systems.
  *
  * This utility bridges them by:
  * 1. Writing COT to a log file that dashboard tails

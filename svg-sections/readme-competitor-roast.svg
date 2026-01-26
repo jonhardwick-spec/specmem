@@ -1,0 +1,224 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1134" width="800" height="1134">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="fireGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ef4444"/>
+      <stop offset="50%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#ef4444"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <linearGradient id="deadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6e7681"/>
+      <stop offset="100%" style="stop-color:#484f58"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="1134" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="1134" rx="16" ry="16" fill="none" stroke="url(#fireGrad)" stroke-width="1" stroke-opacity="0.3"/>
+
+  <!-- Title -->
+  <text x="400" y="38" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="700" fill="url(#fireGrad)">Why Not Use These Instead?</text>
+  <text x="400" y="58" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#6e7681">We looked at every "competitor" so you don't have to. Here's what we found.</text>
+
+  <!-- ==================== CLAUDE-MEM (Main Competitor) ==================== -->
+  <g transform="translate(17, 78)">
+    <rect width="766" height="152" rx="10" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect width="766" height="3" rx="1.5" fill="url(#fireGrad)"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#f59e0b" stroke-width="1"/>
+    <text x="56" y="39" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#f59e0b">claude-mem</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">claude-mem (TheDot-Mac)</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">26k stars / 4 MCP tools / SQLite + ChromaDB</text>
+
+    <rect x="560" y="16" width="80" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+    <text x="600" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#f59e0b">API COSTS</text>
+    <rect x="648" y="16" width="100" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+    <text x="698" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#f59e0b">MAIN RIVAL</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">Credit where it's due: their web viewer is clean and their</tspan>
+      <tspan x="16" dy="14">install is dead simple. 26k stars doesn't happen by accident.</tspan>
+      <tspan x="16" dy="14">But claude-mem captures tool observations. That's it. 4 tools.</tspan>
+      <tspan x="16" dy="14">No codebase indexing, no language extractors, no dependency</tspan>
+      <tspan x="16" dy="14">graphs, no file watching, no multi-agent. Compression runs</tspan>
+      <tspan x="16" dy="14">through cloud APIs. We run 74 tools locally. Their GUI wins though.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== GIGA AI ==================== -->
+  <g transform="translate(17, 244)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="#ef4444"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#e6edf3">GIGA</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">Giga AI</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">gigamind.dev</text>
+
+    <rect x="580" y="16" width="60" height="20" rx="4" fill="#ef4444" fill-opacity="0.15"/>
+    <text x="610" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ef4444">CLOUD</text>
+    <rect x="648" y="16" width="104" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+    <text x="700" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#f59e0b">TRUST US BRO</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">They say they don't use your code for training. Sure. Your code</tspan>
+      <tspan x="16" dy="14">still gets shipped to their servers and lives in a database they</tspan>
+      <tspan x="16" dy="14">control. No MCP, no local option, no multi-agent support.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== CURSOR ==================== -->
+  <g transform="translate(17, 366)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="#ef4444"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#e6edf3">Cursor</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">Cursor</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">cursor.com</text>
+
+    <rect x="620" y="16" width="60" height="20" rx="4" fill="#ef4444" fill-opacity="0.15"/>
+    <text x="650" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ef4444">CLOUD</text>
+    <rect x="690" y="16" width="60" height="20" rx="4" fill="#ef4444" fill-opacity="0.15"/>
+    <text x="720" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ef4444">PAID</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">A whole IDE you gotta switch to. Everything runs through their</tspan>
+      <tspan x="16" dy="14">cloud. No persistent memory between sessions, no semantic</tspan>
+      <tspan x="16" dy="14">search, no per-project isolation, no team coordination.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== CONTINUE ==================== -->
+  <g transform="translate(17, 488)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="#f59e0b"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#e6edf3">Continue</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">Continue</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">continue.dev</text>
+
+    <rect x="640" y="16" width="110" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+    <text x="695" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#f59e0b">NO MEMORY</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">Open source IDE extension. Respect for that. But it doesn't</tspan>
+      <tspan x="16" dy="14">remember anything between sessions. No semantic search, no</tspan>
+      <tspan x="16" dy="14">embeddings, no codebase graph. Close the window and it's gone.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== CODY ==================== -->
+  <g transform="translate(17, 610)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="#ef4444"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#e6edf3">Cody</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">Cody (Sourcegraph)</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">sourcegraph.com</text>
+
+    <rect x="620" y="16" width="60" height="20" rx="4" fill="#ef4444" fill-opacity="0.15"/>
+    <text x="650" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ef4444">CLOUD</text>
+    <rect x="690" y="16" width="60" height="20" rx="4" fill="#ef4444" fill-opacity="0.15"/>
+    <text x="720" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ef4444">PAID</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">Sourcegraph's got decent code search, we'll give them that.</tspan>
+      <tspan x="16" dy="14">But Cody runs on their cloud, costs real money, and doesn't</tspan>
+      <tspan x="16" dy="14">work with Claude Code. No MCP, no hooks, no team coordination.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== MEM0 ==================== -->
+  <g transform="translate(17, 732)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="#f59e0b"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#e6edf3">mem0</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">mem0</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">mem0.ai</text>
+
+    <rect x="580" y="16" width="80" height="20" rx="4" fill="#ef4444" fill-opacity="0.15"/>
+    <text x="620" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ef4444">CLOUD API</text>
+    <rect x="670" y="16" width="80" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+    <text x="710" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#f59e0b">API COSTS</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">mem0 does memory. That's it. No codebase indexing, no language</tspan>
+      <tspan x="16" dy="14">extractors, no tracebacks. Their embeddings run through cloud</tspan>
+      <tspan x="16" dy="14">APIs so you're paying per query and your data leaves your machine.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== CLAUDE-CODEMEM ==================== -->
+  <g transform="translate(17, 854)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#6e7681" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="url(#deadGrad)"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#8b949e">claude-</text>
+    <text x="56" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#8b949e">codemem</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">claude-codemem (MadAppGang)</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">32 stars on GitHub / 24 files total</text>
+
+    <rect x="600" y="16" width="80" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+    <text x="640" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#f59e0b">API COSTS</text>
+    <rect x="690" y="16" width="60" height="20" rx="4" fill="#6e7681" fill-opacity="0.25"/>
+    <text x="720" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6e7681">TINY</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">24 files. The entire project is 24 files. SpecMem has more in the</tspan>
+      <tspan x="16" dy="14">hooks dir alone. Uses OpenRouter for embeddings - cloud API costs</tspan>
+      <tspan x="16" dy="14">on every search. No multi-agent, no team comms, no dashboard.</tspan>
+    </text>
+  </g>
+
+  <!-- ==================== SUPERAGENTIC AI ==================== -->
+  <g transform="translate(17, 976)">
+    <rect width="766" height="108" rx="10" fill="url(#cardGrad)" stroke="#6e7681" stroke-width="1" stroke-opacity="0.4"/>
+    <rect width="766" height="3" rx="1.5" fill="url(#deadGrad)"/>
+
+    <rect x="16" y="16" width="80" height="36" rx="6" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <text x="56" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="700" fill="#6e7681">Super</text>
+    <text x="56" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="700" fill="#6e7681">Agentic</text>
+
+    <text x="112" y="32" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e6edf3">SuperAgentic AI</text>
+    <text x="112" y="48" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">not even on npm</text>
+
+    <rect x="610" y="16" width="60" height="20" rx="4" fill="#6e7681" fill-opacity="0.25"/>
+    <text x="640" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6e7681">CLONE</text>
+    <rect x="680" y="16" width="70" height="20" rx="4" fill="#6e7681" fill-opacity="0.25"/>
+    <text x="715" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6e7681">DEAD</text>
+
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="72">Read our research blog and tried to build a knockoff. Didn't even</tspan>
+      <tspan x="16" dy="14">get it on npm. No package, no real repo, no users. You can't clone</tspan>
+      <tspan x="16" dy="14">74+ tools and a full embedding pipeline from a blog post.</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom: SpecMem flex -->
+  <rect x="17" y="1096" width="766" height="24" rx="8" fill="#22c55e" fill-opacity="0.08" stroke="#22c55e" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="400" y="1113" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#4ade80">SpecMem: 74+ tools, 14 languages, local embeddings, zero cloud, zero API costs.</text>
+</svg>

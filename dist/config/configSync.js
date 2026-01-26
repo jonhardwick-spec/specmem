@@ -47,7 +47,9 @@ function getSpecmemDir() {
     // Otherwise we're in src/config
     return path.resolve(currentDir, '..', '..');
 }
-const BOOTSTRAP_PATH = path.join(getSpecmemDir(), 'bootstrap.cjs');
+// Prefer proxy for resilient MCP connections (auto-reconnect on crash)
+const _proxyPath = path.join(getSpecmemDir(), 'mcp-proxy.cjs');
+const BOOTSTRAP_PATH = fs.existsSync(_proxyPath) ? _proxyPath : path.join(getSpecmemDir(), 'bootstrap.cjs');
 const SOURCE_HOOKS_DIR = path.join(getSpecmemDir(), 'claude-hooks');
 const SOURCE_COMMANDS_DIR = path.join(getSpecmemDir(), 'commands');
 // ============================================================================
@@ -153,8 +155,9 @@ function syncConfigJson() {
             needsFix = true;
         }
         // Check args - should point to bootstrap.cjs
-        const expectedArgs = ['--max-old-space-size=250', BOOTSTRAP_PATH];
-        const actualEntryPoint = existing.args?.[1];
+        const expectedArgs = [BOOTSTRAP_PATH];
+        // Support both old format (with --max-old-space-size) and new format (just path)
+        const actualEntryPoint = existing.args?.find(a => a.includes('bootstrap.cjs') || a.includes('mcp-proxy.cjs'));
         if (actualEntryPoint !== BOOTSTRAP_PATH) {
             mismatches.push({
                 file: 'config.json',
@@ -183,10 +186,10 @@ function syncConfigJson() {
     // Fix config.json
     config.mcpServers['specmem'] = {
         command: 'node',
-        args: ['--max-old-space-size=250', BOOTSTRAP_PATH],
+        args: [BOOTSTRAP_PATH],
         env: {
             HOME: os.homedir(),
-            // Project-local configuration - ${cwd} is expanded by Claude Code per-invocation
+            // Project-local configuration - ${cwd} is expanded by  Code per-invocation
             // NOTE: ${PWD} only resolves at startup, ${cwd} resolves dynamically
             SPECMEM_PROJECT_PATH: '${cwd}',
             SPECMEM_WATCHER_ROOT_PATH: '${cwd}',
@@ -222,17 +225,17 @@ function syncConfigJson() {
 /**
  * Sync project-level MCP configurations in ~/.claude.json
  *
- * Claude Code stores per-project configs under `projects -> {path} -> mcpServers`
+ *  Code stores per-project configs under `projects -> {path} -> mcpServers`
  * These can become stale when credentials change. This function automatically
  * fixes stale specmem env vars in all project entries.
  *
- * ROOT CAUSE FIX: When user runs Claude in different projects, each project
+ * ROOT CAUSE FIX: When user runs  in different projects, each project
  * gets its own MCP config snapshot. If the master credentials change, these
  * per-project snapshots become stale and cause "permission denied" errors.
  */
 function syncProjectConfigs() {
     const projectsFixed = [];
-    // Read the Claude config (not config.json, but ~/.claude.json - the main Claude Code config)
+    // Read the  config (not config.json, but ~/.claude.json - the main  Code config)
     const claudeJsonPath = path.join(os.homedir(), '.claude.json');
     if (!fs.existsSync(claudeJsonPath)) {
         return { fixed: false, projectsFixed: [], error: 'No ~/.claude.json found' };

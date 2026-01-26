@@ -4,6 +4,21 @@ All notable changes to SpecMem - we keep it real with semantic versioning. Deada
 
 ---
 
+## [3.5.96] - 2026-02-07
+
+### Fixed
+- Prevent multiple embedding server processes from spawning (socket contention)
+- Strengthen lock acquisition with PID validation and staleness detection
+- Add bootstrap deduplication to prevent duplicate MCP server instances
+- Health monitoring now detects and kills duplicate processes
+- Reduced subsequent timeout from 60s to 15s for faster failure detection
+
+### Added
+- Resource monitoring for embedding server (CPU/RAM tracking)
+- Cleanup script for manual process management
+
+---
+
 ## [3.1.0] - 2026-01-30
 
 ### Added

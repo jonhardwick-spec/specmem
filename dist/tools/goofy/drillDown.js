@@ -19,8 +19,7 @@
 import { logger } from '../../utils/logger.js';
 import { drilldownRegistry, performDrilldown } from '../../services/CameraZoomSearch.js';
 import { smartCompress } from '../../utils/tokenCompressor.js';
-import { compactXmlResponse, stripNewlines } from '../../utils/compactXmlResponse.js';
-import { formatHumanReadable } from '../../utils/humanReadableOutput.js';
+import { formatHumanReadable, formatHumanReadableError } from '../../utils/humanReadableOutput.js';
 import { cotStart, cotResult, cotError } from '../../utils/cotBroadcast.js';
 import { getProjectPathForInsert } from '../../services/ProjectContext.js';
 // ============================================================================
@@ -28,7 +27,7 @@ import { getProjectPathForInsert } from '../../services/ProjectContext.js';
 // ============================================================================
 const DRILLDOWN_REMINDER = `DRILL_DOWN 深入查看模式
 ✅ fullContent = 主要內容
-✅ pairedMessage = 對話配對 (用戶提示↔Claude回應)
+✅ pairedMessage = 對話配對 (用戶提示↔回應)
 可繼續 drill_down(ID) | 返回: find_memory({ cameraRollMode: true })`;
 const NOT_FOUND_REMINDER = `DRILLDOWN_ID 未找到
 可能已過期或無效 | 請重新搜索: find_memory({ query, cameraRollMode: true })`;
@@ -73,6 +72,13 @@ export class DrillDown {
                 default: true,
                 description: 'Apply Traditional Chinese compression for token efficiency'
             },
+            zoom: {
+                type: 'number',
+                default: 50,
+                minimum: 0,
+                maximum: 100,
+                description: 'Zoom level for code drilldown: 0=signature only, 50=truncated content, 100=full content. For memories, controls detail level.'
+            },
             // humanReadable is always true - removed as configurable option per user request
         },
         required: ['drilldownID']
@@ -82,46 +88,42 @@ export class DrillDown {
     }
     async execute(params) {
         const startTime = Date.now();
+        // Accept both drilldownID and drilldownId (case insensitive)
+        const drilldownID = params.drilldownID ?? params.drilldownId ?? params.id;
         logger.info({
-            drilldownID: params.drilldownID,
+            drilldownID,
             includeCode: params.includeCode,
             includeContext: params.includeContext
         }, '[DrillDown] Executing drilldown');
         // Broadcast COT start to dashboard
-        cotStart('drill_down', `ID ${params.drilldownID}`);
+        cotStart('drill_down', `ID ${drilldownID}`);
         // Resolve drilldownID to entry
-        const entry = drilldownRegistry.resolve(params.drilldownID);
+        const entry = drilldownRegistry.resolve(drilldownID);
         if (!entry) {
-            logger.warn({ drilldownID: params.drilldownID }, '[DrillDown] ID not found in registry');
-            const errorData = {
-                error: 'NOT_FOUND',
-                id: params.drilldownID,
-                message: stripNewlines(`Drilldown ID ${params.drilldownID} not found. It may have expired or never existed.`),
-                hint: 'drill_down(ID) 無效 | 請用 find_memory 重新搜索',
-                reminder: NOT_FOUND_REMINDER
-            };
-            return compactXmlResponse(errorData, 'drilldown');
+            logger.warn({ drilldownID: drilldownID }, '[DrillDown] ID not found in registry');
+            const errorMsg = `Drilldown ID ${drilldownID} not found.
+It may have expired or never existed.
+
+→ Use find_memory({ query, cameraRollMode: true }) to get fresh IDs`;
+            return formatHumanReadableError('drill_down', errorMsg);
         }
         try {
             // Perform the drilldown
-            const result = await performDrilldown(params.drilldownID, this.db, {
+            const result = await performDrilldown(drilldownID, this.db, {
                 includeConversationContext: params.includeContext !== false,
                 relatedLimit: params.relatedLimit ?? 5,
-                codeRefLimit: params.includeCode !== false ? 3 : 0
+                codeRefLimit: params.includeCode !== false ? 3 : 0,
+                zoom: params.zoom ?? 50  // Default 50% zoom for code
             });
             if (!result) {
-                const errorData = {
-                    error: 'LOAD_FAILED',
-                    id: params.drilldownID,
-                    memoryID: entry.memoryID,
-                    type: entry.type,
-                    message: stripNewlines(`Memory ${entry.memoryID} could not be loaded from database.`),
-                    hint: `Memory ${entry.memoryID} 無法加載`,
-                    reminder: NOT_FOUND_REMINDER
-                };
-                return compactXmlResponse(errorData, 'drilldown');
+                const errorMsg = `Memory ${entry.memoryID} could not be loaded.
+Type: ${entry.type}
+
+→ Use find_memory({ query, cameraRollMode: true }) to get fresh IDs`;
+                return formatHumanReadableError('drill_down', errorMsg);
             }
             // Apply compression if requested
+            // smartCompress now preserves newlines and detects code-like lines
             let fullContent = result.fullContent;
             let fullCR = result.fullCR;
             if (params.compress !== false) {
@@ -173,7 +175,7 @@ export class DrillDown {
                 : [];
             const duration = Date.now() - startTime;
             logger.info({
-                drilldownID: params.drilldownID,
+                drilldownID: drilldownID,
                 duration,
                 relatedCount: relatedMemories.length,
                 codeRefCount: codeReferences.length
@@ -183,7 +185,7 @@ export class DrillDown {
             const drilldownHint = childIDs.length > 0
                 ? `可繼續探索: ${childIDs.map(id => `drill_down(${id})`).join(' | ')}`
                 : `無更多可探索項 | 返回: find_memory({ query, cameraRollMode: true })`;
-            // CRITICAL: Format paired message (user prompt for Claude response, or vice versa)
+            // CRITICAL: Format paired message (user prompt for  response, or vice versa)
             let pairedMessage;
             if (result.pairedMessage) {
                 const pairedRole = result.pairedMessage.role || 'user';
@@ -232,7 +234,7 @@ export class DrillDown {
         catch (error) {
             // Broadcast COT error to dashboard
             cotError('drill_down', error?.message?.slice(0, 100) || 'Unknown error');
-            logger.error({ error, drilldownID: params.drilldownID }, '[DrillDown] Failed');
+            logger.error({ error, drilldownID: drilldownID }, '[DrillDown] Failed');
             throw error;
         }
     }
@@ -259,7 +261,8 @@ export class GetMemoryByDrilldownID {
         this.db = db;
     }
     async execute(params) {
-        const entry = drilldownRegistry.resolve(params.drilldownID);
+        const drilldownID = params.drilldownID ?? params.drilldownId ?? params.id;
+        const entry = drilldownRegistry.resolve(drilldownID);
         if (!entry) {
             return null;
         }
@@ -277,7 +280,7 @@ export class GetMemoryByDrilldownID {
             };
         }
         catch (error) {
-            logger.error({ error, drilldownID: params.drilldownID }, '[GetMemoryByDrilldownID] Failed');
+            logger.error({ error, drilldownID: drilldownID }, '[GetMemoryByDrilldownID] Failed');
             return null;
         }
     }

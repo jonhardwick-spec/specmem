@@ -1,7 +1,7 @@
 /**
  * Team Member Deployer Tool
  *
- * "Skidded" version of Claude Code's Task tool that actually works with MCP
+ * "Skidded" version of  Code's Task tool that actually works with MCP
  * Spawns team members with full SpecMem MCP access
  *
  * Now integrates with TeamCommsService for team-based team member coordination:
@@ -30,7 +30,7 @@ import { getAgentsJson, isValidAgentType } from './agentDefinitions.js';
  */
 export async function deployTeamMember(args) {
     const { teamMemberId, teamMemberName, teamMemberType, model, prompt, background = true, parentTaskId, enableTeamComms = !!parentTaskId, nativeAgentType, } = args;
-    // Build native agent flags if specified (Claude 2.1.19+)
+    // Build native agent flags if specified ( 2.1.19+)
     let agentFlags = '';
     if (nativeAgentType && isValidAgentType(nativeAgentType)) {
         const agentsJson = getAgentsJson().replace(/'/g, "'\\''"); // Escape for bash
@@ -138,7 +138,7 @@ export async function deployTeamMember(args) {
                 spawnedAt: new Date().toISOString(),
             }, null, 2));
         }
-        // Map model names to Claude API model IDs
+        // Map model names to  API model IDs
         const modelMap = {
             haiku: 'claude-3-5-haiku-20241022',
             sonnet: 'claude-sonnet-4-5-20250929',

@@ -21,7 +21,7 @@ import { EmbeddingProvider } from '../tools/index.js';
  * PROJECT-SCOPED: Only watches the current project directory
  * Uses SPECMEM_PROJECT_PATH to determine watch scope
  *
- * This prevents RAM bloat from watching all files across all Claude sessions.
+ * This prevents RAM bloat from watching all files across all  sessions.
  * Each SpecMem instance only watches its own project.
  */
 export declare function initializeWatcher(embeddingProvider: EmbeddingProvider): Promise<WatcherManager | null>;
@@ -66,7 +66,7 @@ export declare function getWatcherStatus(): {
 };
 /**
  * isWatcherForProject - check if watcher is initialized for a specific project
- * Useful to avoid conflicts when multiple Claude sessions are running
+ * Useful to avoid conflicts when multiple  sessions are running
  */
 export declare function isWatcherForProject(targetProjectPath: string): boolean;
 /**

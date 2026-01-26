@@ -268,7 +268,7 @@ router.post('/:name/enable', async (req, res) => {
     }
 });
 /**
- * POST /api/hooks/deploy - Deploy all enabled & validated hooks to Claude
+ * POST /api/hooks/deploy - Deploy all enabled & validated hooks to 
  */
 router.post('/deploy', async (req, res) => {
     try {

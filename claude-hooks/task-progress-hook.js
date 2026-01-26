@@ -2,7 +2,7 @@
 /**
  * TASK PROGRESS HOOK - Real loading bars for Task tool agents
  *
- * Writes DIRECTLY to /dev/tty to bypass Claude's stdout capture
+ * Writes DIRECTLY to /dev/tty to bypass 's stdout capture
  * This actually shows content in the terminal!
  */
 

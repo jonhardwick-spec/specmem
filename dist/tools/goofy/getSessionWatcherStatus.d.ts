@@ -1,5 +1,5 @@
 /**
- * getSessionWatcherStatus.ts - Get Claude Session Watcher Status
+ * getSessionWatcherStatus.ts - Get  Session Watcher Status
  *
  * yo fr fr check if the session watcher is running
  * shows stats on how many sessions have been extracted
@@ -8,11 +8,11 @@
  */
 import { z } from 'zod';
 import { MCPTool } from '../../mcp/toolRegistry.js';
-import { ClaudeSessionWatcher } from '../../claude-sessions/sessionWatcher.js';
+import { SessionWatcher } from '../../claude-sessions/sessionWatcher.js';
 declare const GetSessionWatcherStatusInputSchema: z.ZodObject<{}, "strip", z.ZodTypeAny, {}, {}>;
 type GetSessionWatcherStatusInput = z.infer<typeof GetSessionWatcherStatusInputSchema>;
 /**
- * GetSessionWatcherStatus - gets status of the Claude session watcher
+ * GetSessionWatcherStatus - gets status of the  session watcher
  *
  * nah bruh check if your sessions are being auto-extracted
  */
@@ -24,7 +24,7 @@ export declare class GetSessionWatcherStatus implements MCPTool {
         properties: {};
     };
     private sessionWatcher;
-    setSessionWatcher(watcher: ClaudeSessionWatcher): void;
+    setSessionWatcher(watcher: SessionWatcher): void;
     execute(args: GetSessionWatcherStatusInput): Promise<{
         enabled: boolean;
         isWatching: boolean;

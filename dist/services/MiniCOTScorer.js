@@ -12,7 +12,7 @@
  *
  * Attribution Types:
  *   - 'user': Code written/discussed by the user
- *   - 'assistant': Code generated/explained by Claude
+ *   - 'assistant': Code generated/explained by 
  *   - 'unknown': Role not determined
  */
 import { MiniCOTProvider } from '../providers/MiniCOTProvider.js';
@@ -31,7 +31,7 @@ export function extractAttribution(memoryRole, memoryTags) {
         return { attribution: 'user', note: '用戶提供' };
     }
     if (memoryRole === 'assistant') {
-        return { attribution: 'assistant', note: 'Claude生成' };
+        return { attribution: 'assistant', note: '生成' };
     }
     // Priority 2: Check tags
     if (memoryTags) {
@@ -39,14 +39,14 @@ export function extractAttribution(memoryRole, memoryTags) {
             return { attribution: 'user', note: '用戶標籤' };
         }
         if (memoryTags.includes('role:assistant')) {
-            return { attribution: 'assistant', note: 'Claude標籤' };
+            return { attribution: 'assistant', note: '標籤' };
         }
         // Check for code-related tags
         if (memoryTags.includes('user-code') || memoryTags.includes('user-provided')) {
             return { attribution: 'user', note: '用戶代碼標籤' };
         }
         if (memoryTags.includes('generated') || memoryTags.includes('claude-code')) {
-            return { attribution: 'assistant', note: 'Claude代碼標籤' };
+            return { attribution: 'assistant', note: '代碼標籤' };
         }
     }
     // Priority 3: Unknown
@@ -58,7 +58,7 @@ export function extractAttribution(memoryRole, memoryTags) {
 export function formatAttribution(attribution) {
     const formats = {
         'user': '👤 用戶',
-        'assistant': '🤖 Claude',
+        'assistant': '🤖 ',
         'unknown': '❓ 未知'
     };
     return formats[attribution] || formats['unknown'];

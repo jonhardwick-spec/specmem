@@ -29,6 +29,7 @@ import { logger } from '../../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
 import { createHash } from 'crypto';
 import fs from 'fs';
+import path from 'path';
 import { getProjectPathForInsert } from '../../services/ProjectContext.js';
 import { getFileCommsTransport } from '../../comms/fileCommsTransport.js';
 import { smartCompress } from '../../utils/tokenCompressor.js';
@@ -186,6 +187,43 @@ export async function initTeamCommsDB(pool) {
         END IF;
       END $$;
     `);
+        // MIGRATION: Add missing columns to team_channels for older schemas
+        // This fixes the "column X does not exist" errors when indexes try to reference them
+        await client.query(`
+      DO $$
+      BEGIN
+        -- Add channel_type if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                      WHERE table_name = 'team_channels' AND column_name = 'channel_type') THEN
+          ALTER TABLE team_channels ADD COLUMN channel_type VARCHAR(50) DEFAULT 'default';
+        END IF;
+        -- Add project_id if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                      WHERE table_name = 'team_channels' AND column_name = 'project_id') THEN
+          ALTER TABLE team_channels ADD COLUMN project_id VARCHAR(255);
+        END IF;
+        -- Add members if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                      WHERE table_name = 'team_channels' AND column_name = 'members') THEN
+          ALTER TABLE team_channels ADD COLUMN members TEXT[] DEFAULT '{}';
+        END IF;
+        -- Add created_by if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                      WHERE table_name = 'team_channels' AND column_name = 'created_by') THEN
+          ALTER TABLE team_channels ADD COLUMN created_by VARCHAR(255) DEFAULT 'system';
+        END IF;
+        -- Add last_activity if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                      WHERE table_name = 'team_channels' AND column_name = 'last_activity') THEN
+          ALTER TABLE team_channels ADD COLUMN last_activity TIMESTAMPTZ DEFAULT NOW();
+        END IF;
+        -- Add metadata if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                      WHERE table_name = 'team_channels' AND column_name = 'metadata') THEN
+          ALTER TABLE team_channels ADD COLUMN metadata JSONB DEFAULT '{}';
+        END IF;
+      END $$;
+    `);
         // Create team_messages table
         await client.query(`
       CREATE TABLE IF NOT EXISTS team_messages (
@@ -325,6 +363,16 @@ export async function initTeamCommsDB(pool) {
  */
 function isDBAvailable() {
     return dbPool !== null;
+}
+/**
+ * Set search_path for project isolation on a client connection.
+ * MUST be called after acquiring a client from pool, before any queries.
+ * This ensures tables are accessed from the correct project schema.
+ */
+async function setClientSearchPath(client) {
+    const schemaName = getProjectSchema();
+    await client.query(`SET search_path TO ${schemaName}, public`);
+    return schemaName;
 }
 // ============================================================================
 // Utility Functions
@@ -507,6 +555,8 @@ Examples:
             // Use PostgreSQL
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 // Get or create appropriate channel
                 if (task_id) {
                     const channelResult = await client.query(`
@@ -600,6 +650,13 @@ Examples:
                 logger.warn({ error: fileErr }, '[TeamComms] File fallback failed - message only visible in current process');
             }
         }
+        // Write latest team message to statusbar state file for live display
+        try {
+            const statusFile = path.join(projectPath, 'specmem', 'sockets', 'team-comms-latest.json');
+            const commsState = { sender: senderDisplayName, message: message.slice(0, 80), timestamp, channel: channel || 'main' };
+            fs.writeFileSync(statusFile, JSON.stringify(commsState));
+        }
+        catch (_e) { /* non-fatal */ }
         logToTeamChannel('send_message', {
             messageId,
             type,
@@ -697,6 +754,8 @@ Returns messages sorted by newest first.`;
             // Use PostgreSQL
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 // MED-20 FIX: Restructure query to avoid OR conditions that prevent index usage
                 // Previously: WHERE (project_path = $2 OR project_path = '/') AND (channel_id = X OR ...)
                 // This prevented idx_team_messages_project_path from being used effectively
@@ -762,13 +821,14 @@ Returns messages sorted by newest first.`;
                     queryParams.push(since);
                     paramIndex++;
                 }
-                // Session start filter - ALWAYS filter out messages from before current session
-                // This prevents agents from seeing stale messages from previous sessions/deployments
-                // Critical for clean agent coordination - new agents shouldn't read old noise
-                const sessionStart = getSessionStartTime();
-                extraFilters.push(`m.created_at >= $${paramIndex}`);
-                queryParams.push(sessionStart.toISOString());
-                paramIndex++;
+                // Session start filter - DISABLED for now
+                // BUG: Each MCP instance has its own sessionStartTime, causing agents to not see
+                // each other's messages. Until we have a shared session timestamp, disable this filter.
+                // TODO: Use a file-based or DB-based shared session start time
+                // const sessionStart = getSessionStartTime();
+                // extraFilters.push(`m.created_at >= $${paramIndex}`);
+                // queryParams.push(sessionStart.toISOString());
+                // paramIndex++;
                 // Mentions filter
                 if (mentions_only) {
                     extraFilters.push(`$${paramIndex} = ANY(m.mentions)`);
@@ -932,28 +992,50 @@ Returns messages sorted by newest first.`;
             since,
             storage: isDBAvailable() ? 'postgresql' : 'memory'
         });
-        // Human-readable format like find_memory/find_code_pointers
-        const typeLabels = {
-            status: 'status',
-            question: 'question',
-            update: 'update',
-            broadcast: 'broadcast',
-            help_request: 'help',
-            help_response: 'response'
+        // Human-readable format like find_memory/Read tool
+        const typeEmoji = {
+            status: '🔄',
+            question: '❓',
+            update: '📝',
+            broadcast: '📢',
+            help_request: '🆘',
+            help_response: '💡'
+        };
+        const formatTimeAgo = (date) => {
+            const now = Date.now();
+            const then = new Date(date).getTime();
+            const diffSec = Math.floor((now - then) / 1000);
+            if (diffSec < 60) return `${diffSec}s ago`;
+            const diffMin = Math.floor(diffSec / 60);
+            if (diffMin < 60) return `${diffMin}m ago`;
+            const diffHr = Math.floor(diffMin / 60);
+            if (diffHr < 24) return `${diffHr}h ago`;
+            return `${Math.floor(diffHr / 24)}d ago`;
         };
         const formatMessage = (m, idx) => {
-            const unreadMark = m.is_unread ? '★ ' : '';
-            const from = m.sender_name.slice(0, 15);
-            const type = typeLabels[m.type] || m.type;
-            const content = stripNewlines(m.content.slice(0, 100));
-            return `[${idx + 1}] ${unreadMark}${from} [${type}]: ${content}`;
+            const emoji = typeEmoji[m.type] || '💬';
+            const unread = m.is_unread ? ' ★ NEW' : '';
+            const time = formatTimeAgo(m.created_at);
+            const from = m.sender_name || 'unknown';
+            // Compress content with smartCompress for token savings
+            const rawContent = m.content.slice(0, 400);
+            const { result: compressedContent } = smartCompress(rawContent, { threshold: 0.6 });
+            const content = compressedContent.replace(/\n/g, '\n│   ');
+            const truncated = m.content.length > 400 ? '...' : '';
+            return `┌─${unread}────────────────────────────────────
+│ ${emoji} ${from}  •  ${m.type}  •  ${time}
+│   ${content}${truncated}
+└──────────────────────────────────────────`;
         };
-        const header = `[TEAM-MESSAGES]\n${messages.length} messages (${unreadCount} unread)`;
+        // Use [SPECMEM-*] tag format for consistency with other tools
+        const header = `[SPECMEM-TEAM-MESSAGES]
+📬 ${messages.length} messages • ${unreadCount} unread`;
         const msgList = messages.map((m, i) => formatMessage(m, i)).join('\n');
-        const footer = `reply: send_team_message({message, type:"status"})\n[/TEAM-MESSAGES]`;
+        const footer = `\n💬 send_team_message({message}) 回覆
+[/SPECMEM-TEAM-MESSAGES]`;
         const output = messages.length > 0
-            ? `${header}\n${msgList}\n${footer}`
-            : `${header}\nNo messages.\n${footer}`;
+            ? `${header}\n${msgList}${footer}`
+            : `${header}\n  無訊息\n${footer}`;
         return { content: [{ type: 'text', text: output }] };
     }
 }
@@ -1013,6 +1095,8 @@ Use cross_project: true for system-wide announcements (use sparingly).`;
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 await client.query(`
           INSERT INTO team_messages (
             id, channel_id, sender_id, sender_name, content,
@@ -1054,6 +1138,14 @@ Use cross_project: true for system-wide announcements (use sparingly).`;
             };
             teamMessagesMemory.set(messageId, teamMessage);
         }
+        // Write latest broadcast to statusbar state file for live display
+        try {
+            const broadcastProjectPath = cross_project ? (process.env.SPECMEM_PROJECT_PATH || process.cwd()) : projectPath;
+            const statusFile = path.join(broadcastProjectPath, 'specmem', 'sockets', 'team-comms-latest.json');
+            const commsState = { sender: senderName, message: message.slice(0, 80), timestamp, channel: 'broadcast' };
+            fs.writeFileSync(statusFile, JSON.stringify(commsState));
+        }
+        catch (_e) { /* non-fatal */ }
         logToTeamChannel('broadcast', {
             messageId,
             broadcast_type,
@@ -1112,6 +1204,8 @@ Best practice: Always claim before starting work on a task.`;
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 // Check for file conflicts (within same project)
                 if (files.length > 0) {
                     const conflictResult = await client.query(`
@@ -1218,6 +1312,8 @@ Best practice: Release files as you finish them, release entire claim when task 
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 if (claimId === 'all') {
                     // FIX HIGH-13: Add project_path filter to prevent releasing claims from other projects
                     const projectPath = getProjectPathForInsert();
@@ -1373,6 +1469,8 @@ Use this to:
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 // Get active claims (filtered by project)
                 const claimsResult = await client.query(`
           SELECT id, description, files, claimed_by, claimed_at
@@ -1494,6 +1592,8 @@ respond using the respond_to_help tool.`;
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 await client.query(`
           INSERT INTO help_requests (id, question, context, requested_by, requested_at, status, metadata, project_path)
           VALUES ($1, $2, $3, $4, $5, 'open', $6, $7)
@@ -1578,6 +1678,8 @@ will be notified.`;
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 // Get the help request
                 const helpResult = await client.query(`
           SELECT requested_by, question FROM help_requests WHERE id = $1
@@ -1731,6 +1833,8 @@ Example: clear_team_messages({confirm: true, older_than_minutes: 60}) - only old
         if (isDBAvailable()) {
             const client = await dbPool.connect();
             try {
+                // CRITICAL: Set search_path for project isolation
+                await setClientSearchPath(client);
                 // Build time filter if specified
                 let timeFilter = '';
                 const timeParams = [projectPath];

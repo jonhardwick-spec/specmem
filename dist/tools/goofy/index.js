@@ -19,8 +19,8 @@ export { StartWatchingTheFiles } from './startWatchingTheFiles.js';
 export { StopWatchingTheFiles } from './stopWatchingTheFiles.js';
 export { CheckSyncStatus } from './checkSyncStatus.js';
 export { ForceResync } from './forceResync.js';
-// Claude session extraction tools
-export { ExtractClaudeSessions } from './extractClaudeSessions.js';
+//  session extraction tools
+export { ExtractSessions } from './extractClaudeSessions.js';
 export { GetSessionWatcherStatus } from './getSessionWatcherStatus.js';
 export { ExtractContextRestorations } from './extractContextRestorations.js';
 // TeamMember communication tools (legacy wrappers, now use MCP team comms)
@@ -29,7 +29,7 @@ export { ListenForMessages } from './listenForMessages.js';
 export { GetActiveTeamMembers } from './getActiveTeamMembers.js';
 export { SendHeartbeat } from './sendHeartbeat.js';
 // Spatial memory tools - quadrants, clusters, hot paths
-// Makes Claude's memory ACTUALLY INTELLIGENT
+// Makes 's memory ACTUALLY INTELLIGENT
 export { SpatialSearch, SpatialManage } from './spatialSearch.js';
 // TeamMember deployment and monitoring tools (renamed from TeamMember to TeamMember)
 export { ListDeployedTeamMembers } from './listDeployedTeamMembers.js';

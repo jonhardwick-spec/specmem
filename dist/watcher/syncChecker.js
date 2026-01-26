@@ -17,6 +17,23 @@ import { join } from 'path';
 import { createHash } from 'crypto';
 import { logger } from '../utils/logger.js';
 import { glob } from 'glob';
+import { getEmbeddingTimeout } from '../config/embeddingTimeouts.js';
+/**
+ * Wrap an async operation with a timeout. Prevents sync/resync from hanging
+ * indefinitely when embedding service or DB becomes unresponsive.
+ */
+function withSyncTimeout(operation, timeoutMs, operationName) {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            const err = new Error(`[Sync] ${operationName} timed out after ${Math.round(timeoutMs / 1000)}s`);
+            err.code = 'SYNC_TIMEOUT';
+            reject(err);
+        }, timeoutMs);
+        Promise.resolve().then(() => operation())
+            .then(result => { clearTimeout(timeoutId); resolve(result); })
+            .catch(error => { clearTimeout(timeoutId); reject(error); });
+    });
+}
 /**
  * areWeStillInSync - sync status checker
  *
@@ -124,6 +141,9 @@ export class AreWeStillInSync {
     async resyncEverythingFrFr() {
         logger.info('starting full resync (non-blocking)...');
         const startTime = Date.now();
+        // Overall resync deadline: 10 minutes max (configurable via SPECMEM_RESYNC_TIMEOUT_MS)
+        const RESYNC_TIMEOUT_MS = parseInt(process.env['SPECMEM_RESYNC_TIMEOUT_MS'] || '600000');
+        const isOverDeadline = () => (Date.now() - startTime) > RESYNC_TIMEOUT_MS;
         const result = {
             success: false,
             filesAdded: 0,
@@ -140,26 +160,58 @@ export class AreWeStillInSync {
                 missingFromDisk: driftReport.missingFromDisk.length,
                 contentMismatch: driftReport.contentMismatch.length
             }, 'drift detected - starting resync');
-            // Helper to process files in batches with yielding
+            // Helper to process files in PARALLEL batches with concurrency + retry on transient failure
+            const CONCURRENCY = 20; // Process 20 files simultaneously for 10+ files/sec throughput
+            const PER_FILE_TIMEOUT = getEmbeddingTimeout('fileWatcher'); // 120s per file operation
+            const MAX_FILE_RETRIES = 1; // Retry failed files once before giving up
             const processInBatches = async (files, handler, operationType) => {
                 const batchErrors = [];
                 let processed = 0;
-                const BATCH_SIZE = this.config.batchSize;
-                for (let i = 0; i < files.length; i += BATCH_SIZE) {
-                    const batch = files.slice(i, i + BATCH_SIZE);
-                    for (const path of batch) {
-                        try {
-                            await handler(path);
+                let retryQueue = []; // Files that failed transiently and should be retried
+                for (let i = 0; i < files.length; i += CONCURRENCY) {
+                    if (isOverDeadline()) break; // Respect overall deadline
+                    const batch = files.slice(i, i + CONCURRENCY);
+                    const results = await Promise.allSettled(batch.map(path => withSyncTimeout(() => handler(path).then(() => path), PER_FILE_TIMEOUT, `${operationType} ${path}`)));
+                    for (let j = 0; j < results.length; j++) {
+                        const result = results[j];
+                        if (result.status === 'fulfilled') {
                             processed++;
-                        }
-                        catch (error) {
-                            batchErrors.push(`Failed to ${operationType} ${path}: ${error.message}`);
-                            logger.error({ error, path }, `failed to ${operationType} file during resync`);
+                        } else {
+                            const errMsg = result.reason?.message || String(result.reason);
+                            const isTransient = errMsg.includes('timeout') || errMsg.includes('ECONNRESET') || errMsg.includes('socket') || errMsg.includes('QOMS');
+                            if (isTransient) {
+                                retryQueue.push(batch[j]);
+                            } else {
+                                batchErrors.push(`Failed to ${operationType}: ${errMsg}`);
+                                logger.error({ error: result.reason }, `failed to ${operationType} file during resync`);
+                            }
                         }
                     }
-                    // Yield to event loop after each batch
-                    if (i + BATCH_SIZE < files.length) {
+                    // Yield to event loop between parallel batches
+                    if (i + CONCURRENCY < files.length) {
                         await new Promise(resolve => setImmediate(resolve));
+                    }
+                    // Log progress every 50 files
+                    if (processed > 0 && processed % 50 === 0) {
+                        logger.info({ processed, total: files.length, operationType }, 'resync progress');
+                    }
+                }
+                // Retry pass: process transiently-failed files once more with backoff
+                if (retryQueue.length > 0 && !isOverDeadline()) {
+                    logger.info({ retryCount: retryQueue.length, operationType }, '[Sync] Retrying transiently-failed files after 2s backoff');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    for (let i = 0; i < retryQueue.length; i += CONCURRENCY) {
+                        if (isOverDeadline()) break;
+                        const retryBatch = retryQueue.slice(i, i + CONCURRENCY);
+                        const retryResults = await Promise.allSettled(retryBatch.map(path => withSyncTimeout(() => handler(path).then(() => path), PER_FILE_TIMEOUT, `${operationType} retry ${path}`)));
+                        for (const result of retryResults) {
+                            if (result.status === 'fulfilled') {
+                                processed++;
+                            } else {
+                                const errMsg = result.reason?.message || String(result.reason);
+                                batchErrors.push(`Failed to ${operationType} (after retry): ${errMsg}`);
+                            }
+                        }
                     }
                 }
                 return { processed, errors: batchErrors };
@@ -178,6 +230,13 @@ export class AreWeStillInSync {
             }, 'add');
             result.filesAdded = addResult.processed;
             result.errors.push(...addResult.errors);
+            // Check overall deadline between phases
+            if (isOverDeadline()) {
+                logger.warn({ elapsedMs: Date.now() - startTime, phase: 'after-add' }, '[Sync] Resync deadline exceeded, stopping early');
+                result.errors.push(`Resync deadline exceeded after add phase (${Math.round((Date.now() - startTime) / 1000)}s)`);
+                result.duration = Date.now() - startTime;
+                return result;
+            }
             // 3. update files with content mismatch
             const updateResult = await processInBatches(driftReport.contentMismatch, async (path) => {
                 const fullPath = join(this.config.rootPath, path);
@@ -192,6 +251,13 @@ export class AreWeStillInSync {
             }, 'update');
             result.filesUpdated = updateResult.processed;
             result.errors.push(...updateResult.errors);
+            // Check overall deadline between phases
+            if (isOverDeadline()) {
+                logger.warn({ elapsedMs: Date.now() - startTime, phase: 'after-update' }, '[Sync] Resync deadline exceeded, stopping early');
+                result.errors.push(`Resync deadline exceeded after update phase (${Math.round((Date.now() - startTime) / 1000)}s)`);
+                result.duration = Date.now() - startTime;
+                return result;
+            }
             // 4. mark deleted files
             const deleteResult = await processInBatches(driftReport.missingFromDisk, async (path) => {
                 await this.config.changeHandler.handleChange({
@@ -225,38 +291,52 @@ export class AreWeStillInSync {
     /**
      * scanDiskFiles - scans filesystem for all files
      *
-     * NON-BLOCKING: Yields to event loop periodically during batch processing
-     * This prevents blocking the main thread even on large codebases
+     * NON-BLOCKING: Uses streaming/generator pattern to avoid loading all paths into memory.
+     * Processes files in configurable batches with memory pressure detection.
+     * Respects .gitignore and configurable ignore patterns.
+     *
+     * Env vars:
+     *   SPECMEM_SCAN_BATCH_SIZE      - files per batch (default 500)
+     *   SPECMEM_SCAN_MAX_FILES       - max files to scan (default 50000)
+     *   SPECMEM_SCAN_MAX_HEAP_MB     - heap limit before pausing (default 2048)
+     *   SPECMEM_SCAN_IGNORE_PATTERNS - comma-separated ignore dirs (default "node_modules,.git,dist,build,.next,__pycache__")
      */
     async scanDiskFiles() {
-        logger.debug('scanning disk files (non-blocking)...');
-        // build ignore patterns for glob
+        logger.debug('scanning disk files (streaming, non-blocking)...');
+        // Configurable limits via environment variables
+        const SCAN_BATCH_SIZE = parseInt(process.env['SPECMEM_SCAN_BATCH_SIZE'] || '500');
+        const SCAN_MAX_FILES = parseInt(process.env['SPECMEM_SCAN_MAX_FILES'] || '50000');
+        const SCAN_MAX_HEAP_MB = parseInt(process.env['SPECMEM_SCAN_MAX_HEAP_MB'] || '2048');
+        const SCAN_MAX_HEAP_BYTES = SCAN_MAX_HEAP_MB * 1024 * 1024;
+        // Configurable ignore patterns via env var (comma-separated directory names)
+        const defaultIgnoreDirs = 'node_modules,.git,dist,build,.next,__pycache__';
+        const envIgnoreDirs = process.env['SPECMEM_SCAN_IGNORE_PATTERNS'] || defaultIgnoreDirs;
+        const ignoreDirNames = envIgnoreDirs.split(',').map(d => d.trim()).filter(Boolean);
+        // Build glob ignore patterns from the directory names
         const ignorePatterns = [
-            '**/node_modules/**',
-            '**/.git/**',
-            '**/dist/**',
-            '**/build/**',
-            '**/.next/**',
+            ...ignoreDirNames.map(d => `**/${d}/**`),
             '**/coverage/**',
             '**/.cache/**',
             ...this.config.ignorePatterns
         ];
-        // scan all files - glob itself is async so this part is non-blocking
-        const files = await glob('**/*', {
+        // Use glob stream to avoid loading all paths into a single array
+        const fileStream = glob.stream('**/*', {
             cwd: this.config.rootPath,
             ignore: ignorePatterns,
             nodir: true, // only files
             dot: false, // ignore dotfiles
             absolute: false
         });
-        // read and hash each file in batches, yielding to event loop between batches
         const fileData = [];
-        const BATCH_SIZE = this.config.batchSize;
+        let batch = [];
         let processedCount = 0;
-        for (let i = 0; i < files.length; i += BATCH_SIZE) {
-            const batch = files.slice(i, i + BATCH_SIZE);
-            // Process batch
-            for (const file of batch) {
+        let totalEnumerated = 0;
+        let memoryPressurePaused = false;
+        /**
+         * Process a single batch of file paths: stat, read, hash.
+         */
+        const processBatch = async (fileBatch) => {
+            for (const file of fileBatch) {
                 try {
                     const fullPath = join(this.config.rootPath, file);
                     const stats = await fs.stat(fullPath);
@@ -278,70 +358,179 @@ export class AreWeStillInSync {
                     logger.debug({ error, path: file }, 'failed to process file');
                 }
             }
-            processedCount += batch.length;
-            // Yield to event loop after each batch - prevents blocking
-            // This lets other operations (like MCP requests) process between batches
-            if (i + BATCH_SIZE < files.length) {
+        };
+        // Consume the glob stream in batches
+        for await (const filePath of fileStream) {
+            totalEnumerated++;
+            // Enforce max files limit to prevent runaway scanning
+            if (totalEnumerated > SCAN_MAX_FILES) {
+                logger.warn({ maxFiles: SCAN_MAX_FILES, enumerated: totalEnumerated }, '[SyncChecker] Max files limit reached, stopping scan');
+                break;
+            }
+            batch.push(typeof filePath === 'string' ? filePath : filePath.toString());
+            // When batch is full, process it
+            if (batch.length >= SCAN_BATCH_SIZE) {
+                // Memory pressure detection
+                const heapUsed = process.memoryUsage().heapUsed;
+                if (heapUsed > SCAN_MAX_HEAP_BYTES) {
+                    if (!memoryPressurePaused) {
+                        logger.warn({
+                            heapUsedMB: Math.round(heapUsed / (1024 * 1024)),
+                            limitMB: SCAN_MAX_HEAP_MB,
+                            processedSoFar: processedCount,
+                            enumerated: totalEnumerated
+                        }, '[SyncChecker] Memory pressure detected during disk scan, pausing to allow GC');
+                        memoryPressurePaused = true;
+                    }
+                    // Force GC if available, then yield to let it run
+                    if (global.gc) {
+                        global.gc();
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    // Re-check after pause
+                    const heapAfter = process.memoryUsage().heapUsed;
+                    if (heapAfter > SCAN_MAX_HEAP_BYTES) {
+                        logger.warn({
+                            heapUsedMB: Math.round(heapAfter / (1024 * 1024)),
+                            limitMB: SCAN_MAX_HEAP_MB,
+                            processedSoFar: processedCount
+                        }, '[SyncChecker] Memory pressure persists after GC pause, stopping scan early');
+                        break;
+                    }
+                    memoryPressurePaused = false;
+                }
+                await processBatch(batch);
+                processedCount += batch.length;
+                batch = [];
+                // Yield to event loop between batches - prevents blocking
                 await new Promise(resolve => setImmediate(resolve));
-                // Log progress for large scans
-                if (processedCount % 500 === 0) {
-                    logger.debug({ processed: processedCount, total: files.length }, 'disk scan progress');
+                // Log progress periodically
+                if (processedCount % 1000 === 0) {
+                    logger.debug({ processed: processedCount, hashed: fileData.length, enumerated: totalEnumerated }, 'disk scan progress');
                 }
             }
         }
-        logger.debug({ count: fileData.length, total: files.length }, 'disk scan complete');
+        // Process any remaining files in the last partial batch
+        if (batch.length > 0) {
+            await processBatch(batch);
+            processedCount += batch.length;
+        }
+        logger.debug({ count: fileData.length, totalProcessed: processedCount, totalEnumerated, maxFiles: SCAN_MAX_FILES }, 'disk scan complete');
         return fileData;
     }
     /**
      * scanMcpMemories - gets all file-watcher memories from MCP
-     * Also checks codebase_files table where actual indexed files are stored
+     * Also checks codebase_files table where actual indexed files are stored.
+     *
+     * Uses pagination to handle codebases with >10K memories.
+     *
+     * Env vars:
+     *   SPECMEM_SYNC_MEMORY_LIMIT     - max total memories to fetch (default 50000)
+     *   SPECMEM_SYNC_MEMORY_PAGE_SIZE  - page size for paginated queries (default 5000)
      */
     async scanMcpMemories() {
         logger.debug('scanning MCP memories and codebase_files...');
+        const MEMORY_LIMIT = parseInt(process.env['SPECMEM_SYNC_MEMORY_LIMIT'] || '50000');
+        const PAGE_SIZE = parseInt(process.env['SPECMEM_SYNC_MEMORY_PAGE_SIZE'] || '5000');
         const allFiles = [];
         const seenPaths = new Set();
         try {
             // 1. Check codebase_files table first (this is where indexed files actually live)
             const pool = this.config.search.getPool();
-            const codebaseResult = await pool.queryWithSwag(`SELECT file_path, content_hash
-         FROM codebase_files
-         WHERE project_path = $1 AND content_hash IS NOT NULL`, [this.config.rootPath]);
-            for (const row of codebaseResult.rows) {
-                if (row.file_path && !seenPaths.has(row.file_path)) {
-                    seenPaths.add(row.file_path);
-                    allFiles.push({
-                        path: row.file_path,
-                        hash: row.content_hash || '',
-                        deleted: false
-                    });
+            // Get total count first for logging
+            const countResult = await pool.queryWithSwag(`SELECT COUNT(*) as total
+                FROM codebase_files
+                WHERE project_path = $1 AND content_hash IS NOT NULL`, [this.config.rootPath]);
+            const totalCodebaseFiles = parseInt(countResult.rows[0]?.total || '0');
+            logger.debug({ totalCodebaseFiles }, 'codebase_files total count');
+            // Paginated fetch of codebase_files
+            let codebaseOffset = 0;
+            let codebaseFetched = 0;
+            while (codebaseFetched < MEMORY_LIMIT) {
+                const currentPageSize = Math.min(PAGE_SIZE, MEMORY_LIMIT - codebaseFetched);
+                const codebaseResult = await pool.queryWithSwag(`SELECT file_path, content_hash
+                    FROM codebase_files
+                    WHERE project_path = $1 AND content_hash IS NOT NULL
+                    ORDER BY file_path
+                    LIMIT $2 OFFSET $3`, [this.config.rootPath, currentPageSize, codebaseOffset]);
+                if (codebaseResult.rows.length === 0) {
+                    break; // No more rows
                 }
+                for (const row of codebaseResult.rows) {
+                    if (row.file_path && !seenPaths.has(row.file_path)) {
+                        seenPaths.add(row.file_path);
+                        allFiles.push({
+                            path: row.file_path,
+                            hash: row.content_hash || '',
+                            deleted: false
+                        });
+                    }
+                }
+                codebaseFetched += codebaseResult.rows.length;
+                codebaseOffset += codebaseResult.rows.length;
+                // If we got fewer than page size, we've reached the end
+                if (codebaseResult.rows.length < currentPageSize) {
+                    break;
+                }
+                // Yield to event loop between pages
+                await new Promise(resolve => setImmediate(resolve));
             }
-            logger.debug({ codebaseFilesCount: codebaseResult.rows.length }, 'codebase_files scan complete');
+            logger.debug({ codebaseFilesCount: codebaseFetched, totalInDb: totalCodebaseFiles }, 'codebase_files scan complete');
             // 2. Also check memories table for file-watcher entries (legacy support)
-            const results = await this.config.search.textSearch({
-                query: 'file-watcher',
-                limit: 10000,
-                projectPath: this.config.rootPath
-            });
-            const memoriesData = results
-                .filter(m => m.memory.metadata?.source === 'file-watcher')
-                .map(m => ({
-                path: m.memory.metadata?.filePath || '',
-                hash: m.memory.metadata?.contentHash || '',
-                deleted: m.memory.metadata?.deleted === true
-            }))
-                .filter(m => m.path);
-            // Merge memories entries (avoiding duplicates)
-            for (const mem of memoriesData) {
-                if (!seenPaths.has(mem.path)) {
-                    seenPaths.add(mem.path);
-                    allFiles.push(mem);
+            // Use pagination to avoid the old hardcoded 10K limit
+            const memoriesCountResult = await pool.queryWithSwag(`SELECT COUNT(*) as total
+                FROM memories
+                WHERE project_path = $1 AND metadata->>'source' = 'file-watcher'`, [this.config.rootPath]);
+            const totalMemories = parseInt(memoriesCountResult.rows[0]?.total || '0');
+            logger.debug({ totalMemories }, 'file-watcher memories total count');
+            let memoriesOffset = 0;
+            let memoriesFetched = 0;
+            let memoriesAdded = 0;
+            const memoryFetchLimit = MEMORY_LIMIT - codebaseFetched; // Respect overall limit
+            while (memoriesFetched < memoryFetchLimit && memoriesFetched < totalMemories) {
+                const currentPageSize = Math.min(PAGE_SIZE, memoryFetchLimit - memoriesFetched);
+                const results = await this.config.search.textSearch({
+                    query: 'file-watcher',
+                    limit: currentPageSize,
+                    offset: memoriesOffset,
+                    projectPath: this.config.rootPath
+                });
+                if (!results || results.length === 0) {
+                    break; // No more results
                 }
+                const memoriesData = results
+                    .filter(m => m.memory.metadata?.source === 'file-watcher')
+                    .map(m => ({
+                    path: m.memory.metadata?.filePath || '',
+                    hash: m.memory.metadata?.contentHash || '',
+                    deleted: m.memory.metadata?.deleted === true
+                }))
+                    .filter(m => m.path);
+                // Merge memories entries (avoiding duplicates)
+                for (const mem of memoriesData) {
+                    if (!seenPaths.has(mem.path)) {
+                        seenPaths.add(mem.path);
+                        allFiles.push(mem);
+                        memoriesAdded++;
+                    }
+                }
+                memoriesFetched += results.length;
+                memoriesOffset += results.length;
+                // If we got fewer than page size, we've reached the end
+                if (results.length < currentPageSize) {
+                    break;
+                }
+                // Yield to event loop between pages
+                await new Promise(resolve => setImmediate(resolve));
             }
             logger.debug({
                 totalCount: allFiles.length,
-                fromCodebaseFiles: codebaseResult.rows.length,
-                fromMemories: memoriesData.length
+                fromCodebaseFiles: codebaseFetched,
+                fromMemories: memoriesAdded,
+                totalMemoriesInDb: totalMemories,
+                totalCodebaseInDb: totalCodebaseFiles,
+                memoryLimit: MEMORY_LIMIT,
+                pageSize: PAGE_SIZE
             }, 'MCP scan complete');
             return allFiles;
         }

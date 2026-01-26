@@ -25,14 +25,14 @@ import { DrillDown, GetMemoryByDrilldownID } from '../tools/goofy/drillDown.js';
 import { createCodebaseTools } from '../codebase/index.js';
 // Import package tracking tools - trackTheNodeModulesVibes
 import { createPackageTools } from '../packages/index.js';
-// Import memorization tools - Claude remembers what it writes!
+// Import memorization tools -  remembers what it writes!
 import { initializeMemorizationSystem } from '../memorization/index.js';
 // Import trace/explore tools - reduces search overhead by 80%+
 import { createTraceExploreTools } from '../trace/index.js';
 // Import watcher tool wrappers
 import { StartWatchingTool, StopWatchingTool, CheckSyncTool, ForceResyncTool } from './watcherToolWrappers.js';
-// Import Claude session extraction tools
-import { ExtractClaudeSessions } from '../tools/goofy/extractClaudeSessions.js';
+// Import  session extraction tools
+import { ExtractSessions } from '../tools/goofy/extractClaudeSessions.js';
 import { GetSessionWatcherStatus } from '../tools/goofy/getSessionWatcherStatus.js';
 import { ExtractContextRestorations } from '../tools/goofy/extractContextRestorations.js';
 // Import team member communication tools (legacy wrappers that now use MCP team comms)
@@ -40,7 +40,7 @@ import { SayToTeamMember } from '../tools/goofy/sayToTeamMember.js';
 import { ListenForMessages } from '../tools/goofy/listenForMessages.js';
 import { GetActiveTeamMembers } from '../tools/goofy/getActiveTeamMembers.js';
 import { SendHeartbeat } from '../tools/goofy/sendHeartbeat.js';
-// Import research team member tool - spawns Claude to research web when local AI needs more context
+// Import research team member tool - spawns  to research web when local AI needs more context
 import { SpawnResearchTeamMemberTool, GetActiveResearchTeamMembersTool } from '../tools/goofy/spawnResearchTeamMemberTool.js';
 // Import team member deployment monitoring tools
 import { ListDeployedTeamMembers } from '../tools/goofy/listDeployedTeamMembers.js';
@@ -54,6 +54,9 @@ import { SmartSearch } from '../tools/goofy/smartSearch.js';
 // Import memory drilldown tools - gallery view + full drill-down
 import { FindMemoryGallery } from '../tools/goofy/findMemoryGallery.js';
 import { GetMemoryFull } from '../tools/goofy/getMemoryFull.js';
+// Import project memory import/export tools - carry context across projects
+import { ImportProjectMemories } from '../tools/goofy/importProjectMemories.js';
+import { ExportProjectMemories } from '../tools/goofy/exportProjectMemories.js';
 // Import MCP-based team communication tools (NEW - replaces HTTP team member comms)
 import { createTeamCommTools } from './tools/teamComms.js';
 // Import embedding server control tools (Phase 4 - user start/stop/status)
@@ -305,7 +308,7 @@ export class ToolRegistry {
         }
         this.tools.set(tool.name, tool);
         // add to definitions for ListTools response
-        // IMPORTANT: annotations tell Claude Code these tools are safe for automated use
+        // IMPORTANT: annotations tell  Code these tools are safe for automated use
         // This enables subagents to use MCP tools without permission prompts
         this.toolDefinitions.push({
             name: tool.name,
@@ -313,7 +316,7 @@ export class ToolRegistry {
             inputSchema: tool.inputSchema,
             annotations: {
                 // Mark all SpecMem tools as safe for automated execution
-                // These hints tell Claude Code the tool is pre-approved
+                // These hints tell  Code the tool is pre-approved
                 title: tool.name,
                 readOnlyHint: false, // We do modify state, but we're trusted
                 destructiveHint: false, // Not destructive - memory operations are reversible
@@ -469,8 +472,8 @@ export function createToolRegistry(db, embeddingProvider) {
     registry.register(new StopWatchingTool());
     registry.register(new CheckSyncTool());
     registry.register(new ForceResyncTool());
-    // Claude session extraction tools - auto-extract conversation history
-    registry.register(new ExtractClaudeSessions(cachingProvider, db));
+    //  session extraction tools - auto-extract conversation history
+    registry.register(new ExtractSessions(cachingProvider, db));
     registry.register(new GetSessionWatcherStatus());
     // Pass embeddingProvider so extracted memories have embeddings for semantic search!
     registry.register(new ExtractContextRestorations(db, cachingProvider));
@@ -479,8 +482,8 @@ export function createToolRegistry(db, embeddingProvider) {
     registry.register(new ListenForMessages());
     registry.register(new GetActiveTeamMembers());
     registry.register(new SendHeartbeat());
-    // Research team member tools - spawn Claude to research web when local AI needs more context
-    // Flow: SpecMem context -> Claude drilldown -> Local AI gathers more -> Spawn Claude for web research
+    // Research team member tools - spawn  to research web when local AI needs more context
+    // Flow: SpecMem context ->  drilldown -> Local AI gathers more -> Spawn  for web research
     registry.register(new SpawnResearchTeamMemberTool());
     registry.register(new GetActiveResearchTeamMembersTool());
     // TeamMember deployment monitoring tools - monitor and intervene in deployed team members
@@ -500,6 +503,9 @@ export function createToolRegistry(db, embeddingProvider) {
     // Camera roll drilldown tools - zoom in/out on memories and code
     registry.register(new DrillDown(db));
     registry.register(new GetMemoryByDrilldownID(db));
+    // Project memory import/export tools - carry context across projects
+    registry.register(new ImportProjectMemories(db, cachingProvider));
+    registry.register(new ExportProjectMemories(db));
     // Team communication tools - multi-team member coordination
     const teamCommTools = createTeamCommTools();
     for (const tool of teamCommTools) {
@@ -560,15 +566,15 @@ export function createFullToolRegistry(db, pool, embeddingProvider) {
  * - goofy memory tools
  * - codebase ingestion
  * - package tracking
- * - AUTO-MEMORIZATION (Claude remembers what it writes!)
+ * - AUTO-MEMORIZATION ( remembers what it writes!)
  *
- * fr fr Claude never needs massive explores again
+ * fr fr  never needs massive explores again
  */
 export function createUltimateToolRegistry(db, pool, embeddingProvider, memorizationConfig) {
     // first create full registry with codebase + package tools
     const registry = createFullToolRegistry(db, pool, embeddingProvider);
     // now add memorization tools - THE SECRET SAUCE
-    // this is what makes Claude remember what it wrote
+    // this is what makes  remember what it wrote
     try {
         const memSystem = initializeMemorizationSystem({
             pool: pool.getPool(), // get raw pg.Pool from ConnectionPoolGoBrrr
@@ -583,7 +589,7 @@ export function createUltimateToolRegistry(db, pool, embeddingProvider, memoriza
             toolCount: registry.getToolCount(),
             memorizationToolsAdded: memSystem.tools.length,
             memorizationToolNames: memSystem.tools.map(t => t.name)
-        }, 'ULTIMATE tool registry initialized with AUTO-MEMORIZATION - Claude NEVER forgets now');
+        }, 'ULTIMATE tool registry initialized with AUTO-MEMORIZATION -  NEVER forgets now');
     }
     catch (error) {
         logger.warn({ error }, 'memorization tools not added - continuing without them');

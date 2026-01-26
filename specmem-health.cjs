@@ -301,7 +301,7 @@ async function runFullDiagnostic(projectPath, jsonOutput) {
       results.checks.specmem_instance = { status: 'warn', detail: `Socket exists but not responding: ${err.message}` };
     }
   } else {
-    results.checks.specmem_instance = { status: 'warn', detail: 'No running instance (start via Claude Code)' };
+    results.checks.specmem_instance = { status: 'warn', detail: 'No running instance (start via  Code)' };
   }
 
   // Critical files

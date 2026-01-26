@@ -1,10 +1,10 @@
 /**
- * claudeControl.ts - Claude Control API for SpecMem Dashboard
+ * claudeControl.ts -  Control API for SpecMem Dashboard
  *
- * Provides endpoints for triggering Claude actions via MCP sampling,
+ * Provides endpoints for triggering  actions via MCP sampling,
  * including auto-fix, memory consolidation, and team member orchestration.
  *
- * Phase 6 Implementation - MCP -> Claude Control Flow
+ * Phase 6 Implementation - MCP ->  Control Flow
  */
 import { Router, Request, Response, NextFunction } from 'express';
 import { DatabaseManager } from '../../database.js';
@@ -39,6 +39,6 @@ export interface ScheduledTrigger {
     runCount: number;
     createdAt: Date;
 }
-export declare function createClaudeControlRouter(db: DatabaseManager | null, requireAuth: (req: Request, res: Response, next: NextFunction) => void, broadcastUpdate?: (type: string, data: unknown) => void): Router;
-export default createClaudeControlRouter;
+export declare function createControlRouter(db: DatabaseManager | null, requireAuth: (req: Request, res: Response, next: NextFunction) => void, broadcastUpdate?: (type: string, data: unknown) => void): Router;
+export default createControlRouter;
 //# sourceMappingURL=claudeControl.d.ts.map

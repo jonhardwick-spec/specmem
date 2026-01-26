@@ -47,11 +47,11 @@ export interface HealthCheckResult {
 /**
  * Sync project-level MCP configurations in ~/.claude.json
  *
- * Claude Code stores per-project configs under `projects -> {path} -> mcpServers`
+ *  Code stores per-project configs under `projects -> {path} -> mcpServers`
  * These can become stale when credentials change. This function automatically
  * fixes stale specmem env vars in all project entries.
  *
- * ROOT CAUSE FIX: When user runs Claude in different projects, each project
+ * ROOT CAUSE FIX: When user runs  in different projects, each project
  * gets its own MCP config snapshot. If the master credentials change, these
  * per-project snapshots become stale and cause "permission denied" errors.
  */

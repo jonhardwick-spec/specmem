@@ -170,7 +170,7 @@ export declare class SkillScanner {
      */
     searchSkills(query: string): Skill[];
     /**
-     * getSkillsForContext - returns skills formatted for Claude context
+     * getSkillsForContext - returns skills formatted for  context
      */
     getSkillsForContext(): string;
     /**

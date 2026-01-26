@@ -47,7 +47,7 @@ export const SearchMemoryInput = z.object({
         end: z.string().datetime().optional()
     }).optional(),
     includeExpired: z.boolean().default(false),
-    // NEW: Role filtering for Claude sessions
+    // NEW: Role filtering for  sessions
     role: z.enum(['user', 'assistant']).optional(),
     // NEW: Content summarization options (Chinese Compactor approach)
     // DEFAULTS TO COMPACTED to save context - use get_memory for drill-down

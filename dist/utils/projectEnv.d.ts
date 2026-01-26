@@ -7,8 +7,8 @@
  * - Child processes (spawn, exec, fork)
  * - Team members (deployed via deployTeamMember)
  *
- * SPECMEM_PROJECT_PATH is set by Claude Code via MCP config env section:
- * - Claude Code expands ${PWD} at runtime to the project directory
+ * SPECMEM_PROJECT_PATH is set by  Code via MCP config env section:
+ * -  Code expands ${PWD} at runtime to the project directory
  * - If not set, defaults to process.cwd()
  */
 import { getProjectPath, getProjectHash, getProjectHashFull, getInstanceDir } from '../config.js';

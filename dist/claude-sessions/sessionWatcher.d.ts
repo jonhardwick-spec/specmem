@@ -1,5 +1,5 @@
 /**
- * sessionWatcher.ts - Watches Claude Code session files for new entries
+ * sessionWatcher.ts - Watches  Code session files for new entries
  *
  * Features:
  * - Watches ~/.claude/history.jsonl and project session files
@@ -40,15 +40,15 @@ export interface SessionWatcherStats {
     lastCheckTimestamp: number;
 }
 /**
- * ClaudeSessionWatcher - watches and auto-extracts Claude sessions
+ * SessionWatcher - watches and auto-extracts  sessions
  *
- * nah bruh this is THE watcher for Claude sessions
- * auto-updates specmem whenever you chat with Claude
+ * nah bruh this is THE watcher for  sessions
+ * auto-updates specmem whenever you chat with 
  *
  * PROJECT-SCOPED: Only processes sessions belonging to the current project!
  * Sessions from other projects are filtered out to prevent cross-project pollution.
  */
-export declare class ClaudeSessionWatcher {
+export declare class SessionWatcher {
     private config;
     private watcher;
     private parser;
@@ -67,7 +67,7 @@ export declare class ClaudeSessionWatcher {
     private initialCatchUpTimestamp;
     constructor(embeddingProvider: EmbeddingProvider, db: DatabaseManager, config?: SessionWatcherConfig);
     /**
-     * startWatching - starts watching Claude history and project session files
+     * startWatching - starts watching  history and project session files
      *
      * Watches:
      * - ~/.claude/history.jsonl (user prompts)
@@ -135,5 +135,5 @@ export declare class ClaudeSessionWatcher {
 /**
  * Helper function to create watcher with default config
  */
-export declare function createSessionWatcher(embeddingProvider: EmbeddingProvider, db: DatabaseManager, config?: SessionWatcherConfig): ClaudeSessionWatcher;
+export declare function createSessionWatcher(embeddingProvider: EmbeddingProvider, db: DatabaseManager, config?: SessionWatcherConfig): SessionWatcher;
 //# sourceMappingURL=sessionWatcher.d.ts.map

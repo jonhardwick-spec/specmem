@@ -3,8 +3,8 @@
  *
  * Implements connection health monitoring, exponential backoff reconnection,
  * and graceful handling for the stdio-based MCP transport. Since MCP servers
- * run as child processes of Claude Code and communicate via stdin/stdout,
- * actual transport reconnection is handled by Claude Code restarting the process.
+ * run as child processes of  Code and communicate via stdin/stdout,
+ * actual transport reconnection is handled by  Code restarting the process.
  * This module focuses on:
  *
  * 1. Detecting connection issues early (stdin EOF, pipe breaks, EPIPE errors)
@@ -128,12 +128,12 @@ export declare class ResilientTransport extends EventEmitter {
     startMonitoring(): void;
     /**
      * Set the keepalive callback - this will be called periodically to keep connection alive
-     * The callback should send a log message or ping to Claude
+     * The callback should send a log message or ping to 
      */
     setKeepaliveCallback(callback: () => Promise<void>): void;
     /**
      * Set the connection recovery callback - called when connection is restored from degraded
-     * The callback should re-send tool list notifications to Claude
+     * The callback should re-send tool list notifications to 
      */
     setConnectionRecoveryCallback(callback: () => Promise<void>): void;
     /**

@@ -46,12 +46,12 @@ export declare function runDatabaseMigrations(): Promise<void>;
  */
 export declare function deployHooksToUserDir(): Promise<string>;
 /**
- * Configure Claude Code hooks for team member communication
+ * Configure  Code hooks for team member communication
  * GOD MODE - full hook configuration + permissions + everything
  */
-export declare function configureClaudeHooks(): Promise<void>;
+export declare function configureHooks(): Promise<void>;
 /**
- * Register SpecMem as MCP server with Claude
+ * Register SpecMem as MCP server with 
  * runs: claude mcp add specmem ...
  */
 export declare function registerMcpServer(): Promise<void>;

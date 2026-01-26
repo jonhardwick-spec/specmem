@@ -2,19 +2,19 @@
 /**
  * SHARED AGENT DETECTION UTILITY
  *
- * Use this in any hook that should ONLY run for agents, not main Claude.
+ * Use this in any hook that should ONLY run for agents, not main .
  *
  * Usage:
  *   const { isAgent } = require('./is-agent.cjs');
- *   if (!isAgent()) process.exit(0); // Skip for main Claude
+ *   if (!isAgent()) process.exit(0); // Skip for main 
  */
 
 /**
- * Detect if current process is an agent (not main Claude)
+ * Detect if current process is an agent (not main )
  *
  * IMPORTANT: Only explicit agent indicators count!
  * Screen sessions (STY) and process trees are NOT reliable because
- * main Claude also runs in screen sessions via specmem-init.
+ * main  also runs in screen sessions via specmem-init.
  */
 function isAgent() {
   // ONLY use explicit env vars set by agent spawning code
@@ -25,7 +25,7 @@ function isAgent() {
   if (process.env.CLAUDE_AGENT_ID) return true;
 
   // Check if this is a team member screen session (has specmem-tm- prefix)
-  // Regular Claude screens are claude-<project>, not specmem-tm-
+  // Regular  screens are claude-<project>, not specmem-tm-
   if (process.env.STY && process.env.STY.includes('specmem-tm-')) return true;
 
   // Check working directory for agent-specific paths
@@ -37,7 +37,7 @@ function isAgent() {
     }
   } catch (e) {}
 
-  // Default: NOT an agent (main Claude session gets unrestricted access)
+  // Default: NOT an agent (main  session gets unrestricted access)
   return false;
 }
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * SPECMEM AUTOCLAUDE - Autonomous Claude Controller 🤖
+ * SPECMEM AUTOCLAUDE - Autonomous  Controller 🤖
  * =====================================================
  *
  * The future is here. No more n8n + ChatGPT middleman bullshit.
- * SpecMem directly controls Claude via screen sessions.
+ * SpecMem directly controls  via screen sessions.
  *
  * Features:
  *   - Auto-accept permissions (configurable)
@@ -23,7 +23,46 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { execSync, spawn } = require('child_process');
+
+// ============================================================================
+// CLAUDEFIX BINARY DETECTION - Prefer claudefix wrapper over raw binary
+// Falls back to absolute path of raw Claude binary when claudefix not installed
+// ============================================================================
+function getClaudeBinary() {
+  const candidates = [
+    '/usr/local/bin/claude-fixed',
+    '/usr/lib/node_modules/claudefix/bin/claude-fixed.js',
+    '/usr/local/lib/node_modules/claudefix/bin/claude-fixed.js',
+    path.join(os.homedir(), '.npm-global/lib/node_modules/claudefix/bin/claude-fixed.js'),
+    path.join(os.homedir(), 'node_modules/claudefix/bin/claude-fixed.js'),
+  ];
+  try {
+    const wrapper = '/usr/local/bin/claude';
+    if (fs.existsSync(wrapper) && fs.readFileSync(wrapper, 'utf8').includes('claudefix')) {
+      return wrapper;
+    }
+  } catch {}
+  for (const cand of candidates) {
+    if (fs.existsSync(cand)) return cand;
+  }
+  // No claudefix - find raw Claude binary absolute path
+  const versionsDir = path.join(os.homedir(), '.local', 'share', 'claude', 'versions');
+  try {
+    if (fs.existsSync(versionsDir)) {
+      const versions = fs.readdirSync(versionsDir)
+        .filter(v => /^\d+\.\d+\.\d+$/.test(v))
+        .sort((a, b) => { const [aM,am,ap]=a.split('.').map(Number); const [bM,bm,bp]=b.split('.').map(Number); return bM-aM||bm-am||bp-ap; });
+      if (versions.length) return path.join(versionsDir, versions[0]);
+    }
+  } catch {}
+  const rawCandidates = [path.join(os.homedir(), '.local', 'bin', 'claude'), '/usr/local/bin/claude', '/usr/bin/claude'];
+  for (const r of rawCandidates) {
+    try { if (fs.existsSync(r) && !fs.readFileSync(r, 'utf8').slice(0, 500).includes('claudefix')) return fs.realpathSync(r); } catch {}
+  }
+  return 'claude';
+}
 
 // ============================================================================
 // ANSI COLORS
@@ -55,7 +94,7 @@ const c = {
 // ============================================================================
 
 const CONFIG = {
-  // How often to check Claude's output (ms)
+  // How often to check 's output (ms)
   pollInterval: 2000,
 
   // How long to wait after sending a prompt before checking (ms)
@@ -70,7 +109,7 @@ const CONFIG = {
   completionCheckInterval: 10000, // Check every 10 seconds after initial cooldown
 
   // Reinforcement settings
-  reinforceAfterMinutes: 15, // Remind Claude of the objective
+  reinforceAfterMinutes: 15, // Remind  of the objective
   maxReinforcements: 3,
 
   // Permission patterns
@@ -78,7 +117,7 @@ const CONFIG = {
     /\[yes\].*\[no\]/i,
     /Allow.*Deny/i,
     /Do you want to/i,
-    /May Claude/i,
+    /May /i,
     /Permission required/i,
     /\(Y\/n\)/i,
     /approve.*reject/i,
@@ -95,7 +134,7 @@ const CONFIG = {
     /EACCES/i
   ],
 
-  // Stuck patterns (Claude asking for input it shouldn't need)
+  // Stuck patterns ( asking for input it shouldn't need)
   stuckPatterns: [
     /what would you like/i,
     /please provide/i,
@@ -223,7 +262,7 @@ function screenKill(sessionName) {
 // AUTOCLAUDE CONTROLLER
 // ============================================================================
 
-class AutoClaudeController {
+class AutoController {
   constructor(projectPath, prompt, durationMs) {
     this.projectPath = projectPath;
     this.projectId = getProjectId(projectPath);
@@ -269,22 +308,23 @@ class AutoClaudeController {
   }
 
   /**
-   * Start Claude
+   * Start 
    */
-  startClaude() {
+  start() {
     if (screenExists(this.claudeSession)) {
-      log('warn', `Claude session already exists: ${this.claudeSession}`);
+      log('warn', ` session already exists: ${this.claudeSession}`);
       log('info', 'Killing existing session...');
       screenKill(this.claudeSession);
       execSync('sleep 2');
     }
 
-    log('info', `Starting Claude in screen: ${this.claudeSession}`);
+    log('info', `Starting  in screen: ${this.claudeSession}`);
 
     // PTY MEMORY APPROACH: NO -L -Logfile (zero disk I/O)
     // Uses screen hardcopy on-demand instead of continuous logging
     // -h 5000 sets scrollback buffer to 5000 lines for hardcopy capture
-    const cmd = `screen -h 5000 -dmS ${this.claudeSession} bash -c "cd '${this.projectPath}' && claude 2>&1; exec bash"`;
+    const claudeBin = getClaudeBinary();
+    const cmd = `screen -h 5000 -dmS ${this.claudeSession} bash -c "cd '${this.projectPath}' && '${claudeBin}' 2>&1; exec bash"`;
     execSync(cmd, { stdio: 'ignore' });
 
     // Wait for it to start
@@ -295,11 +335,11 @@ class AutoClaudeController {
     }
 
     if (!screenExists(this.claudeSession)) {
-      log('error', 'Failed to start Claude');
+      log('error', 'Failed to start ');
       return false;
     }
 
-    log('success', 'Claude started');
+    log('success', ' started');
     return true;
   }
 
@@ -307,8 +347,8 @@ class AutoClaudeController {
    * Send the initial prompt
    */
   async sendPrompt() {
-    log('info', 'Waiting for Claude to initialize...');
-    await sleep(5000); // Wait for Claude to be ready
+    log('info', 'Waiting for  to initialize...');
+    await sleep(5000); // Wait for  to be ready
 
     log('info', `Sending prompt: ${this.prompt.substring(0, 50)}...`);
 
@@ -370,7 +410,7 @@ This signals that the task is done. Do not use this phrase until you are COMPLET
   }
 
   /**
-   * Check for stuck patterns (Claude asking unnecessary questions)
+   * Check for stuck patterns ( asking unnecessary questions)
    */
   checkForStuck(output) {
     const recentOutput = output.split('\n').slice(-20).join('\n');
@@ -410,10 +450,10 @@ Please continue working on this task. When completely done, respond with:
   }
 
   /**
-   * Handle stuck Claude
+   * Handle stuck 
    */
   async handleStuck() {
-    log('warn', 'Claude appears to be stuck (asking for input)');
+    log('warn', ' appears to be stuck (asking for input)');
 
     const nudge = `
 
@@ -435,9 +475,9 @@ Make decisions autonomously and continue working.`;
     while (this.running) {
       await sleep(CONFIG.pollInterval);
 
-      // Check if Claude is still running
+      // Check if  is still running
       if (!screenExists(this.claudeSession)) {
-        log('error', 'Claude session terminated unexpectedly');
+        log('error', ' session terminated unexpectedly');
         this.stats.exitReason = 'session_terminated';
         this.running = false;
         break;
@@ -464,7 +504,7 @@ Make decisions autonomously and continue working.`;
 
       // Check for completion
       if (this.checkForCompletion(output)) {
-        log('success', '🎉 TASK COMPLETED! Claude signaled completion.');
+        log('success', '🎉 TASK COMPLETED!  signaled completion.');
         this.completed = true;
         this.stats.completedSuccessfully = true;
         this.stats.exitReason = 'completed';
@@ -486,9 +526,9 @@ Make decisions autonomously and continue working.`;
         await this.reinforcePrompt();
       }
 
-      // Check for significant output changes (Claude is working)
+      // Check for significant output changes ( is working)
       if (output.length > this.lastOutput.length + 100) {
-        log('debug', 'Claude is working...');
+        log('debug', ' is working...');
       }
 
       this.lastOutput = output;
@@ -503,13 +543,13 @@ Make decisions autonomously and continue working.`;
   }
 
   /**
-   * Run AutoClaude
+   * Run Auto
    */
   async run() {
     console.log('');
     console.log(`${c.brightCyan}${c.bold}  ╔══════════════════════════════════════════════════╗${c.reset}`);
     console.log(`${c.brightCyan}${c.bold}  ║${c.reset}  ${c.brightYellow}🤖${c.reset} ${c.brightCyan}${c.bold}AUTOCLAUDE${c.reset} ${c.dim}v1.0.0${c.reset}                        ${c.brightCyan}${c.bold}║${c.reset}`);
-    console.log(`${c.brightCyan}${c.bold}  ║${c.reset}  ${c.dim}Autonomous Claude Controller${c.reset}                  ${c.brightCyan}${c.bold}║${c.reset}`);
+    console.log(`${c.brightCyan}${c.bold}  ║${c.reset}  ${c.dim}Autonomous  Controller${c.reset}                  ${c.brightCyan}${c.bold}║${c.reset}`);
     console.log(`${c.brightCyan}${c.bold}  ╚══════════════════════════════════════════════════╝${c.reset}`);
     console.log('');
     console.log(`${c.dim}Project:${c.reset}  ${this.projectPath}`);
@@ -521,8 +561,8 @@ Make decisions autonomously and continue working.`;
     this.stats.startTime = new Date().toISOString();
     this.running = true;
 
-    // Start Claude
-    if (!this.startClaude()) {
+    // Start 
+    if (!this.start()) {
       this.stats.exitReason = 'start_failed';
       return this.stats;
     }
@@ -539,7 +579,7 @@ Make decisions autonomously and continue working.`;
     // Final summary
     console.log('');
     console.log(`${c.dim}═════════════════════════════════════════════════════${c.reset}`);
-    console.log(`${c.bold}AutoClaude Session Complete${c.reset}`);
+    console.log(`${c.bold}Auto Session Complete${c.reset}`);
     console.log(`${c.dim}─────────────────────────────────────────────────────${c.reset}`);
     console.log(`${c.dim}Duration:${c.reset}     ${formatDuration(Date.now() - this.startTime)}`);
     console.log(`${c.dim}Permissions:${c.reset}  ${this.stats.permissionsHandled} auto-handled`);
@@ -549,14 +589,14 @@ Make decisions autonomously and continue working.`;
 
     // Show final output
     console.log('');
-    log('info', 'Final Claude output:');
+    log('info', 'Final  output:');
     console.log(`${c.dim}─────────────────────────────────────────────────────${c.reset}`);
     console.log(screenRead(this.claudeSession, 50));
     console.log(`${c.dim}─────────────────────────────────────────────────────${c.reset}`);
 
-    // Ask if user wants to keep Claude running
+    // Ask if user wants to keep  running
     console.log('');
-    log('info', `Claude session still running: ${this.claudeSession}`);
+    log('info', ` session still running: ${this.claudeSession}`);
     log('info', `Attach with: screen -r ${this.claudeSession}`);
 
     return this.stats;
@@ -571,14 +611,14 @@ async function main() {
   const args = process.argv.slice(2);
 
   if (args.length < 2) {
-    console.log(`${c.cyan}${c.bold}SpecMem AutoClaude${c.reset}`);
+    console.log(`${c.cyan}${c.bold}SpecMem Auto${c.reset}`);
     console.log('');
     console.log(`${c.dim}Usage:${c.reset}`);
     console.log(`  specmem-autoclaude <project-path> <prompt> [duration]`);
     console.log('');
     console.log(`${c.dim}Arguments:${c.reset}`);
     console.log(`  project-path  Path to the project directory`);
-    console.log(`  prompt        The task/prompt to give Claude`);
+    console.log(`  prompt        The task/prompt to give `);
     console.log(`  duration      Max runtime in hour:minute format (default: 0:30)`);
     console.log('');
     console.log(`${c.dim}Examples:${c.reset}`);
@@ -610,8 +650,8 @@ async function main() {
     process.exit(1);
   }
 
-  // Run AutoClaude
-  const controller = new AutoClaudeController(projectPath, prompt, durationMs);
+  // Run Auto
+  const controller = new AutoController(projectPath, prompt, durationMs);
   const stats = await controller.run();
 
   process.exit(stats.completedSuccessfully ? 0 : 1);

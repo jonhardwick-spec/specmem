@@ -106,7 +106,7 @@ export function createTaskTeamMembersRouter() {
     });
     /**
      * POST /api/task-team-members/log-recent
-     * Automatically log the most recent Task team members from Claude history
+     * Automatically log the most recent Task team members from  history
      *
      * yo this extracts team members from ~/.claude/history.jsonl
      */

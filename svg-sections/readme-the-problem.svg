@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ef4444"/>
+      <stop offset="50%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#22c55e"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="400" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="400" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">The Problem</text>
+
+  <!-- BEFORE card (red) -->
+  <g transform="translate(20, 55)">
+    <rect width="370" height="180" rx="12" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="1.5"/>
+    <rect width="370" height="3" rx="1.5" fill="#ef4444"/>
+    <text x="185" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#ef4444">Before SpecMem</text>
+
+    <text font-family="'SF Mono', monospace" font-size="11" fill="#8b949e">
+      <tspan x="20" y="55" fill="#f87171">"Hey Claude, remember the auth module</tspan>
+      <tspan x="20" dy="16" fill="#f87171">uses JWT with refresh tokens and the</tspan>
+      <tspan x="20" dy="16" fill="#f87171">edge case where expired tokens need</tspan>
+      <tspan x="20" dy="16" fill="#f87171">to check the blacklist before..."</tspan>
+    </text>
+
+    <rect x="20" y="128" width="330" height="32" rx="6" fill="#ef4444" fill-opacity="0.1"/>
+    <text x="185" y="149" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#ef4444">500+ tokens of context. Every. Single. Session.</text>
+  </g>
+
+  <!-- Arrow -->
+  <text x="400" y="152" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" fill="#484f58">→</text>
+
+  <!-- AFTER card (green) -->
+  <g transform="translate(410, 55)">
+    <rect width="370" height="180" rx="12" fill="url(#cardGrad)" stroke="#22c55e" stroke-width="1.5"/>
+    <rect width="370" height="3" rx="1.5" fill="#22c55e"/>
+    <text x="185" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#22c55e">With SpecMem</text>
+
+    <text font-family="'SF Mono', monospace" font-size="11" fill="#8b949e">
+      <tspan x="20" y="55" fill="#4ade80">"Fix the auth bug"</tspan>
+      <tspan x="20" dy="24" fill="#6e7681">Claude already knows:</tspan>
+      <tspan x="20" dy="16" fill="#8b949e">  - Your auth architecture</tspan>
+      <tspan x="20" dy="16" fill="#8b949e">  - The JWT refresh flow</tspan>
+      <tspan x="20" dy="16" fill="#8b949e">  - Past bugs you fixed</tspan>
+    </text>
+
+    <rect x="20" y="128" width="330" height="32" rx="6" fill="#22c55e" fill-opacity="0.1"/>
+    <text x="185" y="149" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#22c55e">Zero re-explaining. It just remembers.</text>
+  </g>
+
+  <!-- CLAUDE.md comparison table -->
+  <text x="400" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#e6edf3">Why not just use CLAUDE.md?</text>
+
+  <!-- Table headers -->
+  <rect x="40" y="272" width="350" height="24" rx="4" fill="#ef4444" fill-opacity="0.1"/>
+  <text x="215" y="289" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#f87171">CLAUDE.md Limitation</text>
+  <rect x="410" y="272" width="350" height="24" rx="4" fill="#22c55e" fill-opacity="0.1"/>
+  <text x="585" y="289" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4ade80">SpecMem Solution</text>
+
+  <!-- Rows -->
+  <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
+    <tspan x="50" y="313">Static file, doesn't update as code changes</tspan>
+    <tspan x="420" y="313" fill="#4ade80">File watcher auto-updates on every save</tspan>
+    <tspan x="50" dy="18">Keyword search only</tspan>
+    <tspan x="420" dy="0" fill="#4ade80">Semantic search finds by meaning</tspan>
+    <tspan x="50" dy="18">One big monolithic file</tspan>
+    <tspan x="420" dy="0" fill="#4ade80">Structured memories with types, tags, importance</tspan>
+    <tspan x="50" dy="18">Cross-project pollution</tspan>
+    <tspan x="420" dy="0" fill="#4ade80">Per-project isolation with separate schemas</tspan>
+    <tspan x="50" dy="18">Manual maintenance forever</tspan>
+    <tspan x="420" dy="0" fill="#4ade80">Auto-extraction from your Claude sessions</tspan>
+  </text>
+
+  <!-- Row separators -->
+  <line x1="40" y1="302" x2="760" y2="302" stroke="#30363d" stroke-width="0.5"/>
+  <line x1="40" y1="320" x2="760" y2="320" stroke="#30363d" stroke-width="0.5"/>
+  <line x1="40" y1="338" x2="760" y2="338" stroke="#30363d" stroke-width="0.5"/>
+  <line x1="40" y1="356" x2="760" y2="356" stroke="#30363d" stroke-width="0.5"/>
+  <line x1="40" y1="374" x2="760" y2="374" stroke="#30363d" stroke-width="0.5"/>
+  <!-- Column separator -->
+  <line x1="400" y1="272" x2="400" y2="390" stroke="#30363d" stroke-width="0.5"/>
+</svg>

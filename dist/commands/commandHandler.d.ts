@@ -1,5 +1,5 @@
 /**
- * ClaudeCommandHandler - main command processor for Claude interaction
+ * CommandHandler - main command processor for  interaction
  *
  * yo this is where all the slash commands get parsed and dispatched
  * claude says /memory store and we make it happen fr
@@ -55,12 +55,12 @@ export interface CommandAction {
     examples: string[];
 }
 /**
- * ClaudeCommandHandler - the brain that parses and routes commands
+ * CommandHandler - the brain that parses and routes commands
  *
  * yooo command parsing go crazy
  * this is where we take /memory store and make magic happen
  */
-export declare class ClaudeCommandHandler {
+export declare class CommandHandler {
     private db;
     private embeddingProvider;
     private categories;
@@ -122,5 +122,5 @@ export declare class ClaudeCommandHandler {
 /**
  * Create a command handler instance
  */
-export declare function createCommandHandler(db: DatabaseManager, embeddingProvider: EmbeddingProvider): ClaudeCommandHandler;
+export declare function createCommandHandler(db: DatabaseManager, embeddingProvider: EmbeddingProvider): CommandHandler;
 //# sourceMappingURL=commandHandler.d.ts.map

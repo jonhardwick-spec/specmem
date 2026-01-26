@@ -4,7 +4,7 @@
  * ====================
  *
  * PreToolUse hook that injects a Traditional Chinese compressed reminder
- * when Claude uses Grep/Glob tools, suggesting find_code_pointers instead.
+ * when  uses Grep/Glob tools, suggesting find_code_pointers instead.
  *
  * Hook Event: PreToolUse
  * Matcher: Grep, Glob
@@ -36,7 +36,7 @@ function readStdinWithTimeout(timeoutMs = 3000) {
 
 /**
  * Compact Traditional Chinese reminder for find_code_pointers
- * Claude understands Chinese internally, outputs English
+ *  understands Chinese internally, outputs English
  */
 function getSearchReminder() {
   return `

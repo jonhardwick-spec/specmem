@@ -1,7 +1,7 @@
 /**
  * MEMORY DRILLDOWN SYSTEM - Camera Roll Edition
  *
- * Architecture for Claude's memory access:
+ * Architecture for 's memory access:
  *   1. find_memory(query, { cameraRollMode: true }) → Returns camera roll with drilldownIDs
  *   2. drill_down(drilldownID) → Zoom in for more detail on that memory
  *   3. get_memory(drilldownID) → Get full memory content
@@ -15,12 +15,12 @@
  * Response Format:
  * ```
  * content: "Here's what I said from last week"
- * CR (Claude Response): "Well that's interesting because..."
+ * CR ( Response): "Well that's interesting because..."
  * drilldownID: 123
  * similarity: 0.87
  * ```
  *
- * Then Claude can:
+ * Then  can:
  *   - drill_down(123) - zoom in for more detail on that memory
  *   - get_memory(123) - get full memory content
  *   - Each drill-down may reveal MORE drilldown IDs for deeper exploration
@@ -80,7 +80,7 @@ export class MemoryDrilldown {
     }
     /**
      * FIND MEMORY - Returns gallery of drill-down-able snippets
-     * This is what Claude sees first when searching memories
+     * This is what  sees first when searching memories
      */
     async findMemory(query, limit = 20) {
         // PROJECT NAMESPACING: Filter by current project
@@ -93,7 +93,7 @@ export class MemoryDrilldown {
         m.metadata,
         m.embedding,
         EXISTS(SELECT 1 FROM codebase_pointers WHERE memory_id = m.id) as has_code,
-        EXISTS(SELECT 1 FROM team_member_conversations WHERE memory_id = m.id) as has_conversation,
+        EXISTS(SELECT 1 FROM team_member_conversations tmc WHERE tmc.memory_id = m.id) as has_conversation,
         1 - (m.embedding <=> $1::vector) as relevance
       FROM memories m
       WHERE m.content ILIKE $2
@@ -126,7 +126,7 @@ export class MemoryDrilldown {
     }
     /**
      * GET MEMORY - Full drill-down with code + conversation
-     * This is what Claude gets when they drill down on a memory
+     * This is what  gets when they drill down on a memory
      */
     async getMemory(id) {
         // Fetch base memory - use actual column names (tags, metadata, NOT keywords)
@@ -218,7 +218,8 @@ export class MemoryDrilldown {
      * Fetch the conversation that spawned this memory
      */
     async getConversation(memoryId) {
-        const result = await this.db.query(`
+        try {
+            const result = await this.db.query(`
       SELECT
         team_member_id,
         team_member_name,
@@ -230,17 +231,23 @@ export class MemoryDrilldown {
       ORDER BY timestamp DESC
       LIMIT 1
     `, [memoryId]);
-        if (result.rows.length === 0) {
+            if (result.rows.length === 0) {
+                return null;
+            }
+            const row = result.rows[0];
+            return {
+                team_member_id: row.team_member_id,
+                team_member_name: row.team_member_name,
+                timestamp: row.timestamp,
+                summary: row.summary,
+                full_transcript: row.full_transcript
+            };
+        }
+        catch (err) {
+            // Table may not exist yet - gracefully return null
+            logger.warn({ err: err?.message, memoryId }, 'getConversation failed (table may not exist)');
             return null;
         }
-        const row = result.rows[0];
-        return {
-            team_member_id: row.team_member_id,
-            team_member_name: row.team_member_name,
-            timestamp: row.timestamp,
-            summary: row.summary,
-            full_transcript: row.full_transcript
-        };
     }
     /**
      * GET RELATED MEMORIES
@@ -256,7 +263,7 @@ export class MemoryDrilldown {
         m.tags,
         m.metadata,
         EXISTS(SELECT 1 FROM codebase_pointers WHERE memory_id = m.id) as has_code,
-        EXISTS(SELECT 1 FROM team_member_conversations WHERE memory_id = m.id) as has_conversation,
+        EXISTS(SELECT 1 FROM team_member_conversations tmc WHERE tmc.memory_id = m.id) as has_conversation,
         1 - (m.embedding <=> $1::vector) as relevance
       FROM memories m
       WHERE m.id != $2
@@ -417,10 +424,10 @@ export class MemoryDrilldown {
      * Used when upgrading existing results to camera roll format.
      *
      * @param snippet - The memory snippet to convert
-     * @param includeClaudeResponse - Whether to include CR field
+     * @param includeResponse - Whether to include CR field
      * @returns CameraRollItem with drilldownID
      */
-    toCameraRollItem(snippet, includeClaudeResponse = false) {
+    toCameraRollItem(snippet, includeResponse = false) {
         const drilldownID = this.registerForDrilldown(snippet.id, 'memory');
         // Compress content for token efficiency
         const compressed = smartCompress(snippet.thumbnail, { threshold: 0.85 });
@@ -440,7 +447,7 @@ export class MemoryDrilldown {
  * const drilldown = new MemoryDrilldown(db);
  * const gallery = await drilldown.findMemory("authentication system");
  *
- * // Claude sees:
+ * //  sees:
  * [
  *   {
  *     id: "mem_123",
@@ -453,10 +460,10 @@ export class MemoryDrilldown {
  *   ...
  * ]
  *
- * // Step 2: Claude drills down
+ * // Step 2:  drills down
  * const full = await drilldown.getMemory("mem_123");
  *
- * // Claude now gets:
+ * //  now gets:
  * {
  *   content: "Full memory content...",
  *   code_pointers: [

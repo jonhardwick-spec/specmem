@@ -1,7 +1,7 @@
 /**
- * skillReminder.ts - Auto-Reminder System for Claude Skills
+ * skillReminder.ts - Auto-Reminder System for  Skills
  *
- * yo this system makes it IMPOSSIBLE for Claude to forget skills fr fr
+ * yo this system makes it IMPOSSIBLE for  to forget skills fr fr
  * provides constant context about available skills through MCP prompts
  *
  * Features:
@@ -27,7 +27,7 @@ const DEFAULT_CONFIG = {
 /**
  * SkillReminder - the brain's memory system for skills
  *
- * ensures Claude ALWAYS knows what skills are available
+ * ensures  ALWAYS knows what skills are available
  * like having sticky notes everywhere fr fr
  */
 export class SkillReminder {

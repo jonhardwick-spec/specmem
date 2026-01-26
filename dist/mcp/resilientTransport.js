@@ -3,8 +3,8 @@
  *
  * Implements connection health monitoring, exponential backoff reconnection,
  * and graceful handling for the stdio-based MCP transport. Since MCP servers
- * run as child processes of Claude Code and communicate via stdin/stdout,
- * actual transport reconnection is handled by Claude Code restarting the process.
+ * run as child processes of  Code and communicate via stdin/stdout,
+ * actual transport reconnection is handled by  Code restarting the process.
  * This module focuses on:
  *
  * 1. Detecting connection issues early (stdin EOF, pipe breaks, EPIPE errors)
@@ -64,7 +64,7 @@ const DEFAULT_CONFIG = {
     maxErrorsBeforeShutdown: safeParseInt(process.env['SPECMEM_TRANSPORT_MAX_ERRORS'], 10),
     debugMode: process.env['SPECMEM_TRANSPORT_DEBUG'] === 'true',
     // Keepalive: Send ping every 60 seconds to keep connection alive
-    // This is CRITICAL for preventing "not connected" issues when Claude is idle
+    // This is CRITICAL for preventing "not connected" issues when  is idle
     keepaliveIntervalMs: safeParseInt(process.env['SPECMEM_TRANSPORT_KEEPALIVE_INTERVAL'], 60000),
     keepaliveEnabled: process.env['SPECMEM_TRANSPORT_KEEPALIVE_ENABLED'] !== 'false', // enabled by default
     // NEW: Recovery configuration - exponential backoff for connection issues
@@ -131,18 +131,18 @@ export class ResilientTransport extends EventEmitter {
      */
     getErrorSuggestion(type, message) {
         const suggestions = {
-            'stdin_end': 'Claude Code may have closed the connection. Check if Claude Code is still running. The MCP server will restart automatically when Claude Code reconnects.',
-            'stdin_close': 'The input stream was closed unexpectedly. This usually happens when Claude Code terminates. Wait for Claude Code to restart the MCP server.',
-            'stdin_error': 'Error reading from input stream. Check system resources and file descriptor limits. Try restarting Claude Code.',
-            'stdout_pipe_broken': 'Cannot write to output stream (EPIPE). Claude Code is no longer listening. The connection will be cleaned up automatically.',
-            'stdout_error': 'Error writing to output stream. Check if Claude Code is still running and accepting input.',
-            'stdout_close': 'Output stream closed unexpectedly. Claude Code may have terminated or hit a bug.',
+            'stdin_end': ' Code may have closed the connection. Check if  Code is still running. The MCP server will restart automatically when  Code reconnects.',
+            'stdin_close': 'The input stream was closed unexpectedly. This usually happens when  Code terminates. Wait for  Code to restart the MCP server.',
+            'stdin_error': 'Error reading from input stream. Check system resources and file descriptor limits. Try restarting  Code.',
+            'stdout_pipe_broken': 'Cannot write to output stream (EPIPE).  Code is no longer listening. The connection will be cleaned up automatically.',
+            'stdout_error': 'Error writing to output stream. Check if  Code is still running and accepting input.',
+            'stdout_close': 'Output stream closed unexpectedly.  Code may have terminated or hit a bug.',
             'keepalive_failed': 'Failed to send keepalive ping. The connection may be degraded. Will retry automatically.',
-            'max_errors_exceeded': `Too many errors occurred (${this.errorCount}/${this.config.maxErrorsBeforeShutdown}). Shutting down to prevent resource leaks. Claude Code will restart the MCP server.`,
-            'recovery_exhausted': `All ${this.config.recoveryMaxAttempts} recovery attempts failed. The connection cannot be restored. Claude Code needs to restart the MCP server.`,
-            'epipe': 'Broken pipe error - the receiving end closed the connection. This is normal when Claude Code restarts.',
+            'max_errors_exceeded': `Too many errors occurred (${this.errorCount}/${this.config.maxErrorsBeforeShutdown}). Shutting down to prevent resource leaks.  Code will restart the MCP server.`,
+            'recovery_exhausted': `All ${this.config.recoveryMaxAttempts} recovery attempts failed. The connection cannot be restored.  Code needs to restart the MCP server.`,
+            'epipe': 'Broken pipe error - the receiving end closed the connection. This is normal when  Code restarts.',
             'eagain': 'Resource temporarily unavailable. The system is under load. Will retry automatically with backoff.',
-            'econnreset': 'Connection was reset by peer. Claude Code may have crashed or restarted.',
+            'econnreset': 'Connection was reset by peer.  Code may have crashed or restarted.',
             'enotconn': 'Socket is not connected. The transport was never properly established.',
         };
         // Check for specific error codes in the message
@@ -155,7 +155,7 @@ export class ResilientTransport extends EventEmitter {
             return suggestions['econnreset'];
         if (lowerMessage.includes('enotconn'))
             return suggestions['enotconn'];
-        return suggestions[type] || 'An unexpected error occurred. Check the logs for more details and try restarting Claude Code.';
+        return suggestions[type] || 'An unexpected error occurred. Check the logs for more details and try restarting  Code.';
     }
     /**
      * Calculate the next backoff delay using exponential backoff with jitter
@@ -201,7 +201,7 @@ export class ResilientTransport extends EventEmitter {
             }
         }, `[${timestamp}] ResilientTransport: starting stdio monitoring`);
         process.stderr.write(`[SPECMEM ${timestamp}] Transport monitoring started (health=${this.config.healthCheckIntervalMs}ms, keepalive=${this.config.keepaliveIntervalMs}ms)\n`);
-        // Monitor stdin for EOF (Claude disconnecting)
+        // Monitor stdin for EOF ( disconnecting)
         this.setupStdinMonitoring();
         // Monitor stdout for write errors (pipe broken)
         this.setupStdoutMonitoring();
@@ -222,7 +222,7 @@ export class ResilientTransport extends EventEmitter {
     }
     /**
      * Set the keepalive callback - this will be called periodically to keep connection alive
-     * The callback should send a log message or ping to Claude
+     * The callback should send a log message or ping to 
      */
     setKeepaliveCallback(callback) {
         this.keepaliveCallback = callback;
@@ -230,7 +230,7 @@ export class ResilientTransport extends EventEmitter {
     }
     /**
      * Set the connection recovery callback - called when connection is restored from degraded
-     * The callback should re-send tool list notifications to Claude
+     * The callback should re-send tool list notifications to 
      */
     setConnectionRecoveryCallback(callback) {
         this.connectionRecoveryCallback = callback;
@@ -264,7 +264,7 @@ export class ResilientTransport extends EventEmitter {
         try {
             // Record activity to prevent degraded state
             this.recordActivity();
-            // Call the keepalive callback if set (e.g., send log to Claude)
+            // Call the keepalive callback if set (e.g., send log to )
             if (this.keepaliveCallback) {
                 await this.keepaliveCallback();
             }
@@ -289,7 +289,7 @@ export class ResilientTransport extends EventEmitter {
         const onData = () => {
             this.recordActivity();
         };
-        // Handle stdin end (Claude closed connection)
+        // Handle stdin end ( closed connection)
         // BUT: Don't trigger immediately on startup - stdin may not be ready yet
         // Use configurable grace period (default: 5 seconds)
         const onEnd = () => {
@@ -297,13 +297,13 @@ export class ResilientTransport extends EventEmitter {
             const uptimeMs = Date.now() - this.monitoringStartTime;
             const gracePeriod = this.config.stdinGracePeriodMs;
             if (uptimeMs < gracePeriod) {
-                // Too early - this might be a terminal/test run, not Claude
+                // Too early - this might be a terminal/test run, not 
                 logger.debug({ uptimeMs, gracePeriod, timestamp }, `[${timestamp}] ResilientTransport: stdin ended very early (${uptimeMs}ms < ${gracePeriod}ms grace period) - ignoring (likely terminal mode)`);
                 return;
             }
             const errorDetail = {
                 type: 'stdin_end',
-                message: 'stdin stream ended - Claude may have closed the connection',
+                message: 'stdin stream ended -  may have closed the connection',
                 timestamp,
                 suggestion: this.getErrorSuggestion('stdin_end', ''),
             };
@@ -409,13 +409,13 @@ export class ResilientTransport extends EventEmitter {
                 this.recentErrors.shift();
             }
             if (isPipeError) {
-                // EPIPE typically means Claude closed the connection - this is often fatal
+                // EPIPE typically means  closed the connection - this is often fatal
                 logger.warn({
                     error: err.message,
                     code: err.code,
                     timestamp,
                     errorDetail
-                }, `[${timestamp}] ResilientTransport: stdout pipe broken (EPIPE) - Claude disconnected`);
+                }, `[${timestamp}] ResilientTransport: stdout pipe broken (EPIPE) -  disconnected`);
                 process.stderr.write(`[SPECMEM ${timestamp}] WARNING: Broken pipe - ${errorDetail.suggestion}\n`);
                 this.handleConnectionIssue('stdout_pipe_broken', errorDetail);
             }
@@ -521,7 +521,7 @@ export class ResilientTransport extends EventEmitter {
             process.stderr.write(`[SPECMEM ${timestamp}] Connection restored from ${previousState}\n`);
             this.emit('restored', health);
             // CRITICAL: Trigger connection recovery callback
-            // This re-sends tool list notifications to Claude, fixing "not connected" issues
+            // This re-sends tool list notifications to , fixing "not connected" issues
             this.triggerConnectionRecovery();
         }
         // Check error count

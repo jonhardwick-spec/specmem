@@ -14,7 +14,7 @@
  * Hook Type: PreToolUse (intercepts Task tool calls before execution)
  *
  * Flow:
- *   1. Claude calls Task tool to spawn a team member
+ *   1.  calls Task tool to spawn a team member
  *   2. This hook intercepts the call
  *   3. The prompt is modified to include team framing
  *   4. TeamMember spawns with team context + original task
@@ -204,7 +204,7 @@ export async function teamMemberPrepromptHook(toolName, toolInput, config = {}) 
     };
 }
 /**
- * CLI entry point for Claude Code PreToolUse hook
+ * CLI entry point for  Code PreToolUse hook
  * Reads JSON from stdin: { "tool_name": "...", "tool_input": {...} }
  * Outputs modified tool input to stdout (as JSON)
  */
@@ -237,7 +237,7 @@ export async function runFromCLI() {
         // If not modified, output nothing (tool proceeds unchanged)
     }
     catch (error) {
-        // Silent fail - don't break Claude's flow
+        // Silent fail - don't break 's flow
         logger.error({ error }, '[TeamFraming CLI] Error');
     }
 }

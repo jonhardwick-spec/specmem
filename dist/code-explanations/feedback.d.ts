@@ -1,7 +1,7 @@
 /**
  * provide_explanation_feedback - Improve explanations through feedback
  *
- * Allows Claude to provide feedback on explanations to improve
+ * Allows  to provide feedback on explanations to improve
  * quality scores over time. Good explanations get reused more often.
  */
 import { MCPTool } from '../mcp/toolRegistry.js';

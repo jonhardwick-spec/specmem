@@ -4,7 +4,7 @@
  * ========================
  *
  * CLI entry point for the Team Member Preprompt Hook.
- * This allows the hook to be called directly from Claude Code settings.
+ * This allows the hook to be called directly from  Code settings.
  *
  * Usage in ~/.claude/settings.json:
  *

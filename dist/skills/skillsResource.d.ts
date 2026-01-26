@@ -1,7 +1,7 @@
 /**
  * skillsResource.ts - MCP Resource Provider for Skills
  *
- * exposes all skills as MCP resources so Claude can access them
+ * exposes all skills as MCP resources so  can access them
  * provides list and read endpoints for the MCP protocol
  *
  * Features:

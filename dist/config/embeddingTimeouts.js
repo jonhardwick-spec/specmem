@@ -89,10 +89,10 @@ export const embeddingTimeouts = {
     },
     /**
      * Timeout for embedding generation during memory search (find_memory)
-     * Env: SPECMEM_FIND_EMBEDDING_TIMEOUT_MS (default: 60000 = 60s)
+     * Env: SPECMEM_FIND_EMBEDDING_TIMEOUT_MS (default: 120000 = 120s, increased from 60s to match cold-start)
      */
     get search() {
-        return this.master ?? parseTimeoutMs('SPECMEM_FIND_EMBEDDING_TIMEOUT_MS', 60000);
+        return this.master ?? parseTimeoutMs('SPECMEM_FIND_EMBEDDING_TIMEOUT_MS', 120000);
     },
     /**
      * Timeout for health check embedding tests
@@ -140,10 +140,10 @@ export const embeddingTimeouts = {
     /**
      * Code search/pointer lookup timeout
      * Used by find_code_pointers tool
-     * Env: SPECMEM_CODE_SEARCH_TIMEOUT (default: 60000 - increased from 30s)
+     * Env: SPECMEM_CODE_SEARCH_TIMEOUT (default: 120000 - increased from 60s to match cold-start initial timeout)
      */
     get codeSearch() {
-        return this.master ?? parseTimeoutMs('SPECMEM_CODE_SEARCH_TIMEOUT', 60000);
+        return this.master ?? parseTimeoutMs('SPECMEM_CODE_SEARCH_TIMEOUT', 120000);
     },
     /**
      * Search timeout for database queries in find_memory

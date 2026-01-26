@@ -3,12 +3,12 @@
  * ====================
  *
  * Dynamic hook discovery, validation, and deployment system.
- * Hooks are auto-discovered from {PROJECT}/specmem/hooks/ and deployed to Claude.
+ * Hooks are auto-discovered from {PROJECT}/specmem/hooks/ and deployed to .
  *
  * PER-PROJECT ISOLATION:
  *   - Each project has its own hooks directory: {PROJECT}/specmem/hooks/
  *   - Each project has its own hooks registry: {PROJECT}/specmem/hooks.json
- *   - Claude's ~/.claude/hooks/ is only used for deployment (shared)
+ *   - 's ~/.claude/hooks/ is only used for deployment (shared)
  *
  * Features:
  *   - Auto-discovery of hooks from project hooks directory
@@ -35,7 +35,7 @@ function getCustomHooksDir() {
 function getHooksConfigFile() {
     return path.join(getInstanceDir(), 'hooks.json'); // {PROJECT}/specmem/hooks.json
 }
-// Claude's hooks dir remains global (it's where Claude looks for hooks)
+// 's hooks dir remains global (it's where  looks for hooks)
 const CLAUDE_HOOKS_DIR = path.join(os.homedir(), '.claude', 'hooks');
 // Language configuration for syntax checking
 const LANGUAGE_CONFIG = {
@@ -363,7 +363,7 @@ export class HookManager {
         return { registered, existing, errors };
     }
     /**
-     * Deploy all enabled AND validated hooks to Claude's hooks directory
+     * Deploy all enabled AND validated hooks to 's hooks directory
      */
     deployHooks() {
         const deployed = [];
@@ -398,7 +398,7 @@ export class HookManager {
             this.registry.lastDeployed = new Date().toISOString();
             this.saveRegistry();
         }
-        logger.info({ deployed: deployed.length, skipped: skipped.length, errors: errors.length }, 'Deployed hooks to Claude');
+        logger.info({ deployed: deployed.length, skipped: skipped.length, errors: errors.length }, 'Deployed hooks to ');
         return { deployed, skipped, errors };
     }
     /**
@@ -455,7 +455,7 @@ export class HookManager {
             if (fs.existsSync(hook.file)) {
                 fs.unlinkSync(hook.file);
             }
-            // Also remove from Claude's hooks if deployed
+            // Also remove from 's hooks if deployed
             const claudeHookPath = path.join(CLAUDE_HOOKS_DIR, path.basename(hook.file));
             if (fs.existsSync(claudeHookPath)) {
                 fs.unlinkSync(claudeHookPath);

@@ -65,6 +65,64 @@ try {
 }
 
 // ============================================================================
+// MCP SERVER INSTANCE DEDUPLICATION
+// Prevents multiple Claude agent sessions from each spawning their own
+// MCP server + embedding server, which causes socket contention.
+// ============================================================================
+const MCP_LOCK_DIR = path.join(process.cwd(), 'specmem', 'sockets');
+const MCP_LOCK_PATH = path.join(MCP_LOCK_DIR, 'bootstrap.lock');
+
+function checkBootstrapLock() {
+  try {
+    // Ensure lock directory exists
+    if (!fs.existsSync(MCP_LOCK_DIR)) {
+      fs.mkdirSync(MCP_LOCK_DIR, { recursive: true });
+    }
+
+    if (fs.existsSync(MCP_LOCK_PATH)) {
+      const lockContent = fs.readFileSync(MCP_LOCK_PATH, 'utf8');
+      const [lockPid, lockTime] = lockContent.split('\n');
+      const age = Date.now() - parseInt(lockTime);
+
+      try {
+        process.kill(parseInt(lockPid), 0);
+        // Process alive and lock fresh (< 5 minutes)
+        if (age < 300000) {
+          startupLog(`Bootstrap already running (PID ${lockPid}, age ${Math.round(age / 1000)}s), exiting to prevent duplicates`);
+          console.error(`[SpecMem] Bootstrap already running (PID ${lockPid}), exiting to prevent duplicates`);
+          process.exit(0);
+        }
+        // Process alive but lock is stale (> 5 minutes) - take over
+        startupLog(`Bootstrap lock stale (PID ${lockPid}, age ${Math.round(age / 1000)}s), taking over`);
+      } catch {
+        // Process dead - remove stale lock
+        startupLog(`Removing stale bootstrap lock (PID ${lockPid} is dead)`);
+        console.error(`[SpecMem] Removing stale bootstrap lock (PID ${lockPid})`);
+        fs.unlinkSync(MCP_LOCK_PATH);
+      }
+    }
+
+    // Create lock with our PID and timestamp
+    fs.writeFileSync(MCP_LOCK_PATH, `${process.pid}\n${Date.now()}\n`);
+    startupLog(`Bootstrap lock acquired (PID ${process.pid})`);
+
+    // Clean up lock on exit
+    const cleanupLock = () => {
+      try { fs.unlinkSync(MCP_LOCK_PATH); } catch {}
+    };
+    process.on('exit', cleanupLock);
+    process.on('SIGTERM', () => { cleanupLock(); process.exit(0); });
+    process.on('SIGINT', () => { cleanupLock(); process.exit(0); });
+  } catch (err) {
+    startupLog('Bootstrap lock check failed, continuing anyway', err);
+    console.error('[SpecMem] Bootstrap lock check failed:', err.message);
+    // Continue anyway - don't block on lock failures
+  }
+}
+
+checkBootstrapLock();
+
+// ============================================================================
 // Embedded PostgreSQL Configuration
 // ============================================================================
 
@@ -72,16 +130,69 @@ const PGDATA_DIR = 'pgdata';
 const PG_DEFAULT_PORT_START = 5500; // Start searching for available ports from here
 const PG_DEFAULT_PORT_END = 5600;   // End range for port search
 
+// ============================================================================
+// ROOT/NON-ROOT DETECTION - Dynamic paths based on user privileges
+// ============================================================================
+function isRootUser() {
+  // Check UID on Unix systems
+  if (process.getuid && process.getuid() === 0) return true;
+  // Check EUID (effective UID)
+  if (process.geteuid && process.geteuid() === 0) return true;
+  // Fallback: check if we can write to /usr/lib
+  try {
+    fs.accessSync('/usr/lib', fs.constants.W_OK);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Export for other modules
+const IS_ROOT = isRootUser();
+const USER_SPECMEM_DIR = IS_ROOT ? __dirname : path.join(os.homedir(), '.specmem');
+startupLog(`User mode: ${IS_ROOT ? 'ROOT' : 'NON-ROOT'}, SpecMem dir: ${USER_SPECMEM_DIR}`);
+
+// Auto-install dotenv if missing
+function ensureDotenv() {
+  try {
+    require.resolve('dotenv');
+    return true;
+  } catch (e) {
+    startupLog('dotenv not found, auto-installing...');
+    try {
+      execSync('npm install dotenv --save 2>/dev/null || npm install dotenv', {
+        cwd: __dirname,
+        stdio: 'ignore',
+        timeout: 30000
+      });
+      startupLog('dotenv installed successfully');
+      // Clear require cache to pick up new module
+      delete require.cache[require.resolve('dotenv')];
+      return true;
+    } catch (installErr) {
+      startupLog('Failed to install dotenv', installErr);
+      return false;
+    }
+  }
+}
+
+// Ensure dotenv is available
+ensureDotenv();
+
 // Load environment variables - PROJECT .env FIRST, then package specmem.env as fallback
 // This ensures existing projects keep working with their own credentials!
 const projectEnvPath = path.join(process.cwd(), '.env');
-if (fs.existsSync(projectEnvPath)) {
-  require('dotenv').config({ path: projectEnvPath });
-  startupLog(`dotenv loaded from PROJECT .env: ${projectEnvPath}`);
+try {
+  if (fs.existsSync(projectEnvPath)) {
+    require('dotenv').config({ path: projectEnvPath });
+    startupLog(`dotenv loaded from PROJECT .env: ${projectEnvPath}`);
+  }
+  // Load package specmem.env WITHOUT override - project .env takes precedence
+  require('dotenv').config({ path: path.join(__dirname, 'specmem.env') });
+  startupLog('dotenv loaded from package specmem.env (fallback)');
+} catch (dotenvErr) {
+  startupLog('dotenv config failed, continuing without .env files', dotenvErr);
 }
-// Load package specmem.env WITHOUT override - project .env takes precedence
-require('dotenv').config({ path: path.join(__dirname, 'specmem.env') });
-startupLog('dotenv loaded from package specmem.env (fallback)');
 
 // ============================================================================
 // CRITICAL FIX: Runtime DB credential auto-detection with connection testing
@@ -194,27 +305,33 @@ startupLog(`DB credentials set: DB_NAME="${process.env.SPECMEM_DB_NAME}", DB_USE
 // ============================================================================
 // MULTI-PROJECT ISOLATION: Set SPECMEM_PROJECT_PATH ONCE at startup
 // REMOVED: Marker file fallback - caused race condition with simultaneous projects!
-// Each MCP server instance gets its project path from Claude Code's cwd variable.
+// Each MCP server instance gets its project path from  Code's cwd variable.
 // ============================================================================
 if (!process.env.SPECMEM_PROJECT_PATH) {
-  // Use cwd from Claude Code (passed as env var) - this is set per-session
+  // Use cwd from  Code (passed as env var) - this is set per-session
   process.env.SPECMEM_PROJECT_PATH = process.cwd();
   startupLog(`SPECMEM_PROJECT_PATH set from cwd: ${process.env.SPECMEM_PROJECT_PATH}`);
 } else {
   startupLog(`SPECMEM_PROJECT_PATH already set: ${process.env.SPECMEM_PROJECT_PATH}`);
 }
 
-// Generate project hash for instance isolation (COLLISION-FREE!)
-// Uses SHA256 hash of FULL project path to ensure different paths get different instances.
-// This prevents collisions between /specmem and ~/specmem.
-// Pattern: First 16 chars of hash (e.g., "a1b2c3d4e5f6a7b8")
+// Generate project identifiers for instance isolation
+// CRITICAL FIX: Use DIRECTORY NAME for schema naming (human-readable!)
+// Hash is kept only for legacy compatibility and collision detection
 const normalizedPath = path.resolve(process.env.SPECMEM_PROJECT_PATH).toLowerCase().replace(/\\/g, '/');
 const fullHash = crypto.createHash('sha256').update(normalizedPath).digest('hex');
 const PROJECT_HASH = fullHash.substring(0, 16);
-process.env.SPECMEM_PROJECT_DIR_NAME = PROJECT_HASH;
-process.env.SPECMEM_PROJECT_HASH = PROJECT_HASH;
 
-startupLog(`Project hash (instance isolation): ${PROJECT_HASH} for path: ${normalizedPath}`);
+// DIRECTORY NAME - used for schema naming (specmem_newserver, specmem_specmem, etc.)
+// Sanitize to PostgreSQL-safe identifier: lowercase, alphanumeric + underscore only
+const rawDirName = path.basename(process.env.SPECMEM_PROJECT_PATH);
+const PROJECT_DIR_NAME = rawDirName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/^_+|_+$/g, '') || 'default';
+
+process.env.SPECMEM_PROJECT_DIR_NAME = PROJECT_DIR_NAME;  // Human-readable! e.g., "newserver"
+process.env.SPECMEM_PROJECT_HASH = PROJECT_HASH;           // Keep hash for legacy compat
+
+startupLog(`Project dir name: ${PROJECT_DIR_NAME} (used for schemas!)`)
+startupLog(`Project hash (legacy): ${PROJECT_HASH} for path: ${normalizedPath}`);
 
 // ============================================================================
 // CODEBASE INDEXER DEFAULTS - Enabled by default for code search
@@ -240,8 +357,10 @@ function killStaleBootstraps() {
   const currentPid = process.pid;
   const projectPath = process.env.SPECMEM_PROJECT_PATH;
 
+  if (!projectPath) return; // Can't scope without a project path
+
   try {
-    // Find all node processes running bootstrap.cjs from this same directory
+    // Find all node processes running bootstrap.cjs
     const result = execSync(
       `ps aux | grep -E "node.*bootstrap\\.cjs" | grep -v grep | awk '{print $2}'`,
       { encoding: 'utf8', timeout: 5000 }
@@ -254,37 +373,55 @@ function killStaleBootstraps() {
       const pid = parseInt(pidStr.trim(), 10);
       if (isNaN(pid) || pid === currentPid) continue;
 
-      // Check if this process is from the same project directory
+      // Check if this process serves the SAME project by reading its
+      // SPECMEM_PROJECT_PATH env var — this is the definitive project identity,
+      // not cwd which can differ from the actual project being served.
       try {
-        const cwdLink = fs.readlinkSync(`/proc/${pid}/cwd`);
-        if (cwdLink === projectPath || cwdLink.startsWith(projectPath + '/')) {
-          // CRITICAL: Only kill processes older than 30 seconds to avoid race conditions
-          // when Claude spawns multiple MCP server attempts in quick succession
-          try {
-            const stat = fs.statSync(`/proc/${pid}`);
-            const processAge = Date.now() - stat.ctimeMs;
-            if (processAge < 30000) {
-              startupLog(`CLEANUP: Skipping young process ${pid} (age: ${Math.round(processAge/1000)}s < 30s)`);
-              continue;
+        let otherProjectPath = null;
+        try {
+          const environ = fs.readFileSync(`/proc/${pid}/environ`, 'utf8');
+          const envVars = environ.split('\0');
+          for (const v of envVars) {
+            if (v.startsWith('SPECMEM_PROJECT_PATH=')) {
+              otherProjectPath = v.substring('SPECMEM_PROJECT_PATH='.length);
+              break;
             }
-          } catch (e) {
-            // Can't determine age, skip to be safe
+          }
+        } catch (e) {
+          // Can't read environ (permissions), fall back to cwd check
+          try {
+            otherProjectPath = fs.readlinkSync(`/proc/${pid}/cwd`);
+          } catch { continue; } // Can't determine project — skip to be safe
+        }
+
+        if (!otherProjectPath) continue; // Can't determine — skip
+
+        // STRICT: Only kill if EXACT same project path
+        if (otherProjectPath !== projectPath) continue;
+
+        // Only kill processes older than 30 seconds to avoid race conditions
+        try {
+          const stat = fs.statSync(`/proc/${pid}`);
+          const processAge = Date.now() - stat.ctimeMs;
+          if (processAge < 30000) {
+            startupLog(`CLEANUP: Skipping young process ${pid} (age: ${Math.round(processAge/1000)}s < 30s)`);
             continue;
           }
-
-          startupLog(`CLEANUP: Killing stale bootstrap process ${pid} (cwd: ${cwdLink})`);
-          process.kill(pid, 'SIGTERM');
-          // Give it a moment to die gracefully, then force kill
-          setTimeout(() => {
-            try { process.kill(pid, 'SIGKILL'); } catch (e) { /* already dead */ }
-          }, 1000);
+        } catch (e) {
+          // Can't determine age, skip to be safe
+          continue;
         }
+
+        startupLog(`CLEANUP: Killing stale bootstrap for same project ${pid} (project: ${otherProjectPath})`);
+        process.kill(pid, 'SIGTERM');
+        setTimeout(() => {
+          try { process.kill(pid, 'SIGKILL'); } catch (e) { /* already dead */ }
+        }, 1000);
       } catch (e) {
-        // Process might have died or we can't read its cwd - ignore
+        // Process might have died or we can't read its info - skip
       }
     }
   } catch (e) {
-    // Cleanup is best-effort - don't fail startup if it doesn't work
     startupLog(`CLEANUP: Could not check for stale processes: ${e.message}`);
   }
 }
@@ -300,7 +437,7 @@ killStaleBootstraps();
 // ============================================================================
 function cleanupStaleSockets() {
   const projectPath = process.env.SPECMEM_PROJECT_PATH;
-  const projectDirName = PROJECT_HASH;
+  const projectDirName = PROJECT_DIR_NAME;
 
   // Primary socket directory (THE ONLY VALID LOCATION)
   // Pattern: {PROJECT_DIR}/specmem/sockets/
@@ -432,15 +569,15 @@ try {
   // Ignore - will be created on first log write
 }
 
-startupLog(`SPECMEM_PROJECT_DIR_NAME: ${PROJECT_HASH} (used for ALL naming!)`);
-startupLog(`SPECMEM_PROJECT_HASH: ${PROJECT_HASH} (DEPRECATED - now equals DIR_NAME)`);
+startupLog(`SPECMEM_PROJECT_DIR_NAME: ${PROJECT_DIR_NAME} (used for schemas: specmem_${PROJECT_DIR_NAME})`);
+startupLog(`SPECMEM_PROJECT_HASH: ${PROJECT_HASH} (legacy, kept for backwards compat)`);
 startupLog(`Project specmem dir: ${projectSpecmemDir}`);
 
 // ============================================================================
 // CRITICAL FIX: Sync stale project configs in ~/.claude.json for future sessions
 // This runs synchronously early in startup to fix stale per-project MCP configs
 // ============================================================================
-function syncClaudeProjectConfigs() {
+function syncProjectConfigs() {
   const claudeJsonPath = path.join(os.homedir(), '.claude.json');
 
   if (!fs.existsSync(claudeJsonPath)) {
@@ -470,25 +607,25 @@ function syncClaudeProjectConfigs() {
       let projectFixed = false;
 
       // Check and fix each credential
-      if (specmemEnv.SPECMEM_DB_NAME && OLD_STALE_VALUES.includes(specmemEnv.SPECMEM_DB_NAME)) {
+      if (specmemEnv.SPECMEM_DB_NAME && STALE_VALUES.includes(specmemEnv.SPECMEM_DB_NAME)) {
         specmemEnv.SPECMEM_DB_NAME = canonicalCred;
         projectFixed = true;
       }
-      if (specmemEnv.SPECMEM_DB_USER && OLD_STALE_VALUES.includes(specmemEnv.SPECMEM_DB_USER)) {
+      if (specmemEnv.SPECMEM_DB_USER && STALE_VALUES.includes(specmemEnv.SPECMEM_DB_USER)) {
         specmemEnv.SPECMEM_DB_USER = canonicalCred;
         projectFixed = true;
       }
-      if (specmemEnv.SPECMEM_DB_PASSWORD && OLD_STALE_VALUES.includes(specmemEnv.SPECMEM_DB_PASSWORD)) {
+      if (specmemEnv.SPECMEM_DB_PASSWORD && STALE_VALUES.includes(specmemEnv.SPECMEM_DB_PASSWORD)) {
         specmemEnv.SPECMEM_DB_PASSWORD = canonicalCred;
         projectFixed = true;
       }
-      if (specmemEnv.SPECMEM_DASHBOARD_PASSWORD && OLD_STALE_VALUES.includes(specmemEnv.SPECMEM_DASHBOARD_PASSWORD)) {
+      if (specmemEnv.SPECMEM_DASHBOARD_PASSWORD && STALE_VALUES.includes(specmemEnv.SPECMEM_DASHBOARD_PASSWORD)) {
         specmemEnv.SPECMEM_DASHBOARD_PASSWORD = canonicalCred;
         projectFixed = true;
       }
 
       // CRITICAL: Ensure SPECMEM_PROJECT_PATH is set to actual project path (not ${PWD})
-      // ${PWD} doesn't get expanded by Claude Code, so we must use the literal path
+      // ${PWD} doesn't get expanded by  Code, so we must use the literal path
       if (!specmemEnv.SPECMEM_PROJECT_PATH || specmemEnv.SPECMEM_PROJECT_PATH === '${PWD}' || specmemEnv.SPECMEM_PROJECT_PATH === '${cwd}') {
         specmemEnv.SPECMEM_PROJECT_PATH = projectPath;
         projectFixed = true;
@@ -531,7 +668,7 @@ function syncClaudeProjectConfigs() {
 }
 
 // Run the config sync
-syncClaudeProjectConfigs();
+syncProjectConfigs();
 
 // ============================================================================
 // Project-Local Instance Management
@@ -550,7 +687,7 @@ const STARTUP_LOCK_MAX_RETRIES = 50;  // Max 5 seconds of retrying
 
 /**
  * Get the project path from environment or cwd
- * Claude Code passes this via SPECMEM_PROJECT_PATH
+ *  Code passes this via SPECMEM_PROJECT_PATH
  */
 function getProjectPath() {
   return process.env.SPECMEM_PROJECT_PATH || process.cwd();
@@ -2159,7 +2296,7 @@ const colors = {
 };
 
 // Detect if running as MCP server (stdin is not a TTY means piped input)
-// When Claude Code launches us as MCP, stdin is a pipe so isTTY is undefined (not false)
+// When  Code launches us as MCP, stdin is a pipe so isTTY is undefined (not false)
 // Use !isTTY to catch both undefined and false cases
 const isMcpMode = !process.stdin.isTTY;
 startupLog(`MCP mode detection complete: isMcpMode=${isMcpMode}`);
@@ -2255,7 +2392,7 @@ function logPhase(current, total, message) {
 
 // ============================================================================
 // SILENT AUTO-INSTALL SYSTEM
-// Ensures SpecMem is properly configured in Claude Code on EVERY run
+// Ensures SpecMem is properly configured in  Code on EVERY run
 // This happens BEFORE the MCP server starts
 // ============================================================================
 
@@ -2294,7 +2431,7 @@ function safeWriteJson(filePath, data) {
 
 /**
  * Ensure SpecMem is registered in ~/.claude/config.json
- * This is what makes Claude Code load SpecMem as an MCP server
+ * This is what makes  Code load SpecMem as an MCP server
  */
 function ensureConfigJsonSilent() {
   const claudeDir = path.join(os.homedir(), '.claude');
@@ -2310,13 +2447,13 @@ function ensureConfigJsonSilent() {
   }
 
   // Build the SpecMem MCP server config
-  // CRITICAL: ${PWD} is expanded by Claude Code at runtime to the current project directory
+  // CRITICAL: ${PWD} is expanded by  Code at runtime to the current project directory
   const specmemConfig = {
     command: 'node',
     args: ['--max-old-space-size=250', bootstrapPath],
     env: {
       HOME: os.homedir(),
-      // Project-local configuration - ${PWD} is expanded by Claude Code at runtime
+      // Project-local configuration - ${PWD} is expanded by  Code at runtime
       SPECMEM_PROJECT_PATH: '${PWD}',
       SPECMEM_WATCHER_ROOT_PATH: '${PWD}',
       SPECMEM_CODEBASE_PATH: '${PWD}',
@@ -2338,7 +2475,7 @@ function ensureConfigJsonSilent() {
   };
 
   // Check if update needed - only check ESSENTIAL fields to avoid constant rewrites
-  // This prevents the race condition where Claude reads settings while we're writing
+  // This prevents the race condition where  reads settings while we're writing
   const existing = config.mcpServers.specmem;
   const needsUpdate = !existing ||
     existing.command !== 'node' ||
@@ -2412,7 +2549,7 @@ function copyHookFilesSilent() {
         const srcPath = path.join(sourceDir, file);
         const dstPath = path.join(targetDir, file);
 
-        // Skip if file content is identical - prevents race condition with Claude
+        // Skip if file content is identical - prevents race condition with 
         if (filesAreIdentical(srcPath, dstPath)) {
           continue;
         }
@@ -2482,7 +2619,7 @@ function copyCommandFilesSilent() {
         const srcPath = path.join(sourceDir, file);
         const dstPath = path.join(targetDir, file);
 
-        // Skip if file content is identical - prevents race condition with Claude
+        // Skip if file content is identical - prevents race condition with 
         if (filesAreIdentical(srcPath, dstPath)) {
           continue;
         }
@@ -2505,7 +2642,7 @@ function copyCommandFilesSilent() {
 /**
  * Ensure hooks are properly configured in ~/.claude/settings.json
  *
- * Hook format rules (from Claude Code source):
+ * Hook format rules (from  Code source):
  * - UserPromptSubmit, SessionStart, Stop: NO matcher field
  * - PreToolUse, PostToolUse, PermissionRequest: matcher is a STRING pattern
  */
@@ -2754,7 +2891,7 @@ function ensureSettingsJsonSilent() {
  * 4. settings.json has correct hook configuration
  */
 function runSilentAutoInstall() {
-  logStep('SILENT-INSTALL', 'Ensuring SpecMem is configured in Claude Code...');
+  logStep('SILENT-INSTALL', 'Ensuring SpecMem is configured in  Code...');
 
   // Step 1: Ensure config.json has SpecMem registered
   const configResult = ensureConfigJsonSilent();
@@ -2784,8 +2921,8 @@ function runSilentAutoInstall() {
   const anyChanges = configResult.changed || settingsResult.changed ||
                      hooksResult.copied.length > 0 || commandsResult.copied.length > 0;
   if (anyChanges) {
-    logSuccess('Silent auto-install complete - Claude Code config updated');
-    logWarn('NOTE: Restart Claude Code for changes to take effect');
+    logSuccess('Silent auto-install complete -  Code config updated');
+    logWarn('NOTE: Restart  Code for changes to take effect');
   }
   // No message when nothing changed - faster startup, less noise
 
@@ -3182,7 +3319,7 @@ function markAsInstalled() {
  * we found this by reversing the claude code binary lmaooo
  */
 /**
- * Install SpecMem hooks into Claude Code settings
+ * Install SpecMem hooks into  Code settings
  * These hooks auto-inject memory context into prompts
  */
 function installSpecMemHooks() {
@@ -3225,7 +3362,7 @@ function installSpecMemHooks() {
     logSuccess(`Copied hooks: ${copiedHooks.join(', ')}`);
   }
 
-  // Update Claude settings to enable hooks with NEW format (matcher as object)
+  // Update  settings to enable hooks with NEW format (matcher as object)
   if (fs.existsSync(settingsPath)) {
     try {
       const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
@@ -3316,24 +3453,24 @@ function installSpecMemHooks() {
 
       if (needsUpdate) {
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-        logSuccess('Updated SpecMem hooks to new format in Claude settings');
+        logSuccess('Updated SpecMem hooks to new format in  settings');
         return { installed: true, needsRestart: true };
       } else {
         logSuccess('SpecMem hooks already configured with correct format');
         return { installed: true, alreadySet: true };
       }
     } catch (err) {
-      logWarn(`Could not update Claude settings: ${err.message}`);
+      logWarn(`Could not update  settings: ${err.message}`);
       return { installed: false, error: err.message };
     }
   } else {
-    logWarn('Claude settings.json not found - hooks not registered');
+    logWarn(' settings.json not found - hooks not registered');
     return { installed: false, error: 'settings.json not found' };
   }
 }
 
 /**
- * Install SpecMem slash commands to Claude's commands directory
+ * Install SpecMem slash commands to 's commands directory
  * These are the /specmem-* commands for memory operations
  */
 function installSpecMemCommands() {
@@ -3694,11 +3831,11 @@ function setupRuntimeDirectory() {
 }
 
 /**
- * Auto-configure SpecMem MCP server in Claude config
+ * Auto-configure SpecMem MCP server in  config
  * Updates ~/.claude/config.json with correct path
  */
 function configureMcpServer() {
-  logStep('MCP-CONFIG', 'Configuring SpecMem MCP server in Claude...');
+  logStep('MCP-CONFIG', 'Configuring SpecMem MCP server in ...');
 
   const claudeDir = path.join(os.homedir(), '.claude');
   const configPath = path.join(claudeDir, 'config.json');
@@ -3724,11 +3861,11 @@ function configureMcpServer() {
     }
 
     // Get current environment variables for SpecMem
-    // NOTE: SPECMEM_PROJECT_PATH uses ${PWD} which Claude Code expands to the project directory
+    // NOTE: SPECMEM_PROJECT_PATH uses ${PWD} which  Code expands to the project directory
     // This makes SpecMem project-local automatically!
     const specmemEnv = {
       HOME: process.env.HOME || os.homedir(),
-      // Project-local configuration - ${PWD} is expanded by Claude Code at runtime
+      // Project-local configuration - ${PWD} is expanded by  Code at runtime
       SPECMEM_PROJECT_PATH: '${PWD}',
       SPECMEM_WATCHER_ROOT_PATH: '${PWD}',
       SPECMEM_CODEBASE_PATH: '${PWD}',
@@ -3818,10 +3955,10 @@ function enableMcpForTaskTeamMembers() {
   if (!alreadySet && configToModify) {
     try {
       // Add the export line to shell config
-      const comment = '\n# SpecMem: Enable MCP tools for Claude Code Task-spawned teamMembers\n';
+      const comment = '\n# SpecMem: Enable MCP tools for  Code Task-spawned teamMembers\n';
       fs.appendFileSync(configToModify, comment + exportLine + '\n');
       logSuccess(`Added MCP Task team member support to ${path.basename(configToModify)}`);
-      logWarn('IMPORTANT: Restart Claude Code for Task teamMembers to access SpecMem MCP tools!');
+      logWarn('IMPORTANT: Restart  Code for Task teamMembers to access SpecMem MCP tools!');
       return { added: true, file: configToModify, needsRestart: true };
     } catch (err) {
       logWarn(`Could not modify ${configToModify}: ${err.message}`);
@@ -3841,7 +3978,7 @@ function enableMcpForTaskTeamMembers() {
  *
  * Previous bug: We spawned dist/index.js as a child process with stdio: 'inherit'.
  * This added ~400ms latency while Node.js loaded the child process.
- * During this gap, Claude Code's stdin was connected to bootstrap.cjs which
+ * During this gap,  Code's stdin was connected to bootstrap.cjs which
  * wasn't reading from it - causing the JSON-RPC handshake to fail.
  *
  * New approach: Dynamically import the ES module directly.
@@ -4362,13 +4499,13 @@ async function autoInstallThisMf() {
   // ============================================================================
 
   startupLog('Normal startup path (not ultra-fast)');
-  logPhase(1, 5, 'Registering SpecMem in Claude Code...');
+  logPhase(1, 5, 'Registering SpecMem in  Code...');
 
-  // Silent auto-install ensures SpecMem is registered in Claude Code's config
+  // Silent auto-install ensures SpecMem is registered in  Code's config
   startupLog('Running silent auto-install...');
   runSilentAutoInstall();
   startupLog('Silent auto-install complete');
-  logSuccess('Claude Code registration complete');
+  logSuccess(' Code registration complete');
 
   logPhase(2, 5, 'Detecting project environment...');
   const projectPath = getProjectPath();
@@ -4499,7 +4636,7 @@ async function autoInstallThisMf() {
 
   // ============================================================================
   // GRACEFUL SHUTDOWN HANDLERS
-  // Clean up lock files and notify when Claude Code exits
+  // Clean up lock files and notify when  Code exits
   // ============================================================================
 
   // Orphan check interval (set up after gracefulShutdown is defined)
@@ -4558,7 +4695,7 @@ async function autoInstallThisMf() {
   // ============================================================================
   // ORPHAN DETECTION (PPID=1 CHECK)
   // Detect when parent process dies and we're adopted by init (PID 1)
-  // This happens when Claude Code crashes without sending SIGTERM
+  // This happens when  Code crashes without sending SIGTERM
   // ============================================================================
   orphanCheckInterval = setInterval(() => {
     // On Linux/macOS, when parent dies, process is reparented to init (PID 1)
@@ -4629,7 +4766,7 @@ async function autoInstallThisMf() {
 
   // ============================================================================
   // HOT RELOAD HANDLER (SIGUSR1)
-  // Tier 2 reload: Graceful restart - cleanup and exit(0) so Claude respawns
+  // Tier 2 reload: Graceful restart - cleanup and exit(0) so  respawns
   // This allows code changes to take effect without manual intervention
   // ============================================================================
   process.on('SIGUSR1', async () => {
@@ -4664,7 +4801,7 @@ async function autoInstallThisMf() {
       log('[HOT RELOAD] Cleanup complete, exiting for respawn...', colors.green);
       startupLog('Hot reload cleanup complete, exiting with code 0 for respawn');
 
-      // Exit with 0 - Claude will respawn us with fresh code
+      // Exit with 0 -  will respawn us with fresh code
       process.exit(0);
     } catch (err) {
       logError(`[HOT RELOAD] Error during hot reload: ${err.message}`);
@@ -4841,16 +4978,16 @@ async function autoInstallThisMf() {
     // Step 6.7: Setup runtime directory for sockets
     const runtimeResult = setupRuntimeDirectory();
 
-    // Step 6.8: Auto-configure MCP server in Claude config
+    // Step 6.8: Auto-configure MCP server in  config
     const mcpConfigResult = configureMcpServer();
 
-    // Step 6.8.5: Auto-deploy hooks from specmem to Claude
+    // Step 6.8.5: Auto-deploy hooks from specmem to 
     try {
       const deployScript = path.join(__dirname, 'scripts', 'deploy-hooks.cjs');
       if (fs.existsSync(deployScript)) {
         const { execSync } = require('child_process');
         execSync(`node "${deployScript}"`, { stdio: 'pipe', timeout: 10000 });
-        logSuccess('Hooks auto-deployed to Claude');
+        logSuccess('Hooks auto-deployed to ');
       }
     } catch (e) {
       logWarn(`Hook deploy skipped: ${e.message}`);
@@ -4917,7 +5054,7 @@ async function autoInstallThisMf() {
       if (runtimeResult?.success) {
         log(`Runtime directory: ${runtimeResult.path}`, colors.green);
       }
-      log('Restart Claude Code to apply changes.', colors.yellow);
+      log('Restart  Code to apply changes.', colors.yellow);
     }
     log('='.repeat(60) + '\n', colors.bright);
 

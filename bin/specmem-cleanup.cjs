@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * SPECMEM CLEANUP - Claude Screen Session Manager 🧹
+ * SPECMEM CLEANUP -  Screen Session Manager 🧹
  * ===================================================
  *
- * Manage and cleanup Claude screen sessions for a project.
- * Supports multiple Claude instances per project.
+ * Manage and cleanup  screen sessions for a project.
+ * Supports multiple  instances per project.
  *
  * Session naming:
  *   - claude-{projectId}       (single instance)
@@ -146,7 +146,7 @@ function screenKill(sessionName) {
 }
 
 /**
- * Save progress for a Claude screen
+ * Save progress for a  screen
  */
 function saveProgress(projectPath, screenName, reason = 'cleanup') {
   const trackingDir = path.join(projectPath, 'claudeProgressTracking');
@@ -162,7 +162,7 @@ function saveProgress(projectPath, screenName, reason = 'cleanup') {
   const filename = `${safeName}-${timestamp}-${reason}.txt`;
   const filepath = path.join(trackingDir, filename);
 
-  // Try to ask Claude to summarize
+  // Try to ask  to summarize
   log('info', `Asking ${screenName} to save progress...`);
   screenSend(screenName, '\n\n[SAVE PROGRESS] Please briefly summarize what you accomplished and any pending tasks.');
 
@@ -178,7 +178,7 @@ function saveProgress(projectPath, screenName, reason = 'cleanup') {
   }
 
   // Write file
-  const content = `# Claude Session Progress
+  const content = `#  Session Progress
 # ========================
 # Project: ${projectPath}
 # Session: ${screenName}
@@ -204,10 +204,10 @@ ${output}
  * Stop a screen with optional progress save
  */
 function stopScreen(projectPath, screen, saveFirst = true) {
-  const isClaudeScreen = screen.name.startsWith('claude-');
+  const isScreen = screen.name.startsWith('claude-');
 
-  // Save progress for Claude screens
-  if (saveFirst && isClaudeScreen) {
+  // Save progress for  screens
+  if (saveFirst && isScreen) {
     saveProgress(projectPath, screen.name, 'cleanup');
   }
 
@@ -236,7 +236,7 @@ function printScreenList(screens, projectId) {
 
   let idx = 1;
   for (const screen of screens) {
-    const type = screen.name.startsWith('specmem-') ? '🧠 Brain' : '🤖 Claude';
+    const type = screen.name.startsWith('specmem-') ? '🧠 Brain' : '🤖 ';
     const statusColor = screen.status === 'attached' ? c.green : c.yellow;
     const statusIcon = screen.status === 'attached' ? '●' : '○';
 
@@ -264,12 +264,12 @@ function printGlobalScreens() {
   );
 
   if (specmemScreens.length === 0) {
-    console.log(`${c.dim}No SpecMem/Claude screens found system-wide${c.reset}`);
+    console.log(`${c.dim}No SpecMem/ screens found system-wide${c.reset}`);
     return;
   }
 
   console.log('');
-  console.log(`${c.cyan}${c.bold}All SpecMem/Claude Screens (System-Wide)${c.reset}`);
+  console.log(`${c.cyan}${c.bold}All SpecMem/ Screens (System-Wide)${c.reset}`);
   console.log(`${c.dim}─────────────────────────────────────────────────${c.reset}`);
 
   // Group by project
@@ -326,7 +326,7 @@ function main() {
   // Handle --help
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
-${c.cyan}${c.bold}SPECMEM CLEANUP${c.reset} - Claude Screen Session Manager
+${c.cyan}${c.bold}SPECMEM CLEANUP${c.reset} -  Screen Session Manager
 
 ${c.dim}Usage:${c.reset}
   specmem-cleanup                    List project screens
@@ -351,7 +351,7 @@ ${c.dim}Examples:${c.reset}
   specmem-cleanup --global           # See all projects
 
 ${c.dim}Progress Tracking:${c.reset}
-  When stopping Claude screens, the last 400 lines of output are saved to:
+  When stopping  screens, the last 400 lines of output are saved to:
   ./claudeProgressTracking/claude-session-TIMESTAMP-cleanup.txt
 `);
     process.exit(0);

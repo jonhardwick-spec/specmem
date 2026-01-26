@@ -7,7 +7,7 @@
  * - SubagentStop: Reports completion
  * - Uses suppressOutput to reduce noise while still injecting context
  *
- * The loading bars you see in Claude Code come from the agent's
+ * The loading bars you see in  Code come from the agent's
  * output streaming. This hook provides CONTEXT not loading bars.
  *
  * For true loading bars, agents need to output progress themselves
@@ -137,7 +137,7 @@ function handleSubagentStart(data) {
     .replace(/[#*_`]/g, '');
 
   // Loading context - gets injected into agent's context
-  // FLATTENED: No newlines to avoid breaking Claude's context formatting
+  // FLATTENED: No newlines to avoid breaking 's context formatting
   // CRITICAL: The announcement requirement is MANDATORY and ENFORCED by team-comms-enforcer.cjs
   // Make it PROMINENT and FIRST in the context so agents don't miss it
   const shortPurpose = purpose.slice(0, 30).replace(/"/g, "'");
@@ -177,7 +177,7 @@ function handleSubagentStop(data) {
   }
 
   // Completion context - NOT suppressed (allows finish notifications to show)
-  // FLATTENED: No newlines to avoid breaking Claude's context formatting
+  // FLATTENED: No newlines to avoid breaking 's context formatting
   const completionContext = '[TEAM#' + agentNum + '] Completed | Result: ' + (result || 'done') + ' | Duration: ' + (duration ? duration + 's' : 'N/A');
 
   const output = {

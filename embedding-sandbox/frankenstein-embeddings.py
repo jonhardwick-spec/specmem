@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FRANKENSTEIN EMBEDDINGS v4 - TRULY DYNAMIC Dimension System
+FRANKENSTEIN EMBEDDINGS v5 - TRULY DYNAMIC Dimension System
 
 NO HARDCODED DIMENSIONS - queries PostgreSQL for target dimension!
 
@@ -25,6 +25,87 @@ Protocol:
 
 @author hardwicksoftwareservices
 """
+
+# ============================================================================
+# CRITICAL: Handle SIGPIPE and redirect output to prevent silent death
+# This MUST be done before any imports or print statements!
+# ============================================================================
+import signal
+import sys
+import os
+import socket
+
+# Ignore SIGPIPE - prevents death when parent closes stdout/stderr pipes
+# SIG_IGN = ignore the signal completely (SIG_DFL would still kill us!)
+signal.signal(signal.SIGPIPE, signal.SIG_IGN)
+
+def _setup_daemon_io():
+    """
+    Set up I/O for daemon/service mode.
+    - Close all inherited FDs except 0,1,2 (prevents SIGPIPE from inherited pipes)
+    - Redirect stdin from /dev/null
+    - Redirect stdout/stderr to log file (at FD level for C code compatibility)
+
+    NOTE: We do NOT double-fork because MCP server tracks our PID.
+    Instead, we just fix the I/O issues that cause SIGPIPE.
+    """
+    is_service_mode = '--service' in sys.argv
+    is_not_tty = not sys.stdout.isatty() or not sys.stderr.isatty()
+
+    if not (is_service_mode or is_not_tty):
+        return  # Interactive mode - don't modify I/O
+
+    # Get log file path
+    socket_dir = os.environ.get('SPECMEM_SOCKET_DIR') or os.path.join(
+        os.environ.get('SPECMEM_PROJECT_PATH', os.getcwd()), 'specmem', 'sockets'
+    )
+    log_file = os.path.join(socket_dir, 'embedding-autostart.log')
+
+    try:
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+
+        # Close ALL inherited file descriptors EXCEPT 0,1,2
+        # This is CRITICAL - inherited pipes from parent cause SIGPIPE
+        max_fd = 1024
+        try:
+            max_fd = os.sysconf('SC_OPEN_MAX')
+        except (AttributeError, ValueError):
+            pass
+        for fd in range(3, min(max_fd, 1024)):
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+        # Redirect stdin from /dev/null
+        try:
+            dev_null = os.open('/dev/null', os.O_RDONLY)
+            os.dup2(dev_null, 0)
+            os.close(dev_null)
+        except OSError:
+            pass
+
+        # Redirect stdout/stderr to log file at FD level
+        # This ensures C code (torch, etc.) also writes to log file
+        log_fd = os.open(log_file, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
+        os.dup2(log_fd, 1)  # stdout -> log file
+        os.dup2(log_fd, 2)  # stderr -> log file
+        os.close(log_fd)
+
+        # Recreate Python's sys.stdout/stderr with the new file descriptors
+        sys.stdout = os.fdopen(1, 'w', buffering=1)
+        sys.stderr = os.fdopen(2, 'w', buffering=1)
+
+    except Exception as e:
+        # If setup fails, try to log the error
+        try:
+            with open('/tmp/frankenstein-io-setup-error.log', 'a') as f:
+                f.write(f"{e}\n")
+        except:
+            pass
+
+# Set up I/O FIRST before any other imports (which might print)
+_setup_daemon_io()
 
 # ============================================================================
 # AUTO-INSTALL MISSING DEPENDENCIES
@@ -65,6 +146,20 @@ _auto_install_deps()
 import os
 import hashlib
 import re
+import signal
+import sys
+
+# Fix BrokenPipeError when parent process dies - ignore SIGPIPE
+signal.signal(signal.SIGPIPE, signal.SIG_IGN)
+
+def _safe_print(msg, file=None):
+    """Print that ignores BrokenPipeError when parent dies"""
+    try:
+        print(msg, file=file or sys.stderr)
+    except BrokenPipeError:
+        pass  # Parent process died, nothing to do
+    except Exception:
+        pass  # Any other I/O error, just continue
 
 # Project identification for multi-instance isolation
 def get_project_dir_name():
@@ -94,6 +189,13 @@ PROJECT_PATH = os.environ.get('SPECMEM_PROJECT_PATH', 'default')
 
 SPECMEM_HOME = os.environ.get('SPECMEM_HOME', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SPECMEM_RUN_DIR = os.environ.get('SPECMEM_RUN_DIR', os.path.join(SPECMEM_HOME, 'run'))
+
+# Bundled model: shipped with the npm package, no download needed
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_BUNDLED_MODEL_DIR = os.path.join(_SCRIPT_DIR, 'models', 'all-MiniLM-L6-v2')
+BUNDLED_MODEL_PATH = _BUNDLED_MODEL_DIR if os.path.isfile(os.path.join(_BUNDLED_MODEL_DIR, 'onnx', 'model_quint8_avx2.onnx')) else None
+if BUNDLED_MODEL_PATH:
+    print(f"📦 Bundled model found: {BUNDLED_MODEL_PATH}", file=sys.stderr)
 # Socket directory: {PROJECT}/specmem/sockets/ - matches config.ts expectations
 # This is the ONLY location config.ts checks for per-project sockets
 def _get_socket_dir():
@@ -142,6 +244,99 @@ except ImportError as e:
     print(f"Missing dependency: {e}", file=sys.stderr)
     print("Install: pip install sentence-transformers scikit-learn torch", file=sys.stderr)
     sys.exit(1)
+
+# ============================================================================
+# CPU THREAD LIMITING - Without this, PyTorch uses ALL cores (200%+ CPU!)
+# ============================================================================
+# QQMS only adds delays between requests, but model.encode() runs unrestricted.
+# This is the ACTUAL fix for high CPU usage.
+#
+# Priority order for CPU core limits:
+#   1. SPECMEM_CPU_THREADS env var (direct override)
+#   2. user-config.json resources.cpuCoreMax (set via console cpucoremax command)
+#   3. Default: 2 threads
+def _get_cpu_thread_limit():
+    """Get CPU thread limit from env or user-config.json"""
+    # Check env var first (highest priority)
+    if os.environ.get('SPECMEM_CPU_THREADS'):
+        return int(os.environ['SPECMEM_CPU_THREADS'])
+
+    # Try to read from user-config.json
+    try:
+        config_path = os.path.join(PROJECT_PATH, 'specmem', 'user-config.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                core_max = config.get('resources', {}).get('cpuCoreMax')
+                if core_max is not None:
+                    return int(core_max)
+    except Exception as e:
+        print(f"⚠️ Could not read CPU core limit from config: {e}", file=sys.stderr)
+
+    # Default
+    return 2
+
+_CPU_THREAD_LIMIT = _get_cpu_thread_limit()
+_CPU_THREAD_MIN = int(os.environ.get('SPECMEM_CPU_THREADS_MIN', '1'))
+torch.set_num_threads(_CPU_THREAD_LIMIT)
+# Also limit OpenMP/MKL threads used by numpy/sklearn
+os.environ.setdefault('OMP_NUM_THREADS', str(_CPU_THREAD_LIMIT))
+os.environ.setdefault('MKL_NUM_THREADS', str(_CPU_THREAD_LIMIT))
+os.environ.setdefault('NUMEXPR_NUM_THREADS', str(_CPU_THREAD_LIMIT))
+os.environ.setdefault('OPENBLAS_NUM_THREADS', str(_CPU_THREAD_LIMIT))
+print(f"🔒 CPU threads: {_CPU_THREAD_MIN}-{_CPU_THREAD_LIMIT} (cpucoremin/cpucoremax to adjust)", file=sys.stderr)
+
+# ============================================================================
+# ONNX FILE SELECTION - Auto-detect best quantized model for CPU
+# ============================================================================
+def _detect_best_onnx_file():
+    """
+    Detect CPU features and return the best ONNX model file name.
+    Priority: avx512_vnni > avx512 > avx2 > default
+    Falls back to whatever .onnx file exists if the optimal one isn't found.
+    """
+    # Ordered by preference (best first)
+    candidates = []
+
+    try:
+        with open('/proc/cpuinfo', 'r') as f:
+            cpuinfo = f.read().lower()
+
+        if 'avx512_vnni' in cpuinfo or 'avx512vnni' in cpuinfo:
+            candidates.append(("onnx/model_qint8_avx512_vnni.onnx", "AVX512-VNNI"))
+        if 'avx512f' in cpuinfo or 'avx512' in cpuinfo:
+            candidates.append(("onnx/model_qint8_avx512.onnx", "AVX512"))
+        if 'avx2' in cpuinfo:
+            candidates.append(("onnx/model_quint8_avx2.onnx", "AVX2"))
+    except Exception as e:
+        print(f"⚠️ Could not detect CPU features: {e}", file=sys.stderr)
+
+    # Always add standard fallbacks
+    candidates.append(("onnx/model_quantized.onnx", "quantized"))
+    candidates.append(("onnx/model.onnx", "default"))
+
+    # Check which files actually exist in the bundled model dir
+    bundled_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'all-MiniLM-L6-v2')
+    for onnx_file, label in candidates:
+        full_path = os.path.join(bundled_dir, onnx_file)
+        if os.path.isfile(full_path):
+            print(f"🚀 Using {label} ONNX model: {onnx_file}", file=sys.stderr)
+            return onnx_file
+
+    # Last resort: find ANY .onnx file in the bundled dir
+    onnx_dir = os.path.join(bundled_dir, 'onnx')
+    if os.path.isdir(onnx_dir):
+        for f in os.listdir(onnx_dir):
+            if f.endswith('.onnx'):
+                result = f"onnx/{f}"
+                print(f"🔍 Auto-detected ONNX model: {result}", file=sys.stderr)
+                return result
+
+    # Nothing found - return default and let SentenceTransformer handle it
+    print("ℹ️ No bundled ONNX model found - using default", file=sys.stderr)
+    return "onnx/model.onnx"
+
+_BEST_ONNX_FILE = _detect_best_onnx_file()
 
 
 class EmbeddingPriority(IntEnum):
@@ -649,7 +844,8 @@ class LayerOffloadingTransformer:
     """
 
     def __init__(self, model_name: str, cache_dir: Path):
-        self.model_name = model_name
+        # Use bundled model if available
+        self.model_name = BUNDLED_MODEL_PATH if BUNDLED_MODEL_PATH else model_name
         self.cache_dir = cache_dir
         self.tokenizer = None
         self.model_config = None
@@ -703,10 +899,13 @@ class LayerOffloadingTransformer:
         from sentence_transformers import SentenceTransformer
 
         # Load model, encode, immediately unload
+        # NOTE: backend='onnx' is REQUIRED for model_kwargs file_name to work
         model = SentenceTransformer(
             self.model_name,
             device='cpu',
-            cache_folder=str(self.cache_dir)
+            backend='onnx',
+            cache_folder=str(self.cache_dir),
+            model_kwargs={"file_name": _BEST_ONNX_FILE}
         )
 
         embedding = model.encode(text, convert_to_numpy=True, show_progress_bar=False)
@@ -724,10 +923,13 @@ class LayerOffloadingTransformer:
 
         from sentence_transformers import SentenceTransformer
 
+        # NOTE: backend='onnx' is REQUIRED for model_kwargs file_name to work
         model = SentenceTransformer(
             self.model_name,
             device='cpu',
-            cache_folder=str(self.cache_dir)
+            backend='onnx',
+            cache_folder=str(self.cache_dir),
+            model_kwargs={"file_name": _BEST_ONNX_FILE}
         )
 
         embeddings = model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
@@ -1023,6 +1225,9 @@ class QQMSThrottler:
     Implements intelligent rate limiting and throttling to prevent CPU spikes
     while maintaining embedding quality. Uses a token bucket algorithm with
     CPU-aware dynamic adjustment.
+
+    NEW: Also dynamically adjusts torch thread count between cpucoremin and cpucoremax
+    based on CPU load - scales down when CPU is high, scales up when CPU is low.
     """
 
     def __init__(self, config: Optional[QQMSConfig] = None):
@@ -1043,12 +1248,49 @@ class QQMSThrottler:
         # Stats
         self.total_delay_ms: float = 0.0
         self.throttle_events: int = 0
+        self.thread_adjustments: int = 0
+
+        # Dynamic thread scaling (cpucoremin to cpucoremax)
+        self.thread_min = _CPU_THREAD_MIN
+        self.thread_max = _CPU_THREAD_LIMIT
+        self.current_threads = _CPU_THREAD_LIMIT
+        self.last_thread_adjust = 0.0
 
         print(f"🕐 QQMS Throttler initialized:", file=sys.stderr)
         print(f"   Base delay: {self.config.base_delay_ms}ms", file=sys.stderr)
         print(f"   Max RPS: {self.config.max_requests_per_second}", file=sys.stderr)
         print(f"   Burst limit: {self.config.burst_limit}", file=sys.stderr)
         print(f"   CPU thresholds: {self.config.cpu_low_threshold}%/{self.config.cpu_high_threshold}%/{self.config.cpu_critical_threshold}%", file=sys.stderr)
+        print(f"   Thread scaling: {self.thread_min}-{self.thread_max} cores (dynamic)", file=sys.stderr)
+
+    def _adjust_threads_for_cpu(self):
+        """
+        Dynamically adjust torch thread count based on CPU usage.
+        This is the REAL CPU limiting - not just delays!
+        """
+        now = time.time()
+        # Only adjust every 5 seconds to avoid thrashing
+        if now - self.last_thread_adjust < 5.0:
+            return
+
+        cpu = self.cpu_monitor.get_cpu_usage()
+        old_threads = self.current_threads
+
+        if cpu > self.config.cpu_critical_threshold:
+            # Critical: use minimum threads
+            self.current_threads = self.thread_min
+        elif cpu > self.config.cpu_high_threshold:
+            # High: reduce threads
+            self.current_threads = max(self.thread_min, self.current_threads - 1)
+        elif cpu < self.config.cpu_low_threshold:
+            # Low CPU: can increase threads
+            self.current_threads = min(self.thread_max, self.current_threads + 1)
+
+        if self.current_threads != old_threads:
+            torch.set_num_threads(self.current_threads)
+            self.thread_adjustments += 1
+            self.last_thread_adjust = now
+            print(f"🔧 QQMS: Adjusted threads {old_threads} → {self.current_threads} (CPU: {cpu:.1f}%)", file=sys.stderr)
 
     def _refill_tokens(self):
         """Refill tokens based on elapsed time"""
@@ -1093,6 +1335,9 @@ class QQMSThrottler:
         """
         with self._token_lock:
             self._refill_tokens()
+
+            # REAL CPU CONTROL: Adjust thread count based on CPU load
+            self._adjust_threads_for_cpu()
 
             now = time.time()
             delay_ms = 0.0
@@ -1734,7 +1979,7 @@ class QueryAnalyzer:
 
 class FrankensteinEmbeddings:
     """
-    FRANKENSTEIN v4 - TRULY DYNAMIC embedding system.
+    FRANKENSTEIN v5 - TRULY DYNAMIC embedding system.
 
     NO HARDCODED DIMENSIONS - queries PostgreSQL for target dimension.
     Supports ANY dimension the database specifies.
@@ -1805,13 +2050,18 @@ class FrankensteinEmbeddings:
         self.ram_guard = RAMGuard()
 
         # Store model name for lazy-loading
-        self.base_model = base_model
+        # Use bundled model path if available (no network download needed)
+        self.base_model = BUNDLED_MODEL_PATH if BUNDLED_MODEL_PATH else base_model
 
         # Track request time for idle cleanup
         self.last_request_time = time.time()
 
         # THREAD SAFETY: Lock for model loading to prevent race conditions
         self._model_lock = threading.Lock()
+
+        # Health status flag: reflects whether model is loaded and functional
+        # Set to False on load failure, True on successful load + health check
+        self._model_healthy = True
 
         # ═══════════════════════════════════════════════════════════════════
         # OPT-6: LAZY LOADING - Don't load model until first request
@@ -1824,11 +2074,14 @@ class FrankensteinEmbeddings:
             self.dim_config.native_dims = 384  # MiniLM-L6-v2 is always 384
         else:
             # EAGER MODE: Load model immediately (for high-RAM or heavyOps)
-            print(f"Loading model: {base_model}", file=sys.stderr)
+            print(f"Loading model: {self.base_model} ({_BEST_ONNX_FILE})", file=sys.stderr)
+            # NOTE: backend='onnx' is REQUIRED for model_kwargs file_name to work
             self.model = SentenceTransformer(
-                base_model,
+                self.base_model,
                 device='cpu',
-                cache_folder=str(self.cache_dir)
+                backend='onnx',
+                cache_folder=str(self.cache_dir),
+                model_kwargs={"file_name": _BEST_ONNX_FILE}
             )
             self.dim_config.native_dims = self.model.get_sentence_embedding_dimension()
             print(f"   Native dimensions: {self.dim_config.native_dims}", file=sys.stderr)
@@ -1868,7 +2121,7 @@ class FrankensteinEmbeddings:
         print(f"   RAM limit: {self.ram_guard.MAX_RAM_MB}MB", file=sys.stderr)
 
     def _get_db_connection(self):
-        """Get a psycopg2 database connection"""
+        """Get a psycopg2 database connection with project schema isolation"""
         try:
             import psycopg2
             host = self.db_config.get('host', os.environ.get('SPECMEM_DB_HOST', 'host.docker.internal'))
@@ -1877,17 +2130,37 @@ class FrankensteinEmbeddings:
             user = self.db_config.get('user', os.environ.get('SPECMEM_DB_USER', 'specmem_westayunprofessional'))
             password = self.db_config.get('password', os.environ.get('SPECMEM_DB_PASSWORD', 'specmem_westayunprofessional'))
 
-            return psycopg2.connect(
+            conn = psycopg2.connect(
                 host=host,
                 port=port,
                 database=db,
                 user=user,
                 password=password,
-                connect_timeout=5
+                connect_timeout=5,
+                options=f"-c search_path={self._get_db_schema()},public"
             )
+            return conn
         except Exception as e:
             print(f"DB connection failed: {e}", file=sys.stderr)
             return None
+
+    def _get_db_schema(self):
+        """Get the project-specific DB schema name (specmem_<project_dir>)"""
+        # Check env var first (set by embeddingServerManager)
+        schema = os.environ.get('SPECMEM_DB_SCHEMA', '')
+        if schema:
+            return schema
+        # Derive from project path (same logic as Node.js getProjectSchema)
+        project_path = os.environ.get('SPECMEM_PROJECT_PATH', '/')
+        if project_path in ('/', ''):
+            return 'specmem_default'
+        import re
+        dir_name = os.path.basename(project_path.rstrip('/'))
+        dir_name = re.sub(r'[^a-z0-9_]', '_', dir_name.lower())
+        dir_name = re.sub(r'_+', '_', dir_name).strip('_')
+        if not dir_name:
+            return 'specmem_default'
+        return f'specmem_{dir_name[:50]}'
 
     def _ensure_model_loaded(self):
         """Lazy-load model if it was unloaded during idle pause. THREAD-SAFE.
@@ -1898,40 +2171,79 @@ class FrankensteinEmbeddings:
 
         Uses double-checked locking pattern to avoid lock contention when
         model is already loaded.
+
+        Retries with exponential backoff on failure (Issue #17 fix).
+        Configurable via:
+        - SPECMEM_MODEL_RELOAD_RETRIES (default 3)
+        - SPECMEM_MODEL_RELOAD_DELAY_MS (default 1000) - base delay in ms
+
+        Raises RuntimeError if all retries fail, ensuring callers get an
+        explicit error instead of silent failure.
         """
-        # Fast path: model already loaded (no lock needed)
-        if self.model is not None:
+        # Fast path: model already loaded and healthy (no lock needed)
+        if self.model is not None and getattr(self, '_model_healthy', True):
             return
+
+        max_retries = int(os.environ.get('SPECMEM_MODEL_RELOAD_RETRIES', '3'))
+        base_delay_ms = int(os.environ.get('SPECMEM_MODEL_RELOAD_DELAY_MS', '1000'))
 
         # Slow path: need to load model (with lock)
         with self._model_lock:
             # Double-check inside lock (another thread may have loaded it)
-            if self.model is not None:
+            if self.model is not None and getattr(self, '_model_healthy', True):
                 return
 
-            print(f"🔄 Lazy-loading model: {self.base_model}", file=sys.stderr)
-            start = time.time()
-            try:
-                self.model = SentenceTransformer(
-                    self.base_model,
-                    device='cpu',
-                    cache_folder=str(self.cache_dir)
-                )
-                load_time = (time.time() - start) * 1000
-                print(f"✅ Model loaded in {load_time:.0f}ms - ready to embed!", file=sys.stderr)
+            last_error = None
+            for attempt in range(1, max_retries + 1):
+                print(f"[MODEL-RELOAD] Loading model: {self.base_model} ({_BEST_ONNX_FILE}) (attempt {attempt}/{max_retries})", file=sys.stderr)
+                start = time.time()
+                try:
+                    # NOTE: backend='onnx' is REQUIRED for model_kwargs file_name to work
+                    self.model = SentenceTransformer(
+                        self.base_model,
+                        device='cpu',
+                        backend='onnx',
+                        cache_folder=str(self.cache_dir),
+                        model_kwargs={"file_name": _BEST_ONNX_FILE}
+                    )
+                    load_time = (time.time() - start) * 1000
 
-                # Update native dims if we didn't know them
-                actual_dims = self.model.get_sentence_embedding_dimension()
-                if self.dim_config.native_dims != actual_dims:
-                    print(f"   Native dims updated: {self.dim_config.native_dims} -> {actual_dims}", file=sys.stderr)
-                    self.dim_config.native_dims = actual_dims
+                    # Verify the model actually works by doing a test encode
+                    test_embedding = self.model.encode("health check", show_progress_bar=False)
+                    if test_embedding is None or len(test_embedding) == 0:
+                        raise RuntimeError("Model loaded but produced empty embedding on health check")
 
-            except Exception as e:
-                print(f"❌ Model loading failed: {e}", file=sys.stderr)
-                raise
+                    self._model_healthy = True
+                    print(f"[MODEL-RELOAD] Model loaded and verified in {load_time:.0f}ms (attempt {attempt}) - ready to embed!", file=sys.stderr)
 
-            # Update last request time so idle monitor resets
-            self.last_request_time = time.time()
+                    # Update native dims if we didn't know them
+                    actual_dims = self.model.get_sentence_embedding_dimension()
+                    if self.dim_config.native_dims != actual_dims:
+                        print(f"   Native dims updated: {self.dim_config.native_dims} -> {actual_dims}", file=sys.stderr)
+                        self.dim_config.native_dims = actual_dims
+
+                    # Update last request time so idle monitor resets
+                    self.last_request_time = time.time()
+                    return  # Success
+
+                except Exception as e:
+                    last_error = e
+                    self.model = None
+                    self._model_healthy = False
+                    print(f"[MODEL-RELOAD] Attempt {attempt}/{max_retries} failed: {e}", file=sys.stderr)
+
+                    if attempt < max_retries:
+                        # Exponential backoff: base_delay * 2^(attempt-1)
+                        # e.g., with 1000ms base: 1s, 2s, 4s
+                        delay_seconds = (base_delay_ms / 1000.0) * (2 ** (attempt - 1))
+                        print(f"[MODEL-RELOAD] Retrying in {delay_seconds:.1f}s...", file=sys.stderr)
+                        time.sleep(delay_seconds)
+
+            # All retries exhausted
+            self._model_healthy = False
+            error_msg = f"Model reload failed after {max_retries} attempts. Last error: {last_error}"
+            print(f"[MODEL-RELOAD] FATAL: {error_msg}", file=sys.stderr)
+            raise RuntimeError(error_msg)
 
     def _query_database_dimension(self) -> int:
         """
@@ -2256,7 +2568,8 @@ class FrankensteinEmbeddings:
             'ram_usage_mb': round(self.ram_guard.get_ram_usage_mb(), 1),
             'ram_limit_mb': self.ram_guard.MAX_RAM_MB,
             'throttling_enabled': self.enable_throttling,
-            'model_loaded': self.model is not None
+            'model_loaded': self.model is not None,
+            'model_healthy': getattr(self, '_model_healthy', True)
         }
 
         # Add low-resource optimization stats
@@ -2283,7 +2596,7 @@ class FrankensteinEmbeddings:
 
 class EmbeddingServer:
     """
-    Socket server that serves FRANKENSTEIN v4 embeddings.
+    Socket server that serves FRANKENSTEIN v5 embeddings.
     Compatible with existing specmem embedding socket protocol.
 
     TRULY DYNAMIC DIMENSIONS:
@@ -2317,11 +2630,17 @@ class EmbeddingServer:
         self.shutdown_requested = False
 
         # KYS (Keep Yourself Safe) watchdog - two-way health check
-        # If MCP server doesn't send "kys" heartbeat within 90 seconds, we suicide
+        # If MCP server doesn't send "kys" heartbeat within timeout, take action
         # This prevents orphan embedding servers when MCP crashes
-        # Grace period increased to handle startup delays and heavy operations
+        # Timeout and mode are configurable via environment variables
         self.last_kys_time = time.time()
-        self.kys_timeout = 90  # 25 seconds from MCP + 65 second grace period
+        self.kys_timeout = int(os.environ.get('SPECMEM_KYS_TIMEOUT_SECONDS', '600'))
+        # KYS mode: "kill" = process exit (old behavior), "unload" = release model but keep socket,
+        # "standby" = keep everything loaded and just idle
+        self.kys_mode = os.environ.get('SPECMEM_KYS_MODE', 'unload').lower()
+        if self.kys_mode not in ('kill', 'unload', 'standby'):
+            print(f"[KYS] Invalid SPECMEM_KYS_MODE '{self.kys_mode}', defaulting to 'unload'", file=sys.stderr)
+            self.kys_mode = 'unload'
 
         # QQMS v2 - enhanced queue with FIFO + ACK (takes precedence if provided)
         self.qqms_v2 = qqms_v2
@@ -2346,8 +2665,21 @@ class EmbeddingServer:
         # Start dimension refresh thread (every 60 seconds)
         self._start_dimension_refresh_thread()
 
+    def _safe_sendall(self, conn, data: bytes) -> bool:
+        """Send all data using MSG_NOSIGNAL to prevent SIGPIPE on broken connections."""
+        total_sent = 0
+        while total_sent < len(data):
+            try:
+                sent = conn.send(data[total_sent:], socket.MSG_NOSIGNAL)
+                if sent == 0:
+                    return False
+                total_sent += sent
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                return False
+        return True
+
     def _get_db_connection(self):
-        """Get a psycopg2 database connection"""
+        """Get a psycopg2 database connection with project schema isolation"""
         try:
             import psycopg2
             host = self.db_config.get('host', os.environ.get('SPECMEM_DB_HOST', 'host.docker.internal'))
@@ -2355,6 +2687,7 @@ class EmbeddingServer:
             db = self.db_config.get('database', os.environ.get('SPECMEM_DB_NAME', 'specmem_westayunprofessional'))
             user = self.db_config.get('user', os.environ.get('SPECMEM_DB_USER', 'specmem_westayunprofessional'))
             password = self.db_config.get('password', os.environ.get('SPECMEM_DB_PASSWORD', 'specmem_westayunprofessional'))
+            schema = self._get_db_schema()
 
             return psycopg2.connect(
                 host=host,
@@ -2362,11 +2695,28 @@ class EmbeddingServer:
                 database=db,
                 user=user,
                 password=password,
-                connect_timeout=5
+                connect_timeout=5,
+                options=f"-c search_path={schema},public"
             )
         except Exception as e:
             print(f"⚠️ DB connection failed: {e}", file=sys.stderr)
             return None
+
+    def _get_db_schema(self):
+        """Get the project-specific DB schema name (specmem_<project_dir>)"""
+        schema = os.environ.get('SPECMEM_DB_SCHEMA', '')
+        if schema:
+            return schema
+        project_path = os.environ.get('SPECMEM_PROJECT_PATH', '/')
+        if project_path in ('/', ''):
+            return 'specmem_default'
+        import re
+        dir_name = os.path.basename(project_path.rstrip('/'))
+        dir_name = re.sub(r'[^a-z0-9_]', '_', dir_name.lower())
+        dir_name = re.sub(r'_+', '_', dir_name).strip('_')
+        if not dir_name:
+            return 'specmem_default'
+        return f'specmem_{dir_name[:50]}'
 
     def _get_table_dimensions(self, table_name: str) -> int:
         """
@@ -2522,46 +2872,155 @@ class EmbeddingServer:
         KYS (Keep Yourself Safe) Watchdog - Two-way health check system.
 
         The MCP server sends {"type": "kys", "text": "kurt cobain t minus 25"} every 25 seconds.
-        If we don't receive this heartbeat within 30 seconds (25 + 5 grace), we commit suicide.
+        If we don't receive this heartbeat within the configured timeout, we take action.
         This prevents orphan embedding servers when MCP crashes or is killed.
 
         Without this, crashed MCP leaves zombie embedding servers consuming RAM/CPU forever.
+
+        Modes (SPECMEM_KYS_MODE):
+        - "kill":    Process exit (original behavior)
+        - "unload":  Release ONNX model from memory but keep socket listener alive (default)
+        - "standby": Keep everything loaded, just idle
         """
+        def is_claude_alive_for_project():
+            """Check if any Claude/node process is running for this project directory."""
+            try:
+                import subprocess
+                # Check for node processes with this project path in their environment
+                result = subprocess.run(
+                    ['pgrep', '-f', f'SPECMEM_PROJECT_PATH={PROJECT_PATH}'],
+                    capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    return True
+                # Also check for claude processes with cwd in project
+                result2 = subprocess.run(
+                    ['pgrep', '-f', f'claude.*{PROJECT_PATH}'],
+                    capture_output=True, text=True, timeout=5
+                )
+                if result2.returncode == 0 and result2.stdout.strip():
+                    return True
+                return False
+            except Exception:
+                return False  # Assume dead if we can't check
+
+        def _kys_unload_model():
+            """Unload the model to free RAM but keep the socket listener alive.
+            On next request, _ensure_model_loaded() will reload it."""
+            try:
+                if hasattr(self.embedder, 'model') and self.embedder.model is not None:
+                    del self.embedder.model
+                    self.embedder.model = None
+                    import gc
+                    gc.collect()
+                    try:
+                        import torch
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
+                    except Exception:
+                        pass
+                    print(f"[KYS-UNLOAD] Model released from memory. Socket still listening.", file=sys.stderr)
+                    print(f"[KYS-UNLOAD] Model will reload on next embedding request.", file=sys.stderr)
+                else:
+                    print(f"[KYS-UNLOAD] Model already unloaded, nothing to do.", file=sys.stderr)
+            except Exception as e:
+                print(f"[KYS-UNLOAD] Error unloading model: {e}", file=sys.stderr)
+
         def watchdog():
+            # STARTUP GRACE PERIOD: Don't enforce KYS for first 60 seconds
+            # This allows MCP server to fully initialize (can take 50-60+ seconds)
+            startup_grace_period = 60  # seconds
+            startup_time = time.time()
+            # Extended timeout when there's been recent activity
+            activity_grace_period = 300  # 5 minutes of no activity before considering death
+
             while not self.shutdown_requested:
                 time.sleep(10)  # Check every 10 seconds
 
+                # Skip enforcement during startup grace period
+                if time.time() - startup_time < startup_grace_period:
+                    continue
+
                 time_since_kys = time.time() - self.last_kys_time
+                time_since_activity = time.time() - self.last_request_time
 
+                # MOST IMPORTANT CHECK: Is Claude actually running for this project?
+                if is_claude_alive_for_project():
+                    # Claude is alive! Don't kill even without heartbeat
+                    if time_since_kys > self.kys_timeout and int(time_since_kys) % 120 < 10:
+                        print(f"[KYS] No heartbeat for {time_since_kys:.0f}s but Claude process detected - staying alive", file=sys.stderr)
+                    continue
+
+                # Only take action if BOTH conditions are true:
+                # 1. No heartbeat for kys_timeout
+                # 2. No embedding activity for activity_grace_period (5 min)
+                # This prevents acting on active servers just because heartbeat stopped
                 if time_since_kys > self.kys_timeout:
-                    print(f"", file=sys.stderr)
-                    print(f"💀 KYS WATCHDOG TRIGGERED", file=sys.stderr)
-                    print(f"   No heartbeat from MCP in {time_since_kys:.0f}s (timeout: {self.kys_timeout}s)", file=sys.stderr)
-                    print(f"   MCP server likely crashed - committing suicide to prevent zombie", file=sys.stderr)
-                    print(f"   'kurt cobain t minus 0'", file=sys.stderr)
-                    print(f"", file=sys.stderr)
+                    if time_since_activity < activity_grace_period:
+                        # Recent activity - don't act, just warn once per minute
+                        if int(time_since_kys) % 60 < 10:
+                            print(f"[KYS] No heartbeat for {time_since_kys:.0f}s but recent activity ({time_since_activity:.0f}s ago) - staying alive", file=sys.stderr)
+                        continue
 
-                    # Write death reason file so clients know to auto-respawn
-                    try:
-                        death_reason_path = os.path.join(os.path.dirname(self.socket_path), 'embedding-death-reason.txt')
-                        with open(death_reason_path, 'w') as f:
-                            f.write(f"kys\n{time.time()}\nNo heartbeat from MCP in {time_since_kys:.0f}s")
-                        print(f"   📝 Death reason written to {death_reason_path}", file=sys.stderr)
-                    except Exception as e:
-                        print(f"   ⚠️ Failed to write death reason: {e}", file=sys.stderr)
+                    # --- KYS MODE DISPATCH ---
+                    if self.kys_mode == 'standby':
+                        # STANDBY MODE: Keep everything loaded, just log and continue
+                        if int(time_since_kys) % 120 < 10:
+                            print(f"[KYS-STANDBY] No heartbeat for {time_since_kys:.0f}s, no activity for {time_since_activity:.0f}s - idling in standby mode", file=sys.stderr)
+                        continue
 
-                    # Set shutdown flag and force exit
-                    self.shutdown_requested = True
+                    elif self.kys_mode == 'unload':
+                        # UNLOAD MODE: Release model from memory but keep socket alive
+                        # Only unload once - check if model is still loaded
+                        if hasattr(self.embedder, 'model') and self.embedder.model is not None:
+                            print(f"", file=sys.stderr)
+                            print(f"[KYS-UNLOAD] WATCHDOG TRIGGERED (mode=unload)", file=sys.stderr)
+                            print(f"   No heartbeat from MCP in {time_since_kys:.0f}s (timeout: {self.kys_timeout}s)", file=sys.stderr)
+                            print(f"   No embedding activity for {time_since_activity:.0f}s (grace: {activity_grace_period}s)", file=sys.stderr)
+                            print(f"   Unloading model to free RAM - socket stays alive for reconnection", file=sys.stderr)
+                            _kys_unload_model()
 
-                    # Give a moment for cleanup
-                    time.sleep(1)
+                            # Write status file so clients know state
+                            try:
+                                death_reason_path = os.path.join(os.path.dirname(self.socket_path), 'embedding-death-reason.txt')
+                                with open(death_reason_path, 'w') as f:
+                                    f.write(f"kys-unload\n{time.time()}\nModel unloaded after no heartbeat ({time_since_kys:.0f}s) AND no activity ({time_since_activity:.0f}s). Socket still alive.")
+                            except Exception as e:
+                                print(f"   [KYS-UNLOAD] Failed to write status file: {e}", file=sys.stderr)
+                        # Don't exit - keep looping. Model will reload on next request.
+                        continue
 
-                    # Force exit - os._exit bypasses finally blocks for immediate death
-                    os._exit(0)
+                    else:
+                        # KILL MODE (original behavior): Process exit
+                        print(f"", file=sys.stderr)
+                        print(f"[KYS-KILL] WATCHDOG TRIGGERED (mode=kill)", file=sys.stderr)
+                        print(f"   No heartbeat from MCP in {time_since_kys:.0f}s (timeout: {self.kys_timeout}s)", file=sys.stderr)
+                        print(f"   No embedding activity for {time_since_activity:.0f}s (grace: {activity_grace_period}s)", file=sys.stderr)
+                        print(f"   MCP server likely crashed - committing suicide to prevent zombie", file=sys.stderr)
+                        print(f"   'kurt cobain t minus 0'", file=sys.stderr)
+                        print(f"", file=sys.stderr)
+
+                        # Write death reason file so clients know to auto-respawn
+                        try:
+                            death_reason_path = os.path.join(os.path.dirname(self.socket_path), 'embedding-death-reason.txt')
+                            with open(death_reason_path, 'w') as f:
+                                f.write(f"kys\n{time.time()}\nNo heartbeat ({time_since_kys:.0f}s) AND no activity ({time_since_activity:.0f}s)")
+                            print(f"   Death reason written to {death_reason_path}", file=sys.stderr)
+                        except Exception as e:
+                            print(f"   Failed to write death reason: {e}", file=sys.stderr)
+
+                        # Set shutdown flag and force exit
+                        self.shutdown_requested = True
+
+                        # Give a moment for cleanup
+                        time.sleep(1)
+
+                        # Force exit - os._exit bypasses finally blocks for immediate death
+                        os._exit(0)
 
         thread = threading.Thread(target=watchdog, daemon=True)
         thread.start()
-        print(f"   🛡️  KYS Watchdog: ENABLED (suicide if no heartbeat in {self.kys_timeout}s)", file=sys.stderr)
+        print(f"   KYS Watchdog: ENABLED (mode={self.kys_mode}, timeout={self.kys_timeout}s)", file=sys.stderr)
 
     def _process_codebase_files(self, batch_size: int = 200, limit: int = 0, project_path: str = None) -> Dict:
         """
@@ -2592,17 +3051,30 @@ class EmbeddingServer:
 
         try:
             # Get TOTAL count first for progress tracking
+            # Schema isolation already separates projects, so project_path filter
+            # is only needed when file_path values are absolute. Check if filter
+            # matches anything — if not, skip it (paths are likely relative).
             count_cursor = conn.cursor()
+            use_project_filter = False
             if project_path:
                 count_cursor.execute(
                     "SELECT COUNT(*) FROM codebase_files WHERE embedding IS NULL AND content IS NOT NULL AND file_path LIKE %s",
                     (f"{project_path}%",)
                 )
-                print(f"🎯 Filtering to project: {project_path}", file=sys.stderr)
+                filtered_count = count_cursor.fetchone()[0]
+                if filtered_count > 0:
+                    use_project_filter = True
+                    total_missing = filtered_count
+                    print(f"🎯 Filtering to project: {project_path} ({total_missing} files)", file=sys.stderr)
+                else:
+                    # Paths are relative — schema isolation handles project separation
+                    count_cursor.execute("SELECT COUNT(*) FROM codebase_files WHERE embedding IS NULL AND content IS NOT NULL")
+                    total_missing = count_cursor.fetchone()[0]
+                    print(f"📁 Schema-isolated mode (relative paths, {total_missing} files)", file=sys.stderr)
             else:
                 count_cursor.execute("SELECT COUNT(*) FROM codebase_files WHERE embedding IS NULL AND content IS NOT NULL")
+                total_missing = count_cursor.fetchone()[0]
                 print(f"⚠️ Processing ALL projects (no project_path filter)", file=sys.stderr)
-            total_missing = count_cursor.fetchone()[0]
             count_cursor.close()
 
             print(f"📊 Total files needing embeddings: {total_missing}", file=sys.stderr)
@@ -2620,7 +3092,7 @@ class EmbeddingServer:
 
                 # Fetch next batch - always gets files without embeddings
                 cursor = conn.cursor()
-                if project_path:
+                if use_project_filter:
                     cursor.execute("""
                         SELECT id, file_path, content
                         FROM codebase_files
@@ -2808,17 +3280,28 @@ class EmbeddingServer:
 
         try:
             # Get TOTAL count first for progress tracking
+            # Schema isolation handles project separation, so project_path filter
+            # only applies when file_path values are absolute paths.
             count_cursor = conn.cursor()
+            use_project_filter = False
             if project_path:
                 count_cursor.execute(
                     "SELECT COUNT(*) FROM code_definitions WHERE embedding IS NULL AND file_path LIKE %s",
                     (f"{project_path}%",)
                 )
-                print(f"🎯 Filtering to project: {project_path}", file=sys.stderr)
+                filtered_count = count_cursor.fetchone()[0]
+                if filtered_count > 0:
+                    use_project_filter = True
+                    total_missing = filtered_count
+                    print(f"🎯 Filtering to project: {project_path} ({total_missing} definitions)", file=sys.stderr)
+                else:
+                    count_cursor.execute("SELECT COUNT(*) FROM code_definitions WHERE embedding IS NULL")
+                    total_missing = count_cursor.fetchone()[0]
+                    print(f"📁 Schema-isolated mode (relative paths, {total_missing} definitions)", file=sys.stderr)
             else:
                 count_cursor.execute("SELECT COUNT(*) FROM code_definitions WHERE embedding IS NULL")
+                total_missing = count_cursor.fetchone()[0]
                 print(f"⚠️ Processing ALL projects (no project_path filter)", file=sys.stderr)
-            total_missing = count_cursor.fetchone()[0]
             count_cursor.close()
 
             print(f"📊 Total code_definitions needing embeddings: {total_missing}", file=sys.stderr)
@@ -2836,7 +3319,7 @@ class EmbeddingServer:
 
                 # Fetch next batch
                 cursor = conn.cursor()
-                if project_path:
+                if use_project_filter:
                     cursor.execute("""
                         SELECT id, definition_type, name, signature, docstring, language, file_path
                         FROM code_definitions
@@ -2943,6 +3426,18 @@ class EmbeddingServer:
         if req_type == 'health':
             # Treat like stats request
             request['stats'] = True
+        elif req_type == 'ready':
+            # Fast readiness check - just returns model loading state
+            # Used by specmem-init for event-based startup instead of timeouts
+            model_loaded = self.embedder.model is not None
+            model_healthy = getattr(self.embedder, '_model_healthy', True)
+            return {
+                'ready': model_loaded and model_healthy,
+                'model_loaded': model_loaded,
+                'model_healthy': model_healthy,
+                'lazy_loading': self.embedder.low_resource_config.lazy_loading,
+                'status': 'ready' if (model_loaded and model_healthy) else ('error' if not model_healthy else 'loading')
+            }
         elif req_type == 'kys':
             # KYS (Keep Yourself Safe) heartbeat from MCP server
             # This is a two-way ack system - MCP sends every 25 seconds
@@ -2952,6 +3447,9 @@ class EmbeddingServer:
                 'status': 'alive',
                 'ack': 'kurt cobain t minus reset',
                 'timeout_remaining': self.kys_timeout,
+                'kys_mode': self.kys_mode,
+                'model_loaded': self.embedder.model is not None,
+                'model_healthy': getattr(self.embedder, '_model_healthy', True),
                 'project': PROJECT_DIR_NAME
             }
         elif req_type == 'get_dimension':
@@ -2971,16 +3469,26 @@ class EmbeddingServer:
         elif req_type == 'embed':
             # Already handled by text/texts fields below
             pass
-        elif req_type and req_type not in ['embed', 'health', 'get_dimension', 'set_dimension', 'kys']:
+        elif req_type == 'batch_embed':
+            # batch_embed type from specmem-init.cjs - treated same as 'embed' with texts array
+            # Client sends: {type: 'batch_embed', texts: [...]}
+            # Response: {embeddings: [[...], [...], ...]}
+            pass
+        elif req_type and req_type not in ['embed', 'health', 'get_dimension', 'set_dimension', 'kys', 'batch_embed']:
             # Unknown type - return error
             return {'error': f'Unknown request type: {req_type}'}
 
         # Stats request (or health check)
         if request.get('stats'):
+            model_loaded = self.embedder.model is not None
+            model_healthy = getattr(self.embedder, '_model_healthy', True)
             stats_response = {
-                'status': 'healthy',  # For health check compatibility
+                'status': 'healthy' if model_healthy else 'degraded',
+                'ready': model_loaded and model_healthy,
+                'model_loaded': model_loaded,
+                'model_healthy': model_healthy,
                 'stats': self.embedder.get_stats(),
-                'model': 'frankenstein-v4-dynamic',
+                'model': 'frankenstein-v5-dynamic',
                 'project': PROJECT_DIR_NAME,
                 'project_path': PROJECT_PATH,
                 'project_hash': PROJECT_HASH,  # backwards compat
@@ -3079,7 +3587,7 @@ class EmbeddingServer:
             return {
                 'embedding': embedding.tolist(),
                 'dimensions': len(embedding),
-                'model': 'frankenstein-v4-dynamic',
+                'model': 'frankenstein-v5-dynamic',
                 'target_dims': self.embedder.dim_config.target_dims,
                 'query_type': QueryAnalyzer.get_query_type(request['text']),
                 'complexity': round(QueryAnalyzer.get_complexity_score(request['text']), 3),
@@ -3099,7 +3607,7 @@ class EmbeddingServer:
             return {
                 'embeddings': embeddings.tolist(),
                 'dimensions': embeddings.shape[1],
-                'model': 'frankenstein-v4-dynamic',
+                'model': 'frankenstein-v5-dynamic',
                 'target_dims': self.embedder.dim_config.target_dims,
                 'count': len(embeddings),
                 'priority': priority_str
@@ -3141,12 +3649,16 @@ class EmbeddingServer:
 
             # Check for shutdown request
             if request.get('shutdown'):
-                conn.sendall(b'{"status": "shutting_down"}\n')
+                self._safe_sendall(conn, b'{"status": "shutting_down"}\n')
                 self.shutdown_requested = True
                 return  # FIX: conn.close() now handled by finally block
 
             # Update last request time (keep-alive)
             self.last_request_time = time.time()
+            # CRITICAL FIX: Also reset KYS timer on ANY request
+            # If we're actively processing requests, we're clearly alive - don't suicide!
+            # This prevents KYS death when MCP is busy sending many find_memory requests
+            self.last_kys_time = time.time()
 
             # Extract requestId for persistent socket multiplexing
             request_id = request.get('requestId')
@@ -3160,10 +3672,7 @@ class EmbeddingServer:
             }
             if request_id:
                 heartbeat['requestId'] = request_id
-            try:
-                conn.sendall(json.dumps(heartbeat).encode('utf-8') + b'\n')
-            except:
-                pass
+            self._safe_sendall(conn, json.dumps(heartbeat).encode('utf-8') + b'\n')
 
             # Process - each thread gets its own call stack
             response = self.handle_request(request)
@@ -3173,7 +3682,7 @@ class EmbeddingServer:
                 response['requestId'] = request_id
 
             # Send response
-            conn.sendall(json.dumps(response).encode('utf-8') + b'\n')
+            self._safe_sendall(conn, json.dumps(response).encode('utf-8') + b'\n')
 
         except BrokenPipeError:
             pass  # Client disconnected, will be closed in finally
@@ -3184,10 +3693,7 @@ class EmbeddingServer:
         except Exception as e:
             if 'EPIPE' not in str(e) and 'Broken pipe' not in str(e):
                 print(f"❌ Connection handler error: {e}", file=sys.stderr)
-            try:
-                conn.sendall(json.dumps({'error': str(e)}).encode('utf-8') + b'\n')
-            except:
-                pass
+            self._safe_sendall(conn, json.dumps({'error': str(e)}).encode('utf-8') + b'\n')
         finally:
             # FIX: Always close connection to prevent socket leaks
             try:
@@ -3281,13 +3787,13 @@ class EmbeddingServer:
             print(f"⏳ Quick model warmup (lazy mode)...", file=sys.stderr)
             try:
                 # Force model load by doing a single test embedding
-                _ = self.embedder.embed("warmup test", priority=EmbeddingPriority.LOW)
+                _ = self.embedder.embed_single("warmup test", priority=EmbeddingPriority.LOW)
                 print(f"✅ Model warmed up!", file=sys.stderr)
             except Exception as e:
                 print(f"⚠️ Model warmup failed: {e} (will load on first request)", file=sys.stderr)
 
         print(f"", file=sys.stderr)
-        print(f"FRANKENSTEIN v4 - TRULY DYNAMIC Embedding Server", file=sys.stderr)
+        print(f"FRANKENSTEIN v5 - TRULY DYNAMIC Embedding Server", file=sys.stderr)
         print(f"   Socket: {self.socket_path}", file=sys.stderr)
         print(f"   Native dims: {self.embedder.dim_config.native_dims}", file=sys.stderr)
         print(f"   Target dims: {self.embedder.dim_config.target_dims}D (from database)", file=sys.stderr)
@@ -3431,7 +3937,7 @@ def main():
     _adaptive_sizer = AdaptiveBatchSizer(_resource_config)
 
     print("=" * 70, file=sys.stderr)
-    print(f"FRANKENSTEIN EMBEDDINGS v4 - Project: {PROJECT_DIR_NAME}", file=sys.stderr)
+    print(f"FRANKENSTEIN EMBEDDINGS v5 - Project: {PROJECT_DIR_NAME}", file=sys.stderr)
     print("=" * 70, file=sys.stderr)
     print("", file=sys.stderr)
     print(f"Project Path: {PROJECT_PATH}", file=sys.stderr)
@@ -3557,9 +4063,23 @@ def main():
 
     # Signal handling for graceful shutdown
     import signal
+    import traceback
     def handle_signal(signum, frame):
         sig_name = signal.Signals(signum).name
+        # DEBUG: Log who sent the signal for troubleshooting
+        my_pid = os.getpid()
+        my_ppid = os.getppid()
         print(f"\n⚡ Received {sig_name} - shutting down gracefully...", file=sys.stderr)
+        print(f"   DEBUG: my_pid={my_pid}, my_ppid={my_ppid}", file=sys.stderr)
+        # Try to identify caller via /proc
+        try:
+            with open(f'/proc/{my_ppid}/cmdline', 'r') as f:
+                parent_cmd = f.read().replace('\x00', ' ').strip()
+            print(f"   DEBUG: parent_cmd={parent_cmd[:200]}", file=sys.stderr)
+        except Exception as e:
+            print(f"   DEBUG: could not read parent cmdline: {e}", file=sys.stderr)
+        print(f"   DEBUG: stack trace:", file=sys.stderr)
+        traceback.print_stack(frame, file=sys.stderr)
         server.shutdown_requested = True
         # Stop QQMS v2 drain thread if enabled
         if qqms_v2_instance:

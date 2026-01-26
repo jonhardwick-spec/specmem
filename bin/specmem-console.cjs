@@ -3,17 +3,17 @@
  * SPECMEM CONSOLE - The SpecMem Brain Terminal 🧠
  * ================================================
  *
- * An interactive console for SpecMem that runs independently of Claude.
- * Can control Claude instances, run memory searches, and manage the system.
+ * An interactive console for SpecMem that runs independently of .
+ * Can control  instances, run memory searches, and manage the system.
  *
  * Features:
- *   - Run SpecMem commands without Claude
- *   - Launch/control Claude instances in screen sessions
+ *   - Run SpecMem commands without 
+ *   - Launch/control  instances in screen sessions
  *   - Auto-permission handling
  *   - Project-based screen naming
  *
  * Screen Sessions:
- *   - claude-{projectId}   - Claude instance for this project
+ *   - claude-{projectId}   -  instance for this project
  *   - specmem-{projectId}  - This console (SpecMem brain)
  *
  * @author hardwicksoftwareservices
@@ -27,6 +27,45 @@ const readline = require('readline');
 const { execSync, spawn, exec } = require('child_process');
 const os = require('os');
 const crypto = require('crypto');
+
+// ============================================================================
+// CLAUDEFIX BINARY DETECTION - Prefer claudefix wrapper over raw binary
+// Falls back to absolute path of raw Claude binary when claudefix not installed
+// ============================================================================
+function getClaudeBinary() {
+  const candidates = [
+    '/usr/local/bin/claude-fixed',
+    '/usr/lib/node_modules/claudefix/bin/claude-fixed.js',
+    '/usr/local/lib/node_modules/claudefix/bin/claude-fixed.js',
+    path.join(os.homedir(), '.npm-global/lib/node_modules/claudefix/bin/claude-fixed.js'),
+    path.join(os.homedir(), 'node_modules/claudefix/bin/claude-fixed.js'),
+  ];
+  // Check /usr/local/bin/claude wrapper
+  try {
+    const wrapper = '/usr/local/bin/claude';
+    if (fs.existsSync(wrapper) && fs.readFileSync(wrapper, 'utf8').includes('claudefix')) {
+      return wrapper;
+    }
+  } catch {}
+  for (const cand of candidates) {
+    if (fs.existsSync(cand)) return cand;
+  }
+  // No claudefix - find raw Claude binary absolute path
+  const versionsDir = path.join(os.homedir(), '.local', 'share', 'claude', 'versions');
+  try {
+    if (fs.existsSync(versionsDir)) {
+      const versions = fs.readdirSync(versionsDir)
+        .filter(v => /^\d+\.\d+\.\d+$/.test(v))
+        .sort((a, b) => { const [aM,am,ap]=a.split('.').map(Number); const [bM,bm,bp]=b.split('.').map(Number); return bM-aM||bm-am||bp-ap; });
+      if (versions.length) return path.join(versionsDir, versions[0]);
+    }
+  } catch {}
+  const rawCandidates = [path.join(os.homedir(), '.local', 'bin', 'claude'), '/usr/local/bin/claude', '/usr/bin/claude'];
+  for (const r of rawCandidates) {
+    try { if (fs.existsSync(r) && !fs.readFileSync(r, 'utf8').slice(0, 500).includes('claudefix')) return fs.realpathSync(r); } catch {}
+  }
+  return 'claude';
+}
 
 // ============================================================================
 // TMPFS SCREEN LOG - Zero disk I/O for screen logging
@@ -163,12 +202,13 @@ function attachPTYToScreen(sessionName) {
     const buffer = getPTYBuffer(sessionName);
 
     // Use screen -x to attach in read-only mode
+    const ptyTermName = process.env.TERM || 'xterm-256color';
     const ptyProc = pty.spawn('screen', ['-x', sessionName], {
-      name: 'xterm-256color',
+      name: ptyTermName,
       cols: 200,
       rows: 50,
       cwd: process.cwd(),
-      env: { ...process.env, TERM: 'xterm-256color' }
+      env: { ...process.env, TERM: ptyTermName }
     });
 
     ptyProc.onData((data) => {
@@ -271,12 +311,29 @@ function getPythonPath() {
 // Dashboard module system - Minecraft-style module management
 const {
   DashboardModule,
-  ClaudePreviewModule,
+  PreviewModule,
   PythiaCOTModule,
   MCPToolsModule,
   CommandConsoleModule,
   ModuleManager
 } = require('./DashboardModules.cjs');
+
+// AEGIS TUI Components (graceful fallback if not available)
+let AegisTheme = null;
+let ClaudeLiveScreen = null;
+let MemoryBrowserScreen = null;
+let TabManagerModule = null;
+let AegisStatusBar = null;
+let AegisBoxRenderer = null;
+try { const _m = require('./AegisTheme.cjs'); AegisTheme = _m.AegisTheme || _m; } catch (_) {}
+try { const _m = require('./ClaudeLiveScreen.cjs'); ClaudeLiveScreen = _m.ClaudeLiveScreen || _m; } catch (_) {}
+try { const _m = require('./MemoryBrowserScreen.cjs'); MemoryBrowserScreen = _m.MemoryBrowserScreen || _m; } catch (_) {}
+try { TabManagerModule = require('./TabManager.cjs'); } catch (_) {}
+try { AegisStatusBar = require('./specmem-statusbar.cjs'); } catch (_) {}
+try { AegisBoxRenderer = require('./BoxRenderer.cjs'); } catch (_) {}
+
+// AEGIS Theme instance (singleton)
+const aegisTheme = (AegisTheme && typeof AegisTheme.safeInstance === 'function') ? AegisTheme.safeInstance() : null;
 
 // ============================================================================
 // TERMINAL CAPABILITY DETECTION
@@ -416,10 +473,11 @@ function stripAnsi(str) {
   // - CSI sequences: ESC[ followed by params and command char (most common)
   // - OSC sequences: ESC] followed by text and terminated by BEL or ESC\
   // - Other escape sequences: ESC followed by single char
-  return str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')  // CSI sequences
+  return str.replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, '')  // CSI sequences (including ? for DEC private modes)
+            .replace(/\x1b\[[0-9;]*r/g, '')          // Scroll region sequences
             .replace(/\x1b\][^\x07]*\x07/g, '')      // OSC with BEL terminator
             .replace(/\x1b\][^\x1b]*\x1b\\/g, '')    // OSC with ESC\ terminator
-            .replace(/\x1b[=>()c]/g, '');            // Other escape sequences
+            .replace(/\x1b[=>()c78]/g, '');           // Other escape sequences (save/restore cursor etc)
 }
 
 /**
@@ -487,12 +545,22 @@ function truncateAnsiSafe(str, maxLen) {
   while (i < str.length && visibleCount < maxLen) {
     // Check for ANSI escape sequence
     if (str[i] === '\x1b' && str[i + 1] === '[') {
-      // Find end of escape sequence
+      // Find end of escape sequence (include ? for DEC private modes)
       let j = i + 2;
-      while (j < str.length && /[0-9;]/.test(str[j])) j++;
+      while (j < str.length && /[0-9;?]/.test(str[j])) j++;
       if (j < str.length) j++; // Include command character
       result += str.slice(i, j);
       i = j;
+    } else if (str[i] === '\x1b' && (str[i + 1] === ']' || str[i + 1] === '(' || str[i + 1] === ')' || str[i + 1] === '7' || str[i + 1] === '8')) {
+      // OSC or other escape sequences - skip entirely
+      if (str[i + 1] === ']') {
+        let j = i + 2;
+        while (j < str.length && str[j] !== '\x07' && !(str[j] === '\x1b' && str[j + 1] === '\\')) j++;
+        j += (str[j] === '\x07') ? 1 : 2;
+        i = j;
+      } else {
+        i += 2; // Skip 2-char escape
+      }
     } else {
       const charWidth = getCharWidth(str[i]);
       // Don't add if it would exceed maxLen
@@ -528,19 +596,32 @@ function wrapAnsiSafe(str, maxWidth) {
   while (i < str.length) {
     // Check for ANSI escape sequence
     if (str[i] === '\x1b' && str[i + 1] === '[') {
-      // Find end of escape sequence
+      // Find end of escape sequence (include ? for DEC private modes)
       let j = i + 2;
-      while (j < str.length && /[0-9;]/.test(str[j])) j++;
+      while (j < str.length && /[0-9;?]/.test(str[j])) j++;
       if (j < str.length) j++; // Include command character
       const ansiSeq = str.slice(i, j);
-      currentLine += ansiSeq;
-      // Track style (not reset)
-      if (!ansiSeq.includes('[0m') && !ansiSeq.includes('[m')) {
-        lastActiveStyle = ansiSeq;
-      } else {
-        lastActiveStyle = '';
+      // Only add SGR (style) sequences to output, skip cursor/scroll commands
+      const cmdChar = ansiSeq[ansiSeq.length - 1];
+      if ('mM'.includes(cmdChar)) {
+        currentLine += ansiSeq;
+        // Track style (not reset)
+        if (!ansiSeq.includes('[0m') && !ansiSeq.includes('[m')) {
+          lastActiveStyle = ansiSeq;
+        } else {
+          lastActiveStyle = '';
+        }
       }
+      // Skip non-SGR sequences (cursor positioning, clearing, scroll regions)
       i = j;
+    } else if (str[i] === '\x1b' && str[i + 1] === ']') {
+      // OSC sequence - skip entirely (no visible chars)
+      let j = i + 2;
+      while (j < str.length && str[j] !== '\x07' && !(str[j] === '\x1b' && str[j + 1] === '\\')) j++;
+      i = j < str.length ? (str[j] === '\x07' ? j + 1 : j + 2) : j;
+    } else if (str[i] === '\x1b' && /[=>()78c]/.test(str[i + 1] || '')) {
+      // Other 2-char escape sequences - skip
+      i += 2;
     } else if (str[i] === '\n') {
       // Explicit newline - push line and reset
       if (currentLine.includes('\x1b[')) currentLine += c.reset;
@@ -707,7 +788,7 @@ function readAndTruncateLog(filePath, lines = 50) {
 }
 
 /**
- * Extract MCP tool calls from Claude screen log.
+ * Extract MCP tool calls from  screen log.
  * Parses log content for tool invocations like mcp__specmem__*, Bash, Read, Edit, etc.
  * Shows only the CALL, not the output/result. Most recent calls first.
  *
@@ -1311,6 +1392,40 @@ async function screenReadAsync(sessionName, lines = 50) {
       // Log file fallback also failed
     }
 
+    // FALLBACK 2: Use screen hardcopy (plain text, works without node-pty or log file)
+    try {
+      const timestamp = Date.now();
+      const tmpFile = '/dev/shm/specmem-hardcopy-' + process.pid + '-' + timestamp + '.txt';
+      execSync('screen -S ' + sessionName + ' -p 0 -X hardcopy -h ' + tmpFile, {
+        stdio: 'ignore',
+        timeout: 2000
+      });
+      // Brief wait for file
+      let retries = 0;
+      while (!fs.existsSync(tmpFile) && retries < 5) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        retries++;
+      }
+      if (fs.existsSync(tmpFile)) {
+        const content = fs.readFileSync(tmpFile, 'utf8');
+        try { fs.unlinkSync(tmpFile); } catch (e) { /* ignore */ }
+        if (content && content.trim()) {
+          const allLines = content.split('\n');
+          while (allLines.length > 0 && !allLines[allLines.length - 1].trim()) {
+            allLines.pop();
+          }
+          const lastLines = allLines.slice(-lines).map(function(line) {
+            return line.replace(/[\x00-\x08\x0B\x0C\x0E-\x1A\x1C-\x1F\x7F]/g, '');
+          });
+          const result = { content: lastLines.join('\n'), error: null, method: 'hardcopy' };
+          lastScreenReadCache = { ...result, timestamp: now };
+          return result;
+        }
+      }
+    } catch (hardcopyErr) {
+      // Hardcopy also failed
+    }
+
     // Return empty content if all methods fail
     const result = { content: '', error: 'No screen output available', method: 'none' };
     lastScreenReadCache = { ...result, timestamp: now };
@@ -1346,8 +1461,9 @@ function screenReadNonBlocking(sessionName, lines = 50) {
       });
   }
 
-  // If cache is empty and sessionName provided, try to read from log file directly (synchronous fallback)
+  // If cache is empty and sessionName provided, try sync fallbacks
   if (!cached.content && sessionName) {
+    // Try log file first
     const logFile = getScreenLogPath(process.cwd());
     try {
       if (fs.existsSync(logFile)) {
@@ -1363,7 +1479,40 @@ function screenReadNonBlocking(sessionName, lines = 50) {
         }
       }
     } catch (e) {
-      // Ignore sync read errors, will return empty or cached
+      // Ignore sync read errors
+    }
+
+    // Hardcopy fallback - works without node-pty or log file
+    try {
+      const tmpFile = '/dev/shm/specmem-hc-' + process.pid + '.txt';
+      execSync('screen -S "' + sessionName + '" -p 0 -X hardcopy -h ' + tmpFile, {
+        stdio: 'ignore',
+        timeout: 1500
+      });
+      // Brief sync wait
+      let retries = 0;
+      while (!fs.existsSync(tmpFile) && retries < 3) {
+        execSync('sleep 0.03', { stdio: 'ignore' });
+        retries++;
+      }
+      if (fs.existsSync(tmpFile)) {
+        const content = fs.readFileSync(tmpFile, 'utf8');
+        try { fs.unlinkSync(tmpFile); } catch (e) {}
+        if (content && content.trim()) {
+          const allLines = content.split('\n');
+          while (allLines.length > 0 && !allLines[allLines.length - 1].trim()) {
+            allLines.pop();
+          }
+          const lastLines = allLines.slice(-lines).map(function(line) {
+            return line.replace(/[\x00-\x08\x0B\x0C\x0E-\x1A\x1C-\x1F\x7F]/g, '');
+          });
+          const result = { content: lastLines.join('\n'), error: null, method: 'hardcopy-sync' };
+          lastScreenReadCache = { ...result, timestamp: now };
+          return result;
+        }
+      }
+    } catch (e) {
+      // Hardcopy failed
     }
   }
 
@@ -1412,7 +1561,7 @@ function parseCommandWithTarget(input) {
 // CLAUDE CONTROL
 // ============================================================================
 
-class ClaudeController {
+class Controller {
   constructor(projectPath) {
     this.projectPath = projectPath;
     this.projectId = getProjectId(projectPath);
@@ -1420,36 +1569,38 @@ class ClaudeController {
     this.permissionPatterns = [
       /Allow|Deny|Yes.*don't ask/i,
       /Do you want to/i,
-      /May Claude/i,
+      /May /i,
       /Permission required/i
     ];
   }
 
   /**
-   * Check if Claude is running
+   * Check if  is running
    */
   isRunning() {
     return screenExists(this.claudeSession);
   }
 
   /**
-   * Start Claude in a screen session
+   * Start  in a screen session
    */
   start(prompt = null) {
     if (this.isRunning()) {
-      console.log(`${c.yellow}${icons.warning} Claude is already running in session: ${this.claudeSession}${c.reset}`);
+      console.log(`${c.yellow}${icons.warning}  is already running in session: ${this.claudeSession}${c.reset}`);
       return true;
     }
 
-    console.log(`${c.cyan}Starting Claude in screen session: ${this.claudeSession}${c.reset}`);
+    console.log(`${c.cyan}Starting  in screen session: ${this.claudeSession}${c.reset}`);
 
     try {
       // PTY MEMORY APPROACH: NO -L -Logfile (zero disk I/O)
       // Uses screen hardcopy to tmpfs on-demand instead of continuous logging
       // -h 5000 sets scrollback buffer to 5000 lines for hardcopy capture
+      // SPECMEM_DASHBOARD=1 tells claudefix to disable its footer (dashboard handles rendering)
+      const claudeBin = getClaudeBinary();
       const cmd = prompt
-        ? `screen -h 5000 -dmS ${this.claudeSession} bash -c "cd '${this.projectPath}' && claude '${prompt.replace(/'/g, "\\'")}' 2>&1; exec bash"`
-        : `screen -h 5000 -dmS ${this.claudeSession} bash -c "cd '${this.projectPath}' && claude 2>&1; exec bash"`;
+        ? `screen -h 5000 -dmS ${this.claudeSession} bash -c "cd '${this.projectPath}' && SPECMEM_DASHBOARD=1 '${claudeBin}' '${prompt.replace(/'/g, "\\'")}' 2>&1; exec bash"`
+        : `screen -h 5000 -dmS ${this.claudeSession} bash -c "cd '${this.projectPath}' && SPECMEM_DASHBOARD=1 '${claudeBin}' 2>&1; exec bash"`;
 
       execSync(cmd, { stdio: 'ignore' });
 
@@ -1461,22 +1612,22 @@ class ClaudeController {
       }
 
       if (this.isRunning()) {
-        console.log(`${c.green}${icons.success} Claude started${c.reset}`);
+        console.log(`${c.green}${icons.success}  started${c.reset}`);
         return true;
       } else {
-        console.log(`${c.red}${icons.error} Failed to start Claude${c.reset}`);
+        console.log(`${c.red}${icons.error} Failed to start ${c.reset}`);
         return false;
       }
     } catch (e) {
-      console.log(`${c.red}${icons.error} Error starting Claude: ${e.message}${c.reset}`);
+      console.log(`${c.red}${icons.error} Error starting : ${e.message}${c.reset}`);
       return false;
     }
   }
 
   /**
-   * Save Claude's progress before stopping
-   * - Asks Claude to summarize what it did
-   * - WAITS for Claude to actually respond (up to 30s)
+   * Save 's progress before stopping
+   * - Asks  to summarize what it did
+   * - WAITS for  to actually respond (up to 30s)
    * - Saves last 500 lines to:
    *   1. ./claudeProgressTracking/{timestamp}.txt (archive)
    *   2. ./specmem/sockets/last-session.txt (for next session injection)
@@ -1494,14 +1645,14 @@ class ClaudeController {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
     const archiveFile = path.join(trackingDir, `claude-session-${timestamp}-${reason}.txt`);
 
-    // Get initial screen content to detect when Claude responds
+    // Get initial screen content to detect when  responds
     const initialResult = screenRead(this.claudeSession, 500);
     const initialLength = initialResult.content?.length || 0;
 
-    // Ask Claude to summarize - be explicit
+    // Ask  to summarize - be explicit
     let gotResponse = false;
     if (this.isRunning()) {
-      console.log(`${c.cyan}Asking Claude to save progress...${c.reset}`);
+      console.log(`${c.cyan}Asking  to save progress...${c.reset}`);
       screenSend(this.claudeSession, `
 
 [SAVE PROGRESS - SESSION ENDING]
@@ -1519,11 +1670,11 @@ Then provide:
 3. Files you were working on and their current state
 4. Any gotchas or things to watch out for
 
-This session is ending - your response will be injected into the next Claude session.
+This session is ending - your response will be injected into the next  session.
 `);
 
-      // ACTUALLY WAIT for Claude to respond - poll for new output
-      console.log(`${c.dim}Waiting for Claude to respond (up to 30s)...${c.reset}`);
+      // ACTUALLY WAIT for  to respond - poll for new output
+      console.log(`${c.dim}Waiting for  to respond (up to 30s)...${c.reset}`);
       const startWait = Date.now();
       const maxWait = 30000; // 30 seconds max
       const pollInterval = 1000; // Check every second
@@ -1533,17 +1684,17 @@ This session is ending - your response will be injected into the next Claude ses
         const currentResult = screenRead(this.claudeSession, 500);
         const currentLength = currentResult.content?.length || 0;
 
-        // Check if output has grown significantly (Claude is responding)
+        // Check if output has grown significantly ( is responding)
         if (currentLength > initialLength + 100) {
-          console.log(`${c.green}${icons.success} Claude is responding...${c.reset}`);
+          console.log(`${c.green}${icons.success}  is responding...${c.reset}`);
 
-          // Wait a bit more for Claude to finish
+          // Wait a bit more for  to finish
           execSync('sleep 3');
 
           // Check if still growing
           const newResult = screenRead(this.claudeSession, 500);
           if (newResult.content?.length === currentLength) {
-            // Output stabilized - Claude finished
+            // Output stabilized -  finished
             gotResponse = true;
             console.log(`${c.green}${icons.success} Response captured${c.reset}`);
             break;
@@ -1565,7 +1716,7 @@ This session is ending - your response will be injected into the next Claude ses
       console.log('');
 
       if (!gotResponse) {
-        console.log(`${c.yellow}${icons.warning} Timeout waiting for Claude response${c.reset}`);
+        console.log(`${c.yellow}${icons.warning} Timeout waiting for  response${c.reset}`);
       }
     }
 
@@ -1591,7 +1742,7 @@ This session is ending - your response will be injected into the next Claude ses
     }
 
     // Build the save file content
-    const content = `# Claude Session Progress
+    const content = `#  Session Progress
 # ========================
 # Project: ${this.projectPath}
 # Session: ${this.claudeSession}
@@ -1620,11 +1771,11 @@ ${output}
   }
 
   /**
-   * Stop Claude with progress saving
+   * Stop  with progress saving
    */
   stop(saveFirst = true) {
     if (!this.isRunning()) {
-      console.log(`${c.yellow}${icons.warning} Claude is not running${c.reset}`);
+      console.log(`${c.yellow}${icons.warning}  is not running${c.reset}`);
       return true;
     }
 
@@ -1634,7 +1785,7 @@ ${output}
     }
 
     screenKill(this.claudeSession);
-    console.log(`${c.green}${icons.success} Claude stopped${c.reset}`);
+    console.log(`${c.green}${icons.success}  stopped${c.reset}`);
     return true;
   }
 
@@ -1646,11 +1797,11 @@ ${output}
   }
 
   /**
-   * Send a prompt to Claude
+   * Send a prompt to 
    */
   send(text) {
     if (!this.isRunning()) {
-      console.log(`${c.red}${icons.error} Claude is not running. Use 'claude start' first.${c.reset}`);
+      console.log(`${c.red}${icons.error}  is not running. Use 'claude start' first.${c.reset}`);
       return false;
     }
 
@@ -1658,11 +1809,11 @@ ${output}
   }
 
   /**
-   * Read Claude's output
+   * Read 's output
    */
   read(lines = 50) {
     if (!this.isRunning()) {
-      return { content: null, error: 'Claude is not running' };
+      return { content: null, error: ' is not running' };
     }
     return screenRead(this.claudeSession, lines);
   }
@@ -1698,15 +1849,15 @@ ${output}
   }
 
   /**
-   * Attach to Claude session (opens in current terminal)
+   * Attach to  session (opens in current terminal)
    */
   attach() {
     if (!this.isRunning()) {
-      console.log(`${c.red}${icons.error} Claude is not running${c.reset}`);
+      console.log(`${c.red}${icons.error}  is not running${c.reset}`);
       return;
     }
 
-    console.log(`${c.cyan}Attaching to Claude session. Press Ctrl+A then D to detach.${c.reset}`);
+    console.log(`${c.cyan}Attaching to  session. Press Ctrl+A then D to detach.${c.reset}`);
     try {
       execSync(`screen -r ${this.claudeSession}`, { stdio: 'inherit' });
     } catch (e) {
@@ -1726,7 +1877,7 @@ ${output}
 }
 
 // ============================================================================
-// SPECMEM DIRECT COMMANDS (without Claude)
+// SPECMEM DIRECT COMMANDS (without )
 // ============================================================================
 
 class SpecMemDirect {
@@ -1787,10 +1938,10 @@ class SpecMemDirect {
     const socketExists = fs.existsSync(this.socketPath);
     console.log(`${c.dim}Embeddings:${c.reset} ${socketExists ? `${c.green}${icons.success} Socket found${c.reset}` : `${c.yellow}${icons.warning} Socket not found${c.reset}`}`);
 
-    // Check Claude screen
+    // Check  screen
     const projectId = getProjectId(this.projectPath);
     const claudeRunning = screenExists(`claude-${projectId}`);
-    console.log(`${c.dim}Claude:${c.reset}    ${claudeRunning ? `${c.green}${icons.success} Running (claude-${projectId})${c.reset}` : `${c.dim}Not running${c.reset}`}`);
+    console.log(`${c.dim}:${c.reset}    ${claudeRunning ? `${c.green}${icons.success} Running (claude-${projectId})${c.reset}` : `${c.dim}Not running${c.reset}`}`);
   }
 
   /**
@@ -2274,37 +2425,61 @@ class MCPToolPanel {
 
 /**
  * Display init stats from specmem/sockets/init-stats.json
- * Shows timing breakdown ABOVE the banner
+ * Shows epic summary AFTER the banner
  */
 function displayInitStats(projectPath) {
   try {
     const statsPath = path.join(projectPath, 'specmem', 'sockets', 'init-stats.json');
-    if (!fs.existsSync(statsPath)) return;
+    if (!fs.existsSync(statsPath)) return false;
 
     const stats = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+    if (!stats.tier) return false; // No valid stats
 
-    // Build compact display string
-    const parts = [];
+    // Helper for formatting
+    const formatNumber = n => n.toLocaleString();
+    const formatBytes = b => {
+      if (b < 1024) return `${b} B`;
+      if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+      if (b < 1024 * 1024 * 1024) return `${(b / (1024 * 1024)).toFixed(1)} MB`;
+      return `${(b / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    };
 
-    if (stats.totalMs !== undefined) {
-      parts.push(`Init: ${(stats.totalMs / 1000).toFixed(1)}s`);
-    }
-    if (stats.dbMs !== undefined) {
-      parts.push(`DB: ${(stats.dbMs / 1000).toFixed(1)}s`);
-    }
-    if (stats.embeddingsMs !== undefined) {
-      parts.push(`Embeddings: ${(stats.embeddingsMs / 1000).toFixed(1)}s`);
-    }
-    if (stats.watcherMs !== undefined) {
-      parts.push(`Watcher: ${(stats.watcherMs / 1000).toFixed(1)}s`);
+    const tierColors = { small: c.green, medium: c.yellow, large: c.brightRed };
+    const tierEmoji = { small: '🟢', medium: '🟡', large: '🔴' };
+
+    console.log(`${c.dim}  ─────────────────────────────────────────────${c.reset}`);
+    console.log(`  ${c.dim}Initialized in ${stats.elapsed}s${c.reset}`);
+    console.log(`${c.dim}  ─────────────────────────────────────────────${c.reset}`);
+    console.log(`  ${c.dim}Tier:${c.reset}        ${tierEmoji[stats.tier] || '○'} ${tierColors[stats.tier] || c.white}${c.bold}${stats.tier.toUpperCase()}${c.reset} ${c.dim}(complexity: ${stats.complexity}/100)${c.reset}`);
+    console.log(`  ${c.dim}Files:${c.reset}       ${c.white}${formatNumber(stats.files)}${c.reset} ${c.dim}(${formatBytes(stats.size)})${c.reset}`);
+    console.log(`  ${c.dim}LOC:${c.reset}         ${c.white}${formatNumber(stats.loc)}${c.reset}`);
+
+    if (stats.mode === 'full') {
+      if (stats.commands) {
+        console.log(`  ${c.dim}Commands:${c.reset}    ${c.white}${stats.commands.project}${c.reset} ${c.dim}project${c.reset} + ${c.white}${stats.commands.global}${c.reset} ${c.dim}global${c.reset}`);
+      }
+      if (stats.embedding) {
+        console.log(`  ${c.dim}Embedding:${c.reset}   ${stats.embedding.running ? `${c.green}✓ Server ready (${stats.embedding.warmupMs}ms)${c.reset}` : `${c.yellow}⏳ Will start on first use${c.reset}`}`);
+      }
+      if (stats.codebase) {
+        console.log(`  ${c.dim}Codebase:${c.reset}    ${c.green}✓ ${stats.codebase.files} files${c.reset} ${c.dim}indexed, ${stats.codebase.embeddings} embeddings${c.reset}`);
+      }
+      if (stats.sessions) {
+        console.log(`  ${c.dim}Sessions:${c.reset}    ${c.green}✓ ${stats.sessions.entries} entries${c.reset} ${c.dim}from ${stats.sessions.sessions} sessions${c.reset}`);
+      }
+      if (stats.scorched !== null && stats.scorched !== undefined) {
+        console.log(`  ${c.dim}Scorched:${c.reset}    ${c.brightRed}🔥 ${stats.scorched} items${c.reset} ${c.dim}wiped & rebuilt${c.reset}`);
+      }
+    } else {
+      const modeText = stats.mode === 'brain-respawn' ? 'Brain respawn' : ' spawn';
+      console.log(`  ${c.dim}Mode:${c.reset}        ${c.cyan}Quick (${modeText})${c.reset}`);
     }
 
-    if (parts.length > 0) {
-      console.log(`${c.dim}  ${parts.join(' | ')}${c.reset}`);
-      console.log('');
-    }
+    console.log(`${c.dim}  ─────────────────────────────────────────────${c.reset}`);
+    return true;
   } catch (e) {
     // Silently skip if stats file doesn't exist or is invalid
+    return false;
   }
 }
 
@@ -2317,7 +2492,7 @@ function displayInitStats(projectPath) {
  *
  * Layout:
  * ┌─────────────────┬─────────────────┐
- * │  Claude Preview │   MCP Tools     │
+ * │   Preview │   MCP Tools     │
  * ├─────────────────┼─────────────────┤
  * │ Command Console │   Pythia COT    │
  * └─────────────────┴─────────────────┘
@@ -2339,7 +2514,7 @@ class QuadrantRenderer {
     this.bottomRight = [];
 
     // Quadrant titles with icons for visual polish
-    this.topLeftTitle = `${icons.robot} Claude Preview`;
+    this.topLeftTitle = `${icons.robot}  Preview`;
     this.bottomLeftTitle = `${icons.arrow} Command Console`;
     this.topRightTitle = `${icons.brain} Pythia COT`;
     this.bottomRightTitle = `${icons.bullet} MCP Tool Calls`;
@@ -2349,7 +2524,7 @@ class QuadrantRenderer {
   }
 
   /**
-   * Set content for top-left quadrant (Claude preview)
+   * Set content for top-left quadrant ( preview)
    */
   setTopLeft(lines) {
     this.topLeft = Array.isArray(lines) ? lines : [];
@@ -2391,7 +2566,7 @@ class QuadrantRenderer {
         if (line[i] === '\x1b' && line[i + 1] === '[') {
           // CSI ANSI escape sequence - copy until command char [a-zA-Z]
           let j = i + 2;
-          while (j < line.length && /[0-9;]/.test(line[j])) j++;
+          while (j < line.length && /[0-9;?]/.test(line[j])) j++;
           if (j < line.length && /[a-zA-Z]/.test(line[j])) {
             j++; // Include command character
             result += line.substring(i, j);
@@ -2410,6 +2585,10 @@ class QuadrantRenderer {
             i = j;
             continue;
           }
+        } else if (line[i] === '\x1b' && /[=>()78c]/.test(line[i + 1] || '')) {
+          // Other 2-char escape sequences - skip (no visible width)
+          i += 2;
+          continue;
         }
         const charWidth = getCharWidth(line[i]);
         // Don't add if it would exceed width
@@ -2427,25 +2606,31 @@ class QuadrantRenderer {
   }
 
   /**
-   * Render a quadrant with header and content
-   * NOTE: Final width fitting done by render() with fitLine(halfWidth - 2)
-   * We just format content here - render() handles truncation and padding
+   * Render a quadrant with AEGIS-styled header and content
+   * AEGIS headers use: -- TITLE ────────── style with truecolor
    */
   renderQuadrant(title, lines, width, height) {
     const result = [];
-    const contentHeight = height - 1; // Account for header
+    const contentHeight = height - 1;
 
-    // Header line with styled background - ANSI-aware title length calculation
-    // fitLine in render() will truncate/pad, so just build styled header
-    const header = `${c.bgBlue}${c.white}${c.bold} ${title} ${c.reset}`;
-    result.push(header);
+    // AEGIS-style header: "-- TITLE ──────────"
+    const titlePlain = title.replace(/\x1b\[[0-9;]*m/g, '');
+    const dashLen = Math.max(0, width - titlePlain.length - 5);
+    if (aegisTheme) {
+      const hdrColor = '\x1b[38;2;0;212;255m';  // #00d4ff cyan
+      const hdrDim = '\x1b[38;2;42;58;74m';      // #2a3a4a border
+      const header = `${hdrColor}-- ${title} ${hdrDim}${'─'.repeat(dashLen)}${c.reset}`;
+      result.push(header);
+    } else {
+      const header = `${c.bgBlue}${c.white}${c.bold} ${title} ${c.reset}`;
+      result.push(header);
+    }
 
-    // Content lines - just add leading space, render() handles width via fitLine
+    // Content lines
     for (let i = 0; i < contentHeight; i++) {
       if (i < lines.length) {
         result.push(` ${lines[i] || ''}`);
       } else {
-        // Empty line placeholder - render() will pad
         result.push(' ');
       }
     }
@@ -2454,20 +2639,22 @@ class QuadrantRenderer {
   }
 
   /**
-   * Render full frame with borders and all quadrants
-   * Active quadrant gets orange/yellow borders for visual feedback
+   * Render full frame with AEGIS-themed borders
+   * Active quadrant gets cyan highlight, borders use AEGIS border color
    */
   render() {
     const output = [];
     const halfWidth = this.quadrantWidth;
     const halfHeight = this.quadrantHeight;
 
-    // Border colors based on active quadrant
     const isTopLeftActive = this.activeQuadrant === 'topLeft';
     const isBottomLeftActive = this.activeQuadrant === 'bottomLeft';
-    const orange = c.brightYellow || '\x1b[93m'; // Bright yellow as orange substitute
     const reset = c.reset;
-    const dim = c.dim;
+
+    // AEGIS colors or fallback
+    const borderColor = aegisTheme ? '\x1b[38;2;42;58;74m' : c.dim;      // #2a3a4a
+    const activeColor = aegisTheme ? '\x1b[38;2;0;212;255m' : (c.brightYellow || '\x1b[93m'); // #00d4ff cyan
+    const bgFill = aegisTheme ? '\x1b[48;2;19;25;36m' : '';              // #131924
 
     // Render each quadrant's content
     const tlContent = this.renderQuadrant(this.topLeftTitle, this.topLeft, halfWidth, halfHeight);
@@ -2475,33 +2662,33 @@ class QuadrantRenderer {
     const blContent = this.renderQuadrant(this.bottomLeftTitle, this.bottomLeft, halfWidth, halfHeight);
     const brContent = this.renderQuadrant(this.bottomRightTitle, this.bottomRight, halfWidth, halfHeight);
 
-    // Top border - highlight if top-left is active
-    const topLeftBorder = isTopLeftActive ? orange : dim;
-    output.push(`${topLeftBorder}╭${'─'.repeat(halfWidth - 2)}${reset}${dim}┬${'─'.repeat(halfWidth - 2)}╮${reset}`);
+    // Top border
+    const topLeftBdr = isTopLeftActive ? activeColor : borderColor;
+    output.push(`${topLeftBdr}\u256D${'─'.repeat(halfWidth - 2)}${reset}${borderColor}\u252C${'─'.repeat(halfWidth - 2)}\u256E${reset}`);
 
-    // Top half (top-left + top-right)
+    // Top half
     for (let i = 0; i < tlContent.length; i++) {
       const leftSide = this.fitLine(tlContent[i], halfWidth - 2);
       const rightSide = this.fitLine(trContent[i] || '', halfWidth - 2);
-      const leftBorder = isTopLeftActive ? orange : dim;
-      output.push(`${leftBorder}│${reset}${leftSide}${dim}│${reset}${rightSide}${dim}│${reset}`);
+      const leftBdr = isTopLeftActive ? activeColor : borderColor;
+      output.push(`${leftBdr}\u2502${reset}${bgFill}${leftSide}${reset}${borderColor}\u2502${reset}${bgFill}${rightSide}${reset}${borderColor}\u2502${reset}`);
     }
 
-    // Middle border - highlight left side if bottom-left active, right side of top if top-left active
-    const midLeftBorder = isBottomLeftActive ? orange : (isTopLeftActive ? orange : dim);
-    output.push(`${midLeftBorder}├${'─'.repeat(halfWidth - 2)}${reset}${dim}┼${'─'.repeat(halfWidth - 2)}┤${reset}`);
+    // Middle border
+    const midBdr = isBottomLeftActive ? activeColor : (isTopLeftActive ? activeColor : borderColor);
+    output.push(`${midBdr}\u251C${'─'.repeat(halfWidth - 2)}${reset}${borderColor}\u253C${'─'.repeat(halfWidth - 2)}\u2524${reset}`);
 
-    // Bottom half (bottom-left + bottom-right)
+    // Bottom half
     for (let i = 0; i < blContent.length; i++) {
       const leftSide = this.fitLine(blContent[i], halfWidth - 2);
       const rightSide = this.fitLine(brContent[i] || '', halfWidth - 2);
-      const leftBorder = isBottomLeftActive ? orange : dim;
-      output.push(`${leftBorder}│${reset}${leftSide}${dim}│${reset}${rightSide}${dim}│${reset}`);
+      const leftBdr = isBottomLeftActive ? activeColor : borderColor;
+      output.push(`${leftBdr}\u2502${reset}${bgFill}${leftSide}${reset}${borderColor}\u2502${reset}${bgFill}${rightSide}${reset}${borderColor}\u2502${reset}`);
     }
 
-    // Bottom border - highlight if bottom-left is active
-    const bottomLeftBorder = isBottomLeftActive ? orange : dim;
-    output.push(`${bottomLeftBorder}╰${'─'.repeat(halfWidth - 2)}${reset}${dim}┴${'─'.repeat(halfWidth - 2)}╯${reset}`);
+    // Bottom border
+    const bottomBdr = isBottomLeftActive ? activeColor : borderColor;
+    output.push(`${bottomBdr}\u2570${'─'.repeat(halfWidth - 2)}${reset}${borderColor}\u2534${'─'.repeat(halfWidth - 2)}\u256F${reset}`);
 
     return output.join('\n');
   }
@@ -2515,7 +2702,7 @@ class SpecMemConsole {
   constructor(projectPath) {
     this.projectPath = projectPath;
     this.projectId = getProjectId(projectPath);
-    this.claude = new ClaudeController(projectPath);
+    this.claude = new Controller(projectPath);
     this.specmem = new SpecMemDirect(projectPath);
     this.rl = null;
     this.running = true;
@@ -2523,8 +2710,8 @@ class SpecMemConsole {
     this.pool = null;
     this.dashboardMode = false;
 
-    // Multi-Claude session support
-    this.claudeSessions = [];         // Array of { controller: ClaudeController, sessionNum: number }
+    // Multi- session support
+    this.claudeSessions = [];         // Array of { controller: Controller, sessionNum: number }
     this.activeSessionIndex = -1;     // Index into claudeSessions (-1 = none active)
     this.nextSessionNum = 1;          // Counter for unique session numbering
     this.sessionAliases = new Map();  // Map<alias, sessionNum> for named sessions
@@ -2860,7 +3047,7 @@ class SpecMemConsole {
 
 
   /**
-   * Set an alias for a Claude session
+   * Set an alias for a  session
    * @param {number} sessionNum - Session number
    * @param {string} alias - Alias name (e.g., "main", "test", "feature-x")
    */
@@ -2909,14 +3096,14 @@ class SpecMemConsole {
   }
 
   /**
-   * Create a new Claude session with a unique numbered name
+   * Create a new  session with a unique numbered name
    * Session names: claude-{projectId}-1, claude-{projectId}-2, etc.
    * @param {string|null} prompt - Optional initial prompt
    * @param {string|null} alias - Optional alias for the session
    */
-  createClaudeSession(prompt = null, alias = null) {
+  createSession(prompt = null, alias = null) {
     const sessionNum = this.nextSessionNum++;
-    const controller = new ClaudeController(this.projectPath);
+    const controller = new Controller(this.projectPath);
     // Override the session name to include the number
     controller.claudeSession = `claude-${this.projectId}-${sessionNum}`;
 
@@ -2948,7 +3135,7 @@ class SpecMemConsole {
   }
 
   /**
-   * Get the currently active Claude session
+   * Get the currently active  session
    */
   getActiveSession() {
     if (this.activeSessionIndex >= 0 && this.activeSessionIndex < this.claudeSessions.length) {
@@ -2958,7 +3145,7 @@ class SpecMemConsole {
   }
 
   /**
-   * Switch to the previous Claude session (Ctrl+Shift+Left)
+   * Switch to the previous  session (Ctrl+Shift+Left)
    */
   switchToPreviousSession() {
     if (this.claudeSessions.length === 0) return false;
@@ -2979,7 +3166,7 @@ class SpecMemConsole {
   }
 
   /**
-   * Switch to the next Claude session (Ctrl+Shift+Right)
+   * Switch to the next  session (Ctrl+Shift+Right)
    */
   switchToNextSession() {
     if (this.claudeSessions.length === 0) return false;
@@ -3037,7 +3224,7 @@ class SpecMemConsole {
 
   /**
    * Get session indicator string for dashboard header
-   * Returns e.g., "Claude 1/3", "Claude 2 "main" [3 total]", or "No Sessions"
+   * Returns e.g., " 1/3", " 2 "main" [3 total]", or "No Sessions"
    */
   getSessionIndicator() {
     if (this.claudeSessions.length === 0) {
@@ -3047,13 +3234,13 @@ class SpecMemConsole {
     if (!active) return 'No Active';
     const alias = this.getAliasForSession(active.sessionNum);
     if (alias) {
-      return `Claude ${active.sessionNum} "${alias}" [${this.claudeSessions.length} total]`;
+      return ` ${active.sessionNum} "${alias}" [${this.claudeSessions.length} total]`;
     }
-    return `Claude ${active.sessionNum}/${this.claudeSessions.length}`;
+    return ` ${active.sessionNum}/${this.claudeSessions.length}`;
   }
 
   /**
-   * Sync existing Claude sessions on dashboard start
+   * Sync existing  sessions on dashboard start
    * Finds any running claude-{projectId}-* sessions and adds them
    */
   syncExistingSessions() {
@@ -3070,7 +3257,7 @@ class SpecMemConsole {
         // Check if we already have this session tracked
         const exists = this.claudeSessions.some(s => s.sessionNum === sessionNum);
         if (!exists) {
-          const controller = new ClaudeController(this.projectPath);
+          const controller = new Controller(this.projectPath);
           controller.claudeSession = `claude-${this.projectId}-${sessionNum}`;
           this.claudeSessions.push({ controller, sessionNum });
         }
@@ -3138,12 +3325,12 @@ class SpecMemConsole {
     // Sync existing sessions before checking if any are running
     this.syncExistingSessions();
 
-    // Check if any Claude sessions are running (new multi-session or legacy single)
+    // Check if any  sessions are running (new multi-session or legacy single)
     const hasRunningSession = this.claudeSessions.length > 0 ||
                               this.claude.isRunning();
 
     if (!hasRunningSession) {
-      console.log(`${c.yellow}${icons.warning} No Claude sessions running. Use 'claude start' or press 'n' in dashboard to start one.${c.reset}`);
+      console.log(`${c.yellow}${icons.warning} No  sessions running. Use 'claude start' or press 'n' in dashboard to start one.${c.reset}`);
       // Still allow entering dashboard mode - user can start sessions with 'n' key
     }
 
@@ -3162,17 +3349,24 @@ class SpecMemConsole {
    * Print the welcome banner (animated!)
    */
   async printBanner() {
-    // Display init stats ABOVE the banner (if available)
-    displayInitStats(this.projectPath);
+    // Clear screen first for clean presentation
+    process.stdout.write('\x1b[2J\x1b[H');
+
     await showAnimatedBanner();
     console.log(`${c.dim}  Project: ${this.projectPath}${c.reset}`);
     console.log(`${c.dim}  Session: specmem-${this.projectId}${c.reset}`);
-    // Show terminal mode if in safe/fallback mode
-    if (!termCaps.hasEmoji || !termCaps.hasColors) {
-      console.log(`${c.dim}  Mode: ${termCaps.hasColors ? 'color' : 'plain'}, ${termCaps.hasEmoji ? 'emoji' : 'ascii'}${c.reset}`);
-    }
+    // Show terminal mode
+    console.log(`${c.dim}  Mode: ${termCaps.hasColors ? 'color' : 'plain'}, ${termCaps.hasEmoji ? 'emoji' : 'ascii'}${c.reset}`);
     console.log('');
-    console.log(`${c.dim}  Type 'help' for commands, 'exit' to quit${c.reset}`);
+
+    // Display init stats AFTER the banner (fills the "blank space")
+    const hasStats = displayInitStats(this.projectPath);
+
+    if (!hasStats) {
+      // No init stats, just show help text
+      console.log(`${c.dim}  Type 'help' for commands, 'exit' to quit${c.reset}`);
+    }
+
     console.log('');
     // Persistent notice that this window is optional
     console.log(`${c.dim}  ─────────────────────────────────────────────────────${c.reset}`);
@@ -3195,21 +3389,21 @@ class SpecMemConsole {
     console.log(`  ${c.cyan}init${c.reset}                Run specmem-init`);
     console.log(`  ${c.cyan}screens${c.reset}             List active screen sessions`);
     console.log('');
-    console.log(`${c.bold}Claude Control:${c.reset}`);
-    console.log(`  ${c.cyan}claude start${c.reset}        Start Claude in screen session`);
-    console.log(`  ${c.cyan}claude stop${c.reset}         Stop Claude`);
-    console.log(`  ${c.cyan}claude restart${c.reset}      Restart Claude`);
-    console.log(`  ${c.cyan}claude status${c.reset}       Check if Claude is running`);
-    console.log(`  ${c.cyan}claude attach${c.reset}       Attach to Claude session (Ctrl+A D to detach)`);
-    console.log(`  ${c.cyan}claude send <text>${c.reset}  Send text to Claude`);
-    console.log(`  ${c.cyan}claude read${c.reset}         Read Claude's current output`);
+    console.log(`${c.bold} Control:${c.reset}`);
+    console.log(`  ${c.cyan}claude start${c.reset}        Start  in screen session`);
+    console.log(`  ${c.cyan}claude stop${c.reset}         Stop `);
+    console.log(`  ${c.cyan}claude restart${c.reset}      Restart `);
+    console.log(`  ${c.cyan}claude status${c.reset}       Check if  is running`);
+    console.log(`  ${c.cyan}claude attach${c.reset}       Attach to  session (Ctrl+A D to detach)`);
+    console.log(`  ${c.cyan}claude send <text>${c.reset}  Send text to `);
+    console.log(`  ${c.cyan}claude read${c.reset}         Read 's current output`);
     console.log('');
     console.log(`${c.bold}Session Management:${c.reset}`);
-    console.log(`  ${c.cyan}sessions${c.reset}, ${c.cyan}list${c.reset}     List all Claude sessions with numbers/aliases`);
+    console.log(`  ${c.cyan}sessions${c.reset}, ${c.cyan}list${c.reset}     List all  sessions with numbers/aliases`);
     console.log(`  ${c.cyan}switch <n|alias>${c.reset}    Switch active session`);
     console.log(`  ${c.cyan}alias <n> <name>${c.reset}    Set alias for session (e.g., alias 1 main)`);
-    console.log(`  ${c.cyan}stop [n|alias]${c.reset}      Stop a Claude session (default: active)`);
-    console.log(`  ${c.cyan}restart [n|alias]${c.reset}   Restart a Claude session (default: active)`);
+    console.log(`  ${c.cyan}stop [n|alias]${c.reset}      Stop a  session (default: active)`);
+    console.log(`  ${c.cyan}restart [n|alias]${c.reset}   Restart a  session (default: active)`);
     console.log('');
     console.log(`${c.bold}Permission Handling:${c.reset}  ${c.dim}(add number/alias to target specific session)${c.reset}`);
     console.log(`  ${c.cyan}accept [n|alias]${c.reset}    Accept permission (Yes)`);
@@ -3217,24 +3411,24 @@ class SpecMemConsole {
     console.log(`  ${c.cyan}deny [n|alias]${c.reset}      Deny permission`);
     console.log(`  ${c.dim}Examples: accept 2, deny main, allow 1${c.reset}`);
     console.log('');
-    console.log(`${c.bold}AutoClaude:${c.reset}`);
+    console.log(`${c.bold}Auto:${c.reset}`);
     console.log(`  ${c.cyan}autoclaude <prompt> [duration]${c.reset}`);
-    console.log(`                      Run autonomous Claude with auto-permissions`);
+    console.log(`                      Run autonomous  with auto-permissions`);
     console.log(`                      Duration format: 1:30 = 1 hour 30 minutes`);
     console.log('');
     console.log(`${c.bold}Dashboard:${c.reset}`);
     console.log(`  ${c.cyan}dashboard${c.reset}           Split-view dashboard with Pythia COT and MCP tools`);
     console.log('');
     console.log(`${c.bold}Monitoring & Recovery:${c.reset}`);
-    console.log(`  ${c.cyan}health${c.reset}              Check Claude health status`);
+    console.log(`  ${c.cyan}health${c.reset}              Check  health status`);
     console.log(`  ${c.cyan}monitor [secs]${c.reset}      Start health monitor (default: 30s)`);
     console.log(`  ${c.cyan}monitor stop${c.reset}        Stop health monitor`);
     console.log(`  ${c.cyan}recover${c.reset}             Recover session from crash log`);
     console.log('');
     console.log(`${c.bold}Cleanup:${c.reset}`);
     console.log(`  ${c.cyan}cleanup${c.reset}             List project screens`);
-    console.log(`  ${c.cyan}cleanup all${c.reset}         Stop ALL (saves Claude progress)`);
-    console.log(`  ${c.cyan}cleanup claude${c.reset}      Stop Claude only`);
+    console.log(`  ${c.cyan}cleanup all${c.reset}         Stop ALL (saves  progress)`);
+    console.log(`  ${c.cyan}cleanup claude${c.reset}      Stop  only`);
     console.log(`  ${c.cyan}cleanup <number>${c.reset}    Stop by list number`);
     console.log('');
     console.log(`${c.bold}Agents:${c.reset}`);
@@ -3242,12 +3436,15 @@ class SpecMemConsole {
     console.log(`  ${c.cyan}tasks${c.reset}               Alias for agents`);
     console.log('');
     console.log(`${c.bold}Performance:${c.reset}`);
+    console.log(`  ${c.cyan}power low|med|high${c.reset} Set power mode (low=conserve, high=performance)`);
+    console.log(`  ${c.cyan}power status${c.reset}        Show current power mode`);
     console.log(`  ${c.cyan}heavyops true${c.reset}       Enable heavy ops mode (+batch size, -20% throttle)`);
     console.log(`  ${c.cyan}heavyops false${c.reset}      Disable heavy ops mode (normal settings)`);
-    console.log(`  ${c.cyan}heavyops status${c.reset}     Show current heavy ops status`);
     console.log(`  ${c.cyan}resources${c.reset}           Show current resource limits`);
     console.log(`  ${c.cyan}cpumin <percent>${c.reset}    Set minimum CPU usage target`);
     console.log(`  ${c.cyan}cpumax <percent>${c.reset}    Set maximum CPU usage limit`);
+    console.log(`  ${c.cyan}cpucoremin <n>${c.reset}      Set minimum CPU cores/threads (default: 1)`);
+    console.log(`  ${c.cyan}cpucoremax <n>${c.reset}      Set maximum CPU cores/threads (default: 2)`);
     console.log(`  ${c.cyan}rammin <mb>${c.reset}         Set minimum RAM usage`);
     console.log(`  ${c.cyan}rammax <mb>${c.reset}         Set maximum RAM limit`);
     console.log('');
@@ -3263,7 +3460,7 @@ class SpecMemConsole {
     console.log(`  ${c.cyan}terminal test${c.reset}       Test icon rendering`);
     console.log('');
     console.log(`${c.bold}Shutdown:${c.reset}`);
-    console.log(`  ${c.brightRed}die${c.reset}                 ☠️  KILL ALL - stops Claude, Brain, Docker, cleans up`);
+    console.log(`  ${c.brightRed}die${c.reset}                 ☠️  KILL ALL - stops , Brain, Docker, cleans up`);
     console.log('');
     console.log(`${c.bold}Other:${c.reset}`);
     console.log(`  ${c.cyan}help${c.reset}                Show this help`);
@@ -3329,7 +3526,7 @@ class SpecMemConsole {
         break;
 
       case 'claude':
-        await this.handleClaudeCommand(args);
+        await this.handleCommand(args);
         break;
 
       case 'dashboard':
@@ -3362,9 +3559,9 @@ class SpecMemConsole {
         if (session.controller.accept()) {
           const alias = this.getAliasForSession(session.sessionNum);
           const displayName = alias ? `${session.sessionNum} (${alias})` : session.sessionNum;
-          console.log(`${c.green}${icons.success} Accepted on Claude ${displayName}${c.reset}`);
+          console.log(`${c.green}${icons.success} Accepted on  ${displayName}${c.reset}`);
         } else {
-          console.log(`${c.red}${icons.error} Failed to accept on Claude ${session.sessionNum}${c.reset}`);
+          console.log(`${c.red}${icons.error} Failed to accept on  ${session.sessionNum}${c.reset}`);
         }
         break;
       }
@@ -3394,9 +3591,9 @@ class SpecMemConsole {
         if (session.controller.allowAlways()) {
           const alias = this.getAliasForSession(session.sessionNum);
           const displayName = alias ? `${session.sessionNum} (${alias})` : session.sessionNum;
-          console.log(`${c.green}${icons.success} Allowed (won't ask again) on Claude ${displayName}${c.reset}`);
+          console.log(`${c.green}${icons.success} Allowed (won't ask again) on  ${displayName}${c.reset}`);
         } else {
-          console.log(`${c.red}${icons.error} Failed to allow on Claude ${session.sessionNum}${c.reset}`);
+          console.log(`${c.red}${icons.error} Failed to allow on  ${session.sessionNum}${c.reset}`);
         }
         break;
       }
@@ -3427,15 +3624,15 @@ class SpecMemConsole {
         if (session.controller.deny()) {
           const alias = this.getAliasForSession(session.sessionNum);
           const displayName = alias ? `${session.sessionNum} (${alias})` : session.sessionNum;
-          console.log(`${c.green}${icons.success} Denied on Claude ${displayName}${c.reset}`);
+          console.log(`${c.green}${icons.success} Denied on  ${displayName}${c.reset}`);
         } else {
-          console.log(`${c.red}${icons.error} Failed to deny on Claude ${session.sessionNum}${c.reset}`);
+          console.log(`${c.red}${icons.error} Failed to deny on  ${session.sessionNum}${c.reset}`);
         }
         break;
       }
 
       case 'autoclaude':
-        await this.handleAutoClaudeCommand(args);
+        await this.handleAutoCommand(args);
         break;
 
       case 'cleanup':
@@ -3483,7 +3680,7 @@ class SpecMemConsole {
 
       case 'claudes':
       case 'sessions': {
-        console.log(`\n${c.cyan}${icons.brain} Running Claude Sessions${c.reset}`);
+        console.log(`\n${c.cyan}${icons.brain} Running  Sessions${c.reset}`);
         console.log('─'.repeat(50));
 
         if (this.claudeSessions.length === 0) {
@@ -3512,7 +3709,7 @@ class SpecMemConsole {
             screenKill(active.controller.claudeSession);
             // BUG FIX: Remove stopped session from tracking (was missing before)
             this.removeSessionFromTracking(active);
-            console.log(`${c.yellow}Stopped Claude ${active.sessionNum}${c.reset}`);
+            console.log(`${c.yellow}Stopped  ${active.sessionNum}${c.reset}`);
           } else {
             console.log(`${c.yellow}No active session to stop. Use 'stop <n>' for specific session.${c.reset}`);
           }
@@ -3522,7 +3719,7 @@ class SpecMemConsole {
             screenKill(session.controller.claudeSession);
             // BUG FIX: Remove stopped session from tracking (was missing before)
             this.removeSessionFromTracking(session);
-            console.log(`${c.yellow}Stopped Claude ${session.sessionNum}${c.reset}`);
+            console.log(`${c.yellow}Stopped  ${session.sessionNum}${c.reset}`);
           } else {
             console.log(`${c.red}Session ${target} not found${c.reset}`);
           }
@@ -3545,11 +3742,11 @@ class SpecMemConsole {
           break;
         }
 
-        console.log(`${c.cyan}Restarting Claude ${session.sessionNum}...${c.reset}`);
+        console.log(`${c.cyan}Restarting  ${session.sessionNum}...${c.reset}`);
         screenKill(session.controller.claudeSession);
         await new Promise(r => setTimeout(r, 500));
         session.controller.start();
-        console.log(`${c.green}Claude ${session.sessionNum} restarted${c.reset}`);
+        console.log(`${c.green} ${session.sessionNum} restarted${c.reset}`);
         break;
       }
 
@@ -3568,7 +3765,7 @@ class SpecMemConsole {
           break;
         }
 
-        console.log(`${c.cyan}Attaching to Claude ${session.sessionNum}... (Ctrl+A+D to detach)${c.reset}`);
+        console.log(`${c.cyan}Attaching to  ${session.sessionNum}... (Ctrl+A+D to detach)${c.reset}`);
         try {
           execSync(`screen -r ${session.controller.claudeSession}`, { stdio: 'inherit' });
         } catch (e) {
@@ -3590,7 +3787,7 @@ class SpecMemConsole {
           const idx = this.claudeSessions.indexOf(session);
           if (idx !== -1) {
             this.activeSessionIndex = idx;
-            console.log(`${c.green}Switched to Claude ${session.sessionNum}${c.reset}`);
+            console.log(`${c.green}Switched to  ${session.sessionNum}${c.reset}`);
           }
         } else {
           console.log(`${c.red}Session ${target} not found${c.reset}`);
@@ -3625,6 +3822,14 @@ class SpecMemConsole {
 
       case 'rammin':
         await this.handleResourcesCommand(['rammin', args[0]]);
+        break;
+
+      case 'cpucoremin':
+        await this.handleResourcesCommand(['cpucoremin', args[0]]);
+        break;
+
+      case 'cpucoremax':
+        await this.handleResourcesCommand(['cpucoremax', args[0]]);
         break;
 
       case 'rammax':
@@ -4648,11 +4853,16 @@ class SpecMemConsole {
 
     // Initialize resources section if not exists
     config.resources = config.resources || {
-      cpuMin: 20,    // 20% minimum target
-      cpuMax: 40,    // 40% max limit
-      ramMinMb: 4000, // 4GB minimum
-      ramMaxMb: 6000  // 6GB max
+      cpuMin: 20,       // 20% minimum target
+      cpuMax: 40,       // 40% max limit
+      cpuCoreMin: 1,    // Minimum CPU cores/threads
+      cpuCoreMax: 2,    // Maximum CPU cores/threads (for torch.set_num_threads)
+      ramMinMb: 4000,   // 4GB minimum
+      ramMaxMb: 6000    // 6GB max
     };
+    // Ensure core limits exist for older configs
+    config.resources.cpuCoreMin = config.resources.cpuCoreMin || 1;
+    config.resources.cpuCoreMax = config.resources.cpuCoreMax || 2;
 
     const saveConfig = () => {
       config.resources.updatedAt = new Date().toISOString();
@@ -4709,6 +4919,36 @@ class SpecMemConsole {
         break;
       }
 
+      case 'cpucoremin': {
+        const cores = parseInt(value);
+        if (isNaN(cores) || cores < 1 || cores > 64) {
+          console.log(`${c.red}${icons.error} Invalid core count. Use 1-64.${c.reset}`);
+          break;
+        }
+        config.resources.cpuCoreMin = cores;
+        saveConfig();
+        // Also update environment for running processes
+        process.env.SPECMEM_CPU_THREADS_MIN = String(cores);
+        console.log(`${c.green}${icons.success} CPU Core Min set to ${cores}${c.reset}`);
+        console.log(`${c.dim}Note: Restart embedding server for changes to take effect.${c.reset}`);
+        break;
+      }
+
+      case 'cpucoremax': {
+        const cores = parseInt(value);
+        if (isNaN(cores) || cores < 1 || cores > 64) {
+          console.log(`${c.red}${icons.error} Invalid core count. Use 1-64.${c.reset}`);
+          break;
+        }
+        config.resources.cpuCoreMax = cores;
+        saveConfig();
+        // Also update environment for running processes
+        process.env.SPECMEM_CPU_THREADS = String(cores);
+        console.log(`${c.green}${icons.success} CPU Core Max set to ${cores}${c.reset}`);
+        console.log(`${c.dim}Note: Restart embedding server for changes to take effect.${c.reset}`);
+        break;
+      }
+
       case 'status':
       default: {
         const r = config.resources;
@@ -4716,13 +4956,14 @@ class SpecMemConsole {
         console.log(`${c.dim}─────────────────────────────────────────${c.reset}`);
         console.log(`  ${c.cyan}CPU Min:${c.reset}      ${r.cpuMin}%`);
         console.log(`  ${c.cyan}CPU Max:${c.reset}      ${r.cpuMax}%`);
+        console.log(`  ${c.cyan}CPU Cores:${c.reset}    ${r.cpuCoreMin || 1} - ${r.cpuCoreMax || 2} threads`);
         console.log(`  ${c.cyan}RAM Min:${c.reset}      ${r.ramMinMb}MB`);
         console.log(`  ${c.cyan}RAM Max:${c.reset}      ${r.ramMaxMb}MB`);
         if (r.updatedAt) {
           console.log(`  ${c.dim}Updated:${c.reset}      ${r.updatedAt}`);
         }
         console.log(`${c.dim}─────────────────────────────────────────${c.reset}`);
-        console.log(`${c.dim}Commands: cpumin <n>, cpumax <n>, rammin <mb>, rammax <mb>${c.reset}`);
+        console.log(`${c.dim}Commands: cpumin, cpumax, cpucoremin, cpucoremax, rammin, rammax${c.reset}`);
         break;
       }
     }
@@ -4796,8 +5037,8 @@ class SpecMemConsole {
   }
 
   /**
-   * DIE command - complete shutdown of SpecMem and Claude in this project
-   * Stops Claude session, Brain screen, Docker embedding containers, cleans up
+   * DIE command - complete shutdown of SpecMem and  in this project
+   * Stops  session, Brain screen, Docker embedding containers, cleans up
    */
   async handleDieCommand() {
     console.log(`${c.brightRed}${c.bold}☠️  SPECMEM DIE COMMAND ☠️${c.reset}`);
@@ -4806,18 +5047,18 @@ class SpecMemConsole {
 
     let killed = 0;
 
-    // 1. Stop Claude session
+    // 1. Stop  session
     if (this.claude.claudeSession) {
-      console.log(`${c.yellow}[1/5]${c.reset} Stopping Claude session: ${c.cyan}${this.claude.claudeSession}${c.reset}`);
+      console.log(`${c.yellow}[1/5]${c.reset} Stopping  session: ${c.cyan}${this.claude.claudeSession}${c.reset}`);
       try {
         execSync(`screen -S "${this.claude.claudeSession}" -X quit 2>/dev/null || true`, { stdio: 'ignore' });
-        console.log(`  ${c.green}${icons.success}${c.reset} Claude stopped`);
+        console.log(`  ${c.green}${icons.success}${c.reset}  stopped`);
         killed++;
       } catch (e) {
         console.log(`  ${c.dim}(not running)${c.reset}`);
       }
     } else {
-      console.log(`${c.yellow}[1/5]${c.reset} Claude session: ${c.dim}not detected${c.reset}`);
+      console.log(`${c.yellow}[1/5]${c.reset}  session: ${c.dim}not detected${c.reset}`);
     }
 
     // 2. Stop Brain screen session
@@ -4926,9 +5167,9 @@ class SpecMemConsole {
   }
 
   /**
-   * Handle Claude subcommands
+   * Handle  subcommands
    */
-  async handleClaudeCommand(args) {
+  async handleCommand(args) {
     const subCmd = args[0]?.toLowerCase();
 
     switch (subCmd) {
@@ -4949,12 +5190,12 @@ class SpecMemConsole {
 
       case 'status':
         if (this.claude.isRunning()) {
-          console.log(`${c.green}${icons.success} Claude is running (${this.claude.claudeSession})${c.reset}`);
+          console.log(`${c.green}${icons.success}  is running (${this.claude.claudeSession})${c.reset}`);
           if (this.claude.isWaitingForPermission()) {
             console.log(`${c.yellow}${icons.warning} Waiting for permission response${c.reset}`);
           }
         } else {
-          console.log(`${c.dim}Claude is not running${c.reset}`);
+          console.log(`${c.dim} is not running${c.reset}`);
         }
         break;
 
@@ -4976,7 +5217,7 @@ class SpecMemConsole {
       case 'read':
         const output = this.claude.read(parseInt(args[1]) || 30);
         if (output) {
-          console.log(`${c.dim}─── Claude Output ───${c.reset}`);
+          console.log(`${c.dim}───  Output ───${c.reset}`);
           console.log(output);
           console.log(`${c.dim}─────────────────────${c.reset}`);
         } else {
@@ -4985,10 +5226,10 @@ class SpecMemConsole {
         break;
 
       default:
-        console.log(`${c.cyan}Claude subcommands:${c.reset}`);
-        console.log(`  start [prompt]  - Start Claude`);
-        console.log(`  stop            - Stop Claude`);
-        console.log(`  restart         - Restart Claude`);
+        console.log(`${c.cyan} subcommands:${c.reset}`);
+        console.log(`  start [prompt]  - Start `);
+        console.log(`  stop            - Stop `);
+        console.log(`  restart         - Restart `);
         console.log(`  status          - Check status`);
         console.log(`  attach          - Attach to session`);
         console.log(`  send <text>     - Send text`);
@@ -4997,9 +5238,9 @@ class SpecMemConsole {
   }
 
   /**
-   * Handle AutoClaude command
+   * Handle Auto command
    */
-  async handleAutoClaudeCommand(args) {
+  async handleAutoCommand(args) {
     if (args.length === 0) {
       console.log(`${c.cyan}Usage: autoclaude <prompt> [duration]${c.reset}`);
       console.log(`${c.dim}Duration format: 1:30 = 1 hour 30 minutes (default: 0:30)${c.reset}`);
@@ -5016,7 +5257,7 @@ class SpecMemConsole {
       prompt = args.slice(0, -1).join(' ');
     }
 
-    console.log(`${c.cyan}Starting AutoClaude...${c.reset}`);
+    console.log(`${c.cyan}Starting Auto...${c.reset}`);
     console.log(`${c.dim}Prompt: ${prompt}${c.reset}`);
     console.log(`${c.dim}Duration: ${duration}${c.reset}`);
 
@@ -5032,10 +5273,10 @@ class SpecMemConsole {
       });
 
       autoclaude.on('exit', (code) => {
-        console.log(`${code === 0 ? c.green + icons.success : c.red + icons.error}${c.reset} AutoClaude finished (exit code: ${code})`);
+        console.log(`${code === 0 ? c.green + icons.success : c.red + icons.error}${c.reset} Auto finished (exit code: ${code})`);
       });
     } catch (e) {
-      console.log(`${c.red}${icons.error} Failed to start AutoClaude: ${e.message}${c.reset}`);
+      console.log(`${c.red}${icons.error} Failed to start Auto: ${e.message}${c.reset}`);
     }
   }
 
@@ -5058,7 +5299,7 @@ class SpecMemConsole {
         }
         console.log(`${c.cyan}Active screens for ${this.projectId}:${c.reset}`);
         projectScreens.forEach((s, i) => {
-          const type = s.name.startsWith('specmem-') ? `${icons.brain} Brain` : `${icons.robot} Claude`;
+          const type = s.name.startsWith('specmem-') ? `${icons.brain} Brain` : `${icons.robot} `;
           const statusColor = s.status === 'attached' ? c.green : c.yellow;
           console.log(`  ${i + 1}. ${type}  ${c.white}${s.name}${c.reset} ${statusColor}(${s.status})${c.reset}`);
         });
@@ -5074,7 +5315,7 @@ class SpecMemConsole {
         console.log(`${c.yellow}Stopping ${projectScreens.length} screen(s)...${c.reset}`);
         for (const screen of projectScreens) {
           if (screen.name.startsWith('claude-')) {
-            // Save progress for Claude screens
+            // Save progress for  screens
             this.claude.stop(); // This saves progress
           } else {
             screenKill(screen.name);
@@ -5086,7 +5327,7 @@ class SpecMemConsole {
       case 'claude':
         const claudeScreens = projectScreens.filter(s => s.name.startsWith('claude-'));
         if (claudeScreens.length === 0) {
-          console.log(`${c.dim}No Claude screens running${c.reset}`);
+          console.log(`${c.dim}No  screens running${c.reset}`);
           return;
         }
         for (const screen of claudeScreens) {
@@ -5182,7 +5423,7 @@ class SpecMemConsole {
 
     return {
       status: 'healthy',
-      message: 'Claude running normally',
+      message: ' running normally',
       contextPercent: percentMatch ? parseInt(percentMatch[1]) : null
     };
   }
@@ -5200,8 +5441,8 @@ class SpecMemConsole {
 
     this.healthInterval = setInterval(() => {
       if (!this.claude.isRunning()) {
-        // Claude died - auto-recover
-        console.log(`\n${c.red}${icons.warning} ALERT: Claude session died!${c.reset}`);
+        //  died - auto-recover
+        console.log(`\n${c.red}${icons.warning} ALERT:  session died!${c.reset}`);
         this.recoverFromCrash();
         return;
       }
@@ -5245,7 +5486,7 @@ class SpecMemConsole {
 
     if (!fs.existsSync(logFile)) {
       console.log(`${c.yellow}${icons.warning} No crash log found at: ${logFile}${c.reset}`);
-      console.log(`${c.dim}Claude must have been started with logging enabled${c.reset}`);
+      console.log(`${c.dim} must have been started with logging enabled${c.reset}`);
       return null;
     }
 
@@ -5266,7 +5507,7 @@ class SpecMemConsole {
       console.log(`${c.dim}Log age: ${ageMinutes} minutes${c.reset}`);
 
       // Build recovery content
-      const content = `# Claude Session CRASH RECOVERY
+      const content = `#  Session CRASH RECOVERY
 # ==============================
 # Project: ${this.projectPath}
 # Session: ${this.claudeSession}
@@ -5297,7 +5538,7 @@ ${last500}
       fs.writeFileSync(lastSessionFile, content, 'utf8');
       console.log(`${c.green}${icons.success} Saved for next session: last-session.txt${c.reset}`);
 
-      // Offer to restart Claude
+      // Offer to restart 
       console.log('');
       console.log(`${c.cyan}Recovery complete. Use 'claude start' to restart with continuity.${c.reset}`);
 
@@ -5352,7 +5593,7 @@ ${last500}
    */
   /**
    * Dashboard TUI with 4-quadrant split pane rendering
-   * TOP LEFT: Live Claude screen preview
+   * TOP LEFT: Live  screen preview
    * BOTTOM LEFT: SpecMem command console
    * TOP RIGHT: MCP tool calls
    * BOTTOM RIGHT: Pythia COT (chain of thought)
@@ -5511,7 +5752,45 @@ ${last500}
     // Module state getters (will be populated as we initialize state below)
     let moduleGetters = {};
 
-    // Input mode state: 'command' (default), 'claude' (direct to Claude), 'specmem' (SpecMem commands), 'deploy' (agent deployment)
+    // ============================================================
+    // AEGIS TAB SYSTEM - Full-screen tabs with quad-panel Dashboard
+    // Tab 0 = Dashboard (4-quadrant overview)
+    // Tab 1 = Claude Live (full-screen session view)
+    // Tab 2 = Memories (full-screen memory browser)
+    // Tab 3 = Team (full-screen team comms)
+    // ============================================================
+    let activeTab = 0;
+    const TABS = [
+      { id: 'dashboard', label: 'Dashboard', icon: '\u2261', key: '1' },
+      { id: 'claude-live', label: 'Claude Live', icon: '\u25B6', key: '2' },
+      { id: 'memories', label: 'Memories', icon: '\u2605', key: '3' },
+      { id: 'team', label: 'Team', icon: '\u2691', key: '4' },
+    ];
+
+    // Initialize AEGIS full-screen modules
+    let claudeLiveModule = null;
+    let memoryBrowserModule = null;
+
+    if (ClaudeLiveScreen) {
+      try {
+        claudeLiveModule = new ClaudeLiveScreen({
+          projectPath: self.projectPath,
+          theme: aegisTheme,
+          filterMcp: true,
+        });
+      } catch (e) { /* graceful fallback */ }
+    }
+
+    if (MemoryBrowserScreen) {
+      try {
+        memoryBrowserModule = new MemoryBrowserScreen({
+          projectPath: self.projectPath,
+          theme: aegisTheme,
+        });
+      } catch (e) { /* graceful fallback */ }
+    }
+
+    // Input mode state: 'command' (default), 'claude' (direct to ), 'specmem' (SpecMem commands), 'deploy' (agent deployment)
     // Phase 1: Tri-mode input system - command for dashboard control, claude for screen interaction, specmem for memory commands
     let inputMode = 'specmem';           // 'specmem' (default) | 'command' | 'claude' | 'deploy'
     let claudeInputBuffer = '';          // Buffer for claude mode input
@@ -5534,9 +5813,9 @@ ${last500}
     // Debug mode - logs keypresses to commandHistory when enabled via 'debug' command
     let debugKeyPresses = false;
 
-    // Claude preview caching to prevent flicker
-    let lastClaudeContent = '';        // Cache last good content
-    let lastClaudeTime = 0;            // Timestamp of last good read
+    //  preview caching to prevent flicker
+    let lastContent = '';        // Cache last good content
+    let lastTime = 0;            // Timestamp of last good read
     const claudeReadCooldown = 500;    // Min ms between screen reads
     const MAX_CLAUDE_CONTENT_SIZE = 50000; // Max 50KB cached to prevent RAM bloat
 
@@ -5639,7 +5918,7 @@ ${last500}
         newCotLines = cotMatch[1].trim().split('\n');
       }
 
-      // Also check for thinking blocks from Claude
+      // Also check for thinking blocks from 
       const thinkMatch = content.match(/<thinking>(.*?)<\/thinking>/s);
       if (thinkMatch && newCotLines.length === 0) {
         newCotLines = thinkMatch[1].trim().split('\n').slice(0, 5);
@@ -5655,9 +5934,12 @@ ${last500}
     const renderBottomStrip = (cols) => {
       const halfWidth = Math.floor(cols / 2);
       const output = [];
-      output.push('\u251c' + '\u2500'.repeat(halfWidth - 2) + '\u253c' + '\u2500'.repeat(halfWidth - 2) + '\u2524');
-      const embeddingHeader = c.magenta + icons.star + ' Embedding' + c.reset;
-      const teamCommsHeader = c.yellow + icons.users + ' Team Comms' + c.reset;
+      const _bdr = aegisTheme ? '\x1b[38;2;42;58;74m' : c.dim;
+      output.push(`${_bdr}\u251c${'─'.repeat(halfWidth - 2)}\u253c${'─'.repeat(halfWidth - 2)}\u2524${c.reset}`);
+      const _cyan = aegisTheme ? '\x1b[38;2;0;212;255m' : c.magenta;
+      const _green = aegisTheme ? '\x1b[38;2;0;255;136m' : c.yellow;
+      const embeddingHeader = _cyan + icons.star + ' Embedding' + c.reset;
+      const teamCommsHeader = _green + icons.users + ' Team Comms' + c.reset;
       const leftLines = embeddingLogLines.length > 0 ? embeddingLogLines.slice(0, MAX_STRIP_LINES) : [c.dim + '[Idle]' + c.reset];
       // Right side: Team Comms (COT moved to bottom-right quadrant)
       let teamCommsLines = [];
@@ -5670,7 +5952,7 @@ ${last500}
       const rightHeader = ' ' + teamCommsHeader;
       const paddedLeftHeader = leftHeader + ' '.repeat(Math.max(0, halfWidth - 2 - visibleLength(leftHeader)));
       const paddedRightHeader = rightHeader + ' '.repeat(Math.max(0, halfWidth - 2 - visibleLength(rightHeader)));
-      output.push('\u2502' + paddedLeftHeader + '\u2502' + paddedRightHeader + '\u2502');
+      output.push(`${_bdr}\u2502${c.reset}` + paddedLeftHeader + `${_bdr}\u2502${c.reset}` + paddedRightHeader + `${_bdr}\u2502${c.reset}`);
       // Show 4 content lines (total 5 lines with header = MAX_STRIP_LINES)
       for (let i = 0; i < 4; i++) {
         const leftContent = leftLines[i] || '';
@@ -5679,7 +5961,7 @@ ${last500}
         const truncRight = truncateAnsiSafe(' ' + rightContent, halfWidth - 3);
         const paddedLeft = truncLeft + ' '.repeat(Math.max(0, halfWidth - 2 - visibleLength(truncLeft)));
         const paddedRight = truncRight + ' '.repeat(Math.max(0, halfWidth - 2 - visibleLength(truncRight)));
-        output.push('\u2502' + paddedLeft + '\u2502' + paddedRight + '\u2502');
+        output.push(`${_bdr}\u2502${c.reset}` + paddedLeft + `${_bdr}\u2502${c.reset}` + paddedRight + `${_bdr}\u2502${c.reset}`);
       }
       return output.join('\n');
     };
@@ -5747,14 +6029,14 @@ ${last500}
     rotateAllLogs();
     logRotationInterval = setInterval(rotateAllLogs, LOG_ROTATION_INTERVAL);
 
-    // Claude session tracking - sync with class-level state
+    //  session tracking - sync with class-level state
     // The class maintains claudeSessions array and activeSessionIndex
     // Local variables provide backward compatibility with existing code
     let claudeSessions = self.claudeSessions.map(s => s.controller.claudeSession);
     let currentSessionIndex = Math.max(0, self.activeSessionIndex);
 
-    // Helper to get all Claude sessions for this project (also syncs class state)
-    const getClaudeSessions = () => {
+    // Helper to get all  sessions for this project (also syncs class state)
+    const getSessions = () => {
       // Defensive: ensure projectId is defined
       const safeProjectId = self.projectId || 'unknown-project';
       try {
@@ -5777,7 +6059,7 @@ ${last500}
       }
     };
 
-    // Get active Claude session name from class-level tracking
+    // Get active  session name from class-level tracking
     const getActiveSessionName = () => {
       // First try class-level session tracking
       const activeSession = self.getActiveSession();
@@ -5785,7 +6067,7 @@ ${last500}
         return activeSession.controller.claudeSession;
       }
       // Fallback to local tracking (for legacy/untracked sessions)
-      claudeSessions = getClaudeSessions();
+      claudeSessions = getSessions();
       if (currentSessionIndex >= claudeSessions.length) {
         currentSessionIndex = 0;
       }
@@ -5802,12 +6084,12 @@ ${last500}
       return null;  // No valid session - let caller handle gracefully
     };
 
-    // Get enhanced Claude Preview title with session info
-    // Format: "🤖 Claude #1 [alias] ●" where ● = running, ○ = stopped
-    const getClaudePreviewTitle = () => {
+    // Get enhanced  Preview title with session info
+    // Format: "🤖  #1 [alias] ●" where ● = running, ○ = stopped
+    const getPreviewTitle = () => {
       const activeSession = self.getActiveSession();
       if (!activeSession) {
-        return `${icons.robot} Claude Preview`;
+        return `${icons.robot}  Preview`;
       }
 
       const num = activeSession.sessionNum;
@@ -5815,7 +6097,7 @@ ${last500}
       const isRunning = screenExists(activeSession.controller.claudeSession);
       const status = isRunning ? `${c.green}${icons.dot}${c.reset}` : `${c.dim}${icons.circle}${c.reset}`;
 
-      let title = `${icons.robot} Claude #${num}`;
+      let title = `${icons.robot}  #${num}`;
       if (alias) {
         title += ` [${alias}]`;
       }
@@ -5997,7 +6279,7 @@ ${last500}
             const txt = args.slice(5);
             if (!txt.trim()) { addToHistory('Usage: claude send <text>', 'warning'); return; }
             const ses = getActiveSessionName();
-            if (!ses || ses === 'claude-undefined') { addToHistory('No active Claude session', 'error'); return; }
+            if (!ses || ses === 'claude-undefined') { addToHistory('No active  session', 'error'); return; }
             const ok = screenSend(ses, txt, true);
             addToHistory(ok ? 'Sent: ' + txt.substring(0, 50) : 'Send failed', ok ? 'success' : 'error');
           } else if (args === 'interrupt' || args === 'stop') {
@@ -6033,9 +6315,9 @@ ${last500}
         case 'sessions':
         case 'claudes': {
           if (self.claudeSessions.length === 0) {
-            addToHistory('No Claude sessions running.', 'info');
+            addToHistory('No  sessions running.', 'info');
           } else {
-            addToHistory('Running Claude Sessions:', 'info');
+            addToHistory('Running  Sessions:', 'info');
             for (const sess of self.claudeSessions) {
               const isActive = self.getActiveSession() === sess;
               const alias = self.getAliasForSession ? self.getAliasForSession(sess.sessionNum) : null;
@@ -6053,7 +6335,7 @@ ${last500}
           const switchSess = self.getSessionByIdentifier ? self.getSessionByIdentifier(args) : null;
           if (switchSess) {
             const idx = self.claudeSessions.indexOf(switchSess);
-            if (idx !== -1) { self.activeSessionIndex = idx; addToHistory('Switched to Claude ' + switchSess.sessionNum, 'success'); }
+            if (idx !== -1) { self.activeSessionIndex = idx; addToHistory('Switched to  ' + switchSess.sessionNum, 'success'); }
           } else { addToHistory('Session not found', 'error'); }
           break;
         }
@@ -6061,7 +6343,7 @@ ${last500}
         case 'attach': {
           let attachSess = args ? (self.getSessionByIdentifier ? self.getSessionByIdentifier(args) : null) : self.getActiveSession();
           if (!attachSess) { addToHistory('No session to attach', 'error'); break; }
-          addToHistory('Attaching to Claude ' + attachSess.sessionNum + ' (Ctrl+A+D to detach)...', 'info');
+          addToHistory('Attaching to  ' + attachSess.sessionNum + ' (Ctrl+A+D to detach)...', 'info');
           try { execSync('screen -r ' + attachSess.controller.claudeSession, { stdio: 'inherit' }); } catch (e) { addToHistory('Failed: ' + e.message, 'error'); }
           break;
         }
@@ -6075,7 +6357,7 @@ ${last500}
             if (self.claude.accept()) { addToHistory('Accepted', 'success'); } else { addToHistory('Failed', 'error'); }
             break;
           }
-          if (acceptSess.controller.accept()) { addToHistory('Accepted on Claude ' + acceptSess.sessionNum, 'success'); } else { addToHistory('Failed', 'error'); }
+          if (acceptSess.controller.accept()) { addToHistory('Accepted on  ' + acceptSess.sessionNum, 'success'); } else { addToHistory('Failed', 'error'); }
           break;
         }
 
@@ -6085,7 +6367,7 @@ ${last500}
             if (self.claude.allowAlways()) { addToHistory('Allowed always', 'success'); } else { addToHistory('Failed', 'error'); }
             break;
           }
-          if (allowSess.controller.allowAlways()) { addToHistory('Allowed on Claude ' + allowSess.sessionNum, 'success'); } else { addToHistory('Failed', 'error'); }
+          if (allowSess.controller.allowAlways()) { addToHistory('Allowed on  ' + allowSess.sessionNum, 'success'); } else { addToHistory('Failed', 'error'); }
           break;
         }
 
@@ -6095,23 +6377,23 @@ ${last500}
             if (self.claude.deny()) { addToHistory('Denied', 'success'); } else { addToHistory('Failed', 'error'); }
             break;
           }
-          if (denySess.controller.deny()) { addToHistory('Denied on Claude ' + denySess.sessionNum, 'success'); } else { addToHistory('Failed', 'error'); }
+          if (denySess.controller.deny()) { addToHistory('Denied on  ' + denySess.sessionNum, 'success'); } else { addToHistory('Failed', 'error'); }
           break;
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // AutoClaude Command
+        // Auto Command
         // ═══════════════════════════════════════════════════════════════
         case 'autoclaude': {
           if (!args) { addToHistory('Usage: autoclaude <prompt> [duration]', 'warning'); break; }
           const acParts = args.split(/\s+/);
           let acDuration = '0:30', acPrompt = args;
           if (/^\d+:\d+$/.test(acParts[acParts.length - 1])) { acDuration = acParts.pop(); acPrompt = acParts.join(' '); }
-          addToHistory('Starting AutoClaude: ' + acPrompt + ' (' + acDuration + ')', 'info');
+          addToHistory('Starting Auto: ' + acPrompt + ' (' + acDuration + ')', 'info');
           try {
             const ac = spawn('node', [path.join(__dirname, 'specmem-autoclaude.cjs'), self.projectPath, acPrompt, acDuration], { stdio: 'ignore', detached: true });
             ac.unref();
-            addToHistory('AutoClaude started', 'success');
+            addToHistory('Auto started', 'success');
           } catch (e) { addToHistory('Failed: ' + e.message, 'error'); }
           break;
         }
@@ -6215,7 +6497,7 @@ ${last500}
           addToHistory('AUTO: autoclaude <prompt> [h:mm]', 'info');
           addToHistory('MGMT: cleanup, recover, health, monitor', 'info');
           addToHistory('SYS: webdashboard, init, screens, agents, die', 'info');
-          addToHistory('SHORTCUT: > <text> - send to Claude', 'info');
+          addToHistory('SHORTCUT: > <text> - send to ', 'info');
           break;
 
         case 'debug':
@@ -6228,7 +6510,7 @@ ${last500}
             let txt = command.slice(1); if (args) txt += ' ' + args; txt = txt.trim();
             if (!txt) { addToHistory('Usage: > <text>', 'warning'); return; }
             const ses = getActiveSessionName();
-            if (!ses || ses === 'claude-undefined') { addToHistory('No active Claude session', 'error'); return; }
+            if (!ses || ses === 'claude-undefined') { addToHistory('No active  session', 'error'); return; }
             const ok = screenSend(ses, txt, true);
             addToHistory(ok ? '> ' + txt.substring(0, 50) : 'Failed', ok ? 'success' : 'error');
           } else if (command) {
@@ -6435,8 +6717,8 @@ ${last500}
     const initQuadHeight = Math.floor((initRows - 2 - BOTTOM_STRIP_HEIGHT - 3) / 2);
     const initQuadWidth = Math.floor(initCols / 2);
 
-    // Claude Preview Module (TOP LEFT)
-    const claudeModule = new ClaudePreviewModule(null, {
+    //  Preview Module (TOP LEFT)
+    const claudeModule = new PreviewModule(null, {
       width: initQuadWidth,
       height: initQuadHeight,
       colors: c,
@@ -6515,7 +6797,7 @@ ${last500}
       mcpModule.height = quadHeight;
 
       // ============================================================
-      // TOP LEFT: Claude screen preview (from ACTIVE session)
+      // TOP LEFT:  screen preview (from ACTIVE session)
       // Always poll screen - user needs live updates regardless of focus
       // ============================================================
       const claudeLines = [];
@@ -6523,11 +6805,11 @@ ${last500}
       try {
       // Check if we have a valid session first
       if (!activeSession) {
-        // No valid Claude session - show helpful message
+        // No valid  session - show helpful message
         claudeLines.push('');
-        claudeLines.push(c.yellow + '  No Claude session running' + c.reset);
+        claudeLines.push(c.yellow + '  No  session running' + c.reset);
         claudeLines.push('');
-        claudeLines.push(c.dim + '  Press ' + c.reset + c.cyan + 'n' + c.reset + c.dim + ' to start a new Claude session' + c.reset);
+        claudeLines.push(c.dim + '  Press ' + c.reset + c.cyan + 'n' + c.reset + c.dim + ' to start a new  session' + c.reset);
         claudeLines.push(c.dim + '  Or run: ' + c.reset + c.cyan + 'claude start' + c.reset + c.dim + ' from terminal' + c.reset);
         claudeLines.push('');
       } else {
@@ -6536,18 +6818,18 @@ ${last500}
         const screenResult = screenReadNonBlocking(activeSession, 100); // Get last 100 lines
         if (screenResult && screenResult.content && screenResult.content.trim()) {
           screenContent = screenResult.content;
-          lastClaudeContent = screenContent;
-          lastClaudeTime = Date.now();
+          lastContent = screenContent;
+          lastTime = Date.now();
         } else {
           // Fallback to cached content
-          screenContent = lastClaudeContent;
+          screenContent = lastContent;
         }
         // Fallback to log file if still empty
         if (!screenContent.trim()) {
           const logContent = readLastLines(logFile, quadHeight - 1) || '';
           if (logContent.trim()) {
             screenContent = logContent;
-            lastClaudeContent = screenContent;
+            lastContent = screenContent;
           }
         }
 
@@ -6564,7 +6846,16 @@ ${last500}
             let line = claudeContentLines[i] || '';
             line = line.replace(/[\x00-\x08\x0B\x0C\x0E-\x1A\x1C-\x1F\x7F]/g, '');
 
-            // Filter out MCP protocol XML noise from Claude preview
+            // FIX: Filter out cursor positioning escapes from claudefix footer
+            // These pollute the preview when claudefix draws its footer
+            line = line.replace(/\x1b\[\d+;\d*H/g, '');     // Cursor positioning \x1b[row;colH
+            line = line.replace(/\x1b\[\d*[ABCDJK]/g, '');  // Cursor movement A/B/C/D, clear J/K
+            line = line.replace(/\x1b\[\d+;\d+r/g, '');     // Scroll region \x1b[top;bottomr
+            line = line.replace(/\x1b[78]/g, '');           // Save/restore cursor \x1b7 \x1b8
+            line = line.replace(/\x1b\[[su]/g, '');         // Save/restore cursor \x1b[s \x1b[u
+            line = line.replace(/\x1b\[r/g, '');            // Reset scroll region
+
+            // Filter out MCP protocol XML noise from  preview
             line = line.replace(/<\/?antml:[^>]*>/g, '');
             line = line.replace(/<\/?function_calls>/g, '');
             line = line.replace(/<\/?invoke[^>]*>/g, '');
@@ -6612,10 +6903,10 @@ ${last500}
         consoleLines.push(`${c.bgGreen}${c.black} CLAUDE MODE ${c.reset} ${c.dim}(ESC+ESC to exit)${c.reset}`);
         consoleLines.push('');
         // Show direct input indicator
-        const bufferLine = `${c.cyan}>${c.reset} ${c.dim}[typing directly into Claude]${c.reset}`;
+        const bufferLine = `${c.cyan}>${c.reset} ${c.dim}[typing directly into ]${c.reset}`;
         consoleLines.push(truncateAnsiSafe(bufferLine, quadWidth - 4));
         consoleLines.push('');
-        consoleLines.push(`${c.dim}All keystrokes sent directly to Claude${c.reset}`);
+        consoleLines.push(`${c.dim}All keystrokes sent directly to ${c.reset}`);
         consoleLines.push(`${c.dim}Ctrl+C=interrupt | Arrows/Tab/Backspace work${c.reset}`);
       } else if (inputMode === 'specmem') {
         // Show specmem mode indicator and input buffer
@@ -6645,7 +6936,7 @@ ${last500}
         consoleLines.push(`${c.dim}${icons.circle} Ready for commands${c.reset}`);
         consoleLines.push('');
         consoleLines.push(`${c.cyan}${icons.arrow}${c.reset} ${c.white}Quick Start:${c.reset}`);
-        consoleLines.push(`  ${c.brightCyan}i${c.reset} ${c.dim}${icons.line_h}${c.reset} Chat with Claude`);
+        consoleLines.push(`  ${c.brightCyan}i${c.reset} ${c.dim}${icons.line_h}${c.reset} Chat with `);
         consoleLines.push(`  ${c.brightCyan}n${c.reset} ${c.dim}${icons.line_h}${c.reset} New session`);
         consoleLines.push(`  ${c.brightCyan}h${c.reset} ${c.dim}${icons.line_h}${c.reset} All shortcuts`);
       } else {
@@ -6660,7 +6951,7 @@ ${last500}
 
       // Update title based on mode - include icons for consistency
       if (inputMode === 'claude') {
-        renderer.bottomLeftTitle = `${icons.play} Claude Input`;
+        renderer.bottomLeftTitle = `${icons.play}  Input`;
       } else if (inputMode === 'specmem') {
         renderer.bottomLeftTitle = `${icons.brain} SpecMem Input`;
       } else {
@@ -6672,7 +6963,7 @@ ${last500}
       renderer.setBottomLeft(consoleLines);
 
       // ============================================================
-      // TOP RIGHT: Pythia COT (chain of thought reasoning) - next to Claude
+      // TOP RIGHT: Pythia COT (chain of thought reasoning) - next to 
       // ============================================================
       const cotQuadrantLines = [];
       try {
@@ -6694,7 +6985,7 @@ ${last500}
         cotQuadrantLines.push(c.dim + '[No active reasoning]' + c.reset);
         cotQuadrantLines.push('');
         cotQuadrantLines.push(c.dim + 'COT appears here when' + c.reset);
-        cotQuadrantLines.push(c.dim + 'Claude is thinking...' + c.reset);
+        cotQuadrantLines.push(c.dim + ' is thinking...' + c.reset);
       }
 
       } catch (quadErr) {
@@ -6736,7 +7027,7 @@ ${last500}
           // Empty state for MCP Tools
           mcpLines.push(`${c.dim}${icons.circle} No tool activity${c.reset}`);
           mcpLines.push('');
-          mcpLines.push(`${c.dim}Tools appear here when Claude${c.reset}`);
+          mcpLines.push(`${c.dim}Tools appear here when ${c.reset}`);
           mcpLines.push(`${c.dim}calls MCP tools or functions${c.reset}`);
         }
       }
@@ -6749,57 +7040,141 @@ ${last500}
       // ============================================================
       // Render the frame
       // ============================================================
+      // NOTE: Do NOT add \x1b[2J\x1b[H here - writeDiffFrame handles clear
+      // Adding it here defeats differential rendering and causes flickering
       let frame = '';
-      if (termCaps.hasColors) frame += '\x1b[2J\x1b[H';
 
-      // Update Claude session list (activeSession already defined above)
-      claudeSessions = getClaudeSessions();
+      // Update  session list (activeSession already defined above)
+      claudeSessions = getSessions();
       // Get session indicator from class-level tracking
       const sessionIndicator = self.getSessionIndicator();
       // Mode name for header display - Phase 1 tri-mode system
       const modeName = inputMode === 'claude' ? 'CLAUDE' : inputMode === 'specmem' ? 'SPECMEM' : 'COMMAND';
 
-      // Header with mode and session info
-      // Format: "SPECMEM DASHBOARD - {project} | Claude {n} "alias" [total] | {COMMAND/CLAUDE/SPECMEM} | {agents}"
+      // ============================================================
+      // AEGIS TAB BAR (Header) - Replaces old mode-colored header
+      // ============================================================
       const runningAgents = self.getRunningAgentCount();
-      const agentIndicator = runningAgents > 0 ? ` | ${c.yellow}${runningAgents} agents${c.reset}` : '';
-      const header = ` ${icons.brain} SPECMEM DASHBOARD - ${self.projectId} | ${sessionIndicator} | ${modeName}${agentIndicator}`;
-      // Header background color matches mode
-      const headerBg = inputMode === 'claude' ? c.bgGreen : inputMode === 'specmem' ? c.bgMagenta : c.bgCyan;
-      frame += `${headerBg}${c.black}${header.padEnd(cols)}${c.reset}\n`;
+      const agentIndicator = runningAgents > 0 ? ` ${c.yellow}${runningAgents} agents${c.reset}` : '';
 
-      // Update Claude Preview quadrant title with enhanced session info
-      renderer.topLeftTitle = getClaudePreviewTitle();
+      // Build AEGIS-style tab bar
+      const aegisBg = aegisTheme ? '\x1b[48;2;19;25;36m' : c.bgCyan;    // #131924
+      const aegisCyan = aegisTheme ? '\x1b[38;2;0;212;255m' : c.cyan;    // #00d4ff
+      const aegisGreen = aegisTheme ? '\x1b[38;2;0;255;136m' : c.green;  // #00ff88
+      const aegisMagenta = aegisTheme ? '\x1b[38;2;204;102;255m' : c.magenta; // #cc66ff
+      const aegisYellow = aegisTheme ? '\x1b[38;2;255;170;0m' : c.yellow; // #ffaa00
+      const aegisDim = aegisTheme ? '\x1b[38;2;100;120;140m' : c.dim;    // dimmed text
+      const aegisBorder = aegisTheme ? '\x1b[38;2;42;58;74m' : c.dim;    // #2a3a4a
 
-      // Set active quadrant for border highlighting
-      renderer.activeQuadrant = inputMode === 'claude' ? 'topLeft' : inputMode === 'specmem' ? 'bottomLeft' : null;
-
-      // Quadrants - strip bottom border so we can add bottom strip
-      const quadrantOutput = renderer.render();
-      const quadrantLines = quadrantOutput.split('\n');
-      quadrantLines.pop(); // Remove bottom border (╰...┴...╯)
-      frame += quadrantLines.join('\n');
-
-      // Phase 5: Bottom strip with embedding and COT preview
-      frame += '\n' + renderBottomStrip(cols);
-
-      // Bottom border for the entire frame (quadrants + strip)
-      const halfWidth = Math.floor(cols / 2);
-      frame += '\n\u2570' + '\u2500'.repeat(halfWidth - 2) + '\u2534' + '\u2500'.repeat(halfWidth - 2) + '\u256f';
-
-      // Footer: Phase 1 - Clean, minimal, only essential shortcuts
-      // Shows current mode + 3 essential navigation shortcuts
-      let footer;
-      const modeIcon = inputMode === 'claude' ? `${c.green}CLAUDE${c.reset}` :
-                       inputMode === 'specmem' ? `${c.magenta}SPECMEM${c.reset}` : `${c.cyan}COMMAND${c.reset}`;
-      if (inputMode === 'claude' || inputMode === 'specmem') {
-        // Input modes - show how to exit and mode toggle
-        footer = ` ${modeIcon} ${c.dim}|${c.reset} Ctrl+Shift+${icons.arrow_u}${icons.arrow_d}=Mode ${c.dim}|${c.reset} Ctrl+Shift+${icons.arrow_l}${icons.arrow_r}=Claude ${c.dim}|${c.reset} Ctrl+Shift+H=Exit`;
-      } else {
-        // Command mode - show essential shortcuts only
-        footer = ` ${modeIcon} ${c.dim}|${c.reset} Ctrl+Shift+${icons.arrow_u}${icons.arrow_d}=Mode ${c.dim}|${c.reset} Ctrl+Shift+${icons.arrow_l}${icons.arrow_r}=Claude ${c.dim}|${c.reset} ${c.white}n${c.reset}=New ${c.dim}|${c.reset} ${c.white}h${c.reset}=Help`;
+      let tabBar = `${aegisBg} ${aegisCyan}AEGIS${c.reset}${aegisBg} `;
+      for (let t = 0; t < TABS.length; t++) {
+        const tab = TABS[t];
+        if (t === activeTab) {
+          tabBar += `${aegisBg}${aegisCyan}\u2590${c.reset}\x1b[48;2;0;212;255m\x1b[38;2;19;25;36m ${tab.icon} ${tab.label} ${c.reset}${aegisBg}${aegisCyan}\u258C${c.reset}${aegisBg} `;
+        } else {
+          tabBar += `${aegisBg}${aegisDim}${tab.key}:${tab.label} ${c.reset}${aegisBg}`;
+        }
       }
-      frame += `\n${footer}`;
+      // Right side: session + mode + agents
+      const modeColor = inputMode === 'claude' ? aegisGreen : inputMode === 'specmem' ? aegisMagenta : aegisCyan;
+      const rightInfo = `${aegisDim}${sessionIndicator}${c.reset}${aegisBg} ${modeColor}${modeName}${c.reset}${aegisBg}${agentIndicator} `;
+      const tabBarPlain = tabBar.replace(/\x1b\[[0-9;]*m/g, '') + rightInfo.replace(/\x1b\[[0-9;]*m/g, '');
+      const tabPadding = Math.max(0, cols - tabBarPlain.length);
+      frame += `${tabBar}${' '.repeat(tabPadding)}${rightInfo}${c.reset}\n`;
+
+      // ============================================================
+      // TAB CONTENT RENDERING
+      // ============================================================
+      if (activeTab === 0) {
+        // TAB 0: Dashboard - Original 4-quadrant layout
+        // Update  Preview quadrant title with enhanced session info
+        renderer.topLeftTitle = getPreviewTitle();
+
+        // Set active quadrant for border highlighting
+        renderer.activeQuadrant = inputMode === 'claude' ? 'topLeft' : inputMode === 'specmem' ? 'bottomLeft' : null;
+
+        // Quadrants - strip bottom border so we can add bottom strip
+        const quadrantOutput = renderer.render();
+        const quadrantLines = quadrantOutput.split('\n');
+        quadrantLines.pop(); // Remove bottom border
+        frame += quadrantLines.join('\n');
+
+        // Phase 5: Bottom strip with embedding and COT preview
+        frame += '\n' + renderBottomStrip(cols);
+
+        // Bottom border for the entire frame (quadrants + strip)
+        const halfWidth = Math.floor(cols / 2);
+        frame += '\n\u2570' + '\u2500'.repeat(halfWidth - 2) + '\u2534' + '\u2500'.repeat(halfWidth - 2) + '\u256f';
+
+      } else if (activeTab === 1 && claudeLiveModule) {
+        // TAB 1: Claude Live - Full-screen session view
+        try {
+          claudeLiveModule.update();
+          const contentHeight = rows - 3; // -1 tab bar, -1 footer, -1 border
+          const liveLines = claudeLiveModule.render(cols, contentHeight);
+          frame += liveLines.join('\n');
+        } catch (e) {
+          frame += `${c.red}[Claude Live Error: ${e.message}]${c.reset}`;
+        }
+
+      } else if (activeTab === 2 && memoryBrowserModule) {
+        // TAB 2: Memories - Full-screen memory browser
+        try {
+          const contentHeight = rows - 3;
+          const memLines = memoryBrowserModule.render(cols, contentHeight);
+          frame += memLines.join('\n');
+        } catch (e) {
+          frame += `${c.red}[Memory Browser Error: ${e.message}]${c.reset}`;
+        }
+
+      } else if (activeTab === 3) {
+        // TAB 3: Team Comms - Full-screen team view
+        try {
+          const contentHeight = rows - 3;
+          const teamLines = [];
+          if (self.teamCommsPanel && self.teamCommsPanel.render) {
+            const rendered = self.teamCommsPanel.render(cols, contentHeight);
+            if (Array.isArray(rendered)) {
+              for (const line of rendered) teamLines.push(line);
+            }
+          }
+          if (teamLines.length === 0) {
+            teamLines.push('');
+            teamLines.push(`  ${aegisCyan}-- TEAM COMMUNICATIONS --${c.reset}`);
+            teamLines.push('');
+            teamLines.push(`  ${c.dim}Team comms panel initializing...${c.reset}`);
+            teamLines.push(`  ${c.dim}Messages from team members will appear here.${c.reset}`);
+          }
+          // Pad to fill content area
+          while (teamLines.length < contentHeight) teamLines.push('');
+          frame += teamLines.join('\n');
+        } catch (e) {
+          frame += `${c.red}[Team Error: ${e.message}]${c.reset}`;
+        }
+
+      } else {
+        // Fallback for tabs without modules loaded
+        const contentHeight = rows - 3;
+        const fallbackLines = [];
+        fallbackLines.push('');
+        fallbackLines.push(`  ${aegisCyan}${TABS[activeTab]?.label || 'Unknown'}${c.reset}`);
+        fallbackLines.push('');
+        fallbackLines.push(`  ${c.dim}Module not loaded. Check bin/${TABS[activeTab]?.id || 'unknown'}.cjs${c.reset}`);
+        while (fallbackLines.length < contentHeight) fallbackLines.push('');
+        frame += fallbackLines.join('\n');
+      }
+
+      // ============================================================
+      // AEGIS FOOTER - Status bar with mode, version, resources
+      // ============================================================
+      let footer;
+      const modeIcon = inputMode === 'claude' ? `${aegisGreen}CLAUDE${c.reset}` :
+                       inputMode === 'specmem' ? `${aegisMagenta}SPECMEM${c.reset}` : `${aegisCyan}COMMAND${c.reset}`;
+      const version = require('../package.json').version || '?.?.?';
+      footer = `${aegisBg} ${modeIcon}${aegisBg} ${aegisDim}|${c.reset}${aegisBg} ${aegisDim}SpecMem v${version}${c.reset}${aegisBg} ${aegisDim}|${c.reset}${aegisBg} ${aegisDim}1-4${c.reset}${aegisBg}${aegisCyan}=Tab${c.reset}${aegisBg} ${aegisDim}|${c.reset}${aegisBg} ${aegisDim}Ctrl+Shift+\u2191\u2193${c.reset}${aegisBg}${aegisCyan}=Mode${c.reset}${aegisBg} ${aegisDim}|${c.reset}${aegisBg} ${aegisDim}Ctrl+Shift+H${c.reset}${aegisBg}${aegisCyan}=Exit${c.reset}${aegisBg}`;
+      const footerPlain = footer.replace(/\x1b\[[0-9;]*m/g, '');
+      const footerPad = Math.max(0, cols - footerPlain.length);
+      frame += `\n${footer}${aegisBg}${' '.repeat(footerPad)}${c.reset}`;
 
       // Help overlay (render on top of frame if active)
       if (showHelp) {
@@ -6813,16 +7188,17 @@ ${last500}
           '  i                Enter CLAUDE mode (shortcut)',
           '',
           `${c.yellow}Navigation:${c.reset}`,
-          '  Ctrl+Shift+Left  Previous Claude session',
-          '  Ctrl+Shift+Right Next Claude session',
-          '  1-9              Switch to Claude #N',
+          '  Ctrl+Shift+Left  Previous  session',
+          '  Ctrl+Shift+Right Next  session',
+          '  1-9              Switch to  #N',
           '',
           `${c.yellow}Actions:${c.reset}`,
-          '  n   New Claude session',
+          '  n   New  session',
           '  a   Accept permission prompt',
           '  x   Reject permission prompt',
-          '  s   Stop active Claude',
+          '  s   Stop active ',
           '  q   Quit dashboard',
+          '  X   Exit dashboard (backup)',
           '  Ctrl+Shift+H    Exit to CLI',
           '',
           `${c.yellow}SpecMem Commands (in SPECMEM mode):${c.reset}`,
@@ -7012,6 +7388,8 @@ ${last500}
       // - CSI u uppercase: \x1b[72;6u (H=72)
       // - xterm modifyOtherKeys: \x1b[27;6;104~ and \x1b[27;6;72~
       // - kitty keyboard protocol: \x1b[104;6:3u
+      // - tmux/screen passthrough: \x1bP...\x1b\\
+      // - gnome-terminal/VTE: may send \x1b[72;6~ or \x1b[104;6~
       // - Also handle Ctrl+Shift+Tab as fallback for terminals without H support
       // Note: \x08 is plain Ctrl+H (backspace), NOT Ctrl+Shift+H - not included
       const isCtrlShiftH = key === '\x1b[104;6u' ||
@@ -7019,17 +7397,77 @@ ${last500}
                            key === '\x1b[27;6;104~' ||
                            key === '\x1b[27;6;72~' ||
                            key === '\x1b[104;6:3u' ||  // kitty protocol
-                           key === '\x1b[72;6:3u';     // kitty uppercase
+                           key === '\x1b[72;6:3u' ||   // kitty uppercase
+                           key === '\x1b[72;6~' ||     // VTE/gnome-terminal
+                           key === '\x1b[104;6~' ||    // VTE/gnome-terminal lowercase
+                           key === '\x1b[1;6H' ||      // Some terminals use this format
+                           key === '\x1b[H;6u' ||      // Edge case variant
+                           key === '\x1b[72;5u' ||     // Ctrl+Shift uppercase H (5 = Ctrl)
+                           key === '\x1b[104;5u' ||    // Ctrl+Shift lowercase h
+                           key === '\x1bH' ||          // Gnome Terminal raw (no CSI)
+                           key.includes(';6H') ||      // Catch-all for H with modifier 6
+                           key.includes(';6h');        // Catch-all for h with modifier 6
 
       const isCtrlShiftTab = key === '\x1b[9;6u' ||
                              key === '\x1b[27;6;9~' ||
                              key === '\x1b[1;6Z';
 
-      if (isCtrlShiftH || isCtrlShiftTab) {
+      // Also allow 'q' and 'X' keys in COMMAND mode as exit shortcuts (backup methods)
+      const isExitKey = (key === 'X' || key === 'q') && inputMode === 'command';
+
+      if (isCtrlShiftH || isCtrlShiftTab || isExitKey) {
         running = false;
         // cleanup() handles all terminal restoration - don't duplicate here
         cleanup();
         return;
+      }
+
+      // ============================================================
+      // TAB SWITCHING - F1-F4 or Alt+1-4 (only in COMMAND mode or any mode with modifier)
+      // Also supports raw number keys 1-4 in COMMAND mode
+      // ============================================================
+      // F1-F4 keys (work in any mode)
+      const tabFKeys = { '\x1bOP': 0, '\x1bOQ': 1, '\x1bOR': 2, '\x1bOS': 3,
+                         '\x1b[11~': 0, '\x1b[12~': 1, '\x1b[13~': 2, '\x1b[14~': 3 };
+      if (tabFKeys[key] !== undefined) {
+        const newTab = tabFKeys[key];
+        if (newTab !== activeTab && newTab < TABS.length) {
+          // Deactivate old tab
+          if (activeTab === 1 && claudeLiveModule && claudeLiveModule.onDeactivate) claudeLiveModule.onDeactivate();
+          if (activeTab === 2 && memoryBrowserModule && memoryBrowserModule.onDeactivate) memoryBrowserModule.onDeactivate();
+          activeTab = newTab;
+          // Activate new tab
+          if (activeTab === 1 && claudeLiveModule && claudeLiveModule.onActivate) claudeLiveModule.onActivate();
+          if (activeTab === 2 && memoryBrowserModule && memoryBrowserModule.onActivate) memoryBrowserModule.onActivate();
+          previousFrameLines = []; // Force full redraw on tab switch
+          draw();
+        }
+        return;
+      }
+
+      // Number keys 1-4 for tab switching (only in COMMAND mode, not in input modes)
+      if (inputMode === 'command' && key >= '1' && key <= '4') {
+        const newTab = parseInt(key) - 1;
+        if (newTab !== activeTab && newTab < TABS.length) {
+          if (activeTab === 1 && claudeLiveModule && claudeLiveModule.onDeactivate) claudeLiveModule.onDeactivate();
+          if (activeTab === 2 && memoryBrowserModule && memoryBrowserModule.onDeactivate) memoryBrowserModule.onDeactivate();
+          activeTab = newTab;
+          if (activeTab === 1 && claudeLiveModule && claudeLiveModule.onActivate) claudeLiveModule.onActivate();
+          if (activeTab === 2 && memoryBrowserModule && memoryBrowserModule.onActivate) memoryBrowserModule.onActivate();
+          previousFrameLines = [];
+          draw();
+        }
+        return;
+      }
+
+      // Delegate input to active tab's handler (for tabs 1-3)
+      if (activeTab === 1 && claudeLiveModule && claudeLiveModule.handleInput) {
+        const consumed = claudeLiveModule.handleInput(key);
+        if (consumed) { draw(); return; }
+      }
+      if (activeTab === 2 && memoryBrowserModule && memoryBrowserModule.handleInput) {
+        const consumed = memoryBrowserModule.handleInput(key);
+        if (consumed) { draw(); return; }
       }
 
       // Ctrl+Up (\x1b[1;5A) - toggle to COMMAND mode (legacy behavior)
@@ -7094,7 +7532,7 @@ ${last500}
           return;
         }
 
-        // Ctrl+C in specmem mode - clear buffer (don't interfere with Claude)
+        // Ctrl+C in specmem mode - clear buffer (don't interfere with )
         if (key === '\x03') {
           specmemInputBuffer = '';
           draw();
@@ -7125,7 +7563,7 @@ ${last500}
         return; // Ignore other escape sequences in specmem mode
       }
 
-      // In CLAUDE mode - all input goes to Claude
+      // In CLAUDE mode - all input goes to 
       if (inputMode === 'claude') {
         const activeSession = getActiveSessionName();
 
@@ -7141,10 +7579,10 @@ ${last500}
             escPressCount = 0;
             draw();
           } else {
-            // Wait for second ESC, or send single ESC to Claude after timeout
+            // Wait for second ESC, or send single ESC to  after timeout
             escTimeout = setTimeout(() => {
               if (escPressCount === 1) {
-                // Single ESC timed out - send it to Claude
+                // Single ESC timed out - send it to 
                 screenKey(activeSession, 'esc');
               }
               escPressCount = 0;
@@ -7154,16 +7592,16 @@ ${last500}
         }
 
         // Reset ESC counter and cancel pending ESC timeout on any other key
-        // This prevents ESC from being sent to Claude after user types something else
+        // This prevents ESC from being sent to  after user types something else
         escPressCount = 0;
         if (escTimeout) {
           clearTimeout(escTimeout);
           escTimeout = null;
         }
 
-        // Arrow keys - Up/Down scroll preview, Left/Right go to Claude
+        // Arrow keys - Up/Down scroll preview, Left/Right go to 
         if (key === '\x1b[A') { // Up arrow - scroll preview up
-          if (claudeScrollOffset < totalClaudeLines) {
+          if (claudeScrollOffset < totalLines) {
             claudeScrollOffset++;
           }
           draw();
@@ -7176,12 +7614,12 @@ ${last500}
           draw();
           return;
         }
-        if (key === '\x1b[C') { // Right arrow - send to Claude
+        if (key === '\x1b[C') { // Right arrow - send to 
           screenKey(activeSession, 'right');
           draw();
           return;
         }
-        if (key === '\x1b[D') { // Left arrow - send to Claude
+        if (key === '\x1b[D') { // Left arrow - send to 
           screenKey(activeSession, 'left');
           draw();
           return;
@@ -7190,7 +7628,7 @@ ${last500}
         // Home key - jump to top of preview
         if (key === '\x1b[H' || key === '\x1b[1~') {
           const displayHeight = Math.floor((getSize().rows - 2 - 6 - 3) / 2) - 1;
-          claudeScrollOffset = Math.max(0, totalClaudeLines - displayHeight);
+          claudeScrollOffset = Math.max(0, totalLines - displayHeight);
           draw();
           return;
         }
@@ -7205,7 +7643,7 @@ ${last500}
         // Page Up - scroll up one screen
         if (key === '\x1b[5~') {
           const displayHeight = Math.floor((getSize().rows - 2 - 6 - 3) / 2) - 1;
-          claudeScrollOffset = Math.min(totalClaudeLines, claudeScrollOffset + displayHeight);
+          claudeScrollOffset = Math.min(totalLines, claudeScrollOffset + displayHeight);
           draw();
           return;
         }
@@ -7218,70 +7656,70 @@ ${last500}
           return;
         }
 
-        // Tab key - send directly to Claude
+        // Tab key - send directly to 
         if (key === '\t') {
           screenKey(activeSession, 'tab');
           draw();
           return;
         }
 
-        // Shift+Tab - send directly to Claude
+        // Shift+Tab - send directly to 
         if (key === '\x1b[Z') {
           screenKey(activeSession, 'shift-tab');
           draw();
           return;
         }
 
-        // Home key - send directly to Claude
+        // Home key - send directly to 
         if (key === '\x1b[H' || key === '\x1b[1~') {
           screenKey(activeSession, 'home');
           draw();
           return;
         }
 
-        // End key - send directly to Claude
+        // End key - send directly to 
         if (key === '\x1b[F' || key === '\x1b[4~') {
           screenKey(activeSession, 'end');
           draw();
           return;
         }
 
-        // Delete key - send directly to Claude
+        // Delete key - send directly to 
         if (key === '\x1b[3~') {
           screenKey(activeSession, 'delete');
           draw();
           return;
         }
 
-        // Page Up - send directly to Claude
+        // Page Up - send directly to 
         if (key === '\x1b[5~') {
           screenKey(activeSession, 'page-up');
           draw();
           return;
         }
 
-        // Page Down - send directly to Claude
+        // Page Down - send directly to 
         if (key === '\x1b[6~') {
           screenKey(activeSession, 'page-down');
           draw();
           return;
         }
 
-        // Enter - send directly to Claude
+        // Enter - send directly to 
         if (key === '\r' || key === '\n') {
           screenKey(activeSession, 'enter');
           draw();
           return;
         }
 
-        // Backspace - send directly to Claude
+        // Backspace - send directly to 
         if (key === '\x7f' || key === '\b') {
           screenKey(activeSession, 'backspace');
           draw();
           return;
         }
 
-        // Ctrl+C in claude mode - send to Claude (interrupt running command)
+        // Ctrl+C in claude mode - send to  (interrupt running command)
         if (key === '\x03') {
           screenKey(activeSession, 'ctrl-c');
           const cmd = `${c.yellow}[CTRL+C]${c.reset} Interrupt sent ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
@@ -7291,21 +7729,21 @@ ${last500}
           return;
         }
 
-        // Ctrl+D - send to Claude (EOF)
+        // Ctrl+D - send to  (EOF)
         if (key === '\x04') {
           screenKey(activeSession, 'ctrl-d');
           draw();
           return;
         }
 
-        // Printable characters - send directly to Claude
+        // Printable characters - send directly to 
         if (key.length === 1 && key.charCodeAt(0) >= 32) {
           screenSend(activeSession, key, false);
           draw();
           return;
         }
 
-        // Multi-character paste - send directly to Claude
+        // Multi-character paste - send directly to 
         if (key.length > 1 && !key.startsWith('\x1b')) {
           screenSend(activeSession, key, false);
           draw();
@@ -7339,12 +7777,12 @@ ${last500}
         if (self.teamCommsPanel) self.teamCommsPanel.poll();
         draw();
       } else if (key === 'n') {
-        // Spawn new Claude session using class-level session management
+        // Spawn new  session using class-level session management
         // Uses numbered session names: claude-{projectId}-1, claude-{projectId}-2, etc.
-        const newSession = self.createClaudeSession();
+        const newSession = self.createSession();
         if (newSession) {
           // Update local tracking to match class state
-          claudeSessions = getClaudeSessions();
+          claudeSessions = getSessions();
           currentSessionIndex = self.activeSessionIndex;
           const cmd = `${c.yellow}[NEW CLAUDE]${c.reset} ${newSession.controller.claudeSession} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
           commandHistory.push(cmd);
@@ -7352,7 +7790,7 @@ ${last500}
             commandHistory.shift();
           }
         } else {
-          const cmd = `${c.red}[ERROR]${c.reset} Failed to start new Claude session ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
+          const cmd = `${c.red}[ERROR]${c.reset} Failed to start new  session ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
           commandHistory.push(cmd);
           if (commandHistory.length > maxCommandHistory) {
             commandHistory.shift();
@@ -7360,18 +7798,18 @@ ${last500}
         }
         draw();
       } else if (key === '\x1b[1;6D' || key === '<' || key === ',') {
-        // Ctrl+Shift+Left or < or , - switch to previous Claude session
+        // Ctrl+Shift+Left or < or , - switch to previous  session
         if (self.switchToPreviousSession()) {
           // Sync local tracking with class state
-          claudeSessions = getClaudeSessions();
+          claudeSessions = getSessions();
           currentSessionIndex = self.activeSessionIndex;
           draw();
         }
       } else if (key === '\x1b[1;6C' || key === '>' || key === '.') {
-        // Ctrl+Shift+Right or > or . - switch to next Claude session
+        // Ctrl+Shift+Right or > or . - switch to next  session
         if (self.switchToNextSession()) {
           // Sync local tracking with class state
-          claudeSessions = getClaudeSessions();
+          claudeSessions = getSessions();
           currentSessionIndex = self.activeSessionIndex;
           draw();
         }
@@ -7395,17 +7833,17 @@ ${last500}
         commandHistory.push(cmd);
         if (commandHistory.length > maxCommandHistory) commandHistory.shift();
         draw();
-      } else if (key >= '1' && key <= '9') {
-        // Number keys 1-9 to switch to Claude session by number
+      } else if (key >= '5' && key <= '9') {
+        // Number keys 5-9 to switch to  session by number (1-4 reserved for tab switching)
         const targetNum = parseInt(key);
         const session = self.claudeSessions.find(s => s.sessionNum === targetNum);
         if (session) {
           const idx = self.claudeSessions.indexOf(session);
           self.activeSessionIndex = idx;
           // Sync local tracking with class state
-          claudeSessions = getClaudeSessions();
+          claudeSessions = getSessions();
           currentSessionIndex = self.activeSessionIndex;
-          const cmd = `${c.cyan}[SWITCH]${c.reset} Claude ${targetNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
+          const cmd = `${c.cyan}[SWITCH]${c.reset}  ${targetNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
           commandHistory.push(cmd);
           if (commandHistory.length > maxCommandHistory) commandHistory.shift();
         } else {
@@ -7415,13 +7853,13 @@ ${last500}
         }
         draw();
       } else if (key === 'a') {
-        // Accept permission on active Claude (send 'y' + Enter)
+        // Accept permission on active  (send 'y' + Enter)
         const session = self.getActiveSession();
         if (session && session.controller) {
           const sent = screenSend(session.controller.claudeSession, 'y');
           const cmd = sent
-            ? `${c.green}[ACCEPT]${c.reset} Permission accepted on Claude ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`
-            : `${c.red}[ACCEPT FAILED]${c.reset} Screen send failed on Claude ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
+            ? `${c.green}[ACCEPT]${c.reset} Permission accepted on  ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`
+            : `${c.red}[ACCEPT FAILED]${c.reset} Screen send failed on  ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
           commandHistory.push(cmd);
           if (commandHistory.length > maxCommandHistory) commandHistory.shift();
         } else {
@@ -7431,13 +7869,13 @@ ${last500}
         }
         draw();
       } else if (key === 'x') {
-        // Reject permission on active Claude (send 'n' + Enter)
+        // Reject permission on active  (send 'n' + Enter)
         const session = self.getActiveSession();
         if (session && session.controller) {
           const sent = screenSend(session.controller.claudeSession, 'n');
           const cmd = sent
-            ? `${c.red}[REJECT]${c.reset} Permission rejected on Claude ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`
-            : `${c.red}[REJECT FAILED]${c.reset} Screen send failed on Claude ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
+            ? `${c.red}[REJECT]${c.reset} Permission rejected on  ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`
+            : `${c.red}[REJECT FAILED]${c.reset} Screen send failed on  ${session.sessionNum} ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
           commandHistory.push(cmd);
           if (commandHistory.length > maxCommandHistory) commandHistory.shift();
         } else {
@@ -7447,16 +7885,16 @@ ${last500}
         }
         draw();
       } else if (key === 's') {
-        // Stop active Claude session
+        // Stop active  session
         const session = self.getActiveSession();
         if (session && session.controller) {
           screenKill(session.controller.claudeSession);
-          const cmd = `${c.yellow}[STOP]${c.reset} Claude ${session.sessionNum} stopped ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
+          const cmd = `${c.yellow}[STOP]${c.reset}  ${session.sessionNum} stopped ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
           commandHistory.push(cmd);
           if (commandHistory.length > maxCommandHistory) commandHistory.shift();
           // BUG FIX: Use centralized removal with proper index adjustment
           self.removeSessionFromTracking(session);
-          claudeSessions = getClaudeSessions();
+          claudeSessions = getSessions();
           currentSessionIndex = self.activeSessionIndex;
         } else {
           const cmd = `${c.yellow}[STOP]${c.reset} No active session ${c.dim}(${new Date().toLocaleTimeString()})${c.reset}`;
@@ -7479,6 +7917,9 @@ ${last500}
       stopEmbeddingLogTail(); // Phase 5: Stop embedding log tail process
       stopCotLogTail();       // Stop COT log tail process
       detachAllPTY();         // Detach all PTY processes for screen capture
+      // AEGIS module cleanup
+      if (claudeLiveModule && claudeLiveModule.onDeactivate) { try { claudeLiveModule.onDeactivate(); } catch (_) {} }
+      if (memoryBrowserModule && memoryBrowserModule.onDeactivate) { try { memoryBrowserModule.onDeactivate(); } catch (_) {} }
       process.stdout.removeListener('resize', handleResize);
       process.stdin.removeListener('data', keyHandler);
       // Remove signal handlers for visibility tracking

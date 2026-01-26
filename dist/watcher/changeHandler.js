@@ -20,6 +20,32 @@ import { logger } from '../utils/logger.js';
 import { getCoordinator } from '../coordination/integration.js';
 import { isMinifiedOrBundled, isBinaryFile, EXCLUSION_CONFIG } from '../codebase/exclusions.js';
 import { getProjectPathForInsert } from '../services/ProjectContext.js';
+import { getEmbeddingTimeout } from '../config/embeddingTimeouts.js';
+// Retry helper for transient embedding failures (timeout, socket reset, etc.)
+const WATCHER_MAX_RETRIES = parseInt(process.env['SPECMEM_WATCHER_RETRIES'] || '2');
+async function withWatcherRetry(operation, filePath) {
+    let lastError = null;
+    for (let attempt = 0; attempt <= WATCHER_MAX_RETRIES; attempt++) {
+        try {
+            return await operation();
+        }
+        catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            const msg = lastError.message.toLowerCase();
+            const isTransient = msg.includes('timeout') || msg.includes('econnreset') ||
+                msg.includes('econnrefused') || msg.includes('socket') || msg.includes('qoms');
+            if (attempt < WATCHER_MAX_RETRIES && isTransient) {
+                const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+                logger.warn({ filePath, attempt: attempt + 1, retryInMs: delay, error: lastError.message }, `[Watcher] Embedding retry ${attempt + 1}/${WATCHER_MAX_RETRIES}`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            else {
+                break;
+            }
+        }
+    }
+    throw lastError;
+}
 /**
  * autoUpdateTheMemories - main change handler class
  *
@@ -135,10 +161,22 @@ export class AutoUpdateTheMemories {
                 this.stats.filesSkipped++;
                 return;
             }
-            // generate embedding with retry and queue fallback
+            // generate embedding with retry + timeout protection
             let embedding;
+            const WATCHER_EMBEDDING_TIMEOUT = getEmbeddingTimeout('fileWatcher');
             try {
-                embedding = await this.config.embeddingProvider.generateEmbedding(content);
+                embedding = await withWatcherRetry(async () => {
+                    return new Promise((resolve, reject) => {
+                        const timeoutId = setTimeout(() => {
+                            const err = new Error(`[Watcher] Embedding generation timed out after ${Math.round(WATCHER_EMBEDDING_TIMEOUT / 1000)}s for ${metadata.relativePath}`);
+                            err.code = 'WATCHER_EMBEDDING_TIMEOUT';
+                            reject(err);
+                        }, WATCHER_EMBEDDING_TIMEOUT);
+                        this.config.embeddingProvider.generateEmbedding(content)
+                            .then(result => { clearTimeout(timeoutId); resolve(result); })
+                            .catch(error => { clearTimeout(timeoutId); reject(error); });
+                    });
+                }, metadata.relativePath);
             }
             catch (embeddingError) {
                 logger.error({
@@ -236,10 +274,22 @@ export class AutoUpdateTheMemories {
                 this.stats.filesSkipped++;
                 return;
             }
-            // generate new embedding with retry and queue fallback
+            // generate new embedding with retry and queue fallback + timeout protection
             let embedding;
+            const WATCHER_EMBEDDING_TIMEOUT_MOD = getEmbeddingTimeout('fileWatcher');
             try {
-                embedding = await this.config.embeddingProvider.generateEmbedding(content);
+                embedding = await withWatcherRetry(async () => {
+                    return new Promise((resolve, reject) => {
+                        const timeoutId = setTimeout(() => {
+                            const err = new Error(`[Watcher] Embedding generation timed out after ${Math.round(WATCHER_EMBEDDING_TIMEOUT_MOD / 1000)}s for ${metadata.relativePath}`);
+                            err.code = 'WATCHER_EMBEDDING_TIMEOUT';
+                            reject(err);
+                        }, WATCHER_EMBEDDING_TIMEOUT_MOD);
+                        this.config.embeddingProvider.generateEmbedding(content)
+                            .then(result => { clearTimeout(timeoutId); resolve(result); })
+                            .catch(error => { clearTimeout(timeoutId); reject(error); });
+                    });
+                }, metadata.relativePath);
             }
             catch (embeddingError) {
                 logger.error({

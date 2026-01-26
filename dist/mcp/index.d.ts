@@ -7,7 +7,7 @@
 export { SpecMemServer, _SERVER_CACHE } from './specMemServer.js';
 export { ToolRegistry, createToolRegistry, MCPTool, CachingEmbeddingProvider, _EMBEDDING_CACHE, getCachedEmbedding, setCachedEmbedding } from './toolRegistry.js';
 export { MCPProtocolHandler, parseTimeExpression, splitContent } from './mcpProtocolHandler.js';
-export { ClaudeCommandHandler, createCommandHandler, CommandResult, ParsedCommand, CommandCategory, CommandAction, MemoryCommands, CodebaseCommands, ContextCommands, PromptCommands, getCommandsResource, getCommandHelpResource, getCommandExecutorToolDefinition, getResourceTemplates } from '../commands/index.js';
+export { CommandHandler, createCommandHandler, CommandResult, ParsedCommand, CommandCategory, CommandAction, MemoryCommands, CodebaseCommands, ContextCommands, PromptCommands, getCommandsResource, getCommandHelpResource, getCommandExecutorToolDefinition, getResourceTemplates } from '../commands/index.js';
 export { CLINotifier, sendStartupNotification, getDashboardUrl, createNotificationMessage, formatToolList, createToolDiscoveryHint, NotificationLevel, NotificationOptions, StartupNotificationOptions, ToolCategory } from './cliNotifications.js';
 export { HotReloadManager, hotReloadManager } from './hotReloadManager.js';
 export { broadcastReload, signalInstance, getOtherInstanceCount, hasOtherInstances, notifyReloadComplete, executeCLIReload, ReloadBroadcastResult, ReloadBroadcastOptions, CLIReloadResult } from './reloadBroadcast.js';

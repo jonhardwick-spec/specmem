@@ -14,7 +14,7 @@
 import { MCPTool } from '../mcp/toolRegistry.js';
 import { CodeMemorizer } from './codeMemorizer.js';
 import { CodeRecall } from './codeRecall.js';
-import { ClaudeCodeTracker } from './claudeCodeTracker.js';
+import { CodeTracker } from './claudeCodeTracker.js';
 export interface RememberWhatIWroteInput {
     filePath: string;
     codeWritten: string;
@@ -373,7 +373,7 @@ export declare class SetCodingPurposeTool implements MCPTool<SetCodingPurposeInp
         };
         required: string[];
     };
-    constructor(tracker: ClaudeCodeTracker);
+    constructor(tracker: CodeTracker);
     execute(params: SetCodingPurposeInput): Promise<SetCodingPurposeOutput>;
 }
 export interface CodeStatsInput {
@@ -409,5 +409,5 @@ export declare class CodeStatsTool implements MCPTool<CodeStatsInput, CodeStatsO
  *
  * fr fr this is where we assemble the squad
  */
-export declare function createMemorizationTools(memorizer: CodeMemorizer, recall: CodeRecall, tracker: ClaudeCodeTracker): MCPTool[];
+export declare function createMemorizationTools(memorizer: CodeMemorizer, recall: CodeRecall, tracker: CodeTracker): MCPTool[];
 //# sourceMappingURL=memorizationTools.d.ts.map

@@ -1,7 +1,7 @@
 /**
- * SpecMem Auto-Deploy to Claude
+ * SpecMem Auto-Deploy to 
  *
- * Automatically deploys SpecMem hooks and slash commands to Claude's
+ * Automatically deploys SpecMem hooks and slash commands to 's
  * configuration directories on startup.
  *
  * Source directories (in SpecMem):
@@ -14,7 +14,7 @@
  *   - Executable permissions for hooks
  *   - Backup of existing files
  *
- * This ensures SpecMem's Claude integration is always up-to-date
+ * This ensures SpecMem's  integration is always up-to-date
  * without manual file copying.
  */
 import * as fs from 'fs';
@@ -35,7 +35,7 @@ const SPECMEM_ROOT = path.resolve(__dirname, '..', '..');
 // Source directories in SpecMem
 const HOOKS_SOURCE = path.join(SPECMEM_ROOT, 'claude-hooks');
 const COMMANDS_SOURCE = path.join(SPECMEM_ROOT, 'commands');
-// Target directories in Claude's config
+// Target directories in 's config
 const CLAUDE_HOME = path.join(os.homedir(), '.claude');
 const HOOKS_TARGET = path.join(CLAUDE_HOME, 'hooks');
 const COMMANDS_TARGET = path.join(CLAUDE_HOME, 'commands');
@@ -232,9 +232,9 @@ function cleanupBackups(basePath, keepCount) {
     }
 }
 /**
- * Update Claude's settings.json to register hooks
+ * Update 's settings.json to register hooks
  */
-function updateClaudeSettings() {
+function updateSettings() {
     const settingsPath = path.join(CLAUDE_HOME, 'settings.json');
     try {
         let settings = {};
@@ -361,7 +361,7 @@ function updateClaudeSettings() {
         return false;
     }
 }
-export async function deployToClaude() {
+export async function deployTo() {
     const version = getSpecMemVersion();
     const result = {
         success: true,
@@ -373,10 +373,10 @@ export async function deployToClaude() {
         errors: [],
         version,
     };
-    log('Starting SpecMem deployment to Claude...');
+    log('Starting SpecMem deployment to ...');
     log(`SpecMem version: ${version}`);
     log(`SpecMem root: ${SPECMEM_ROOT}`);
-    log(`Claude home: ${CLAUDE_HOME}`);
+    log(` home: ${CLAUDE_HOME}`);
     // Load existing manifests for version checking
     const hooksManifest = loadManifest(HOOKS_TARGET);
     const commandsManifest = loadManifest(COMMANDS_TARGET);
@@ -486,8 +486,8 @@ export async function deployToClaude() {
         log(`Commands source directory not found: ${COMMANDS_SOURCE}`);
         result.errors.push(`Commands source directory not found: ${COMMANDS_SOURCE}`);
     }
-    // Update Claude's settings.json to register hooks
-    result.settingsUpdated = updateClaudeSettings();
+    // Update 's settings.json to register hooks
+    result.settingsUpdated = updateSettings();
     // Summary
     const totalDeployed = result.hooksDeployed.length + result.commandsDeployed.length;
     const totalSkipped = result.hooksSkipped.length + result.commandsSkipped.length;
@@ -515,7 +515,7 @@ export async function deployToClaude() {
  */
 export async function autoDeployHooks() {
     try {
-        const result = await deployToClaude();
+        const result = await deployTo();
         return result.success;
     }
     catch (error) {
@@ -531,7 +531,7 @@ export { getSpecMemVersion, loadManifest };
 // Run directly if this is the main module
 const isMainModule = process.argv[1]?.includes('deploy-to-claude');
 if (isMainModule) {
-    deployToClaude()
+    deployTo()
         .then((result) => {
         console.log('\n========================================');
         console.log('  SpecMem Hook Deployment Report');
@@ -561,7 +561,7 @@ if (isMainModule) {
         }
         console.log('\n========================================\n');
         if (result.success) {
-            console.log('SpecMem hooks are now ready. Restart Claude to activate.\n');
+            console.log('SpecMem hooks are now ready. Restart  to activate.\n');
             process.exit(0);
         }
         else {

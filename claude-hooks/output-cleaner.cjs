@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * OUTPUT CLEANER - Compacts bloated Claude agent output files
+ * OUTPUT CLEANER - Compacts bloated  agent output files
  *
  * Transforms verbose JSON lines into minimal format:
  * FROM: {parentUuid, isSidechain, userType, cwd, sessionId, version, gitBranch,
@@ -49,6 +49,7 @@ function cleanLine(jsonLine) {
       // Extract text and tool calls
       const texts = [];
       const tools = [];
+      const toolResults = [];
       const thinkingBlocks = [];
 
       for (const block of content) {
@@ -60,17 +61,31 @@ function cleanLine(jsonLine) {
           texts.push(block.text);
         } else if (block.type === 'tool_use') {
           // Compact tool call: name + truncated input (matches fader format)
+          // MUST preserve id for API compatibility with tool_result blocks
           tools.push({
+            id: block.id,  // CRITICAL: API requires matching tool_use_id
             name: block.name,
             input: JSON.stringify(block.input || {}).slice(0, 100)
           });
         } else if (block.type === 'tool_result') {
-          // Skip tool results - they're verbose and redundant
+          // Preserve tool_result with tool_use_id for API compatibility
+          const result = {
+            type: 'tool_result',
+            tool_use_id: block.tool_use_id  // CRITICAL: must match tool_use.id
+          };
+          // Truncate content but preserve it
+          if (typeof block.content === 'string') {
+            result.content = block.content.slice(0, 500);
+          } else if (block.content) {
+            result.content = JSON.stringify(block.content).slice(0, 500);
+          }
+          toolResults.push(result);
         }
       }
 
       if (texts.length) clean.content = texts.join('\n');
       if (tools.length) clean.tools = tools;
+      if (toolResults.length) clean.toolResults = toolResults;
       // Preserve thinking blocks exactly - no modification
       if (thinkingBlocks.length) clean.thinking = thinkingBlocks;
     }

@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS team_member_conversations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_team_member_conversations_memory ON team_member_conversations(memory_id);
-CREATE INDEX IF NOT EXISTS idx_team_member_conversations_team member ON team_member_conversations(team_member_id);
+CREATE INDEX IF NOT EXISTS idx_team_member_conversations_team_member ON team_member_conversations(team_member_id);
 CREATE INDEX IF NOT EXISTS idx_team_member_conversations_time ON team_member_conversations(timestamp);
 
 -- HELPER FUNCTIONS

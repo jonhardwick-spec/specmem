@@ -1,12 +1,12 @@
 /**
- * promptExecutor.ts - Real Claude API Prompt Executor
+ * promptExecutor.ts - Real  API Prompt Executor
  *
- * Executes prompts via direct Anthropic Claude API calls.
- * Supports multiple Claude models (3.5 Sonnet, 4.0, Opus) with UNLIMITED tokens.
+ * Executes prompts via direct   API calls.
+ * Supports multiple  models (3.5 Sonnet, 4.0, Opus) with UNLIMITED tokens.
  *
- * Phase 4 Implementation - Direct Claude API Integration
+ * Phase 4 Implementation - Direct  API Integration
  *
- * TEAM_MEMBER 3 FIX: Real Claude API integration with model switching and NO TOKEN LIMITS
+ * TEAM_MEMBER 3 FIX: Real  API integration with model switching and NO TOKEN LIMITS
  */
 import Anthropic from '@anthropic-ai/sdk';
 export type ModelId = 'claude-3-5-sonnet' | 'claude-4' | 'opus' | 'sonnet-3.5' | 'haiku';
@@ -77,10 +77,10 @@ export interface SamplingResponse {
     };
 }
 /**
- * Real Claude API Client
- * TEAM_MEMBER 3 FIX: Actually calls Claude API instead of simulating responses
+ * Real  API Client
+ * TEAM_MEMBER 3 FIX: Actually calls  API instead of simulating responses
  */
-declare class ClaudeAPIClient {
+declare class APIClient {
     private anthropic;
     private isConnected;
     constructor();
@@ -89,7 +89,7 @@ declare class ClaudeAPIClient {
      */
     private resolveModel;
     /**
-     * Send a real request to Claude API - NO TOKEN LIMITS!
+     * Send a real request to  API - NO TOKEN LIMITS!
      */
     request(method: string, params: SamplingRequest['params']): Promise<SamplingResponse>;
     /**
@@ -102,15 +102,15 @@ declare class ClaudeAPIClient {
     disconnect(): void;
 }
 /**
- * Get or create the Claude API client
+ * Get or create the  API client
  */
-export declare function getMCPClient(): ClaudeAPIClient;
+export declare function getMCPClient(): APIClient;
 /**
- * Execute a prompt via Claude API
- * TEAM_MEMBER 3 FIX: Real Claude API calls with model selection and NO TOKEN LIMITS!
+ * Execute a prompt via  API
+ * TEAM_MEMBER 3 FIX: Real  API calls with model selection and NO TOKEN LIMITS!
  *
  * @param params - The prompt parameters including content and configuration
- * @returns The response from Claude API
+ * @returns The response from  API
  */
 export declare function executePrompt(params: PromptParams): Promise<PromptResponse>;
 /**
@@ -153,9 +153,9 @@ export interface LiveShitParams extends PromptParams {
     onBrainDump: BrainDumpCallback;
 }
 /**
- * liveShitBroadcaster - Streams Claude responses in REAL TIME!
+ * liveShitBroadcaster - Streams  responses in REAL TIME!
  *
- * Uses the Anthropic SDK's messages.stream() method to get:
+ * Uses the  SDK's messages.stream() method to get:
  * - Thinking blocks as they're generated (extended thinking)
  * - Response text chunks as they stream in
  * - Final statistics when done
@@ -164,15 +164,15 @@ export interface LiveShitParams extends PromptParams {
  */
 export declare function liveShitBroadcaster(params: LiveShitParams): Promise<PromptResponse>;
 /**
- * Get the raw Anthropic client for streaming
- * This is needed because messages.stream() is on the Anthropic class directly
+ * Get the raw  client for streaming
+ * This is needed because messages.stream() is on the  class directly
  */
-export declare function getAnthropicClient(): Anthropic | null;
+export declare function getClient():  | null;
 /**
- * catchClaudesThoughts - Helper to extract thinking from a full response
+ * catchsThoughts - Helper to extract thinking from a full response
  * Useful for non-streaming responses that include thinking blocks
  */
-export declare function catchClaudesThoughts(content: any[]): {
+export declare function catchsThoughts(content: any[]): {
     thinking: string[];
     text: string;
 };
@@ -181,8 +181,8 @@ declare const _default: {
     getMCPClient: typeof getMCPClient;
     buildContext: typeof buildContext;
     liveShitBroadcaster: typeof liveShitBroadcaster;
-    getAnthropicClient: typeof getAnthropicClient;
-    catchClaudesThoughts: typeof catchClaudesThoughts;
+    getClient: typeof getClient;
+    catchsThoughts: typeof catchsThoughts;
 };
 export default _default;
 //# sourceMappingURL=promptExecutor.d.ts.map

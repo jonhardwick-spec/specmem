@@ -4,7 +4,7 @@
  * ========================
  *
  * CLI entry point for the Team Member Preprompt Hook.
- * This allows the hook to be called directly from Claude Code settings.
+ * This allows the hook to be called directly from  Code settings.
  *
  * Usage in ~/.claude/settings.json:
  *
@@ -66,7 +66,7 @@ async function runHook() {
         if (!input) {
             return;
         }
-        // Parse JSON input from Claude Code
+        // Parse JSON input from  Code
         const data = JSON.parse(input);
         const toolName = data.tool_name || '';
         const toolInput = data.tool_input || {};
@@ -83,7 +83,7 @@ async function runHook() {
         // If not modified, output nothing (tool proceeds unchanged)
     }
     catch (error) {
-        // Silent fail - don't break Claude's flow
+        // Silent fail - don't break 's flow
         console.error(`[TeamFraming Hook Error] ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }

@@ -6,7 +6,7 @@
  *
  * Why Traditional Chinese?
  * - CJK characters encode more semantic info per token
- * - Claude understands Chinese natively
+ * -  understands Chinese natively
  * - ~40-60% token reduction for English text
  *
  * ROUND-TRIP VERIFICATION ALGORITHM:
@@ -864,10 +864,10 @@ export function smartCompress(text, options) {
     if (!text || text.length < minLength) {
         return { result: text, compressionRatio: 1.0, wasCompressed: false };
     }
-    // Split into sentences/chunks for granular compression
-    // Use smarter sentence boundary detection
-    const chunks = splitIntoSegments(text);
-    const results = [];
+    // NEWLINE-PRESERVING COMPRESSION
+    // Process line-by-line to preserve structure, then compress within lines
+    const lines = text.split('\n');
+    const compressedLines = [];
     const decisions = [];
     let totalOriginal = 0;
     let totalCompressed = 0;
@@ -876,51 +876,56 @@ export function smartCompress(text, options) {
     let totalConfidence = 0;
     let compressedCount = 0;
     let preservedCount = 0;
-    for (const chunk of chunks) {
-        // Skip very short chunks
-        if (chunk.length < 15) {
-            results.push(chunk);
-            totalOriginal += chunk.length;
-            totalCompressed += chunk.length;
+    for (const line of lines) {
+        // Preserve empty lines as-is
+        if (line.trim().length === 0) {
+            compressedLines.push(line);
+            continue;
+        }
+        // Skip very short lines
+        if (line.length < 15) {
+            compressedLines.push(line);
+            totalOriginal += line.length;
+            totalCompressed += line.length;
             decisions.push({
-                original: chunk,
-                output: chunk,
+                original: line,
+                output: line,
                 usedChinese: false,
                 confidence: 1.0,
                 reason: 'Too short to compress'
             });
             continue;
         }
-        // Skip chunks that are mostly code/technical
-        if (isCodeLikeChunk(chunk)) {
-            results.push(chunk);
-            totalOriginal += chunk.length;
-            totalCompressed += chunk.length;
+        // Skip lines that are mostly code/technical
+        if (isCodeLikeChunk(line)) {
+            compressedLines.push(line);
+            totalOriginal += line.length;
+            totalCompressed += line.length;
             preservedCount++;
             decisions.push({
-                original: chunk,
-                output: chunk,
+                original: line,
+                output: line,
                 usedChinese: false,
                 confidence: 1.0,
                 reason: 'Code-like content preserved'
             });
             continue;
         }
-        // Perform round-trip verification
-        const test = testSemanticPreservation(chunk, { threshold, useCache: true });
+        // Perform round-trip verification on the line
+        const test = testSemanticPreservation(line, { threshold, useCache: true });
         totalConfidence += test.confidence.overall;
         if (test.cached) {
             cacheHits++;
         }
         if (test.preserved) {
             // Context preserved after round-trip -> use Chinese
-            results.push(test.compressed);
-            totalOriginal += chunk.length;
+            compressedLines.push(test.compressed);
+            totalOriginal += line.length;
             totalCompressed += test.compressed.length;
             anyCompressed = true;
             compressedCount++;
             decisions.push({
-                original: chunk,
+                original: line,
                 output: test.compressed,
                 usedChinese: true,
                 confidence: test.confidence.overall,
@@ -929,13 +934,13 @@ export function smartCompress(text, options) {
         }
         else {
             // Context lost after round-trip -> keep English
-            results.push(chunk);
-            totalOriginal += chunk.length;
-            totalCompressed += chunk.length;
+            compressedLines.push(line);
+            totalOriginal += line.length;
+            totalCompressed += line.length;
             preservedCount++;
             decisions.push({
-                original: chunk,
-                output: chunk,
+                original: line,
+                output: line,
                 usedChinese: false,
                 confidence: test.confidence.overall,
                 reason: `Context loss detected: ${test.confidence.details.slice(0, 2).join(', ')}`
@@ -943,14 +948,14 @@ export function smartCompress(text, options) {
         }
     }
     const stats = {
-        totalSegments: chunks.length,
+        totalSegments: lines.length,
         compressedSegments: compressedCount,
         preservedSegments: preservedCount,
         cacheHits,
-        avgConfidence: chunks.length > 0 ? totalConfidence / chunks.length : 0
+        avgConfidence: lines.length > 0 ? totalConfidence / lines.length : 0
     };
     return {
-        result: results.join(' '),
+        result: compressedLines.join('\n'),  // PRESERVE NEWLINES!
         compressionRatio: totalOriginal > 0 ? totalCompressed / totalOriginal : 1.0,
         wasCompressed: anyCompressed,
         ...(verbose ? { segmentDecisions: decisions, stats } : {})

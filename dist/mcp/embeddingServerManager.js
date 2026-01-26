@@ -2,7 +2,7 @@
  * Embedding Server Lifecycle Manager
  *
  * Manages the embedding server process lifecycle for the MCP server.
- * Ensures embedding server is ALWAYS available when Claude needs it.
+ * Ensures embedding server is ALWAYS available when  needs it.
  *
  * Features:
  * 1. On MCP server start: Check for stale processes, kill them, start fresh
@@ -23,6 +23,7 @@ import { logger } from '../utils/logger.js';
 import { getProjectPath, getEmbeddingSocketPath } from '../config.js';
 import { checkProcessHealth } from '../utils/processHealthCheck.js';
 import { getPythonPath, mergeWithProjectEnv } from '../utils/projectEnv.js';
+import { getProjectSchema } from '../db/projectNamespacing.js';
 import { ensureSocketDirAtomicSync } from '../utils/fileProcessingQueue.js';
 import { getEmbeddingQueue, hasEmbeddingQueue } from '../services/EmbeddingQueue.js';
 import { getDatabase } from '../database.js';
@@ -47,6 +48,11 @@ const DEFAULT_CONFIG = {
     autoStart: process.env['SPECMEM_EMBEDDING_AUTO_START'] !== 'false',
     killStaleOnStart: process.env['SPECMEM_EMBEDDING_KILL_STALE'] !== 'false',
     maxProcessAgeHours: parseFloat(process.env['SPECMEM_EMBEDDING_MAX_AGE_HOURS'] || '1'),
+    // Circuit breaker configuration (Issue #10)
+    cbRestartWindowMs: parseInt(process.env['SPECMEM_RESTART_WINDOW_MS'] || '300000', 10),
+    cbMaxRestartsInWindow: parseInt(process.env['SPECMEM_RESTART_MAX_IN_WINDOW'] || '5', 10),
+    cbCooldownMs: parseInt(process.env['SPECMEM_RESTART_COOLDOWN_MS'] || '60000', 10),
+    cbMaxCooldownMs: parseInt(process.env['SPECMEM_RESTART_MAX_COOLDOWN_MS'] || '600000', 10),
 };
 // ============================================================================
 // EMBEDDING SERVER MANAGER
@@ -77,6 +83,8 @@ export class EmbeddingServerManager extends EventEmitter {
     isShuttingDown = false;
     // FIX: Prevent concurrent starts (race condition causing duplicate processes)
     isStarting = false;
+    // FIX: Startup grace period - prevents health monitoring from reporting errors during initialization
+    startupGraceUntil = 0;
     // FIX: File-based lock to prevent CROSS-PROCESS concurrent starts
     // The in-memory isStarting flag only prevents within same process
     // Multiple MCP servers (subagents, sessions) need file-based coordination
@@ -86,6 +94,13 @@ export class EmbeddingServerManager extends EventEmitter {
     stoppedFlagPath;
     // Phase 4: Track restart timestamps for loop detection
     restartTimestamps = [];
+    // Circuit breaker state (Issue #10)
+    // States: 'closed' (normal), 'open' (tripped, blocking restarts), 'half-open' (testing one restart)
+    cbState = 'closed';
+    cbRestartTimestamps = []; // sliding window of restart timestamps
+    cbCurrentCooldownMs = 0; // current cooldown duration (doubles on repeated failures)
+    cbCooldownUntil = 0; // timestamp when cooldown expires
+    cbLastStateChange = Date.now();
     // KYS (Keep Yourself Safe) heartbeat timer - sends heartbeat every 25s to embedding server
     // If embedding server doesn't receive heartbeat within 90s, it commits suicide
     // This prevents zombie embedding servers when MCP crashes (increased from 30s for startup tolerance)
@@ -167,6 +182,118 @@ export class EmbeddingServerManager extends EventEmitter {
             logger.warn('[EmbeddingServerManager] Cannot start during shutdown');
             return false;
         }
+        // FIX 1B: Process deduplication check BEFORE acquiring lock
+        // Find all running embedding server processes and try to reuse one
+        const runningServers = this.findRunningEmbeddingServers();
+        if (runningServers.length > 0) {
+            logger.info({ count: runningServers.length, pids: runningServers.map(s => s.pid) },
+                '[EmbeddingServerManager] FIX 1B: Found existing embedding server processes, checking health');
+            // Test if any existing process is healthy via socket
+            // CRITICAL FIX: Retry health check up to 15s to give freshly-spawned servers time to warm up
+            // This prevents MCP bootstrap from killing servers that init just spawned
+            if (existsSync(this.socketPath)) {
+                for (let attempt = 0; attempt < 6; attempt++) {
+                    const healthResult = await this.healthCheck();
+                    if (healthResult.success) {
+                        logger.info({
+                            pids: runningServers.map(s => s.pid),
+                            responseTimeMs: healthResult.responseTimeMs,
+                            attempt,
+                        }, '[EmbeddingServerManager] FIX 1B: Existing server is healthy - reusing instead of spawning new');
+                        this.isRunning = true;
+                        this.startTime = Date.now();
+                        this.consecutiveFailures = 0;
+                        return true;
+                    }
+                    if (attempt < 5) {
+                        logger.debug({ attempt }, '[EmbeddingServerManager] FIX 1B: Health check failed, waiting 3s before retry...');
+                        await this.sleep(3000);
+                        // Re-check socket still exists
+                        if (!existsSync(this.socketPath)) break;
+                    }
+                }
+            } else {
+                // Socket doesn't exist yet but processes are running - wait for socket to appear
+                logger.debug('[EmbeddingServerManager] FIX 1B: No socket yet, waiting up to 15s for server to create it');
+                for (let i = 0; i < 15; i++) {
+                    await this.sleep(1000);
+                    if (existsSync(this.socketPath)) {
+                        const healthResult = await this.healthCheck();
+                        if (healthResult.success) {
+                            logger.info({
+                                pids: runningServers.map(s => s.pid),
+                                responseTimeMs: healthResult.responseTimeMs,
+                            }, '[EmbeddingServerManager] FIX 1B: Server became healthy after waiting - reusing');
+                            this.isRunning = true;
+                            this.startTime = Date.now();
+                            this.consecutiveFailures = 0;
+                            return true;
+                        }
+                    }
+                }
+            }
+            // Existing processes found but unhealthy after retries - kill only THIS project's before starting fresh
+            // PROJECT ISOLATION: Filter to only processes belonging to this project
+            const thisProjectServers = runningServers.filter(s => this._isProcessForThisProject(s.pid));
+            logger.warn({ count: thisProjectServers.length, totalFound: runningServers.length },
+                '[EmbeddingServerManager] FIX 1B: Existing processes are unhealthy, killing this project\'s before fresh start');
+            for (const server of thisProjectServers) {
+                try {
+                    process.kill(server.pid, 'SIGTERM');
+                    logger.info({ pid: server.pid }, '[EmbeddingServerManager] FIX 1B: Sent SIGTERM to unhealthy server');
+                }
+                catch (err) {
+                    logger.debug({ pid: server.pid, error: err.message }, '[EmbeddingServerManager] FIX 1B: Failed to SIGTERM process');
+                }
+            }
+            // Wait 2 seconds for processes to terminate
+            await this.sleep(2000);
+            // Force kill any survivors
+            for (const server of thisProjectServers) {
+                try {
+                    process.kill(server.pid, 0); // Check if alive
+                    process.kill(server.pid, 'SIGKILL');
+                    logger.info({ pid: server.pid }, '[EmbeddingServerManager] FIX 1B: Force killed surviving process');
+                }
+                catch {
+                    // Already dead - good
+                }
+            }
+            // Clean up stale socket
+            if (existsSync(this.socketPath)) {
+                try { unlinkSync(this.socketPath); } catch { /* ignore */ }
+            }
+        }
+        // FIX 1C: PID file validation before acquiring lock
+        // Check if PID file points to a live, healthy process we can reuse
+        const pidData = this.readPidFileWithTimestamp();
+        if (pidData && pidData.pid) {
+            try {
+                process.kill(pidData.pid, 0); // Check if process is alive
+                // Process is alive - check if it's healthy
+                if (existsSync(this.socketPath)) {
+                    const pidHealthResult = await this.healthCheck();
+                    if (pidHealthResult.success) {
+                        logger.info({
+                            pid: pidData.pid,
+                            responseTimeMs: pidHealthResult.responseTimeMs,
+                        }, '[EmbeddingServerManager] FIX 1C: PID file process is alive and healthy - reusing');
+                        this.isRunning = true;
+                        this.startTime = Date.now();
+                        this.consecutiveFailures = 0;
+                        return true;
+                    }
+                }
+                logger.info({ pid: pidData.pid },
+                    '[EmbeddingServerManager] FIX 1C: PID file process alive but not healthy, continuing with start');
+            }
+            catch {
+                // Process is dead - clean up PID file
+                logger.info({ pid: pidData.pid },
+                    '[EmbeddingServerManager] FIX 1C: PID file process is dead, cleaning up');
+                this.removePidFile();
+            }
+        }
         // FIX: ATOMIC CROSS-PROCESS file-based lock using O_CREAT | O_EXCL
         // This prevents race condition where multiple processes check then write
         // O_EXCL makes openSync fail if file exists - truly atomic lock acquisition
@@ -201,7 +328,9 @@ export class EmbeddingServerManager extends EventEmitter {
         }
         // Set starting flag immediately to prevent race conditions
         this.isStarting = true;
-        logger.info('[EmbeddingServerManager] Starting embedding server...');
+        // FIX: Set dynamic startup grace period based on configured startupTimeoutMs
+        this.startupGraceUntil = Date.now() + this.config.startupTimeoutMs;
+        logger.info({ graceMs: this.config.startupTimeoutMs }, '[EmbeddingServerManager] Starting embedding server (grace period active)...');
         // Ensure socket directory exists
         // Task #17 FIX: Use atomic mkdir to prevent race condition when multiple
         // MCP servers try to create the socket directory simultaneously
@@ -243,6 +372,64 @@ export class EmbeddingServerManager extends EventEmitter {
             catch (err) {
                 logger.warn({ error: err }, '[EmbeddingServerManager] Failed to remove old socket');
             }
+        }
+        // ═══════════════════════════════════════════════════════════════════════════
+        // PRE-SPAWN ORPHAN KILL: Ensure NO other Frankenstein is running for this socket
+        // This is the LAST line of defense before spawning a new process
+        // ═══════════════════════════════════════════════════════════════════════════
+        try {
+            const killWaitMs = parseInt(process.env['SPECMEM_ORPHAN_KILL_WAIT_MS'] || '2000', 10);
+            // 1. Kill via PID file
+            const pidFilePath = join(dirname(this.socketPath), 'embedding.pid');
+            if (existsSync(pidFilePath)) {
+                const pidContent = readFileSync(pidFilePath, 'utf8').trim();
+                const oldPid = parseInt(pidContent.split(':')[0], 10);
+                if (oldPid && !isNaN(oldPid) && oldPid !== process.pid) {
+                    try {
+                        process.kill(oldPid, 0);
+                        logger.info({ pid: oldPid }, '[EmbeddingServerManager] Killing existing process before spawn');
+                        process.kill(oldPid, 'SIGTERM');
+                        await this.sleep(killWaitMs);
+                        try {
+                            process.kill(oldPid, 0);
+                            process.kill(oldPid, 'SIGKILL');
+                            logger.warn({ pid: oldPid }, '[EmbeddingServerManager] Force killed stubborn process');
+                        } catch { /* dead */ }
+                    } catch { /* not running */ }
+                }
+            }
+            // 2. Kill via pgrep as fallback (catches processes without PID files)
+            // PROJECT ISOLATION: Only kill processes belonging to THIS project
+            try {
+                const { execSync: execSyncLocal } = await import('child_process');
+                const pids = execSyncLocal(`pgrep -f "frankenstein-embeddings.py" 2>/dev/null || true`, { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+                let killedAny = false;
+                for (const pidStr of pids) {
+                    const pid = parseInt(pidStr, 10);
+                    if (pid && pid !== process.pid) {
+                        // PROJECT ISOLATION: Skip processes belonging to other projects
+                        if (!this._isProcessForThisProject(pid)) {
+                            logger.debug({ pid }, '[EmbeddingServerManager] Pre-spawn: Skipping process belonging to another project');
+                            continue;
+                        }
+                        try {
+                            process.kill(pid, 'SIGTERM');
+                            killedAny = true;
+                            logger.info({ pid }, '[EmbeddingServerManager] Killed orphan frankenstein process (pgrep)');
+                        } catch { /* already dead */ }
+                    }
+                }
+                if (killedAny) {
+                    await this.sleep(killWaitMs);
+                }
+            } catch { /* pgrep not available or no matches */ }
+            // 3. Clean stale socket
+            if (existsSync(this.socketPath)) {
+                unlinkSync(this.socketPath);
+                logger.debug('[EmbeddingServerManager] Removed stale socket before spawn');
+            }
+        } catch (preSpawnErr) {
+            logger.debug({ error: preSpawnErr }, '[EmbeddingServerManager] Pre-spawn cleanup failed (non-fatal)');
         }
         // Find the embedding script (prefers warm-start.sh Docker mode)
         const scriptInfo = this.findEmbeddingScript();
@@ -291,10 +478,13 @@ export class EmbeddingServerManager extends EventEmitter {
                 logger.warn({ error: configErr }, '[EmbeddingServerManager] Could not read model-config.json');
             }
             // yooo ALWAYS use mergeWithProjectEnv for project isolation - spawned processes need the full context
+            // CRITICAL: Pass DB schema name so embedding server queries the right schema
+            const projectSchema = getProjectSchema(this.projectPath);
             const env = mergeWithProjectEnv({
                 SPECMEM_SOCKET_DIR: socketDir,
                 SPECMEM_EMBEDDING_SOCKET: this.socketPath,
                 SPECMEM_EMBEDDING_IDLE_TIMEOUT: '0',
+                SPECMEM_DB_SCHEMA: projectSchema,
                 ...configEnv,
             });
             if (useWarmStart) {
@@ -380,12 +570,17 @@ export class EmbeddingServerManager extends EventEmitter {
                 logger.warn({ error: err }, '[EmbeddingServerManager] Queue drain failed (non-fatal)');
             });
             this.isStarting = false; // Reset starting flag on success
+            // FIX: Clear grace period once server is verified running
+            if (verifyHealth.success) {
+                this.startupGraceUntil = 0;
+            }
             this.releaseStartLock(); // Release file-based lock
             return true;
         }
         catch (err) {
             logger.error({ error: err }, '[EmbeddingServerManager] Failed to start server');
             this.isStarting = false; // Reset starting flag on error
+            this.startupGraceUntil = 0; // Clear grace on failure too
             this.releaseStartLock(); // Release file-based lock
             return false;
         }
@@ -397,21 +592,42 @@ export class EmbeddingServerManager extends EventEmitter {
      */
     async acquireStartLockAtomic() {
         try {
+            // FIX 1A: Strengthened lock acquisition with PID validation and stale detection
             // First check if lock exists and is stale
             if (existsSync(this.startLockPath)) {
                 try {
                     const lockContent = readFileSync(this.startLockPath, 'utf8').trim();
-                    const lockTime = parseInt(lockContent.split(':')[0], 10);
-                    const lockPid = parseInt(lockContent.split(':')[1], 10);
+                    const parts = lockContent.split(':');
+                    const lockTime = parseInt(parts[0], 10);
+                    const lockPid = parseInt(parts[1], 10);
                     const lockAge = Date.now() - lockTime;
-                    if (lockAge >= this.START_LOCK_TIMEOUT_MS) {
-                        // Stale lock - remove it
-                        logger.warn({ lockAge, lockPid }, '[EmbeddingServerManager] Removing stale start lock');
+                    // FIX 1A: Reduced stale threshold from 60s to 120s for robustness
+                    const STALE_LOCK_THRESHOLD_MS = 120000; // 120 seconds
+                    if (lockAge >= STALE_LOCK_THRESHOLD_MS) {
+                        // Stale lock by time - remove it
+                        logger.warn({ lockAge, lockPid, thresholdMs: STALE_LOCK_THRESHOLD_MS }, '[EmbeddingServerManager] Removing stale start lock (exceeded time threshold)');
                         unlinkSync(this.startLockPath);
                     }
+                    else if (!isNaN(lockPid) && lockPid > 0) {
+                        // FIX 1A: Lock is recent - check if the owning process is still alive
+                        try {
+                            process.kill(lockPid, 0); // Signal 0 = check existence
+                            // Process is alive and lock is recent - respect it
+                            logger.debug({ lockAge, lockPid }, '[EmbeddingServerManager] Lock held by alive process');
+                            return false;
+                        }
+                        catch (killErr) {
+                            // Process is dead - stale lock from a crashed process
+                            logger.warn({ lockPid, lockAge }, '[EmbeddingServerManager] Lock owner process is dead, removing stale lock');
+                            try {
+                                unlinkSync(this.startLockPath);
+                            }
+                            catch { /* ignore */ }
+                        }
+                    }
                     else {
-                        // Recent lock - another process has it
-                        logger.debug({ lockAge, lockPid }, '[EmbeddingServerManager] Lock held by another process');
+                        // Recent lock but no valid PID - respect it
+                        logger.debug({ lockAge, lockPid }, '[EmbeddingServerManager] Lock held by another process (no valid PID)');
                         return false;
                     }
                 }
@@ -426,6 +642,7 @@ export class EmbeddingServerManager extends EventEmitter {
             // Try atomic create with O_CREAT | O_EXCL - fails if file exists
             // This is the atomic part - only one process can succeed
             const fd = openSync(this.startLockPath, constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY);
+            // FIX 1A: Write PID + timestamp to lock file for stale detection
             const lockContent = `${Date.now()}:${process.pid}`;
             writeFileSync(fd, lockContent, 'utf8');
             closeSync(fd);
@@ -434,7 +651,49 @@ export class EmbeddingServerManager extends EventEmitter {
         }
         catch (err) {
             if (err.code === 'EEXIST') {
-                // Another process created the file first - they have the lock
+                // FIX 1A: On EEXIST, read the lock content and check if owner is alive
+                try {
+                    const lockContent = readFileSync(this.startLockPath, 'utf8').trim();
+                    const parts = lockContent.split(':');
+                    const lockTime = parseInt(parts[0], 10);
+                    const lockPid = parseInt(parts[1], 10);
+                    const lockAge = Date.now() - lockTime;
+                    // Check if lock is stale (>120s) or owner process is dead
+                    let isStale = lockAge > 120000;
+                    if (!isStale && !isNaN(lockPid) && lockPid > 0) {
+                        try {
+                            process.kill(lockPid, 0);
+                            // Owner alive, lock valid
+                        }
+                        catch {
+                            // Owner dead, lock is stale
+                            isStale = true;
+                        }
+                    }
+                    if (isStale) {
+                        logger.warn({ lockPid, lockAge }, '[EmbeddingServerManager] EEXIST but lock is stale, removing and retrying');
+                        try {
+                            unlinkSync(this.startLockPath);
+                        }
+                        catch { /* ignore */ }
+                        // Retry once after removing stale lock
+                        try {
+                            const fd = openSync(this.startLockPath, constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY);
+                            const newLockContent = `${Date.now()}:${process.pid}`;
+                            writeFileSync(fd, newLockContent, 'utf8');
+                            closeSync(fd);
+                            logger.debug({ pid: process.pid }, '[EmbeddingServerManager] Acquired start lock on retry after stale removal');
+                            return true;
+                        }
+                        catch (retryErr) {
+                            logger.debug('[EmbeddingServerManager] Retry lock acquisition failed - another process won the race');
+                            return false;
+                        }
+                    }
+                }
+                catch (readErr) {
+                    // Can't read lock file - just report as held
+                }
                 logger.debug('[EmbeddingServerManager] Lock already exists (EEXIST) - another process has it');
                 return false;
             }
@@ -455,6 +714,33 @@ export class EmbeddingServerManager extends EventEmitter {
         }
         catch (err) {
             logger.debug({ error: err }, '[EmbeddingServerManager] Failed to release start lock');
+        }
+    }
+    /**
+     * FIX 1B: Find all running embedding server processes using ps
+     * Returns array of { pid, command } objects for each running frankenstein-embeddings.py process
+     */
+    findRunningEmbeddingServers() {
+        try {
+            const result = execSync('ps aux | grep frankenstein-embeddings.py | grep -v grep', {
+                encoding: 'utf8',
+                timeout: 5000,
+            }).trim();
+            if (!result) return [];
+            const processes = [];
+            for (const line of result.split('\n')) {
+                if (!line.trim()) continue;
+                const parts = line.trim().split(/\s+/);
+                const pid = parseInt(parts[1], 10);
+                if (!isNaN(pid)) {
+                    processes.push({ pid, command: parts.slice(10).join(' ') });
+                }
+            }
+            return processes;
+        }
+        catch (err) {
+            // ps/grep returns exit code 1 when no matches found - that's normal
+            return [];
         }
     }
     /**
@@ -512,29 +798,42 @@ export class EmbeddingServerManager extends EventEmitter {
             });
             socket.on('data', (data) => {
                 buffer += data.toString();
-                const newlineIndex = buffer.indexOf('\n');
-                if (newlineIndex !== -1) {
-                    clearTimeout(timeout);
+                // Process all complete lines in the buffer
+                // The server may send multiple lines: {"status": "processing"} then {"embedding": [...]}
+                let newlineIndex;
+                while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
                     if (resolved)
                         return;
-                    resolved = true;
+                    const line = buffer.slice(0, newlineIndex);
+                    buffer = buffer.slice(newlineIndex + 1);
                     try {
-                        const response = JSON.parse(buffer.slice(0, newlineIndex));
-                        socket.end();
+                        const response = JSON.parse(line);
+                        // Handle error responses
                         if (response.error) {
+                            clearTimeout(timeout);
+                            resolved = true;
+                            socket.end();
                             reject(new Error(response.error));
                             return;
                         }
+                        // Skip "processing" status messages - wait for actual embedding
+                        if (response.status === 'processing') {
+                            logger.debug({ textLength: response.text_length }, '[EmbeddingServerManager] Embedding request queued, waiting for result...');
+                            continue; // Keep reading for the actual embedding
+                        }
+                        // Got the embedding!
                         if (response.embedding && Array.isArray(response.embedding)) {
+                            clearTimeout(timeout);
+                            resolved = true;
+                            socket.end();
                             resolve(response.embedding);
+                            return;
                         }
-                        else {
-                            reject(new Error('Invalid embedding response format'));
-                        }
+                        // Unknown response format - log but keep waiting
+                        logger.warn({ response: JSON.stringify(response).slice(0, 100) }, '[EmbeddingServerManager] Unexpected response format, continuing to wait');
                     }
                     catch (parseErr) {
-                        socket.end();
-                        reject(new Error('Failed to parse embedding response'));
+                        logger.warn({ line: line.slice(0, 100) }, '[EmbeddingServerManager] Failed to parse line, continuing to wait');
                     }
                 }
             });
@@ -548,11 +847,166 @@ export class EmbeddingServerManager extends EventEmitter {
         });
     }
     /**
+     * Generate embeddings for multiple texts in a SINGLE socket connection.
+     * Sends {texts: [...]} → gets {embeddings: [[...], [...], ...]}
+     * Much faster than N individual generateEmbeddingViaSocket calls.
+     */
+    async generateEmbeddingsBatchViaSocket(texts) {
+        if (!texts || texts.length === 0) return [];
+        return new Promise((resolve, reject) => {
+            const socket = createConnection(this.socketPath);
+            let buffer = '';
+            let resolved = false;
+            // Scale timeout with batch size: 60s base + 1s per text
+            const timeoutMs = Math.max(60000, 60000 + texts.length * 1000);
+            const timeout = setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    socket.destroy();
+                    reject(new Error(`Batch embedding timeout after ${timeoutMs}ms for ${texts.length} texts`));
+                }
+            }, timeoutMs);
+            socket.on('connect', () => {
+                socket.write(JSON.stringify({ texts }) + '\n');
+            });
+            socket.on('data', (data) => {
+                buffer += data.toString();
+                let newlineIndex;
+                while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                    if (resolved) return;
+                    const line = buffer.slice(0, newlineIndex);
+                    buffer = buffer.slice(newlineIndex + 1);
+                    try {
+                        const response = JSON.parse(line);
+                        if (response.error) {
+                            clearTimeout(timeout);
+                            resolved = true;
+                            socket.end();
+                            reject(new Error(response.error));
+                            return;
+                        }
+                        if (response.status === 'processing') {
+                            continue; // Wait for actual result
+                        }
+                        if (response.embeddings && Array.isArray(response.embeddings)) {
+                            clearTimeout(timeout);
+                            resolved = true;
+                            socket.end();
+                            resolve(response.embeddings);
+                            return;
+                        }
+                        logger.warn({ responseKeys: Object.keys(response) }, '[EmbeddingServerManager] Unexpected batch response, continuing');
+                    } catch (parseErr) {
+                        logger.warn({ line: line.slice(0, 100) }, '[EmbeddingServerManager] Failed to parse batch line');
+                    }
+                }
+            });
+            socket.on('error', (err) => {
+                clearTimeout(timeout);
+                if (!resolved) {
+                    resolved = true;
+                    reject(err);
+                }
+            });
+            socket.on('close', () => {
+                clearTimeout(timeout);
+                if (!resolved) {
+                    resolved = true;
+                    reject(new Error('Socket closed before batch embedding response received'));
+                }
+            });
+        });
+    }
+    /**
+     * Trigger server-side codebase processing via process_codebase command.
+     * The Python server reads files from DB that have NULL embeddings
+     * and generates embeddings in large batches (200/batch) with direct DB writes.
+     * This is the FASTEST path for large codebases (30k+ files).
+     */
+    async triggerServerSideProcessing(projectPath = null, batchSize = 200) {
+        return new Promise((resolve, reject) => {
+            const socket = createConnection(this.socketPath);
+            let buffer = '';
+            let resolved = false;
+            // Server-side processing can take a long time for large codebases
+            const timeoutMs = 600000; // 10 minutes
+            const timeout = setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    socket.destroy();
+                    reject(new Error(`Server-side codebase processing timeout after ${timeoutMs}ms`));
+                }
+            }, timeoutMs);
+            socket.on('connect', () => {
+                const request = {
+                    process_codebase: true,
+                    batch_size: batchSize,
+                    limit: 0, // Process ALL files
+                };
+                if (projectPath) {
+                    request.project_path = projectPath;
+                }
+                socket.write(JSON.stringify(request) + '\n');
+                logger.info({ projectPath, batchSize }, '[EmbeddingServerManager] Triggered server-side codebase processing');
+            });
+            socket.on('data', (data) => {
+                buffer += data.toString();
+                let newlineIndex;
+                while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                    if (resolved) return;
+                    const line = buffer.slice(0, newlineIndex);
+                    buffer = buffer.slice(newlineIndex + 1);
+                    try {
+                        const response = JSON.parse(line);
+                        if (response.error) {
+                            clearTimeout(timeout);
+                            resolved = true;
+                            socket.end();
+                            reject(new Error(response.error));
+                            return;
+                        }
+                        if (response.status === 'processing') {
+                            logger.debug('[EmbeddingServerManager] Server-side processing in progress...');
+                            continue;
+                        }
+                        // process_codebase returns stats when done
+                        if (response.total_processed !== undefined || response.processed !== undefined) {
+                            clearTimeout(timeout);
+                            resolved = true;
+                            socket.end();
+                            logger.info({ response }, '[EmbeddingServerManager] Server-side processing complete');
+                            resolve(response);
+                            return;
+                        }
+                        logger.debug({ responseKeys: Object.keys(response) }, '[EmbeddingServerManager] Server-side processing intermediate response');
+                    } catch (parseErr) {
+                        logger.warn({ line: line.slice(0, 100) }, '[EmbeddingServerManager] Failed to parse server-side response');
+                    }
+                }
+            });
+            socket.on('error', (err) => {
+                clearTimeout(timeout);
+                if (!resolved) {
+                    resolved = true;
+                    reject(err);
+                }
+            });
+            socket.on('close', () => {
+                clearTimeout(timeout);
+                if (!resolved) {
+                    resolved = true;
+                    reject(new Error('Socket closed before server-side processing response'));
+                }
+            });
+        });
+    }
+    /**
      * Stop the embedding server gracefully
      */
     async stop() {
         this.isShuttingDown = true;
         this.isStarting = false; // Reset starting flag on stop
+        this.startupGraceUntil = 0; // Clear any active grace period
         logger.info('[EmbeddingServerManager] Stopping embedding server...');
         // Stop health monitoring
         this.stopHealthMonitoring();
@@ -581,6 +1035,27 @@ export class EmbeddingServerManager extends EventEmitter {
         }
         // Also try killing by PID file (in case process reference was lost)
         await this.killByPidFile();
+        // FIX: Kill remaining embedding server processes for THIS project (orphans from previous sessions/subagents)
+        // PROJECT ISOLATION: Only kill processes belonging to this project, not other projects
+        const allServers = this.findRunningEmbeddingServers();
+        const thisProjectStopServers = allServers.filter(s => this._isProcessForThisProject(s.pid));
+        if (thisProjectStopServers.length > 0) {
+            logger.info({ count: thisProjectStopServers.length, totalFound: allServers.length, pids: thisProjectStopServers.map(s => s.pid) },
+                '[EmbeddingServerManager] Killing remaining embedding server processes for THIS project');
+            for (const server of thisProjectStopServers) {
+                try {
+                    process.kill(server.pid, 'SIGTERM');
+                } catch { /* already dead */ }
+            }
+            await this.sleep(2000);
+            for (const server of thisProjectStopServers) {
+                try {
+                    process.kill(server.pid, 0);
+                    process.kill(server.pid, 'SIGKILL');
+                    logger.info({ pid: server.pid }, '[EmbeddingServerManager] Force killed orphan embedding process');
+                } catch { /* already dead */ }
+            }
+        }
         // Clean up PID file
         this.removePidFile();
         // Clean up socket file
@@ -847,6 +1322,8 @@ export class EmbeddingServerManager extends EventEmitter {
         this.restartTimestamps = [];
         this.consecutiveFailures = 0;
         this.isShuttingDown = false;
+        // Reset circuit breaker on user-initiated start (Issue #10)
+        this.resetCircuitBreaker();
         // Kill existing and start fresh
         await this.stop();
         // Clear the shutdown flag that stop() sets
@@ -887,10 +1364,70 @@ export class EmbeddingServerManager extends EventEmitter {
      * Get extended status including stopped-by-user flag and restart loop info
      */
     getExtendedStatus() {
+        const graceActive = this.startupGraceUntil > 0 && Date.now() < this.startupGraceUntil;
         return {
             ...this.getStatus(),
             stoppedByUser: this.isStoppedByUser(),
-            restartLoop: this.getRestartLoopInfo()
+            restartLoop: this.getRestartLoopInfo(),
+            circuitBreaker: this.getCircuitBreakerStatus(),
+            startupGrace: graceActive ? {
+                active: true,
+                remainingMs: this.startupGraceUntil - Date.now(),
+                totalMs: this.config.startupTimeoutMs
+            } : { active: false }
+        };
+    }
+    // ==========================================================================
+    // CIRCUIT BREAKER (Issue #10)
+    // ==========================================================================
+    /**
+     * Manually reset the circuit breaker - callable from MCP tools
+     * Resets the circuit breaker to closed state, clears all cooldowns and counters.
+     * Use this when the underlying issue has been resolved (e.g., model file fixed, dependency installed).
+     */
+    resetCircuitBreaker() {
+        const previousState = this.cbState;
+        this.cbState = 'closed';
+        this.cbRestartTimestamps = [];
+        this.cbCurrentCooldownMs = 0;
+        this.cbCooldownUntil = 0;
+        this.cbLastStateChange = Date.now();
+        // Also reset the legacy restart counters
+        this.restartCount = 0;
+        this.restartTimestamps = [];
+        this.consecutiveFailures = 0;
+        logger.info({
+            previousState,
+            newState: 'closed',
+        }, '[EmbeddingServerManager] Circuit breaker manually reset: -> closed (all counters cleared)');
+        this.emit('circuit_breaker', { state: 'closed', manualReset: true });
+        return {
+            success: true,
+            previousState,
+            newState: 'closed',
+            message: `Circuit breaker reset from '${previousState}' to 'closed'. All cooldowns and counters cleared.`,
+        };
+    }
+    /**
+     * Get circuit breaker status for diagnostics
+     */
+    getCircuitBreakerStatus() {
+        const now = Date.now();
+        // Prune window for accurate count
+        const restartsInWindow = this.cbRestartTimestamps.filter(
+            ts => (now - ts) < this.config.cbRestartWindowMs
+        ).length;
+        return {
+            state: this.cbState,
+            restartsInWindow,
+            maxRestartsInWindow: this.config.cbMaxRestartsInWindow,
+            windowMs: this.config.cbRestartWindowMs,
+            currentCooldownMs: this.cbCurrentCooldownMs,
+            maxCooldownMs: this.config.cbMaxCooldownMs,
+            cooldownUntil: this.cbCooldownUntil > 0 ? new Date(this.cbCooldownUntil).toISOString() : null,
+            cooldownRemainingMs: this.cbCooldownUntil > now ? this.cbCooldownUntil - now : 0,
+            lastStateChange: new Date(this.cbLastStateChange).toISOString(),
+            timeSinceLastStateChangeMs: now - this.cbLastStateChange,
         };
     }
     // ==========================================================================
@@ -902,6 +1439,29 @@ export class EmbeddingServerManager extends EventEmitter {
      */
     async killStaleProcesses() {
         logger.info('[EmbeddingServerManager] Checking for stale processes...');
+        // Step 0: KILL ANY ROGUE DOCKER EMBEDDING CONTAINERS
+        // Docker containers crash-loop if they can't bind to the socket because
+        // the native Python server already owns it. Clean them up FIRST.
+        try {
+            const projectDirName = require('path').basename(this.projectPath).toLowerCase().replace(/[^a-z0-9]/g, '');
+            const containerName = `specmem-embedding-${projectDirName}`;
+            // Check if container exists (running or stopped)
+            const checkCmd = `docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^${containerName}$"`;
+            try {
+                execSync(checkCmd, { stdio: 'pipe' });
+                // Container exists - remove it forcefully
+                logger.info({ containerName }, '[EmbeddingServerManager] Removing rogue Docker embedding container');
+                execSync(`docker rm -f ${containerName} 2>/dev/null`, { stdio: 'pipe' });
+                logger.info({ containerName }, '[EmbeddingServerManager] Rogue Docker container removed');
+            }
+            catch {
+                // Container doesn't exist - good
+                logger.debug({ containerName }, '[EmbeddingServerManager] No rogue Docker container found');
+            }
+        }
+        catch (err) {
+            logger.debug({ error: err?.message || err }, '[EmbeddingServerManager] Docker cleanup check failed (Docker may not be installed)');
+        }
         // Step 1: Check PID file with health check
         const healthInfo = checkProcessHealth({
             pidFilePath: this.pidFilePath,
@@ -947,11 +1507,17 @@ export class EmbeddingServerManager extends EventEmitter {
                 await this.killProcessWithHealthInfo(healthInfo);
             }
             else {
+                // CRITICAL FIX: Don't kill healthy servers - REUSE them!
+                // This allows multiple MCP sessions to share the same embedding server
+                // Killing a healthy server breaks other sessions that depend on it
                 logger.info({
                     pid: healthInfo.pid,
                     ageHours: healthInfo.processAgeHours?.toFixed(2) || 'unknown',
-                }, '[EmbeddingServerManager] Process is healthy and belongs to this project - will be killed (killStaleOnStart=true)');
-                await this.killProcessWithHealthInfo(healthInfo);
+                }, '[EmbeddingServerManager] Process is healthy - REUSING instead of killing (preserves other sessions)');
+                // Mark as running so we don't try to start a new one
+                this.isRunning = true;
+                this.process = { pid: healthInfo.pid }; // Track the existing process
+                return; // Don't kill, don't clean socket - just reuse
             }
         }
         else {
@@ -1040,7 +1606,7 @@ export class EmbeddingServerManager extends EventEmitter {
             // CRITICAL FIX: Also search for PID files in ANY project path
             // This catches project-specific socket directories like /newServer/specmem/sockets/
             try {
-                const allProjectPids = execSync(`find / -path "*/specmem/sockets/embedding.pid" -o -path "*/.specmem/*/sockets/embedding.pid" 2>/dev/null | xargs cat 2>/dev/null || true`, { encoding: 'utf8', timeout: 5000 }).trim();
+                const allProjectPids = execSync(`find /home /root /opt /srv /var /tmp -maxdepth 6 -path "*/specmem/sockets/embedding.pid" -o -path "*/.specmem/*/sockets/embedding.pid" 2>/dev/null | xargs cat 2>/dev/null || true`, { encoding: 'utf8', timeout: 5000 }).trim();
                 for (const line of allProjectPids.split('\n')) {
                     if (!line.trim())
                         continue;
@@ -1093,6 +1659,20 @@ export class EmbeddingServerManager extends EventEmitter {
                                 commandLine,
                                 thisProjectSocket: this.socketPath,
                             }, '[EmbeddingServerManager] SAFETY CHECK: Process command line does not match this project - skipping kill');
+                            continue;
+                        }
+                        // CRITICAL FIX: Never kill --service mode processes based on age
+                        // Service mode is meant to run indefinitely
+                        const isServiceMode = commandLine.includes('--service');
+                        if (isServiceMode) {
+                            logger.info({
+                                pid,
+                                ageHours: ageHours?.toFixed(2) || 'unknown',
+                                socketPath: this.socketPath,
+                            }, '[EmbeddingServerManager] Orphaned --service process found - KEEPING (service mode runs indefinitely)');
+                            // Adopt it instead of killing
+                            this.isRunning = true;
+                            this.process = { pid };
                             continue;
                         }
                         // Only kill if older than max age
@@ -1148,7 +1728,12 @@ export class EmbeddingServerManager extends EventEmitter {
             // Environment variables are null-separated
             const envVars = environ.split('\0');
             for (const envVar of envVars) {
+                // Check both env var names - MCP manager uses SPECMEM_EMBEDDING_SOCKET,
+                // but specmem-init spawns with SPECMEM_SOCKET_PATH
                 if (envVar.startsWith('SPECMEM_EMBEDDING_SOCKET=')) {
+                    return envVar.split('=')[1];
+                }
+                if (envVar.startsWith('SPECMEM_SOCKET_PATH=')) {
                     return envVar.split('=')[1];
                 }
             }
@@ -1156,6 +1741,34 @@ export class EmbeddingServerManager extends EventEmitter {
         }
         catch {
             return null;
+        }
+    }
+    /**
+     * Check if a running process belongs to THIS project instance.
+     * Reads /proc/PID/environ and checks SPECMEM_PROJECT_PATH, SPECMEM_SOCKET_PATH,
+     * and SPECMEM_EMBEDDING_SOCKET for a match against this project's paths.
+     * Returns true if the process belongs to this project, false otherwise.
+     * Returns false on any error (permission denied, process gone, etc.)
+     */
+    _isProcessForThisProject(pid) {
+        try {
+            const environPath = `/proc/${pid}/environ`;
+            if (!existsSync(environPath)) {
+                return false;
+            }
+            const environ = readFileSync(environPath, 'utf8');
+            const envVars = environ.split('\0');
+            const projectPath = this.projectPath || process.cwd();
+            const socketPath = this.socketPath;
+            for (const v of envVars) {
+                if (v.startsWith('SPECMEM_PROJECT_PATH=') && v.includes(projectPath)) return true;
+                if (v.startsWith('SPECMEM_SOCKET_PATH=') && v.includes(projectPath)) return true;
+                if (v.startsWith('SPECMEM_EMBEDDING_SOCKET=') && socketPath && v.includes(socketPath)) return true;
+            }
+            return false;
+        }
+        catch {
+            return false;
         }
     }
     /**
@@ -1220,6 +1833,12 @@ export class EmbeddingServerManager extends EventEmitter {
             statusMessage: healthInfo.statusMessage,
         }, '[EmbeddingServerManager] Checked PID file process');
         if (healthInfo.processExists) {
+            // Respect recommended action — don't kill healthy/service processes
+            if (healthInfo.recommendedAction === 'keep') {
+                logger.info({ pid: healthInfo.pid, status: healthInfo.statusMessage },
+                    '[EmbeddingServerManager] killByPidFile: Process is healthy/service - keeping');
+                return;
+            }
             await this.killProcessWithHealthInfo(healthInfo);
         }
         else {
@@ -1358,7 +1977,12 @@ export class EmbeddingServerManager extends EventEmitter {
         this.attemptRestart();
     }
     /**
-     * Attempt to restart the server
+     * Attempt to restart the server (with circuit breaker - Issue #10)
+     *
+     * Circuit breaker pattern:
+     * - CLOSED: Normal operation, restarts allowed. Track restarts in sliding window.
+     * - OPEN: Too many restarts in window, block all restarts, wait for cooldown.
+     * - HALF-OPEN: After cooldown, allow ONE test restart. Success -> CLOSED, failure -> OPEN (doubled cooldown).
      */
     async attemptRestart() {
         // Phase 4: Don't restart if user manually stopped
@@ -1366,7 +1990,60 @@ export class EmbeddingServerManager extends EventEmitter {
             logger.info('[EmbeddingServerManager] Skipping restart - stopped by user');
             return;
         }
-        // Phase 4: Check for restart loop (>3 restarts in 60 seconds)
+        const now = Date.now();
+        // --- Circuit Breaker Logic (Issue #10) ---
+        // Prune the sliding window: remove timestamps older than cbRestartWindowMs
+        this.cbRestartTimestamps = this.cbRestartTimestamps.filter(
+            ts => (now - ts) < this.config.cbRestartWindowMs
+        );
+        if (this.cbState === 'open') {
+            // Circuit is OPEN - check if cooldown has elapsed
+            if (now < this.cbCooldownUntil) {
+                const remainingMs = this.cbCooldownUntil - now;
+                logger.warn({
+                    cbState: this.cbState,
+                    cooldownRemainingMs: remainingMs,
+                    currentCooldownMs: this.cbCurrentCooldownMs,
+                }, '[EmbeddingServerManager] Circuit breaker OPEN - restart blocked, waiting for cooldown');
+                return;
+            }
+            // Cooldown elapsed - transition to half-open
+            this.cbState = 'half-open';
+            this.cbLastStateChange = now;
+            logger.info({
+                previousState: 'open',
+                newState: 'half-open',
+                cooldownMs: this.cbCurrentCooldownMs,
+            }, '[EmbeddingServerManager] Circuit breaker: open -> half-open (allowing one test restart)');
+            this.emit('circuit_breaker', { state: 'half-open', cooldownMs: this.cbCurrentCooldownMs });
+        }
+        if (this.cbState === 'closed') {
+            // Check if we should trip the breaker
+            if (this.cbRestartTimestamps.length >= this.config.cbMaxRestartsInWindow) {
+                // Trip the circuit breaker
+                this.cbState = 'open';
+                this.cbCurrentCooldownMs = this.cbCurrentCooldownMs || this.config.cbCooldownMs;
+                this.cbCooldownUntil = now + this.cbCurrentCooldownMs;
+                this.cbLastStateChange = now;
+                logger.error({
+                    previousState: 'closed',
+                    newState: 'open',
+                    restartsInWindow: this.cbRestartTimestamps.length,
+                    windowMs: this.config.cbRestartWindowMs,
+                    maxAllowed: this.config.cbMaxRestartsInWindow,
+                    cooldownMs: this.cbCurrentCooldownMs,
+                    cooldownUntil: new Date(this.cbCooldownUntil).toISOString(),
+                }, '[EmbeddingServerManager] Circuit breaker TRIPPED: closed -> open (too many restarts in window)');
+                this.emit('circuit_breaker', {
+                    state: 'open',
+                    restartsInWindow: this.cbRestartTimestamps.length,
+                    cooldownMs: this.cbCurrentCooldownMs,
+                });
+                return;
+            }
+        }
+        // --- End Circuit Breaker pre-check ---
+        // Phase 4: Check for restart loop (>3 restarts in 60 seconds) - legacy check
         const loopInfo = this.getRestartLoopInfo();
         if (loopInfo.inLoop) {
             logger.error({
@@ -1380,7 +2057,7 @@ export class EmbeddingServerManager extends EventEmitter {
             await this.sleep(backoffMs);
         }
         // Check cooldown
-        const timeSinceLastRestart = Date.now() - this.lastRestartTime;
+        const timeSinceLastRestart = now - this.lastRestartTime;
         if (timeSinceLastRestart < this.config.restartCooldownMs) {
             const waitTime = this.config.restartCooldownMs - timeSinceLastRestart;
             logger.debug({ waitTime }, '[EmbeddingServerManager] Waiting for restart cooldown');
@@ -1397,15 +2074,57 @@ export class EmbeddingServerManager extends EventEmitter {
         }
         this.restartCount++;
         this.lastRestartTime = Date.now();
-        // Phase 4: Track restart timestamp for loop detection
-        this.restartTimestamps.push(Date.now());
-        // Keep only last 10 timestamps
+        // Track restart timestamp for both legacy loop detection and circuit breaker window
+        const restartTs = Date.now();
+        this.restartTimestamps.push(restartTs);
+        this.cbRestartTimestamps.push(restartTs);
+        // Keep only last 10 timestamps for legacy tracking
         if (this.restartTimestamps.length > 10) {
             this.restartTimestamps.shift();
         }
-        logger.info({ attempt: this.restartCount }, '[EmbeddingServerManager] Attempting restart');
+        logger.info({
+            attempt: this.restartCount,
+            cbState: this.cbState,
+            restartsInWindow: this.cbRestartTimestamps.length,
+        }, '[EmbeddingServerManager] Attempting restart');
         this.emit('restarting', { attempt: this.restartCount });
         const success = await this.start();
+        // --- Circuit Breaker post-restart evaluation ---
+        if (this.cbState === 'half-open') {
+            if (success) {
+                // Test restart succeeded - close the circuit breaker
+                this.cbState = 'closed';
+                this.cbCurrentCooldownMs = 0; // Reset cooldown on success
+                this.cbRestartTimestamps = [];
+                this.cbLastStateChange = Date.now();
+                logger.info({
+                    previousState: 'half-open',
+                    newState: 'closed',
+                }, '[EmbeddingServerManager] Circuit breaker: half-open -> closed (restart succeeded, counters reset)');
+                this.emit('circuit_breaker', { state: 'closed' });
+            }
+            else {
+                // Test restart failed - reopen with doubled cooldown
+                this.cbState = 'open';
+                this.cbCurrentCooldownMs = Math.min(
+                    this.cbCurrentCooldownMs * 2,
+                    this.config.cbMaxCooldownMs
+                );
+                this.cbCooldownUntil = Date.now() + this.cbCurrentCooldownMs;
+                this.cbLastStateChange = Date.now();
+                logger.error({
+                    previousState: 'half-open',
+                    newState: 'open',
+                    newCooldownMs: this.cbCurrentCooldownMs,
+                    maxCooldownMs: this.config.cbMaxCooldownMs,
+                    cooldownUntil: new Date(this.cbCooldownUntil).toISOString(),
+                }, '[EmbeddingServerManager] Circuit breaker: half-open -> open (restart failed, cooldown doubled)');
+                this.emit('circuit_breaker', {
+                    state: 'open',
+                    cooldownMs: this.cbCurrentCooldownMs,
+                });
+            }
+        }
         if (!success) {
             // Will retry on next health check
             logger.warn('[EmbeddingServerManager] Restart attempt failed');
@@ -1439,6 +2158,18 @@ export class EmbeddingServerManager extends EventEmitter {
                 this.consecutiveFailures = 0;
             }
             else {
+                // FIX: During startup grace period, suppress failure counting and restart attempts
+                // Grace period is dynamic, derived from config.startupTimeoutMs
+                if (this.startupGraceUntil > 0 && Date.now() < this.startupGraceUntil) {
+                    const remainingMs = this.startupGraceUntil - Date.now();
+                    logger.debug({ remainingMs, error: result.error },
+                        '[EmbeddingServerManager] Health check failed during startup grace period - suppressing');
+                    return; // Don't count failures or attempt restarts during grace
+                }
+                // Clear expired grace period
+                if (this.startupGraceUntil > 0 && Date.now() >= this.startupGraceUntil) {
+                    this.startupGraceUntil = 0;
+                }
                 // Check if server was killed by KYS watchdog - if so, auto-respawn immediately
                 if (this.wasKilledByKYS()) {
                     logger.info('[EmbeddingServerManager] Health check failed - server was killed by KYS watchdog, auto-respawning...');
@@ -1469,6 +2200,65 @@ export class EmbeddingServerManager extends EventEmitter {
                     await this.attemptRestart();
                 }
             }
+            // FIX 4: Duplicate process detection during health monitoring
+            // Check for multiple embedding server processes FOR THIS PROJECT and kill extras
+            // PROJECT ISOLATION: Filter to only this project's processes before killing duplicates
+            try {
+                const runningServers = this.findRunningEmbeddingServers();
+                // PROJECT ISOLATION: Only consider processes belonging to this project
+                const thisProjectHealthServers = runningServers.filter(s => this._isProcessForThisProject(s.pid));
+                if (thisProjectHealthServers.length > 1) {
+                    logger.error({
+                        count: thisProjectHealthServers.length,
+                        totalSystemWide: runningServers.length,
+                        pids: thisProjectHealthServers.map(s => s.pid),
+                    }, '[EmbeddingServerManager] CRITICAL: Multiple embedding server processes detected for THIS project!');
+                    // Determine the legitimate PID from PID file
+                    const legitimatePid = this.readPidFile();
+                    if (legitimatePid) {
+                        // Kill all THIS PROJECT's processes that are NOT the legitimate one
+                        for (const server of thisProjectHealthServers) {
+                            if (server.pid !== legitimatePid) {
+                                try {
+                                    logger.warn({ pid: server.pid, legitimatePid },
+                                        '[EmbeddingServerManager] FIX 4: Killing duplicate embedding server process');
+                                    process.kill(server.pid, 'SIGTERM');
+                                    // Give it a moment, then force kill if needed
+                                    setTimeout(() => {
+                                        try {
+                                            process.kill(server.pid, 0);
+                                            process.kill(server.pid, 'SIGKILL');
+                                            logger.warn({ pid: server.pid },
+                                                '[EmbeddingServerManager] FIX 4: Force killed duplicate process');
+                                        }
+                                        catch { /* already dead */ }
+                                    }, 2000);
+                                }
+                                catch (killErr) {
+                                    logger.debug({ pid: server.pid, error: killErr.message },
+                                        '[EmbeddingServerManager] FIX 4: Failed to kill duplicate (may be dead)');
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        // No PID file - keep the first one, kill the rest (only this project's processes)
+                        logger.warn('[EmbeddingServerManager] FIX 4: No PID file found, keeping oldest process');
+                        for (let i = 1; i < thisProjectHealthServers.length; i++) {
+                            try {
+                                process.kill(thisProjectHealthServers[i].pid, 'SIGTERM');
+                                logger.warn({ pid: thisProjectHealthServers[i].pid },
+                                    '[EmbeddingServerManager] FIX 4: Killing extra duplicate process');
+                            }
+                            catch { /* ignore */ }
+                        }
+                    }
+                }
+            }
+            catch (dupErr) {
+                logger.debug({ error: dupErr.message },
+                    '[EmbeddingServerManager] FIX 4: Duplicate detection check failed (non-fatal)');
+            }
         }, this.config.healthCheckIntervalMs);
         // Don't prevent process exit
         this.healthCheckTimer.unref();
@@ -1498,7 +2288,8 @@ export class EmbeddingServerManager extends EventEmitter {
         this.stopKysHeartbeat();
         logger.info('[EmbeddingServerManager] Starting KYS heartbeat (every 25s)');
         this.kysHeartbeatTimer = setInterval(async () => {
-            if (!this.isRunning || this.isShuttingDown) {
+            // FIX: Only skip if shutting down - heartbeat should still try for externally started servers
+            if (this.isShuttingDown) {
                 return;
             }
             try {
@@ -1621,6 +2412,88 @@ export class EmbeddingServerManager extends EventEmitter {
         catch (err) {
             logger.debug({ error: err }, '[EmbeddingServerManager] Failed to remove PID file');
         }
+    }
+    /**
+     * FIX 6: Get process resource usage (CPU, memory) for the embedding server
+     * Uses `ps -p PID -o pid,pcpu,pmem,rss,vsz` to get resource metrics
+     * @returns {{ pid: number, cpu: number, memPercent: number, rss: number, vsz: number } | null}
+     */
+    getProcessResources() {
+        const pid = this.readPidFile();
+        if (!pid) return null;
+        try {
+            // Check process is alive first
+            process.kill(pid, 0);
+            const result = execSync(`ps -p ${pid} -o pid,pcpu,pmem,rss,vsz --no-headers`, {
+                encoding: 'utf8',
+                timeout: 5000,
+            }).trim();
+            if (!result) return null;
+            const parts = result.trim().split(/\s+/);
+            if (parts.length < 5) return null;
+            return {
+                pid: parseInt(parts[0], 10),
+                cpu: parseFloat(parts[1]),           // %CPU
+                memPercent: parseFloat(parts[2]),     // %MEM
+                rss: parseInt(parts[3], 10),          // RSS in KB
+                vsz: parseInt(parts[4], 10),          // VSZ in KB
+            };
+        }
+        catch (err) {
+            logger.debug({ pid, error: err.message }, '[EmbeddingServerManager] FIX 6: Failed to get process resources');
+            return null;
+        }
+    }
+    /**
+     * FIX 6: Check resource limits and log warnings if exceeded
+     * Warns if RSS > 6000MB or CPU > 80%
+     * @returns {{ withinLimits: boolean, warnings: string[] }}
+     */
+    checkResourceLimits() {
+        const resources = this.getProcessResources();
+        if (!resources) {
+            return { withinLimits: true, warnings: [] };
+        }
+        const warnings = [];
+        const RSS_LIMIT_MB = 6000;   // 6GB RSS limit
+        const CPU_LIMIT_PCT = 80;     // 80% CPU limit
+        const rssMb = resources.rss / 1024; // Convert KB to MB
+        if (rssMb > RSS_LIMIT_MB) {
+            const msg = `Embedding server RSS memory (${rssMb.toFixed(0)}MB) exceeds limit (${RSS_LIMIT_MB}MB)`;
+            warnings.push(msg);
+            logger.warn({
+                pid: resources.pid,
+                rssMb: rssMb.toFixed(0),
+                limitMb: RSS_LIMIT_MB,
+            }, `[EmbeddingServerManager] FIX 6: RESOURCE WARNING - ${msg}`);
+        }
+        if (resources.cpu > CPU_LIMIT_PCT) {
+            const msg = `Embedding server CPU usage (${resources.cpu.toFixed(1)}%) exceeds limit (${CPU_LIMIT_PCT}%)`;
+            warnings.push(msg);
+            logger.warn({
+                pid: resources.pid,
+                cpuPercent: resources.cpu.toFixed(1),
+                limitPercent: CPU_LIMIT_PCT,
+            }, `[EmbeddingServerManager] FIX 6: RESOURCE WARNING - ${msg}`);
+        }
+        if (warnings.length === 0) {
+            logger.debug({
+                pid: resources.pid,
+                rssMb: rssMb.toFixed(0),
+                cpuPercent: resources.cpu.toFixed(1),
+            }, '[EmbeddingServerManager] FIX 6: Resource usage within limits');
+        }
+        return {
+            withinLimits: warnings.length === 0,
+            warnings,
+            resources: {
+                pid: resources.pid,
+                cpuPercent: resources.cpu,
+                rssMb: Math.round(rssMb),
+                vszMb: Math.round(resources.vsz / 1024),
+                memPercent: resources.memPercent,
+            },
+        };
     }
     /**
      * Sleep helper

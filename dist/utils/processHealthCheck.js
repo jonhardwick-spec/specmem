@@ -70,7 +70,31 @@ export function checkProcessHealth(config) {
         if (commandLine) {
             const isEmbedding = commandLine.includes('frankenstein-embeddings.py') ||
                 (expectedProcessName && commandLine.includes(expectedProcessName));
-            const isCorrectProject = !projectPath || commandLine.includes(projectPath);
+            // Check project path in command line first, then fall back to env vars
+            // CRITICAL FIX: The embedding server receives project path via SPECMEM_PROJECT_PATH
+            // and socket path via SPECMEM_SOCKET_PATH env vars, NOT command line args.
+            // Without this check, every embedding server appears to be "wrong project" and gets killed.
+            let isCorrectProject = !projectPath || commandLine.includes(projectPath);
+            if (!isCorrectProject && projectPath && isEmbedding) {
+                // Check process environment for SPECMEM_PROJECT_PATH
+                const processEnvProjectPath = getProcessEnvVar(pid, 'SPECMEM_PROJECT_PATH');
+                if (processEnvProjectPath) {
+                    isCorrectProject = processEnvProjectPath === projectPath || processEnvProjectPath.startsWith(projectPath);
+                    if (isCorrectProject) {
+                        logger.debug({ pid, processEnvProjectPath, expectedProject: projectPath },
+                            '[ProcessHealthCheck] Project path matched via SPECMEM_PROJECT_PATH env var');
+                    }
+                }
+                // Also check SPECMEM_SOCKET_PATH which contains the project path
+                if (!isCorrectProject) {
+                    const processSocketPath = getProcessEnvVar(pid, 'SPECMEM_SOCKET_PATH');
+                    if (processSocketPath && processSocketPath.includes(projectPath)) {
+                        isCorrectProject = true;
+                        logger.debug({ pid, processSocketPath, expectedProject: projectPath },
+                            '[ProcessHealthCheck] Project path matched via SPECMEM_SOCKET_PATH env var');
+                    }
+                }
+            }
             isEmbeddingServer = isEmbedding && isCorrectProject;
             if (isEmbedding && !isCorrectProject) {
                 logger.warn({
@@ -95,7 +119,10 @@ export function checkProcessHealth(config) {
     // Step 4: Determine if stale
     // Use actual process age if available, otherwise fall back to PID file age
     const effectiveAgeHours = processAgeHours !== null ? processAgeHours : pidFileAgeHours;
-    const isStale = effectiveAgeHours > maxAgeHours;
+    // CRITICAL FIX: --service mode processes are meant to run indefinitely
+    // They should NEVER be considered stale based on age alone
+    const isServiceMode = commandLine && commandLine.includes('--service');
+    const isStale = isServiceMode ? false : effectiveAgeHours > maxAgeHours;
     // Step 5: Determine recommended action
     let recommendedAction = 'keep';
     let statusMessage = '';
@@ -113,7 +140,9 @@ export function checkProcessHealth(config) {
     }
     else {
         recommendedAction = 'keep';
-        statusMessage = `Process ${pid} is healthy (${effectiveAgeHours.toFixed(2)}h old)`;
+        statusMessage = isServiceMode
+            ? `Process ${pid} is healthy service-mode (${effectiveAgeHours.toFixed(2)}h old, age check bypassed)`
+            : `Process ${pid} is healthy (${effectiveAgeHours.toFixed(2)}h old)`;
     }
     logger.info({
         pid,
@@ -144,6 +173,30 @@ export function checkProcessHealth(config) {
 // ============================================================================
 // LOW-LEVEL UTILITIES
 // ============================================================================
+/**
+ * Read a specific environment variable from a running process via /proc
+ * Returns the value or null if not found/readable
+ */
+function getProcessEnvVar(pid, varName) {
+    try {
+        const environPath = `/proc/${pid}/environ`;
+        if (!existsSync(environPath)) {
+            return null;
+        }
+        const environ = readFileSync(environPath, 'utf8');
+        const prefix = varName + '=';
+        const envVars = environ.split('\0');
+        for (const envVar of envVars) {
+            if (envVar.startsWith(prefix)) {
+                return envVar.slice(prefix.length);
+            }
+        }
+        return null;
+    }
+    catch {
+        return null;
+    }
+}
 /**
  * Read PID file with timestamp
  * Format: PID:TIMESTAMP

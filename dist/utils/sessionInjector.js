@@ -1,5 +1,5 @@
 /**
- * Session Injector - Inject text into the current Claude screen session
+ * Session Injector - Inject text into the current  screen session
  *
  * Uses the STY environment variable to reliably identify the current screen session.
  * Supports text injection + Enter key submission.
@@ -24,7 +24,7 @@ export function getCurrentScreenSession() {
     return sty;
 }
 /**
- * Inject text into the current Claude session's terminal input
+ * Inject text into the current  session's terminal input
  *
  * @param text - Text to inject
  * @param pressEnter - Whether to send Enter key after text (default: false)
@@ -129,7 +129,7 @@ export function sendSpecialKey(key) {
 }
 /**
  * Self-message: inject a message as user input and submit it
- * This allows a Claude subprocess to "send itself" a message
+ * This allows a  subprocess to "send itself" a message
  *
  * @param message - Message to inject as user input
  * @returns true if injection and submission succeeded

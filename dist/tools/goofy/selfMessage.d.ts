@@ -1,13 +1,13 @@
 /**
  * selfMessage - Send a message to yourself via terminal injection
  *
- * This tool allows Claude (or any subprocess) to inject a prompt into
- * the current Claude session. The message appears as user input and
- * triggers a Claude response.
+ * This tool allows  (or any subprocess) to inject a prompt into
+ * the current  session. The message appears as user input and
+ * triggers a  response.
  *
  * Use cases:
- * - Hooks can send notifications that Claude will respond to
- * - Subagents can request follow-up from the main Claude
+ * - Hooks can send notifications that  will respond to
+ * - Subagents can request follow-up from the main 
  * - Background processes can push status updates
  *
  * IMPORTANT: This uses the STY environment variable to find the correct

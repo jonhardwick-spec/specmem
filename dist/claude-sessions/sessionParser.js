@@ -1,14 +1,14 @@
 /**
- * sessionParser.ts - Claude Code Session File Parser
+ * sessionParser.ts -  Code Session File Parser
  *
- * Parses Claude Code session files to extract conversations:
+ * Parses  Code session files to extract conversations:
  * - Reads from ~/.claude/history.jsonl (user prompts with metadata)
  * - Reads from ~/.claude/projects/ directories (full conversations)
  *
  * Features:
  * - Parses both history.jsonl and project session files (JSONL format)
  * - Extracts USER messages and ASSISTANT messages
- * - Extracts thinking blocks from Claude's responses
+ * - Extracts thinking blocks from 's responses
  * - Extracts tool_use blocks for context
  * - Tags messages properly: role:user, role:assistant, has-thinking
  * - Formats content: [USER] prefix or [CLAUDE] prefix with [THINKING] blocks
@@ -76,7 +76,7 @@ const DEFAULT_CHUNKING_CONFIG = {
     batchSize: 100 // 100 entries per batch
 };
 /**
- * ClaudeSessionParser - parses Claude Code session files
+ * SessionParser - parses  Code session files
  *
  * Reads from:
  * - ~/.claude/history.jsonl (user prompts)
@@ -86,7 +86,7 @@ const DEFAULT_CHUNKING_CONFIG = {
  * When projectPathFilter is provided, only parses session files that match the project.
  * This prevents wasted parsing of sessions from other projects.
  */
-export class ClaudeSessionParser {
+export class SessionParser {
     claudeDir;
     projectsDir;
     historyPath;
@@ -121,7 +121,7 @@ export class ClaudeSessionParser {
                     const dirPath = join(this.projectsDir, entry.name);
                     // FIX Task #13: Early filtering by project path if filter is set
                     if (this.projectPathFilter) {
-                        // Claude encodes project paths in directory names by replacing / with -
+                        //  encodes project paths in directory names by replacing / with -
                         // e.g., /specmem becomes -specmem or specmem
                         // Check if this directory could belong to our project
                         const encodedFilter = this.projectPathFilter.replace(/\//g, '-').replace(/^-/, '');
@@ -198,10 +198,10 @@ export class ClaudeSessionParser {
     /**
      * parseAllSessions - reads ALL session files from history.jsonl and project directories
      *
-     * Reads both user prompts and Claude's responses including thinking blocks
+     * Reads both user prompts and 's responses including thinking blocks
      */
     async parseAllSessions() {
-        logger.info({ historyPath: this.historyPath, projectsDir: this.projectsDir }, 'parsing Claude session files');
+        logger.info({ historyPath: this.historyPath, projectsDir: this.projectsDir }, 'parsing  session files');
         try {
             const allFiles = await this.getAllSessionFiles();
             logger.info({ fileCount: allFiles.length }, 'found session files');
@@ -576,7 +576,7 @@ export class ClaudeSessionParser {
             return null;
         }
         // CRITICAL: Skip subagent/team member outputs - they pollute the memory database
-        // These are internal Claude Code agent responses, not user conversations
+        // These are internal  Code agent responses, not user conversations
         if (entry.teamMemberId) {
             return null;
         }
@@ -975,7 +975,7 @@ export class ClaudeSessionParser {
  * that could match the specified project path, avoiding wasteful parsing.
  */
 export function createSessionParser(claudeDir, projectPathFilter) {
-    return new ClaudeSessionParser(claudeDir, projectPathFilter ?? null);
+    return new SessionParser(claudeDir, projectPathFilter ?? null);
 }
 /**
  * isToolOrThinkingContent - checks if content is a tool call
@@ -1006,7 +1006,7 @@ export function isToolOrThinkingContent(content) {
 /**
  * isContextRestoration - detects context restoration summaries
  *
- * Context restorations are injected when Claude's context window overflows.
+ * Context restorations are injected when 's context window overflows.
  * They look like user messages but are actually system-generated summaries.
  *
  * These should be tagged differently so they don't pollute find_memory results
@@ -1015,7 +1015,7 @@ export function isToolOrThinkingContent(content) {
 export function isContextRestoration(content) {
     if (!content || typeof content !== 'string')
         return false;
-    // These are the key markers Claude Code uses for context restorations
+    // These are the key markers  Code uses for context restorations
     const markers = [
         'This session is being continued from a previous conversation',
         'conversation is summarized below',

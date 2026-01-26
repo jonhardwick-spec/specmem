@@ -8,7 +8,7 @@
  *   - Web research triggering
  *
  * This is the USER CONTROL layer - every drilldown decision
- * goes through the user via Claude's AskUserQuestion tool.
+ * goes through the user via 's AskUserQuestion tool.
  *
  * Flow:
  *   1. Initial search returns memories
@@ -82,7 +82,7 @@ export declare function getDrilldownState(sessionId: string): DrilldownState | n
  */
 export declare function clearDrilldown(sessionId: string): void;
 /**
- * Generate drilldown prompt for Claude's AskUserQuestion
+ * Generate drilldown prompt for 's AskUserQuestion
  *
  * This creates the question structure for user interaction
  */

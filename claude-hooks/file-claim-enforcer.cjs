@@ -195,11 +195,11 @@ function readStdinWithTimeout(timeoutMs = 5000) {
 
 /**
  * Check if we're running as an agent (subagent from Task tool)
- * Main Claude sessions should NOT be restricted
+ * Main  sessions should NOT be restricted
  *
  * IMPORTANT: Only explicit agent indicators count!
  * Screen sessions (STY) and process trees are NOT reliable because
- * main Claude also runs in screen sessions via specmem-init.
+ * main  also runs in screen sessions via specmem-init.
  */
 function isAgent() {
   // ONLY use explicit env vars set by agent spawning code
@@ -210,7 +210,7 @@ function isAgent() {
   if (process.env.CLAUDE_AGENT_ID) return true;
 
   // Check if this is a team member screen session (has specmem-tm- prefix)
-  // Regular Claude screens are claude-<project>, not specmem-tm-
+  // Regular  screens are claude-<project>, not specmem-tm-
   if (process.env.STY && process.env.STY.includes('specmem-tm-')) return true;
 
   // Check working directory for agent-specific paths
@@ -222,7 +222,7 @@ function isAgent() {
     }
   } catch (e) {}
 
-  // Default: NOT an agent (main Claude session gets unrestricted access)
+  // Default: NOT an agent (main  session gets unrestricted access)
   return false;
 }
 
@@ -234,7 +234,7 @@ async function main() {
     const toolName = hookData.tool_name || '';
     const toolInput = hookData.tool_input || {};
 
-    // Only enforce on agents, not main Claude session
+    // Only enforce on agents, not main  session
     if (!isAgent()) {
       process.exit(0);
     }

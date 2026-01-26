@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * SpecMem TeamMember Injection Hook for Claude Code
+ * SpecMem TeamMember Injection Hook for  Code
  *
  * Automatically injects SpecMem HTTP API instructions into subteammember prompts
  * when the Task tool is called. This enables team-member-to-team member communication
@@ -169,7 +169,7 @@ function buildTeamMemberApiReference() {
   const port = CONFIG.specmemPort;
   const pwd = CONFIG.specmemPassword;
 
-  // Compact single-line format - no newlines that could break Claude's formatting
+  // Compact single-line format - no newlines that could break 's formatting
   const rawContent = ' [TEAM-MEMBER-CTX] You=ghost dev on team. Other devs edit SAME files NOW. ' +
     'FIRST: claim files, check team status, announce yourself. ' +
     'MCP Tools (try first): send_team_message({message,type:"status"}), read_team_messages({limit:10}), ' +
@@ -257,7 +257,7 @@ async function main() {
 
   } catch (error) {
     log(`Error: ${error.message}`);
-    // Exit cleanly to not block Claude
+    // Exit cleanly to not block 
     process.exit(0);
   }
 }

@@ -676,7 +676,7 @@ let globalAllocatedPorts = null;
  */
 export async function getInstancePorts(projectPath, options) {
     // Use SPECMEM_PROJECT_PATH (set by bootstrap.cjs) as primary source of truth for project path
-    // This ensures per-instance isolation when multiple Claude sessions are running
+    // This ensures per-instance isolation when multiple  sessions are running
     const effectiveProjectPath = projectPath || process.env['SPECMEM_PROJECT_PATH'] || process.cwd();
     // Use cached allocation if available and matches project
     if (globalAllocatedPorts) {

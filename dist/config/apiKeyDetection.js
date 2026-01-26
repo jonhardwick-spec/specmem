@@ -1,23 +1,23 @@
 /**
  * SpecMem API Key Detection
  *
- * Auto-detects Claude/Anthropic API keys from common locations.
- * Used for orchestrating Claude instances via SpecMem CLI.
+ * Auto-detects / API keys from common locations.
+ * Used for orchestrating  instances via SpecMem CLI.
  */
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import { logger } from '../utils/logger.js';
 /**
- * All locations where Claude/Anthropic API keys might be stored
+ * All locations where / API keys might be stored
  */
 const KEY_LOCATIONS = [
     // Environment variables (highest priority)
     { type: 'env', path: 'ANTHROPIC_API_KEY' },
     { type: 'env', path: 'CLAUDE_API_KEY' },
-    // Claude Code credentials file
+    //  Code credentials file
     { type: 'file', path: '~/.claude/.credentials.json', keyPath: 'claudeAiOauth.accessToken' },
-    // Claude config files
+    //  config files
     { type: 'file', path: '~/.config/claude/credentials.json', keyPath: 'api_key' },
     { type: 'file', path: '~/.anthropic/credentials', keyPath: null }, // Plain text file
     // Project-level
@@ -50,12 +50,12 @@ function getNestedValue(obj, keyPath) {
     return typeof current === 'string' ? current : null;
 }
 /**
- * Validate that a string looks like an Anthropic API key
+ * Validate that a string looks like an  API key
  */
 function isValidApiKey(key) {
     if (!key)
         return false;
-    // Anthropic keys typically start with 'sk-ant-'
+    //  keys typically start with 'sk-ant-'
     return key.startsWith('sk-ant-') || key.startsWith('sk-');
 }
 /**
@@ -92,7 +92,7 @@ async function readKeyFromFile(filePath, keyPath, pattern) {
     }
 }
 /**
- * Detect Claude/Anthropic API key from all known locations.
+ * Detect / API key from all known locations.
  * Returns the first valid key found.
  */
 export async function detectApiKey() {
@@ -181,18 +181,18 @@ export async function saveApiKey(key) {
     }
 }
 /**
- * Extract API key from Claude Code's OAuth token.
+ * Extract API key from  Code's OAuth token.
  * This is what you stored at ~/.claude/.credentials.json
  */
-export async function getClaudeCodeApiKey() {
+export async function getCodeApiKey() {
     const credPath = path.join(os.homedir(), '.claude', '.credentials.json');
     try {
         const content = await fs.readFile(credPath, 'utf-8');
         const creds = JSON.parse(content);
-        // Claude Code stores the OAuth access token
+        //  Code stores the OAuth access token
         const token = creds?.claudeAiOauth?.accessToken;
         if (token && typeof token === 'string') {
-            logger.info('Found Claude Code OAuth token');
+            logger.info('Found  Code OAuth token');
             return token;
         }
     }

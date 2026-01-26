@@ -1,7 +1,7 @@
 /**
  * Trace/Explore System Index
  *
- * The intelligent trace and explore system for Claude Code
+ * The intelligent trace and explore system for  Code
  * Reduces full codebase searches by 80%+ through:
  * - Error pattern recognition
  * - Bug pattern detection

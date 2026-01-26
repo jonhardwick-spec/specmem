@@ -33,7 +33,7 @@ const FADE_MARKER_PREFIX = '---FADED:';
 /**
  * Clean a single JSON line - strip metadata, keep essentials
  *
- * IMPORTANT: Keep keys readable for Claude! Don't use cryptic abbreviations.
+ * IMPORTANT: Keep keys readable for ! Don't use cryptic abbreviations.
  * Keys used: role, content, tools (with name, input), thinking
  *
  * CRITICAL: thinking and redacted_thinking blocks MUST be preserved exactly!
@@ -65,6 +65,7 @@ function cleanLine(jsonLine) {
     } else if (Array.isArray(content)) {
       const texts = [];
       const tools = [];
+      const toolResults = [];
       const thinkingBlocks = [];
 
       for (const block of content) {
@@ -75,16 +76,31 @@ function cleanLine(jsonLine) {
         } else if (block.type === 'text' && block.text) {
           texts.push(compressText(block.text));
         } else if (block.type === 'tool_use') {
-          // Keep tool info readable
+          // Keep tool info readable - MUST preserve id for API compatibility
           tools.push({
+            id: block.id,  // CRITICAL: API requires matching tool_use_id
             name: block.name,
             input: JSON.stringify(block.input || {}).slice(0, 100) // slightly more context
           });
+        } else if (block.type === 'tool_result') {
+          // Preserve tool_result with tool_use_id for API compatibility
+          const result = {
+            type: 'tool_result',
+            tool_use_id: block.tool_use_id  // CRITICAL: must match tool_use.id
+          };
+          // Truncate content but preserve it
+          if (typeof block.content === 'string') {
+            result.content = block.content.slice(0, 500);
+          } else if (block.content) {
+            result.content = JSON.stringify(block.content).slice(0, 500);
+          }
+          toolResults.push(result);
         }
       }
 
       if (texts.length) clean.content = texts.join('\n');
       if (tools.length) clean.tools = tools;
+      if (toolResults.length) clean.toolResults = toolResults;
       // Preserve thinking blocks exactly - no compression, no modification
       if (thinkingBlocks.length) clean.thinking = thinkingBlocks;
     }

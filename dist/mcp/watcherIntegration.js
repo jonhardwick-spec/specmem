@@ -23,6 +23,12 @@ import * as path from 'path';
 /** Map of projectPath -> WatcherState - each project isolated */
 const watcherStateByProject = new Map();
 /**
+ * Initialization lock per project - prevents double watcher initialization (Issue #12).
+ * Maps projectPath -> Promise that resolves when initialization completes.
+ * If init is already in progress, subsequent calls await the existing promise.
+ */
+const initializationLockByProject = new Map();
+/**
  * getWatcherState - get or create watcher state for a project
  * This is the key to per-project isolation - no more cross-pollution!
  */
@@ -90,23 +96,52 @@ async function getWatchedPathsFromDb() {
  * PROJECT-SCOPED: Only watches the current project directory
  * Uses SPECMEM_PROJECT_PATH to determine watch scope
  *
- * This prevents RAM bloat from watching all files across all Claude sessions.
+ * This prevents RAM bloat from watching all files across all  sessions.
  * Each SpecMem instance only watches its own project.
  */
 export async function initializeWatcher(embeddingProvider) {
-    // check if watcher is enabled in config
-    // config.watcher is always defined now (never undefined), check .enabled boolean
-    if (!config.watcher.enabled) {
-        logger.info('file watcher disabled in config (SPECMEM_WATCHER_ENABLED=false) - skipping initialization');
+    // check if watcher is EXPLICITLY disabled in config
+    // Default is ENABLED (true) - only skip if user explicitly set SPECMEM_WATCHER_ENABLED=false
+    const watcherEnabled = config.watcher?.enabled ?? true;
+    const envOverride = process.env['SPECMEM_WATCHER_ENABLED'];
+    // Only disable if explicitly set to 'false' - empty string, undefined, 'true' all mean enabled
+    if (envOverride === 'false' || (envOverride === undefined && watcherEnabled === false)) {
+        logger.info('file watcher EXPLICITLY disabled via SPECMEM_WATCHER_ENABLED=false - skipping initialization');
         return null;
     }
     const projectPath = getProjectPath();
     const state = getWatcherState(projectPath);
-    // Prevent re-initialization for the same project
+    // Issue #12 Fix: Check if watcher is already fully initialized for this project
     if (state.manager) {
-        logger.info({ projectPath }, 'watcher already initialized for this project');
+        logger.info({ projectPath }, 'watcher already initialized for this project - returning existing manager');
         return state.manager;
     }
+    // Issue #12 Fix: Promise-based initialization lock prevents double init race condition.
+    // If init is already in progress from another code path (MCP tool call, startup, reconnection),
+    // subsequent calls await the existing init promise instead of creating a second watcher.
+    if (initializationLockByProject.has(projectPath)) {
+        logger.warn({ projectPath }, 'watcher initialization already in progress - awaiting existing init (preventing double init race condition)');
+        return await initializationLockByProject.get(projectPath);
+    }
+    // Create the initialization promise and store it as the lock
+    const initPromise = _doInitializeWatcher(embeddingProvider, projectPath, state);
+    initializationLockByProject.set(projectPath, initPromise);
+    try {
+        const result = await initPromise;
+        return result;
+    }
+    finally {
+        // Always release the lock when init completes (success or failure)
+        initializationLockByProject.delete(projectPath);
+    }
+}
+/**
+ * _doInitializeWatcher - internal init logic, called once per project under lock
+ *
+ * Separated from initializeWatcher to keep the lock logic clean.
+ * This function does the actual work of creating and starting the watcher.
+ */
+async function _doInitializeWatcher(embeddingProvider, projectPath, state) {
     logger.info({ projectPath }, 'initializing PROJECT-SCOPED file watcher...');
     try {
         // get database context - check if it's initialized first
@@ -136,13 +171,17 @@ export async function initializeWatcher(embeddingProvider) {
             paths: watchPaths,
             source: dbPaths.length > 0 ? 'database (project-scoped)' : 'project path only'
         }, 'resolved PROJECT-SCOPED watch paths');
+        // Issue #12 Fix: Watcher event debounce is configurable via SPECMEM_WATCHER_DEBOUNCE_MS
+        // Default is 1000ms. This prevents excessive processing of rapid file change events.
+        const debounceMs = parseInt(process.env['SPECMEM_WATCHER_DEBOUNCE_MS'] || String(config.watcher.debounceMs || 1000), 10);
+        logger.info({ debounceMs }, 'using configurable watcher debounce delay');
         // build watcher config
         const watcherConfig = {
             watcher: {
                 rootPath: primaryPath,
                 additionalPaths: additionalPaths,
                 ignorePath: config.watcher.ignorePath,
-                debounceMs: config.watcher.debounceMs,
+                debounceMs: debounceMs,
                 autoRestart: config.watcher.autoRestart,
                 maxRestarts: config.watcher.maxRestarts,
                 verbose: config.logging.level === 'debug' || config.logging.level === 'trace'
@@ -226,12 +265,16 @@ export async function initializeWatcher(embeddingProvider) {
             projectPath,
             paths: watchPaths,
             syncCheckIntervalMinutes: config.watcher.syncCheckIntervalMinutes,
+            debounceMs: debounceMs,
             filesWatched: status.watcher.filesWatched
         }, 'PROJECT-SCOPED file watcher initialized and VERIFIED running');
         return state.manager;
     }
     catch (error) {
         logger.error({ error, projectPath }, 'failed to initialize project-scoped file watcher');
+        // Clean up state on failure so a retry can succeed
+        state.manager = null;
+        state.watchedPaths.clear();
         return null;
     }
 }
@@ -356,7 +399,7 @@ export function getWatcherStatus() {
 }
 /**
  * isWatcherForProject - check if watcher is initialized for a specific project
- * Useful to avoid conflicts when multiple Claude sessions are running
+ * Useful to avoid conflicts when multiple  sessions are running
  */
 export function isWatcherForProject(targetProjectPath) {
     const state = getWatcherState(targetProjectPath);

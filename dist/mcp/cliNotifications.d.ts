@@ -1,8 +1,8 @@
 /**
- * CLI Notifications - MCP to Claude Code CLI notification system
+ * CLI Notifications - MCP to  Code CLI notification system
  *
  * This module provides a centralized way to send notifications from the MCP server
- * to the Claude Code CLI. It uses the MCP SDK's sendLoggingMessage API as the primary
+ * to the  Code CLI. It uses the MCP SDK's sendLoggingMessage API as the primary
  * method, with stderr fallback for banner display.
  *
  * Usage:
@@ -45,7 +45,7 @@ export interface StartupNotificationOptions {
     toolsCount?: number;
 }
 /**
- * CLI Notifier - sends notifications to Claude Code CLI via MCP protocol
+ * CLI Notifier - sends notifications to  Code CLI via MCP protocol
  *
  * Primary method: MCP SDK's sendLoggingMessage
  * Fallback: stderr for banner-style output
@@ -55,7 +55,7 @@ export declare class CLINotifier {
     private defaultOptions;
     constructor(server: Server, defaultOptions?: NotificationOptions);
     /**
-     * Send a notification to Claude Code CLI
+     * Send a notification to  Code CLI
      *
      * Uses MCP's sendLoggingMessage with retry logic and stderr fallback
      */
@@ -72,16 +72,16 @@ export declare class CLINotifier {
      * Display a formatted banner in the terminal
      *
      * This writes directly to stderr for immediate visual feedback
-     * in the Claude Code CLI terminal.
+     * in the  Code CLI terminal.
      */
     displayBanner(options: StartupNotificationOptions): void;
 }
 /**
- * Send startup notification to Claude Code CLI
+ * Send startup notification to  Code CLI
  *
  * This is the main entry point for sending the "SpecMem Loaded" message
  * when the MCP server starts up. It:
- * 1. Sends MCP logging message (appears in Claude's logs)
+ * 1. Sends MCP logging message (appears in 's logs)
  * 2. Displays a banner in stderr (appears in terminal)
  *
  * @param server - The MCP Server instance
@@ -114,7 +114,7 @@ export interface ToolCategory {
  * Create a formatted tool list for announcement
  *
  * Groups tools by category for better readability in the startup message.
- * This helps Claude (and users) understand what capabilities are available.
+ * This helps  (and users) understand what capabilities are available.
  */
 export declare function formatToolList(tools: Array<{
     name: string;
@@ -127,7 +127,7 @@ export declare function formatToolList(tools: Array<{
 /**
  * Create a tool discovery hint message
  *
- * Helps Claude understand how to discover and use tools.
+ * Helps  understand how to discover and use tools.
  */
 export declare function createToolDiscoveryHint(toolCount: number): string;
 //# sourceMappingURL=cliNotifications.d.ts.map

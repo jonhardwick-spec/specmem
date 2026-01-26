@@ -4,14 +4,14 @@
  * exposes command information as MCP resources
  * so claude can discover and learn about available commands
  */
-import { ClaudeCommandHandler } from './commandHandler.js';
+import { CommandHandler } from './commandHandler.js';
 /**
  * Get all commands as an MCP resource
  *
  * Returns a structured view of all available commands
- * that Claude can use to understand what's available
+ * that  can use to understand what's available
  */
-export declare function getCommandsResource(handler: ClaudeCommandHandler): {
+export declare function getCommandsResource(handler: CommandHandler): {
     uri: string;
     name: string;
     description: string;
@@ -23,7 +23,7 @@ export declare function getCommandsResource(handler: ClaudeCommandHandler): {
  *
  * Returns detailed help for a specific command or all commands
  */
-export declare function getCommandHelpResource(handler: ClaudeCommandHandler, category?: string, action?: string): {
+export declare function getCommandHelpResource(handler: CommandHandler, category?: string, action?: string): {
     uri: string;
     name: string;
     description: string;

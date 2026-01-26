@@ -8,7 +8,7 @@
  * Get all commands as an MCP resource
  *
  * Returns a structured view of all available commands
- * that Claude can use to understand what's available
+ * that  can use to understand what's available
  */
 export function getCommandsResource(handler) {
     const commandData = handler.getCommandsResource();
@@ -211,7 +211,7 @@ export function getCommandsResource(handler) {
     return {
         uri: 'specmem://commands/list',
         name: 'Available Commands',
-        description: 'List of all available slash commands for Claude',
+        description: 'List of all available slash commands for ',
         mimeType: 'application/json',
         contents
     };
@@ -261,7 +261,7 @@ export function getCommandHelpResource(handler, category, action) {
  * Generate global help text
  */
 function generateGlobalHelp() {
-    return `# Claude Commands - SpecMem Command System
+    return `#  Commands - SpecMem Command System
 
 Use slash commands to interact with the memory system.
 

@@ -8,13 +8,13 @@
  * 4. Metrics tracking for token savings
  *
  * Usage:
- *   import { compactResponse, compactForClaude } from '../services/ResponseCompactor';
+ *   import { compactResponse, compactFor } from '../services/ResponseCompactor';
  *
  *   // In tool execute():
  *   return compactResponse({ content: "Your response..." }, 'search');
  *
  * Or use the decorator pattern:
- *   return compactForClaude("Your response text", 'search');
+ *   return compactFor("Your response text", 'search');
  */
 interface CompressionMetrics {
     totalCompressed: number;
@@ -47,19 +47,19 @@ export declare function getCompressionMetrics(): CompressionMetrics;
 export declare function resetCompressionMetrics(): void;
 export type CompressionContext = 'search' | 'system' | 'hook';
 /**
- * Compress a string for Claude response using Traditional Chinese
+ * Compress a string for  response using Traditional Chinese
  * This is the main entry point for string compression
  *
  * @param text - The text to compress
  * @param context - The context (search, system, hook) for config-aware compression
  * @returns Compressed text (or original if compression disabled/failed)
  */
-export declare function compactForClaude(text: string, context?: CompressionContext): Promise<string>;
+export declare function compactFor(text: string, context?: CompressionContext): Promise<string>;
 /**
  * Compress a string synchronously (for simpler use cases)
  * Uses the smart compress algorithm
  */
-export declare function compactForClaudeSync(text: string, context?: CompressionContext): string;
+export declare function compactForSync(text: string, context?: CompressionContext): string;
 /**
  * Recursively compress string fields in an object
  * Handles nested objects and arrays

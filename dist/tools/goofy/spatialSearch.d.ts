@@ -2,10 +2,10 @@
  * spatialSearch.ts - SPATIAL MEMORY SEARCH TOOL
  *
  * MCP tool for searching memories using spatial/quadrant organization.
- * Enables Claude to search memories like navigating a map - by region,
+ * Enables  to search memories like navigating a map - by region,
  * cluster, or following hot paths.
  *
- * This is how Claude's memory becomes truly intelligent - not just
+ * This is how 's memory becomes truly intelligent - not just
  * searching text, but understanding the landscape of knowledge.
  *
  * Use cases:

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * AI TeamMember Worker - Claude-powered team member worker
+ * AI TeamMember Worker - -powered team member worker
  *
- * Extends BaseWorker with Claude API integration for intelligent task execution.
+ * Extends BaseWorker with  API integration for intelligent task execution.
  * Supports streaming responses, token tracking, and inter-team member communication.
  */
 import { BaseWorker } from './baseWorker.js';
@@ -48,14 +48,14 @@ Be concise, helpful, and collaborative. Focus on your assigned tasks while being
     }
     async initialize() {
         this.log('AI Worker initializing...');
-        // Initialize Anthropic client
+        // Initialize  client
         const apiKey = this.aiConfig.apiKey || process.env.ANTHROPIC_API_KEY;
         if (!apiKey) {
-            this.logError('WARNING: No ANTHROPIC_API_KEY found. Claude API calls will fail.');
+            this.logError('WARNING: No ANTHROPIC_API_KEY found.  API calls will fail.');
         }
         else {
-            this.anthropic = new Anthropic({ apiKey });
-            this.log('Anthropic client initialized');
+            this.anthropic = new ({ apiKey });
+            this.log(' client initialized');
         }
         // Register with SpecMem for team member discovery
         const registered = await this.registerWithSpecMem();
@@ -125,10 +125,10 @@ Be concise, helpful, and collaborative. Focus on your assigned tasks while being
                     await this.handleChat(task.content);
                     break;
                 case 'execute':
-                    await this.executeWithClaude(task.content, task.context);
+                    await this.executeWith(task.content, task.context);
                     break;
                 case 'analyze':
-                    await this.analyzeWithClaude(task.content);
+                    await this.analyzeWith(task.content);
                     break;
                 case 'communicate':
                     await this.handleCommunication(task);
@@ -147,29 +147,29 @@ Be concise, helpful, and collaborative. Focus on your assigned tasks while being
         this.reportProgress(10);
         // Add user message to history
         this.conversationHistory.push({ role: 'user', content: message });
-        // Get response from Claude
-        const response = await this.sendToClaudeWithStreaming(this.conversationHistory);
+        // Get response from 
+        const response = await this.sendToWithStreaming(this.conversationHistory);
         // Add assistant response to history
         this.conversationHistory.push({ role: 'assistant', content: response });
         // Output the response
         console.log(`RESPONSE:${JSON.stringify({ content: response })}`);
         this.reportProgress(100);
     }
-    async executeWithClaude(instruction, context) {
+    async executeWith(instruction, context) {
         this.reportProgress(20);
         const prompt = context
             ? `Context:\n${context}\n\nInstruction:\n${instruction}`
             : instruction;
-        const response = await this.sendToClaudeWithStreaming([
+        const response = await this.sendToWithStreaming([
             { role: 'user', content: prompt }
         ]);
         console.log(`EXECUTION_RESULT:${JSON.stringify({ result: response })}`);
         this.reportProgress(100);
     }
-    async analyzeWithClaude(content) {
+    async analyzeWith(content) {
         this.reportProgress(20);
         const analysisPrompt = `Please analyze the following and provide insights:\n\n${content}`;
-        const response = await this.sendToClaudeWithStreaming([
+        const response = await this.sendToWithStreaming([
             { role: 'user', content: analysisPrompt }
         ]);
         console.log(`ANALYSIS_RESULT:${JSON.stringify({ analysis: response })}`);
@@ -200,11 +200,11 @@ Be concise, helpful, and collaborative. Focus on your assigned tasks while being
         console.log(`ACTIVE_TEAM_MEMBERS:${JSON.stringify({ teamMembers, count: teamMembers.length })}`);
     }
     /**
-     * Send message to Claude API with streaming
+     * Send message to  API with streaming
      */
-    async sendToClaudeWithStreaming(messages) {
+    async sendToWithStreaming(messages) {
         if (!this.anthropic) {
-            return 'ERROR: Anthropic client not initialized. Set ANTHROPIC_API_KEY environment variable.';
+            return 'ERROR:  client not initialized. Set ANTHROPIC_API_KEY environment variable.';
         }
         try {
             let fullResponse = '';
@@ -248,16 +248,16 @@ Be concise, helpful, and collaborative. Focus on your assigned tasks while being
             return fullResponse;
         }
         catch (error) {
-            this.logError(`Claude API error: ${error.message}`);
+            this.logError(` API error: ${error.message}`);
             return `ERROR: ${error.message}`;
         }
     }
     /**
-     * Simple send to Claude (non-streaming)
+     * Simple send to  (non-streaming)
      */
-    async sendToClaude(prompt) {
+    async sendTo(prompt) {
         if (!this.anthropic) {
-            return 'ERROR: Anthropic client not initialized';
+            return 'ERROR:  client not initialized';
         }
         try {
             const response = await this.anthropic.messages.create({

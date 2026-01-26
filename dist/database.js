@@ -8,6 +8,7 @@ import { getDebugLogger } from './utils/debugLogger.js';
 import { getDimensionService } from './services/DimensionService.js';
 import { getProjectContext, getProjectPathForInsert } from './services/ProjectContext.js';
 import { getProjectSchema, createProjectSchema, setProjectSearchPath, initializeProjectSchema } from './db/projectNamespacing.js';
+import { BigBrainMigrations } from './db/bigBrainMigrations.js';
 const { Pool, types } = pg;
 types.setTypeParser(1700, parseFloat);
 types.setTypeParser(20, parseInt);
@@ -171,28 +172,70 @@ export class DatabaseManager {
         return undefined;
     }
     createPool() {
+        // Issue #11 FIX: All pool settings are env-var configurable with sensible defaults
+        const poolMax = parseInt(process.env['SPECMEM_DB_POOL_MAX'] || String(this.config.maxConnections || 20), 10);
+        const connectionTimeoutMillis = parseInt(process.env['SPECMEM_DB_CONNECTION_TIMEOUT_MS'] || String(this.config.connectionTimeout || 10000), 10);
+        const statementTimeoutMs = parseInt(process.env['SPECMEM_DB_STATEMENT_TIMEOUT_MS'] || '30000', 10);
+        const idleInTransactionTimeoutMs = parseInt(process.env['SPECMEM_DB_IDLE_TRANSACTION_TIMEOUT_MS'] || '60000', 10);
+        logger.info({
+            poolMax,
+            connectionTimeoutMillis,
+            statementTimeoutMs,
+            idleInTransactionTimeoutMs
+        }, 'Creating pool with configurable timeouts (Issue #11 fix)');
         return new Pool({
             host: this.config.host,
             port: this.config.port,
             database: this.config.database,
             user: this.config.user,
             password: this.config.password,
-            max: this.config.maxConnections,
+            max: poolMax,
             idleTimeoutMillis: this.config.idleTimeout,
-            connectionTimeoutMillis: this.config.connectionTimeout,
-            ssl: this.config.ssl
+            connectionTimeoutMillis: connectionTimeoutMillis,
+            ssl: this.config.ssl,
+            // Issue #11: Set statement_timeout and idle_in_transaction_session_timeout
+            // These prevent hung queries from blocking the pool over long sessions
+            statement_timeout: statementTimeoutMs,
+            idle_in_transaction_session_timeout: idleInTransactionTimeoutMs
         });
     }
     setupPoolEvents() {
+        // Issue #11 FIX: Enhanced pool error handler with connection details
         this.pool.on('error', (err) => {
-            logger.error({ err }, 'Unexpected pool error');
+            logger.error({
+                err,
+                totalCount: this.pool.totalCount,
+                idleCount: this.pool.idleCount,
+                waitingCount: this.pool.waitingCount
+            }, 'Unexpected pool error - logging pool health for diagnostics');
         });
         // SCHEMA ISOLATION FIX: pool.on('connect') doesn't wait for async callbacks!
         // The client is returned to the caller before await completes.
         // We still set search_path here for defense-in-depth, but critical paths
         // must use ensureSearchPath() explicitly to guarantee isolation.
         this.pool.on('connect', (client) => {
-            logger.debug('New client connected to pool');
+            // Issue #11 FIX: Set statement_timeout and idle_in_transaction_session_timeout
+            // on each new connection as defense-in-depth (in addition to pool-level config).
+            // This ensures timeouts apply even if the pool config is ignored by the driver.
+            const statementTimeoutMs = parseInt(process.env['SPECMEM_DB_STATEMENT_TIMEOUT_MS'] || '30000', 10);
+            const idleInTransactionTimeoutMs = parseInt(process.env['SPECMEM_DB_IDLE_TRANSACTION_TIMEOUT_MS'] || '60000', 10);
+            logger.debug({
+                totalCount: this.pool.totalCount,
+                idleCount: this.pool.idleCount,
+                waitingCount: this.pool.waitingCount
+            }, 'New client connected to pool');
+            // Set statement_timeout and idle_in_transaction_session_timeout via SET command
+            // This is fire-and-forget (pg doesn't await connect handlers)
+            client.query('SET statement_timeout TO ' + statementTimeoutMs)
+                .then(() => {
+                return client.query('SET idle_in_transaction_session_timeout TO ' + idleInTransactionTimeoutMs);
+            })
+                .then(() => {
+                logger.debug({ statementTimeoutMs, idleInTransactionTimeoutMs }, 'Set query timeouts on new pool connection');
+            })
+                .catch((error) => {
+                logger.error({ error }, 'Failed to set query timeouts on new connection');
+            });
             // If we have a current schema, set search_path on this new connection
             // NOTE: This is fire-and-forget because pg doesn't await connect handlers
             // Critical code paths should call ensureSearchPath() explicitly
@@ -210,7 +253,11 @@ export class DatabaseManager {
             }
         });
         this.pool.on('remove', () => {
-            logger.debug('Client removed from pool');
+            logger.debug({
+                totalCount: this.pool.totalCount,
+                idleCount: this.pool.idleCount,
+                waitingCount: this.pool.waitingCount
+            }, 'Client removed from pool');
         });
     }
     async initialize() {
@@ -279,6 +326,44 @@ export class DatabaseManager {
                 else {
                     throw ensureError; // Not a permission/ownership error, re-throw
                 }
+            }
+            // CRITICAL: Run migrations to create code_definitions and other tables
+            // ensureSchema only creates basic tables - migrations add the rest
+            try {
+                logger.info('Running database migrations for code_definitions and other tables...');
+                // BigBrainMigrations needs pool-like object with queryWithSwag and transactionGang
+                const self = this;
+                const poolAdapter = {
+                    queryWithSwag: async (sql, params) => self.query(sql, params),
+                    transactionGang: async (callback) => {
+                        // Run callback in a transaction
+                        const poolClient = await self.pool.connect();
+                        try {
+                            await poolClient.query('BEGIN');
+                            // Create a client-like wrapper for the callback
+                            const clientWrapper = {
+                                query: (sql, params) => poolClient.query(sql, params)
+                            };
+                            await callback(clientWrapper);
+                            await poolClient.query('COMMIT');
+                        }
+                        catch (err) {
+                            await poolClient.query('ROLLBACK');
+                            throw err;
+                        }
+                        finally {
+                            poolClient.release();
+                        }
+                    }
+                };
+                const migrations = new BigBrainMigrations(poolAdapter);
+                await migrations.runAllMigrations();
+                logger.info('Migrations complete - code_definitions table should now exist');
+            }
+            catch (migrationError) {
+                const errMsg = migrationError instanceof Error ? migrationError.message : String(migrationError);
+                // Log ALL migration errors for debugging
+                logger.error({ error: errMsg, stack: migrationError?.stack }, 'Migration error');
             }
             this.isInitialized = true;
             this.startHealthCheck();
@@ -456,6 +541,13 @@ export class DatabaseManager {
       EXCEPTION WHEN duplicate_object THEN NULL;
       END $$
     `);
+        // Create immutable SHA256 helper function for GENERATED ALWAYS columns
+        // sha256() alone is not marked IMMUTABLE in PostgreSQL, so we wrap it
+        await client.query(`
+      CREATE OR REPLACE FUNCTION content_sha256(text) RETURNS varchar(64) AS $$
+        SELECT encode(sha256(convert_to($1, 'UTF8')), 'hex')
+      $$ LANGUAGE SQL IMMUTABLE STRICT
+    `);
         // Check if memories table already exists and get its current dimension
         const existingDim = await this.getTableDimension('memories');
         if (existingDim !== null) {
@@ -479,6 +571,19 @@ export class DatabaseManager {
             await client.query(`ALTER TABLE memories ADD COLUMN IF NOT EXISTS consolidated_from UUID[] DEFAULT '{}'`);
             await client.query(`ALTER TABLE memories ADD COLUMN IF NOT EXISTS role VARCHAR(20)`);
             await client.query(`ALTER TABLE memories ADD COLUMN IF NOT EXISTS project_path TEXT`);
+            // Add content_hash GENERATED column if missing (required for dedup, inserts, and search)
+            // GENERATED ALWAYS columns can be added via ALTER TABLE in PostgreSQL 12+
+            try {
+                await client.query(`ALTER TABLE memories ADD COLUMN IF NOT EXISTS content_hash VARCHAR(64) GENERATED ALWAYS AS (content_sha256(content)) STORED`);
+            } catch (hashErr) {
+                // If GENERATED ALWAYS fails (e.g. column exists as non-generated), try plain column
+                if (!hashErr.message.includes('already exists')) {
+                    logger.warn({ err: hashErr }, 'Could not add content_hash as GENERATED column, trying plain VARCHAR');
+                    try {
+                        await client.query(`ALTER TABLE memories ADD COLUMN IF NOT EXISTS content_hash VARCHAR(64)`);
+                    } catch (e2) { /* column likely already exists */ }
+                }
+            }
             logger.info('Ensured all required columns exist in memories table');
         }
         else {
@@ -489,6 +594,7 @@ export class DatabaseManager {
         CREATE TABLE IF NOT EXISTS memories (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           content TEXT NOT NULL,
+          content_hash VARCHAR(64) GENERATED ALWAYS AS (content_sha256(content)) STORED,
           content_tsv TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', content)) STORED,
           memory_type memory_type NOT NULL DEFAULT 'semantic',
           importance importance_level NOT NULL DEFAULT 'medium',
@@ -530,6 +636,7 @@ export class DatabaseManager {
         await client.query(`ALTER TABLE memory_relations ADD COLUMN IF NOT EXISTS relation_type VARCHAR(50) DEFAULT 'related'`);
         await client.query(`ALTER TABLE memory_relations ADD COLUMN IF NOT EXISTS strength FLOAT DEFAULT 1.0`);
         await client.query(`ALTER TABLE memory_relations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW()`);
+        await client.query(`CREATE INDEX IF NOT EXISTS idx_memories_content_hash ON memories(content_hash)`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_memories_embedding ON memories USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_memories_content_tsv ON memories USING gin(content_tsv)`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_memories_tags ON memories USING gin(tags)`);
@@ -566,6 +673,28 @@ export class DatabaseManager {
       EXCEPTION WHEN duplicate_object THEN NULL;
       END $$
     `);
+        // AUTO-ADD project_path to codebase_files if table exists but column is missing
+        // This fixes find_code_pointers "column project_path does not exist" error
+        try {
+            const cbfExists = await client.query(`SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'codebase_files' AND table_schema = current_schema()) as exists`);
+            if (cbfExists.rows[0]?.exists) {
+                await client.query(`ALTER TABLE codebase_files ADD COLUMN IF NOT EXISTS project_path VARCHAR(500) DEFAULT '/'`);
+                await client.query(`CREATE INDEX IF NOT EXISTS idx_codebase_files_project_path ON codebase_files(project_path)`);
+                await client.query(`CREATE INDEX IF NOT EXISTS idx_codebase_files_project_path_file ON codebase_files(project_path, file_path)`);
+            }
+        } catch (cbfErr) {
+            // Ignore - table may not exist yet, migrations will create it
+        }
+        // AUTO-ADD project_path to code_dependencies if table exists but column is missing
+        try {
+            const cdExists = await client.query(`SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'code_dependencies' AND table_schema = current_schema()) as exists`);
+            if (cdExists.rows[0]?.exists) {
+                await client.query(`ALTER TABLE code_dependencies ADD COLUMN IF NOT EXISTS project_path VARCHAR(500) DEFAULT '/'`);
+                await client.query(`CREATE INDEX IF NOT EXISTS idx_code_dependencies_project_path ON code_dependencies(project_path)`);
+            }
+        } catch (cdErr) {
+            // Ignore
+        }
     }
     startHealthCheck() {
         this.healthCheckInterval = setInterval(async () => {
@@ -595,8 +724,16 @@ export class DatabaseManager {
         let success = true;
         let errorMsg;
         let rowsAffected;
+        // CRITICAL FIX: Use dedicated client with ensureSearchPath to prevent
+        // schema cross-contamination. pool.query() can race with the fire-and-forget
+        // search_path set in pool.on('connect'), causing writes to wrong schema.
+        const client = await this.pool.connect();
         try {
-            const result = await this.pool.query(text, params);
+            if (this.currentSchema) {
+                const safeSchema = '"' + this.currentSchema.replace(/"/g, '""') + '"';
+                await client.query('SET search_path TO ' + safeSchema + ', public');
+            }
+            const result = await client.query(text, params);
             rowsAffected = result.rowCount ?? undefined;
             const duration = Date.now() - start;
             // Emit db:query:complete event via LWJEB
@@ -617,6 +754,9 @@ export class DatabaseManager {
             // Emit db:query:complete event with error via LWJEB
             coordinator?.emitDBQueryComplete(queryId, queryType, duration, false, undefined, errorMsg);
             throw error;
+        }
+        finally {
+            client.release();
         }
     }
     /**

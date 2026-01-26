@@ -1,13 +1,13 @@
 /**
  * SPAWN RESEARCH TEAM_MEMBER
  *
- * Spawns a Claude Code subprocess to research information on the web.
+ * Spawns a  Code subprocess to research information on the web.
  * The local embedding model is just a dumb vector generator - it can't
  * actually understand or research things. This tool bridges that gap.
  *
  * When SpecMem needs more context on a topic:
- *   1. This tool spawns a Claude subprocess via deployTeamMember (with MCP access!)
- *   2. Claude researches using WebSearch/WebFetch
+ *   1. This tool spawns a  subprocess via deployTeamMember (with MCP access!)
+ *   2.  researches using WebSearch/WebFetch
  *   3. Findings are saved back to SpecMem as memories
  *   4. The local embedding model can then find these researched facts
  *
@@ -20,10 +20,10 @@
  *
  * FIX 2024-12 (CRITICAL): Changed from spawn('claude', ['--print', ...]) to
  * deployTeamMember() which properly gives team members MCP access. The old --print mode
- * ran Claude WITHOUT any tools, so WebSearch/WebFetch were never available!
+ * ran  WITHOUT any tools, so WebSearch/WebFetch were never available!
  *
- * Security: Claude subprocess inherits parent permissions. This is
- * intentional - we want Claude to have web access for research.
+ * Security:  subprocess inherits parent permissions. This is
+ * intentional - we want  to have web access for research.
  */
 import { z } from 'zod';
 declare const SpawnResearchTeamMemberSchema: z.ZodObject<{
@@ -57,7 +57,7 @@ interface ResearchResult {
     screenSession?: string;
 }
 /**
- * Spawn Claude subprocess to do research
+ * Spawn  subprocess to do research
  *
  * FIXED: Now uses deployTeamMember() which properly spawns team members with:
  * - Full MCP access (SpecMem, WebSearch, WebFetch, etc.)
@@ -65,7 +65,7 @@ interface ResearchResult {
  * - Proper tracking and monitoring
  *
  * The OLD implementation used spawn('claude', ['--print', '-p', prompt])
- * which runs Claude in print-only mode WITHOUT MCP tools access!
+ * which runs  in print-only mode WITHOUT MCP tools access!
  */
 export declare function spawnResearchTeamMember(input: SpawnResearchTeamMemberInput): Promise<ResearchResult>;
 export declare function getActiveResearchTeamMembers(): Promise<Array<{

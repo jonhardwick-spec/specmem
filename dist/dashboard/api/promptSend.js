@@ -1,7 +1,7 @@
 /**
  * promptSend.ts - Direct Prompting API for SpecMem Dashboard
  *
- * Provides endpoints for sending prompts to Claude via MCP sampling,
+ * Provides endpoints for sending prompts to  via MCP sampling,
  * with support for context injection (memories, files, codebase).
  *
  * Phase 4 Implementation - Direct Prompting Interface
@@ -76,7 +76,7 @@ const conversationHistory = {
 export function createPromptSendRouter(db, requireAuth) {
     const router = Router();
     /**
-     * POST /api/prompt/send - Send a prompt to Claude via MCP sampling
+     * POST /api/prompt/send - Send a prompt to  via MCP sampling
      */
     router.post('/send', requireAuth, async (req, res) => {
         const startTime = Date.now();
@@ -176,7 +176,7 @@ export function createPromptSendRouter(db, requireAuth) {
                 contextContent += 'You have access to the SpecMem MCP Server codebase. ';
                 contextContent += 'This is a PostgreSQL-backed memory system with semantic search capabilities.\n';
             }
-            // Execute the prompt via Claude API - TEAM_MEMBER 3 FIX: Real API with model support!
+            // Execute the prompt via  API - TEAM_MEMBER 3 FIX: Real API with model support!
             const promptParams = {
                 prompt: contextContent ? `${contextContent}\n\n---\n\n${prompt}` : prompt,
                 config: {
@@ -244,12 +244,12 @@ export function createPromptSendRouter(db, requireAuth) {
     });
     // ============================================================================
     // TEAM_MEMBER 2's SSE STREAMING ENDPOINT - blastThisShitLive()
-    // Real-time streaming of Claude responses with thinking blocks!
+    // Real-time streaming of  responses with thinking blocks!
     // ============================================================================
     /**
-     * POST /api/prompt/streamLive - Stream Claude response via SSE
+     * POST /api/prompt/streamLive - Stream  response via SSE
      *
-     * TEAM_MEMBER 2's MASTERPIECE! Streams Claude responses in real-time using
+     * TEAM_MEMBER 2's MASTERPIECE! Streams  responses in real-time using
      * Server-Sent Events (SSE). Frontend can listen for:
      * - claudeBrainFart: thinking chunks
      * - actualWordVomit: response text chunks
@@ -289,7 +289,7 @@ export function createPromptSendRouter(db, requireAuth) {
             // Send initial connection event
             yeetTheEvent('connected', {
                 streamId,
-                message: 'Stream connected, waiting for Claude...',
+                message: 'Stream connected, waiting for ...',
                 timestamp: new Date().toISOString()
             });
             // Build context from memories, files, and codebase (same as /send)

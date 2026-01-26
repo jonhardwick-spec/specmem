@@ -1,7 +1,7 @@
 /**
  * spatialMemory.ts - SPATIAL MEMORY ENGINE
  *
- * Makes Claude's memory ACTUALLY INTELLIGENT through spatial organization.
+ * Makes 's memory ACTUALLY INTELLIGENT through spatial organization.
  * This is where memories become self-organizing semantic neighborhoods.
  *
  * Features:
@@ -11,7 +11,7 @@
  * - Cluster auto-labeling from content themes
  * - Self-balancing when quadrants get too full
  *
- * The goal: Claude should think about memories like physical locations,
+ * The goal:  should think about memories like physical locations,
  * where related concepts are "near" each other in semantic space.
  */
 import { logger } from '../utils/logger.js';

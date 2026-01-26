@@ -1,8 +1,8 @@
 /**
- * CLI Notifications - MCP to Claude Code CLI notification system
+ * CLI Notifications - MCP to  Code CLI notification system
  *
  * This module provides a centralized way to send notifications from the MCP server
- * to the Claude Code CLI. It uses the MCP SDK's sendLoggingMessage API as the primary
+ * to the  Code CLI. It uses the MCP SDK's sendLoggingMessage API as the primary
  * method, with stderr fallback for banner display.
  *
  * Usage:
@@ -33,7 +33,7 @@ const COLORS = {
     blue: '\x1b[34m',
 };
 /**
- * CLI Notifier - sends notifications to Claude Code CLI via MCP protocol
+ * CLI Notifier - sends notifications to  Code CLI via MCP protocol
  *
  * Primary method: MCP SDK's sendLoggingMessage
  * Fallback: stderr for banner-style output
@@ -53,7 +53,7 @@ export class CLINotifier {
         };
     }
     /**
-     * Send a notification to Claude Code CLI
+     * Send a notification to  Code CLI
      *
      * Uses MCP's sendLoggingMessage with retry logic and stderr fallback
      */
@@ -112,7 +112,7 @@ export class CLINotifier {
      * Display a formatted banner in the terminal
      *
      * This writes directly to stderr for immediate visual feedback
-     * in the Claude Code CLI terminal.
+     * in the  Code CLI terminal.
      */
     displayBanner(options) {
         const c = COLORS;
@@ -143,7 +143,7 @@ ${c.yellow}+==================================================================+$
 ${c.yellow}|${c.reset}  ${c.dim}Type /specmem for commands | /specmem-find to search memories${c.reset}   ${c.yellow}|${c.reset}
 ${c.yellow}+==================================================================+${c.reset}
 `;
-        // Write to stderr so it appears in Claude Code CLI terminal
+        // Write to stderr so it appears in  Code CLI terminal
         process.stderr.write(banner);
     }
 }
@@ -167,11 +167,11 @@ function createStartupMessage(options) {
     return parts.join(' | ');
 }
 /**
- * Send startup notification to Claude Code CLI
+ * Send startup notification to  Code CLI
  *
  * This is the main entry point for sending the "SpecMem Loaded" message
  * when the MCP server starts up. It:
- * 1. Sends MCP logging message (appears in Claude's logs)
+ * 1. Sends MCP logging message (appears in 's logs)
  * 2. Displays a banner in stderr (appears in terminal)
  *
  * @param server - The MCP Server instance
@@ -184,7 +184,7 @@ export async function sendStartupNotification(server, options) {
     await notifier.notify(message, { level: 'notice' });
     // Also display the visual banner in stderr
     notifier.displayBanner(options);
-    logger.info('startup notification sent to Claude Code CLI');
+    logger.info('startup notification sent to  Code CLI');
 }
 /**
  * Get the appropriate dashboard URL based on host configuration
@@ -218,7 +218,7 @@ export function createNotificationMessage(title, details) {
  * Create a formatted tool list for announcement
  *
  * Groups tools by category for better readability in the startup message.
- * This helps Claude (and users) understand what capabilities are available.
+ * This helps  (and users) understand what capabilities are available.
  */
 export function formatToolList(tools, options) {
     const opts = {
@@ -273,7 +273,7 @@ export function formatToolList(tools, options) {
 /**
  * Create a tool discovery hint message
  *
- * Helps Claude understand how to discover and use tools.
+ * Helps  understand how to discover and use tools.
  */
 export function createToolDiscoveryHint(toolCount) {
     return `SpecMem provides ${toolCount} tools for memory, codebase, and team operations.
@@ -281,7 +281,7 @@ export function createToolDiscoveryHint(toolCount) {
 Key tools:
 - save_memory: Store important information for future recall
 - find_memory: Search memories semantically
-- ingestThisWholeAssMfCodebase: Index your codebase for AI-assisted development
+- ingestThisWholeAssMfCodebase: Index your codebase for  development
 - smartSearch: Interactive search mode selector
 
 Use tools/list to see all available tools with descriptions.`;

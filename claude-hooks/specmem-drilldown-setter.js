@@ -9,7 +9,7 @@
  * When find_memory/find_code_pointers returns results, this hook:
  * 1. Parses the results to extract memory IDs
  * 2. Writes state to $SPECMEM_RUN_DIR/specmem-drilldown-state.json
- * 3. The enforcer hook will then remind Claude to drill down
+ * 3. The enforcer hook will then remind  to drill down
  *
  * Works in standalone mode (no PM2 required)
  *
@@ -20,7 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Helper to expand ${cwd} in env vars (Claude Code doesn't expand them!)
+// Helper to expand ${cwd} in env vars ( Code doesn't expand them!)
 function expandCwd(val) {
   if (!val) return val;
   return val.replace(/\$\{cwd\}/g, process.cwd()).replace(/\$cwd/g, process.cwd());

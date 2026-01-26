@@ -104,7 +104,7 @@ export class ExplainCode {
                 codeSnippet = await this.extractCodeSnippet(codeFile.id, 1, 50);
             }
             // For now, we store a placeholder explanation
-            // In real use, Claude would provide the explanation text
+            // In real use,  would provide the explanation text
             const explanationText = validatedParams.context ||
                 `Explanation for ${validatedParams.filePath}` +
                     (validatedParams.lineStart ? ` (lines ${validatedParams.lineStart}-${validatedParams.lineEnd})` : '');

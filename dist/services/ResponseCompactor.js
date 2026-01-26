@@ -8,13 +8,13 @@
  * 4. Metrics tracking for token savings
  *
  * Usage:
- *   import { compactResponse, compactForClaude } from '../services/ResponseCompactor';
+ *   import { compactResponse, compactFor } from '../services/ResponseCompactor';
  *
  *   // In tool execute():
  *   return compactResponse({ content: "Your response..." }, 'search');
  *
  * Or use the decorator pattern:
- *   return compactForClaude("Your response text", 'search');
+ *   return compactFor("Your response text", 'search');
  */
 import { getCompressionConfig } from '../config.js';
 import { logger } from '../utils/logger.js';
@@ -108,14 +108,14 @@ function updateMetrics(originalLen, compressedLen, context) {
     metrics.lastUpdated = new Date();
 }
 /**
- * Compress a string for Claude response using Traditional Chinese
+ * Compress a string for  response using Traditional Chinese
  * This is the main entry point for string compression
  *
  * @param text - The text to compress
  * @param context - The context (search, system, hook) for config-aware compression
  * @returns Compressed text (or original if compression disabled/failed)
  */
-export async function compactForClaude(text, context = 'system') {
+export async function compactFor(text, context = 'system') {
     if (!text || typeof text !== 'string')
         return text;
     // Check if compression is enabled for this context
@@ -138,7 +138,7 @@ export async function compactForClaude(text, context = 'system') {
                 compressedLen: result.length,
                 ratio: compressionRatio,
                 wordsCompressed
-            }, 'Text compressed for Claude');
+            }, 'Text compressed for ');
             return result;
         }
         return text;
@@ -152,7 +152,7 @@ export async function compactForClaude(text, context = 'system') {
  * Compress a string synchronously (for simpler use cases)
  * Uses the smart compress algorithm
  */
-export function compactForClaudeSync(text, context = 'system') {
+export function compactForSync(text, context = 'system') {
     if (!text || typeof text !== 'string')
         return text;
     if (!shouldCompress(text, context)) {
@@ -204,7 +204,7 @@ function compactObjectRecursive(obj, context) {
         return obj;
     // Handle strings
     if (typeof obj === 'string') {
-        return compactForClaudeSync(obj, context);
+        return compactForSync(obj, context);
     }
     // Handle arrays
     if (Array.isArray(obj)) {
@@ -221,7 +221,7 @@ function compactObjectRecursive(obj, context) {
             }
             // Compress string fields that are commonly verbose
             if (isCompressibleKey(key) && typeof value === 'string') {
-                compressed[key] = compactForClaudeSync(value, context);
+                compressed[key] = compactForSync(value, context);
             }
             else if (typeof value === 'object' && value !== null) {
                 compressed[key] = compactObjectRecursive(value, context);
@@ -242,7 +242,7 @@ async function compactObjectRecursiveAsync(obj, context) {
         return obj;
     // Handle strings
     if (typeof obj === 'string') {
-        return compactForClaude(obj, context);
+        return compactFor(obj, context);
     }
     // Handle arrays
     if (Array.isArray(obj)) {
@@ -259,7 +259,7 @@ async function compactObjectRecursiveAsync(obj, context) {
             }
             // Compress string fields that are commonly verbose
             if (isCompressibleKey(key) && typeof value === 'string') {
-                compressed[key] = await compactForClaude(value, context);
+                compressed[key] = await compactFor(value, context);
             }
             else if (typeof value === 'object' && value !== null) {
                 compressed[key] = await compactObjectRecursiveAsync(value, context);
@@ -404,11 +404,15 @@ export function compressHumanReadableFormat(text) {
         // Preserve structure lines as-is
         if (line.startsWith('[SPECMEM-') ||
             line.startsWith('[/SPECMEM-') ||
+            line.startsWith('[CAMERA-ROLL]') ||
+            line.startsWith('[/CAMERA-ROLL]') ||
             line.startsWith('Query:') ||
+            line.startsWith('Zoom:') ||
             line.startsWith('Mode:') ||
             line.startsWith('Found ') ||
             line.startsWith('Use drill_down') ||
             line.startsWith('Use get_memory') ||
+            line.startsWith('drill_down(') ||
             line.trim() === '') {
             compressedLines.push(line);
             continue;

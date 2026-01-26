@@ -1,7 +1,7 @@
 /**
  * Silent Auto-Install System
  *
- * This module provides GUARANTEED silent installation of SpecMem into Claude Code.
+ * This module provides GUARANTEED silent installation of SpecMem into  Code.
  * It handles both config.json (MCP server registration) and settings.json (hooks).
  *
  * Key principles:
@@ -18,7 +18,7 @@ export interface McpServerConfig {
 }
 /**
  * Ensure SpecMem is registered in ~/.claude/config.json
- * This is what makes Claude Code load SpecMem as an MCP server
+ * This is what makes  Code load SpecMem as an MCP server
  */
 export declare function ensureConfigJson(): {
     success: boolean;
@@ -54,7 +54,7 @@ export declare function copyCommandFiles(): {
 /**
  * Ensure hooks are properly configured in ~/.claude/settings.json
  *
- * Hook format rules (discovered from Claude Code source):
+ * Hook format rules (discovered from  Code source):
  * - UserPromptSubmit, SessionStart, Stop: NO matcher field (not applicable)
  * - PreToolUse, PostToolUse, PermissionRequest: matcher is a STRING pattern ("*", "Bash", "Edit|Write")
  */
@@ -89,7 +89,7 @@ export interface SilentInstallResult {
  */
 export declare function runSilentInstall(): SilentInstallResult;
 /**
- * Check if SpecMem is already installed in Claude
+ * Check if SpecMem is already installed in 
  */
 export declare function isSpecmemInstalled(): {
     config: boolean;

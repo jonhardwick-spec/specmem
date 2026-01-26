@@ -29,7 +29,7 @@ export { MCPProtocolHandler, parseTimeExpression, splitContent } from './mcp/mcp
 export { DatabaseManager, getDatabase, resetDatabase } from './database.js';
 export { EmbeddingProvider } from './tools/index.js';
 export { RememberThisShit, FindWhatISaid, WhatDidIMean, YeahNahDeleteThat, SmushMemoriesTogether, LinkTheVibes, ShowMeTheStats, FindCodePointers } from './tools/goofy/index.js';
-export { ClaudeCommandHandler, createCommandHandler, CommandResult, ParsedCommand, CommandCategory, CommandAction, MemoryCommands, CodebaseCommands, ContextCommands, PromptCommands, getCommandsResource, getCommandHelpResource } from './commands/index.js';
+export { CommandHandler, createCommandHandler, CommandResult, ParsedCommand, CommandCategory, CommandAction, MemoryCommands, CodebaseCommands, ContextCommands, PromptCommands, getCommandsResource, getCommandHelpResource } from './commands/index.js';
 export { SkillScanner, Skill, SkillScannerConfig, SkillScanResult, getSkillScanner, resetSkillScanner } from './skills/skillScanner.js';
 export { SkillResourceProvider, getSkillResourceProvider } from './skills/skillsResource.js';
 export { CodebaseIndexer, IndexedFile, CodebaseIndexerConfig, IndexStats, getCodebaseIndexer, resetCodebaseIndexer } from './codebase/codebaseIndexer.js';

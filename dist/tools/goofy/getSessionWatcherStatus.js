@@ -1,5 +1,5 @@
 /**
- * getSessionWatcherStatus.ts - Get Claude Session Watcher Status
+ * getSessionWatcherStatus.ts - Get  Session Watcher Status
  *
  * yo fr fr check if the session watcher is running
  * shows stats on how many sessions have been extracted
@@ -19,13 +19,13 @@ function isSessionWatcherEnabled() {
     return envVal !== 'false' && envVal !== '0';
 }
 /**
- * GetSessionWatcherStatus - gets status of the Claude session watcher
+ * GetSessionWatcherStatus - gets status of the  session watcher
  *
  * nah bruh check if your sessions are being auto-extracted
  */
 export class GetSessionWatcherStatus {
     name = 'get-session-watcher-status';
-    description = 'Get the status of the Claude Code session watcher. Shows if auto-extraction is enabled, how many sessions have been processed, and when the last extraction occurred.';
+    description = 'Get the status of the  Code session watcher. Shows if auto-extraction is enabled, how many sessions have been processed, and when the last extraction occurred.';
     inputSchema = {
         type: 'object',
         properties: {}
@@ -48,7 +48,7 @@ export class GetSessionWatcherStatus {
                         enabled: false,
                         isWatching: false,
                         envEnabled: false,
-                        message: 'Claude session watcher is disabled. Set SPECMEM_SESSION_WATCHER_ENABLED=true to enable.'
+                        message: ' session watcher is disabled. Set SPECMEM_SESSION_WATCHER_ENABLED=true to enable.'
                     };
                 }
                 else {

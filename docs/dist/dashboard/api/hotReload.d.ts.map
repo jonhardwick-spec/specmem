@@ -1,1 +1,0 @@
-{"version":3,"file":"hotReload.d.ts","sourceRoot":"","sources":["../../../src/dashboard/api/hotReload.ts"],"names":[],"mappings":"AAAA;;;;;;;;;GASG;AAEH,OAAO,EAAE,MAAM,EAAE,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AA8BlE,wBAAgB,qBAAqB,CACnC,WAAW,EAAE,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,EAAE,QAAQ,EAAE,IAAI,EAAE,YAAY,KAAK,IAAI,GACrE,MAAM,CAoLR;AAYD,eAAe,qBAAqB,CAAC"}

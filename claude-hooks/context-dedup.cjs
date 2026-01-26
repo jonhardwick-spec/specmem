@@ -3,7 +3,7 @@
  * CONTEXT DEDUPLICATION MODULE
  * ============================
  *
- * Prevents duplicate context injection during a Claude session.
+ * Prevents duplicate context injection during a  session.
  * Uses file-based cache that persists across hook invocations.
  *
  * Cache is automatically cleared when:

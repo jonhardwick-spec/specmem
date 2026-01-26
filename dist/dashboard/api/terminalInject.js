@@ -1,12 +1,12 @@
 /**
  * terminalInject.ts - Terminal Prompt Injection API
  *
- * Injects prompts directly into the running Claude Code terminal session.
+ * Injects prompts directly into the running  Code terminal session.
  *
  * Features:
  * - STY-based session detection (reliable current session identification)
  * - screen -X stuff injection with Enter key support
- * - Auto-discovery of Claude process PID and TTY
+ * - Auto-discovery of  process PID and TTY
  *
  * Primary method: Use STY env var + screen -X stuff
  * Fallback: TIOCSTI ioctl (when not in screen session)
@@ -14,9 +14,57 @@
 // @ts-ignore - express types
 import { Router } from 'express';
 import { execSync } from 'child_process';
+import { existsSync, readFileSync, readdirSync, realpathSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
 import { z } from 'zod';
 import { logger } from '../../utils/logger.js';
 import { getCurrentScreenSession, injectToSession, listScreenSessions } from '../../utils/sessionInjector.js';
+// ============================================================================
+// CLAUDEFIX BINARY DETECTION
+// Falls back to absolute path of raw Claude binary when claudefix not installed
+// ============================================================================
+function getClaudeBinary() {
+    const candidates = [
+        '/usr/local/bin/claude-fixed',
+        '/usr/lib/node_modules/claudefix/bin/claude-fixed.js',
+        '/usr/local/lib/node_modules/claudefix/bin/claude-fixed.js',
+        join(homedir(), '.npm-global/lib/node_modules/claudefix/bin/claude-fixed.js'),
+        join(homedir(), 'node_modules/claudefix/bin/claude-fixed.js'),
+    ];
+    try {
+        const wrapper = '/usr/local/bin/claude';
+        if (existsSync(wrapper) && readFileSync(wrapper, 'utf8').includes('claudefix')) {
+            return wrapper;
+        }
+    }
+    catch { }
+    for (const cand of candidates) {
+        if (existsSync(cand))
+            return cand;
+    }
+    // No claudefix - find raw Claude binary absolute path
+    const versionsDir = join(homedir(), '.local', 'share', 'claude', 'versions');
+    try {
+        if (existsSync(versionsDir)) {
+            const versions = readdirSync(versionsDir)
+                .filter(v => /^\d+\.\d+\.\d+$/.test(v))
+                .sort((a, b) => { const [aM, am, ap] = a.split('.').map(Number); const [bM, bm, bp] = b.split('.').map(Number); return bM - aM || bm - am || bp - ap; });
+            if (versions.length)
+                return join(versionsDir, versions[0]);
+        }
+    }
+    catch { }
+    const rawCandidates = [join(homedir(), '.local', 'bin', 'claude'), '/usr/local/bin/claude', '/usr/bin/claude'];
+    for (const r of rawCandidates) {
+        try {
+            if (existsSync(r) && !readFileSync(r, 'utf8').slice(0, 500).includes('claudefix'))
+                return realpathSync(r);
+        }
+        catch { }
+    }
+    return 'claude';
+}
 // ============================================================================
 // Zod Validation Schemas
 // ============================================================================
@@ -30,12 +78,12 @@ const InjectPromptSchema = z.object({
 // Helper Functions
 // ============================================================================
 /**
- * Find the current Claude Code process PID and TTY
- * Returns the NEWEST Claude instance (highest PID)
+ * Find the current  Code process PID and TTY
+ * Returns the NEWEST  instance (highest PID)
  */
-function findClaudeProcess() {
+function findProcess() {
     try {
-        // Find Claude process (not SCREEN, not grep) - get the NEWEST one (last line = highest PID)
+        // Find  process (not SCREEN, not grep) - get the NEWEST one (last line = highest PID)
         const psOutput = execSync(`ps aux | grep "^root.*claude$" | grep -v grep | grep -v SCREEN | tail -1`, { encoding: 'utf-8' }).trim();
         if (!psOutput) {
             return null;
@@ -53,7 +101,7 @@ function findClaudeProcess() {
         return { pid, tty: ttyOutput };
     }
     catch (error) {
-        logger.error({ error }, 'Failed to find Claude process');
+        logger.error({ error }, 'Failed to find  process');
         return null;
     }
 }
@@ -86,7 +134,7 @@ function injectPrompt(tty, prompt) {
 export function createTerminalInjectRouter(requireAuth) {
     const router = Router();
     /**
-     * POST /api/terminal/inject - Inject prompt into Claude Code terminal
+     * POST /api/terminal/inject - Inject prompt into  Code terminal
      *
      * NOW SUPPORTS autoSubmit=true to automatically press Enter after injection!
      * Uses STY environment variable for reliable session detection.
@@ -124,12 +172,12 @@ export function createTerminalInjectRouter(requireAuth) {
             }
             if (!targetSession) {
                 // Last resort: try TIOCSTI approach
-                const claudeProcess = findClaudeProcess();
+                const claudeProcess = findProcess();
                 if (!claudeProcess) {
                     res.status(404).json({
                         success: false,
-                        error: 'No Claude session found',
-                        message: 'No screen session or Claude process found'
+                        error: 'No  session found',
+                        message: 'No screen session or  process found'
                     });
                     return;
                 }
@@ -183,7 +231,7 @@ export function createTerminalInjectRouter(requireAuth) {
         }
     });
     /**
-     * GET /api/terminal/status - Check Claude Code terminal status
+     * GET /api/terminal/status - Check  Code terminal status
      * Returns screen session info and process info
      */
     router.get('/status', requireAuth, async (req, res) => {
@@ -191,13 +239,13 @@ export function createTerminalInjectRouter(requireAuth) {
             // Get screen sessions
             const sessions = listScreenSessions();
             const currentSession = getCurrentScreenSession();
-            // Get Claude process info (fallback)
-            const claudeProcess = findClaudeProcess();
+            // Get  process info (fallback)
+            const claudeProcess = findProcess();
             if (sessions.length === 0 && !claudeProcess) {
                 res.json({
                     success: true,
                     running: false,
-                    message: 'No Claude sessions found'
+                    message: 'No  sessions found'
                 });
                 return;
             }
@@ -222,7 +270,7 @@ export function createTerminalInjectRouter(requireAuth) {
         }
     });
     /**
-     * POST /api/terminal/new-instance - Start a new Claude Code screen session
+     * POST /api/terminal/new-instance - Start a new  Code screen session
      */
     router.post('/new-instance', requireAuth, async (req, res) => {
         try {
@@ -231,9 +279,10 @@ export function createTerminalInjectRouter(requireAuth) {
             const logFile = `/tmp/screen-${sessionName}.log`;
             // Create session with screen's built-in logging (-L = enable logging, -Logfile = log path)
             // This safely captures ALL output without crashing the instance
-            const startCommand = `screen -L -Logfile ${logFile} -dmS ${sessionName} claude`;
+            const claudeBin = getClaudeBinary();
+            const startCommand = `screen -L -Logfile ${logFile} -dmS ${sessionName} ${claudeBin}`;
             execSync(startCommand, { encoding: 'utf-8' });
-            logger.info({ sessionName, logFile }, 'New Claude instance started with logging');
+            logger.info({ sessionName, logFile }, 'New  instance started with logging');
             setTimeout(() => {
                 try {
                     const checkCommand = `screen -list | grep ${sessionName}`;
@@ -242,7 +291,7 @@ export function createTerminalInjectRouter(requireAuth) {
                     const pid = match ? parseInt(match[1], 10) : null;
                     res.json({
                         success: true,
-                        message: 'New Claude instance started with logging',
+                        message: 'New  instance started with logging',
                         sessionName: sessionName,
                         logFile: logFile,
                         pid: pid
@@ -251,7 +300,7 @@ export function createTerminalInjectRouter(requireAuth) {
                 catch (error) {
                     res.json({
                         success: true,
-                        message: 'Claude instance started but PID not yet available',
+                        message: ' instance started but PID not yet available',
                         sessionName: sessionName,
                         logFile: logFile
                     });
@@ -259,7 +308,7 @@ export function createTerminalInjectRouter(requireAuth) {
             }, 1000);
         }
         catch (error) {
-            logger.error({ error }, 'Failed to start new Claude instance');
+            logger.error({ error }, 'Failed to start new  instance');
             res.status(500).json({
                 success: false,
                 error: 'Failed to start new instance',

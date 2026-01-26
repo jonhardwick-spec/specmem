@@ -6,7 +6,7 @@
  *
  * Enhanced with SpecMem HTTP client integration for inter-team member communication.
  *
- * RAM usage: ~10-30MB per worker (vs 800MB+ for full Claude instance)
+ * RAM usage: ~10-30MB per worker (vs 800MB+ for full  instance)
  */
 import { SpecMemClient, Memory } from './specmemClient.js';
 import { TeamMemberCommunicator, TeamMemberMessage, TeamMemberInfo } from '../communication.js';

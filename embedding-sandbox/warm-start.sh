@@ -132,8 +132,19 @@ cleanup_stale() {
 
     # If socket exists but container not running, remove orphan socket
     if [ -S "$SOCKET_PATH" ] && [ "$(get_container_state)" != "running" ] && [ "$(get_container_state)" != "paused" ]; then
-        log "Removing orphaned socket"
-        rm -f "$SOCKET_PATH"
+        # Check if a native Python embedding server owns this socket before removing
+        NATIVE_PID=""
+        PID_FILE="$(dirname "$SOCKET_PATH")/embedding.pid"
+        if [ -f "$PID_FILE" ]; then
+            NATIVE_PID=$(cut -d: -f1 "$PID_FILE" 2>/dev/null)
+        fi
+        if [ -n "$NATIVE_PID" ] && kill -0 "$NATIVE_PID" 2>/dev/null; then
+            log "Socket owned by native Python server (PID $NATIVE_PID) - NOT removing"
+        else
+            log "Removing orphaned socket (no Docker container, no native server)"
+            rm -f "$SOCKET_PATH"
+            [ -f "$PID_FILE" ] && rm -f "$PID_FILE"
+        fi
     fi
 }
 

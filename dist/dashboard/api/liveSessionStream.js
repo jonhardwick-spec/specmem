@@ -1,7 +1,7 @@
 /**
- * liveSessionStream.ts - LIVE Claude Code Session Streaming API
+ * liveSessionStream.ts - LIVE  Code Session Streaming API
  *
- * Team Member 2's MASTERPIECE - Real-time streaming of Claude Code sessions!
+ * Team Member 2's MASTERPIECE - Real-time streaming of  Code sessions!
  *
  * This watches the history.jsonl file for changes and streams new entries
  * via SSE (Server-Sent Events) to the Console Live Viewer.
@@ -49,7 +49,7 @@ function formatEntry(raw) {
         type = 'tool_result';
         role = 'tool';
     }
-    // Handle message wrapper (common in Claude API responses)
+    // Handle message wrapper (common in  API responses)
     if (raw.message) {
         if (raw.message.role === 'user') {
             type = 'user';
@@ -263,7 +263,7 @@ export function createLiveSessionRouter(requireAuth) {
     /**
      * GET /api/live/stream - SSE endpoint for live session streaming
      *
-     * Streams new Claude Code session entries in real-time.
+     * Streams new  Code session entries in real-time.
      * Connect with EventSource in the browser.
      */
     router.get('/stream', requireAuth, (req, res) => {
@@ -379,7 +379,7 @@ export function createLiveSessionRouter(requireAuth) {
     /**
      * GET /api/live/thinking - Get the thinking stream endpoint
      *
-     * SSE endpoint specifically for thinking blocks - shows Claude's reasoning
+     * SSE endpoint specifically for thinking blocks - shows 's reasoning
      */
     router.get('/thinking', requireAuth, (req, res) => {
         const clientId = `thinking-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

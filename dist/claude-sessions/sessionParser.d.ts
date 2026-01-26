@@ -1,14 +1,14 @@
 /**
- * sessionParser.ts - Claude Code Session File Parser
+ * sessionParser.ts -  Code Session File Parser
  *
- * Parses Claude Code session files to extract conversations:
+ * Parses  Code session files to extract conversations:
  * - Reads from ~/.claude/history.jsonl (user prompts with metadata)
  * - Reads from ~/.claude/projects/ directories (full conversations)
  *
  * Features:
  * - Parses both history.jsonl and project session files (JSONL format)
  * - Extracts USER messages and ASSISTANT messages
- * - Extracts thinking blocks from Claude's responses
+ * - Extracts thinking blocks from 's responses
  * - Extracts tool_use blocks for context
  * - Tags messages properly: role:user, role:assistant, has-thinking
  * - Formats content: [USER] prefix or [CLAUDE] prefix with [THINKING] blocks
@@ -81,7 +81,7 @@ export interface HistoryEntry {
     project: string;
     sessionId: string;
 }
-export type ClaudeSessionEntry = HistoryEntry;
+export type SessionEntry = HistoryEntry;
 /**
  * Parsed session data with metadata
  */
@@ -137,7 +137,7 @@ export interface AckResult {
     hash: string;
 }
 /**
- * ClaudeSessionParser - parses Claude Code session files
+ * SessionParser - parses  Code session files
  *
  * Reads from:
  * - ~/.claude/history.jsonl (user prompts)
@@ -147,7 +147,7 @@ export interface AckResult {
  * When projectPathFilter is provided, only parses session files that match the project.
  * This prevents wasted parsing of sessions from other projects.
  */
-export declare class ClaudeSessionParser {
+export declare class SessionParser {
     private claudeDir;
     private projectsDir;
     private historyPath;
@@ -174,7 +174,7 @@ export declare class ClaudeSessionParser {
     /**
      * parseAllSessions - reads ALL session files from history.jsonl and project directories
      *
-     * Reads both user prompts and Claude's responses including thinking blocks
+     * Reads both user prompts and 's responses including thinking blocks
      */
     parseAllSessions(): Promise<ParsedSession[]>;
     /**
@@ -268,7 +268,7 @@ export declare class ClaudeSessionParser {
  * When provided, the parser will only process session files from directories
  * that could match the specified project path, avoiding wasteful parsing.
  */
-export declare function createSessionParser(claudeDir?: string, projectPathFilter?: string): ClaudeSessionParser;
+export declare function createSessionParser(claudeDir?: string, projectPathFilter?: string): SessionParser;
 /**
  * isToolOrThinkingContent - checks if content is a tool call
  * These should be SKIPPED from memory storage as they pollute the database
@@ -283,7 +283,7 @@ export declare function isToolOrThinkingContent(content: string): boolean;
 /**
  * isContextRestoration - detects context restoration summaries
  *
- * Context restorations are injected when Claude's context window overflows.
+ * Context restorations are injected when 's context window overflows.
  * They look like user messages but are actually system-generated summaries.
  *
  * These should be tagged differently so they don't pollute find_memory results

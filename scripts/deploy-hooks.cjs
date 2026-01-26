@@ -3,7 +3,7 @@
  * SPECMEM HOOK DEPLOYER
  * =====================
  *
- * Auto-deploys hooks to Claude's settings for the current project.
+ * Auto-deploys hooks to 's settings for the current project.
  * Runs on `specmem init` to configure per-project hooks.
  *
  * @author hardwicksoftwareservices
@@ -59,7 +59,7 @@ const HOOKS_TO_DEPLOY = [
   'drilldown-enforcer.js',
   'file-claim-enforcer.cjs',             // Enforces claim_task before Read/Edit/Write for agents
   'input-aware-improver.js',
-  'search-reminder-hook.js',            // Reminds Claude to use find_code_pointers
+  'search-reminder-hook.js',            // Reminds  to use find_code_pointers
   'smart-context-hook.cjs',
   'smart-search-interceptor.js',
   'specmem-context-hook.cjs',
@@ -76,6 +76,8 @@ const HOOKS_TO_DEPLOY = [
   'smart-context-hook.cjs',
   // Team communication enforcement
   'team-comms-enforcer.cjs',
+  // Bullshit radar - sycophancy detection
+  'bullshit-radar.cjs',
   'post-write-memory-hook.cjs',
   'context-dedup.cjs',
   'specmem-team-comms.cjs',
@@ -100,7 +102,7 @@ const HOOKS_TO_DEPLOY = [
   'claude-watchdog.sh'
 ];
 
-// Hook configuration for Claude settings.json
+// Hook configuration for  settings.json
 // NOTE: These are generated at runtime with correct paths
 // VALID HOOKS: PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit,
 //              Notification, SessionStart, SessionEnd, Stop, SubagentStart,
@@ -119,6 +121,16 @@ function getHookConfig() {
   return {
     // UserPromptSubmit - fires when user submits prompt, can inject context
     "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": `node ${PACKAGE_HOOKS_DIR}/bullshit-radar.cjs`,
+            "timeout": 5,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -488,12 +500,12 @@ function getHookConfig() {
 }
 
 /**
- * Copy hooks from SpecMem to Claude hooks directory
+ * Copy hooks from SpecMem to  hooks directory
  */
 function copyHooks() {
   console.log(`\n${C.cyan}═══ Copying Hooks ═══${C.reset}\n`);
 
-  // Create Claude hooks directory
+  // Create  hooks directory
   if (!fs.existsSync(CLAUDE_HOOKS_DIR)) {
     fs.mkdirSync(CLAUDE_HOOKS_DIR, { recursive: true });
     console.log(`${C.green}✓${C.reset} Created ${PACKAGE_HOOKS_DIR}`);
@@ -534,44 +546,65 @@ function copyHooks() {
 }
 
 /**
- * DEEP MERGE helper - appends SpecMem hooks without clobbering existing ones
+ * DEEP MERGE helper - appends SpecMem hooks without clobbering user's custom hooks
  * @param {Object} existing - Existing hooks object
  * @param {Object} specmemHooks - SpecMem hooks to inject
  * @returns {Object} Merged hooks object
  */
 function mergeHooksAppend(existing, specmemHooks) {
-  const merged = { ...existing };
+  const merged = {};
+
+  // Copy all existing event types first
+  for (const eventName of Object.keys(existing)) {
+    merged[eventName] = [...existing[eventName]];
+  }
 
   for (const [eventName, specmemEventHooks] of Object.entries(specmemHooks)) {
     if (!merged[eventName]) {
       // Event doesn't exist, add it fresh
       merged[eventName] = specmemEventHooks;
-    } else {
-      // Event exists - UPDATE our hooks (replace by filename match) or append
-      const existingHooks = merged[eventName];
+      continue;
+    }
 
-      for (const specmemHook of specmemEventHooks) {
-        // Check if this exact hook already exists (by command path)
-        const specmemCommand = specmemHook.hooks?.[0]?.command || '';
-        const specmemFile = specmemCommand.split('/').pop();
+    // Build set of specmem matchers (undefined = catch-all)
+    const specmemMatchers = new Map();
+    for (const group of specmemEventHooks) {
+      const matcherKey = group.matcher || '__CATCHALL__';
+      specmemMatchers.set(matcherKey, group);
+    }
 
-        const existingIndex = existingHooks.findIndex(existing => {
-          const existingCommand = existing.hooks?.[0]?.command || '';
-          // Match by hook file name (last part of path)
-          const existingFile = existingCommand.split('/').pop();
-          return specmemFile && existingFile && specmemFile === existingFile;
-        });
+    // Filter existing groups:
+    // - Remove groups with same matcher as specmem (specmem takes priority)
+    // - Remove groups that contain specmem hook commands (avoid duplicates)
+    const preservedGroups = merged[eventName].filter(group => {
+      const matcherKey = group.matcher || '__CATCHALL__';
 
-        if (existingIndex >= 0) {
-          // CRITICAL FIX: UPDATE existing hook instead of skipping!
-          // This ensures env vars like SPECMEM_PROJECT_PATH get updated
-          existingHooks[existingIndex] = specmemHook;
-          console.log(`${C.dim}  Updated existing hook: ${specmemFile}${C.reset}`);
-        } else {
-          // New hook, append it
-          existingHooks.push(specmemHook);
-        }
+      // If specmem has a hook for this matcher, remove existing
+      if (specmemMatchers.has(matcherKey)) {
+        return false;
       }
+
+      // Check if this is a specmem hook (to avoid duplicates on re-init)
+      const groupStr = JSON.stringify(group);
+      if (groupStr.includes('specmem-') ||
+          groupStr.includes('/specmem/') ||
+          groupStr.includes('team-comms-enforcer') ||
+          groupStr.includes('smart-context-hook') ||
+          groupStr.includes('agent-loading-hook')) {
+        return false;
+      }
+
+      return true; // Preserve user's custom hooks
+    });
+
+    // Merge: user's preserved hooks first, then specmem hooks
+    merged[eventName] = [...preservedGroups, ...specmemEventHooks];
+
+    // Log what we did
+    const userPreserved = preservedGroups.length;
+    const specmemAdded = specmemEventHooks.length;
+    if (userPreserved > 0) {
+      console.log(`${C.dim}  ${eventName}: preserved ${userPreserved} user hooks, added ${specmemAdded} specmem hooks${C.reset}`);
     }
   }
 
@@ -617,13 +650,13 @@ function verifyHookRegistration(settings, requiredHooks) {
 }
 
 /**
- * Update Claude settings.json with hook configuration
+ * Update  settings.json with hook configuration
  * CRITICAL: APPENDS hooks instead of replacing - preserves user's existing hooks!
  */
-function updateClaudeSettings() {
-  console.log(`\n${C.cyan}═══ Updating Claude Settings (APPEND MODE) ═══${C.reset}\n`);
+function updateSettings() {
+  console.log(`\n${C.cyan}═══ Updating  Settings (APPEND MODE) ═══${C.reset}\n`);
 
-  // Create Claude directory if needed
+  // Create  directory if needed
   if (!fs.existsSync(CLAUDE_DIR)) {
     fs.mkdirSync(CLAUDE_DIR, { recursive: true });
   }
@@ -683,7 +716,7 @@ function updateClaudeSettings() {
     }
   }
 
-  // NOTE: MCP server config moved to configureClaudeMCP() - writes to config.json not settings.json
+  // NOTE: MCP server config moved to configureMCP() - writes to config.json not settings.json
 
   // Save settings
   if (updated) {
@@ -740,7 +773,7 @@ function updateClaudeSettings() {
 }
 
 /**
- * Copy commands from SpecMem to Claude commands directory
+ * Copy commands from SpecMem to  commands directory
  */
 function copyCommands() {
   console.log(`\n${C.cyan}═══ Copying Commands ═══${C.reset}\n`);
@@ -748,7 +781,7 @@ function copyCommands() {
   const CLAUDE_COMMANDS_DIR = path.join(CLAUDE_DIR, 'commands');
   const SPECMEM_COMMANDS_DIR = path.join(SPECMEM_PKG, 'commands');
 
-  // Create Claude commands directory
+  // Create  commands directory
   if (!fs.existsSync(CLAUDE_COMMANDS_DIR)) {
     fs.mkdirSync(CLAUDE_COMMANDS_DIR, { recursive: true });
     console.log(`${C.green}✓${C.reset} Created ${CLAUDE_COMMANDS_DIR}`);
@@ -845,9 +878,9 @@ function copySkills() {
 
 /**
  * Configure MCP server in ~/.claude.json (the ACTUAL location!)
- * Claude Code stores per-project MCP servers in ~/.claude.json under projects[path].mcpServers
+ *  Code stores per-project MCP servers in ~/.claude.json under projects[path].mcpServers
  */
-function configureClaudeMCP() {
+function configureMCP() {
   console.log(`\n${C.cyan}═══ Configuring MCP Server ═══${C.reset}\n`);
 
   // Load existing ~/.claude.json or create new
@@ -876,8 +909,8 @@ function configureClaudeMCP() {
       disabledMcpjsonServers: [],
       hasTrustDialogAccepted: true,
       projectOnboardingSeenCount: 0,
-      hasClaudeMdExternalIncludesApproved: false,
-      hasClaudeMdExternalIncludesWarningShown: false
+      hasMdExternalIncludesApproved: false,
+      hasMdExternalIncludesWarningShown: false
     };
     console.log(`${C.dim}Created project entry for ${PROJECT_PATH}${C.reset}`);
   }
@@ -1004,31 +1037,31 @@ function createProjectConfig() {
 }
 
 /**
- * Auto-install Claude Code if not present
+ * Auto-install  Code if not present
  */
-function ensureClaudeCode() {
-  console.log(`\n${C.cyan}═══ Checking Claude Code ═══${C.reset}\n`);
+function ensureCode() {
+  console.log(`\n${C.cyan}═══ Checking  Code ═══${C.reset}\n`);
 
   // Check if claude command exists
   try {
     const { execSync } = require('child_process');
     execSync('which claude', { stdio: 'pipe' });
-    console.log(`${C.green}✓${C.reset} Claude Code is installed`);
+    console.log(`${C.green}✓${C.reset}  Code is installed`);
     return true;
   } catch {
-    console.log(`${C.yellow}⚠${C.reset} Claude Code not found, installing...`);
+    console.log(`${C.yellow}⚠${C.reset}  Code not found, installing...`);
 
     try {
       const { execSync } = require('child_process');
-      // Install Claude Code globally via npm
+      // Install  Code globally via npm
       execSync('npm install -g @anthropic-ai/claude-code', {
         stdio: 'inherit',
         timeout: 120000
       });
-      console.log(`${C.green}✓${C.reset} Claude Code installed successfully`);
+      console.log(`${C.green}✓${C.reset}  Code installed successfully`);
       return true;
     } catch (err) {
-      console.log(`${C.red}✗${C.reset} Failed to install Claude Code: ${err.message}`);
+      console.log(`${C.red}✗${C.reset} Failed to install  Code: ${err.message}`);
       console.log(`${C.dim}Install manually: npm install -g @anthropic-ai/claude-code${C.reset}`);
       return false;
     }
@@ -1372,8 +1405,8 @@ ${C.cyan}${C.bold}╔═══════════════════�
     console.log(`${C.dim}  Current directory will still be configured.${C.reset}\n`);
   }
 
-  // Step 1: Ensure Claude Code is installed (MUST BE FIRST)
-  ensureClaudeCode();
+  // Step 1: Ensure  Code is installed (MUST BE FIRST)
+  ensureCode();
 
   // Step 2: Ensure PostgreSQL + pgvector (REQUIRED for specmem to work)
   ensurePostgres();
@@ -1387,11 +1420,11 @@ ${C.cyan}${C.bold}╔═══════════════════�
   // Step 5: Copy skills to ~/.claude/skills/
   const skillsCopied = copySkills();
 
-  // Step 6: Update Claude settings.json (hooks + permissions)
-  const settingsUpdated = updateClaudeSettings();
+  // Step 6: Update  settings.json (hooks + permissions)
+  const settingsUpdated = updateSettings();
 
   // Step 7: Configure MCP server in ~/.claude.json (THE IMPORTANT ONE!)
-  const mcpConfigured = configureClaudeMCP();
+  const mcpConfigured = configureMCP();
 
   // Step 8: Create project config (.specmem/hooks.json)
   const projectConfigured = createProjectConfig();
@@ -1403,13 +1436,13 @@ ${C.green}${C.bold}╔═══════════════════�
 ╚═══════════════════════════════════════════════════════════════╝${C.reset}
 
 ${C.cyan}What's configured:${C.reset}
-  • ${C.bold}MCP Server${C.reset} - specmem auto-starts when Claude Code runs
+  • ${C.bold}MCP Server${C.reset} - specmem auto-starts when  Code runs
   • ${C.bold}Hooks${C.reset} - Context injection before prompts
   • ${C.bold}Commands${C.reset} - /specmem-* slash commands
   • ${C.bold}Skills${C.reset} - ${skillsCopied} skills deployed
 
 ${C.cyan}Next:${C.reset}
-  ${C.bold}Just restart Claude Code${C.reset} - specmem will auto-start!
+  ${C.bold}Just restart  Code${C.reset} - specmem will auto-start!
   ${C.dim}No need to run 'specmem start' manually.${C.reset}
 `);
 }

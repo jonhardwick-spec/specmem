@@ -1,19 +1,19 @@
 /**
- * claudeControl.ts - Claude Control API for SpecMem Dashboard
+ * claudeControl.ts -  Control API for SpecMem Dashboard
  *
- * Provides endpoints for triggering Claude actions via MCP sampling,
+ * Provides endpoints for triggering  actions via MCP sampling,
  * including auto-fix, memory consolidation, and team member orchestration.
  *
- * Phase 6 Implementation - MCP -> Claude Control Flow
+ * Phase 6 Implementation - MCP ->  Control Flow
  */
 // @ts-ignore - express types
 import { Router } from 'express';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../utils/logger.js';
-import { getClaudeTriggerSystem } from '../../mcp/triggerSystem.js';
+import { getTriggerSystem } from '../../mcp/triggerSystem.js';
 import { getCurrentProjectPath } from '../../services/ProjectContext.js';
-import { createClaudeHistoryRouter } from './claudeHistory.js';
+import { createHistoryRouter } from './claudeHistory.js';
 // ============================================================================
 // Zod Validation Schemas
 // ============================================================================
@@ -110,15 +110,15 @@ const triggerHistory = { push: (v) => getTriggerHistory().push(v), unshift: (v) 
 const scheduledTriggers = { get: (k) => getScheduledTriggers().get(k), set: (k, v) => getScheduledTriggers().set(k, v), delete: (k) => getScheduledTriggers().delete(k), has: (k) => getScheduledTriggers().has(k), values: () => getScheduledTriggers().values(), get size() { return getScheduledTriggers().size; } };
 const pendingConfirmations = { get: (k) => getPendingConfirmations().get(k), set: (k, v) => getPendingConfirmations().set(k, v), delete: (k) => getPendingConfirmations().delete(k), has: (k) => getPendingConfirmations().has(k), values: () => getPendingConfirmations().values() };
 // ============================================================================
-// Claude Control Router
+//  Control Router
 // ============================================================================
-export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
+export function createControlRouter(db, requireAuth, broadcastUpdate) {
     const router = Router();
     // mount claude code history routes at /api/claude/history
-    const historyRouter = createClaudeHistoryRouter(requireAuth);
+    const historyRouter = createHistoryRouter(requireAuth);
     router.use('/', historyRouter);
     /**
-     * POST /api/claude/trigger - Trigger a Claude action via MCP sampling
+     * POST /api/claude/trigger - Trigger a  action via MCP sampling
      */
     router.post('/trigger', requireAuth, async (req, res) => {
         try {
@@ -175,8 +175,8 @@ export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
             }
             // Execute immediately
             historyEntry.startedAt = new Date();
-            logger.info({ triggerId, action }, 'Executing Claude trigger');
-            const triggerSystem = getClaudeTriggerSystem();
+            logger.info({ triggerId, action }, 'Executing  trigger');
+            const triggerSystem = getTriggerSystem();
             const triggerAction = {
                 id: triggerId,
                 action,
@@ -213,10 +213,10 @@ export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
             });
         }
         catch (error) {
-            logger.error({ error }, 'Error triggering Claude action');
+            logger.error({ error }, 'Error triggering  action');
             res.status(500).json({
                 success: false,
-                error: 'Failed to trigger Claude action',
+                error: 'Failed to trigger  action',
                 message: error instanceof Error ? error.message : 'Unknown error'
             });
         }
@@ -242,7 +242,7 @@ export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
             pendingTrigger.confirmedAt = new Date();
             pendingTrigger.startedAt = new Date();
             logger.info({ triggerId: id, action: pendingTrigger.action }, 'Confirmed trigger, executing');
-            const triggerSystem = getClaudeTriggerSystem();
+            const triggerSystem = getTriggerSystem();
             const triggerAction = {
                 id,
                 action: pendingTrigger.action,
@@ -417,7 +417,7 @@ export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
             scheduledTriggers.set(scheduleId, scheduledTrigger);
             // Register with trigger system if enabled
             if (enabled) {
-                const triggerSystem = getClaudeTriggerSystem();
+                const triggerSystem = getTriggerSystem();
                 await triggerSystem.scheduleAction(scheduleId, {
                     id: scheduleId,
                     action: action,
@@ -477,7 +477,7 @@ export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
                 return;
             }
             // Remove from trigger system
-            const triggerSystem = getClaudeTriggerSystem();
+            const triggerSystem = getTriggerSystem();
             triggerSystem.cancelScheduledAction(id);
             // Remove from storage
             scheduledTriggers.delete(id);
@@ -510,7 +510,7 @@ export function createClaudeControlRouter(db, requireAuth, broadcastUpdate) {
             }
             // Toggle enabled state
             schedule.enabled = !schedule.enabled;
-            const triggerSystem = getClaudeTriggerSystem();
+            const triggerSystem = getTriggerSystem();
             if (schedule.enabled) {
                 await triggerSystem.scheduleAction(id, {
                     id,
@@ -646,5 +646,5 @@ function calculateNextRun(schedule) {
     }
     return undefined;
 }
-export default createClaudeControlRouter;
+export default createControlRouter;
 //# sourceMappingURL=claudeControl.js.map

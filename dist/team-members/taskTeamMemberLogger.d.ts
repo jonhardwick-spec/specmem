@@ -1,7 +1,7 @@
 /**
- * taskTeamMemberLogger.ts - Logs Claude Code Task team member activity to SpecMem database
+ * taskTeamMemberLogger.ts - Logs  Code Task team member activity to SpecMem database
  *
- * yo fr fr this bridges the gap between Claude Code's Task tool and SpecMem tracking
+ * yo fr fr this bridges the gap between  Code's Task tool and SpecMem tracking
  *
  * Problem: Task-deployed team members are invisible to SpecMem dashboard
  * Solution: Log team member activity before/after Task deployment
@@ -10,7 +10,7 @@
  * - Pre-deployment logging (creates session in database)
  * - Post-deployment logging (updates status, logs, results)
  * - Manual logging for past deployments
- * - Extracts team member activity from Claude history
+ * - Extracts team member activity from  history
  */
 import { DatabaseManager } from '../database.js';
 export interface TaskTeamMemberDeployment {

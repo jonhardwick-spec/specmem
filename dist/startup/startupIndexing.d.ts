@@ -9,7 +9,7 @@
  * 3. Trigger background indexing/extraction when needed
  * 4. Report progress in server logs
  *
- * Everything is ready when Claude starts, not on-demand!
+ * Everything is ready when  starts, not on-demand!
  */
 import { DatabaseManager } from '../database.js';
 import { EmbeddingProvider } from '../tools/index.js';
@@ -24,7 +24,7 @@ export declare function checkCodebaseIndexStatus(db: DatabaseManager): Promise<{
     needsReindex: boolean;
 }>;
 /**
- * Check if Claude sessions have been extracted
+ * Check if  sessions have been extracted
  * Returns stats about extracted sessions
  */
 export declare function checkSessionExtractionStatus(db: DatabaseManager): Promise<{
@@ -43,7 +43,7 @@ export declare function triggerBackgroundIndexing(embeddingProvider: EmbeddingPr
 }): Promise<void>;
 /**
  * Trigger background session extraction
- * Extracts Claude Code sessions asynchronously
+ * Extracts  Code sessions asynchronously
  */
 export declare function triggerBackgroundSessionExtraction(embeddingProvider: EmbeddingProvider, options?: {
     force?: boolean;

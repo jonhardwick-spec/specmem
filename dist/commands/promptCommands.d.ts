@@ -1,5 +1,5 @@
 /**
- * PromptCommands - prompt library management for Claude
+ * PromptCommands - prompt library management for 
  *
  * save and reuse prompts fr fr
  * - /prompt save <name> - save current prompt

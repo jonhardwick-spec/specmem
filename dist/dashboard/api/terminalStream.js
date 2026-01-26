@@ -1,7 +1,7 @@
 /**
  * terminalStream.ts - WebSocket Terminal Streaming API
  *
- * Provides WebSocket streaming of Claude Code terminal output with full
+ * Provides WebSocket streaming of  Code terminal output with full
  * ANSI support (colors, formatting, cursor positioning, etc.)
  */
 // @ts-ignore - express types
@@ -91,7 +91,7 @@ ptyStreamer.on('end', () => {
             try {
                 ws.send(JSON.stringify({
                     type: 'terminal-closed',
-                    message: 'Claude Code terminal closed'
+                    message: ' Code terminal closed'
                 }));
             }
             catch (sendError) {
@@ -241,10 +241,10 @@ export function handleTerminalWebSocket(ws, req) {
                     instance = ptyStreamer.getNewestInstance();
                 }
                 if (!instance) {
-                    logger.warn('[TERMINAL-WS-DEBUG] No Claude Code instances found for streaming');
+                    logger.warn('[TERMINAL-WS-DEBUG] No  Code instances found for streaming');
                     safeSend(ws, JSON.stringify({
                         type: 'error',
-                        message: 'No Claude Code instances found'
+                        message: 'No  Code instances found'
                     }), 'start-streaming-error');
                     return;
                 }
@@ -439,7 +439,7 @@ function getCloseCodeExplanation(code) {
 export function createTerminalStreamRouter(requireAuth) {
     const router = Router();
     /**
-     * GET /api/terminal-stream/instances - List all Claude instances
+     * GET /api/terminal-stream/instances - List all  instances
      */
     router.get('/instances', requireAuth, async (req, res) => {
         try {

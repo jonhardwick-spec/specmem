@@ -2,7 +2,7 @@
  * SPECMEM HOOKS - Native Context Injection System
  * ===============================================
  *
- * This module exports the SpecMem hook system for Claude Code integration.
+ * This module exports the SpecMem hook system for  Code integration.
  *
  * Main hooks:
  *
@@ -22,7 +22,7 @@
  *    - Creates psychological context for team member collaboration
  *    - Includes team communication tool instructions
  *
- * Usage in Claude Code settings.json:
+ * Usage in  Code settings.json:
  * {
  *   "hooks": {
  *     "UserPromptSubmit": [

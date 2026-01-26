@@ -166,7 +166,7 @@ async function main() {
       process.exit(0);
     }
 
-    // Default: run foreground (let Claude Bash tool handle it normally)
+    // Default: run foreground (let  Bash tool handle it normally)
     process.exit(0);
 
   } catch (e) {

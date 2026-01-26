@@ -39,7 +39,7 @@ const loggerOptions = {
     }
 };
 // CRITICAL: For MCP stdio protocol, ALL logs MUST go to stderr, not stdout!
-// stdout is reserved exclusively for JSON-RPC messages between Claude and the MCP server
+// stdout is reserved exclusively for JSON-RPC messages between  and the MCP server
 // Outputting logs to stdout will break the MCP protocol and cause "Failed to connect" errors
 export const logger = pino(loggerOptions, pino.destination({ dest: 2 })); // 2 = stderr
 export function createChildLogger(context) {

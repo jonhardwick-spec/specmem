@@ -4,7 +4,7 @@
  * =================
  *
  * CLI entry point for SpecMem hooks.
- * This allows hooks to be called from Claude Code settings.
+ * This allows hooks to be called from  Code settings.
  *
  * Usage in ~/.claude/settings.json:
  * {

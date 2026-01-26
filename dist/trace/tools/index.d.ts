@@ -2,7 +2,7 @@
  * Trace/Explore Tools Index
  *
  * Exports all the trace and explore MCP tools
- * These tools reduce Claude's search overhead by 80%+
+ * These tools reduce 's search overhead by 80%+
  */
 export { TraceError, default as TraceErrorTool } from './traceError.js';
 export { ExploreDependencies, default as ExploreDependenciesTool } from './exploreDependencies.js';

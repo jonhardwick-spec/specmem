@@ -76,7 +76,7 @@ export declare class SpecMemServer {
     private initializeHealthMonitor;
     /**
      * Initialize the embedding server lifecycle manager
-     * This ensures the embedding server is ALWAYS available when Claude needs it
+     * This ensures the embedding server is ALWAYS available when  needs it
      *
      * Features:
      * 1. On MCP server start: Check for stale processes, kill them, start fresh
@@ -91,7 +91,7 @@ export declare class SpecMemServer {
      */
     private setupEmbeddingServerHandlers;
     /**
-     * Send embedding server notification to Claude via MCP logging
+     * Send embedding server notification to  via MCP logging
      */
     private sendEmbeddingServerNotification;
     /**
@@ -104,7 +104,7 @@ export declare class SpecMemServer {
      */
     private setupMiniCOTServerHandlers;
     /**
-     * Send Mini COT server status notification to Claude
+     * Send Mini COT server status notification to 
      */
     private sendMiniCOTServerNotification;
     /**
@@ -117,7 +117,7 @@ export declare class SpecMemServer {
      */
     private setupHealthMonitorHandlers;
     /**
-     * Send health monitor notification to Claude via MCP logging
+     * Send health monitor notification to  via MCP logging
      */
     private sendHealthMonitorNotification;
     /**
@@ -126,7 +126,7 @@ export declare class SpecMemServer {
      */
     private setupResilientTransportHandlers;
     /**
-     * Send health notification to Claude when connection state changes
+     * Send health notification to  when connection state changes
      */
     private sendHealthNotification;
     /**
@@ -140,21 +140,21 @@ export declare class SpecMemServer {
      * Get the tool registry for dynamic tool registration
      *
      * Useful for plugins or extensions that want to add tools at runtime.
-     * After registering new tools, call refreshToolList() to notify Claude.
+     * After registering new tools, call refreshToolList() to notify .
      */
     getToolRegistry(): ToolRegistry;
     /**
-     * Refresh the tool list and notify Claude of changes
+     * Refresh the tool list and notify  of changes
      *
      * Call this after dynamically registering new tools to make them
-     * immediately available to Claude without requiring an MCP restart.
+     * immediately available to  without requiring an MCP restart.
      *
      * @example
      * ```typescript
      * const server = new SpecMemServer(embeddingProvider);
      * const registry = server.getToolRegistry();
      * registry.register(new MyCustomTool());
-     * await server.refreshToolList(); // Claude now sees the new tool!
+     * await server.refreshToolList(); //  now sees the new tool!
      * ```
      */
     refreshToolList(): Promise<void>;
@@ -168,7 +168,7 @@ export declare class SpecMemServer {
      * What it does:
      * 1. Re-scans skills directory to pick up new/changed skill files
      * 2. Reloads command handlers if they support dynamic reload
-     * 3. Notifies Claude that the tool list has changed (triggers re-fetch)
+     * 3. Notifies  that the tool list has changed (triggers re-fetch)
      *
      * @example
      * ```bash
@@ -264,18 +264,18 @@ export declare class SpecMemServer {
      */
     stopMiniCOTServer(): Promise<void>;
     /**
-     * Notify Claude that the tool list is ready
+     * Notify  that the tool list is ready
      *
      * CRITICAL FOR TOOL AUTO-DISCOVERY:
      * This calls the MCP SDK's sendToolListChanged() method which sends a
-     * notifications/tools/list_changed notification to Claude Code.
+     * notifications/tools/list_changed notification to  Code.
      *
-     * When Claude receives this notification, it will:
+     * When  receives this notification, it will:
      * 1. Invalidate its cached tool list
      * 2. Make a new ListToolsRequest to get the updated list
      * 3. Make all 39+ SpecMem tools available in its tool palette
      *
-     * Without this notification, Claude may cache an empty or stale tool list
+     * Without this notification,  may cache an empty or stale tool list
      * from the initial handshake before all tools are registered.
      *
      * The MCP protocol flow:
@@ -287,12 +287,12 @@ export declare class SpecMemServer {
      */
     private notifyToolListReady;
     /**
-     * Announce specmem to Claude on startup
+     * Announce specmem to  on startup
      *
-     * yo this is the startup banner that lets Claude know we loaded fr fr
-     * shows all tools, skills, and dashboard URL so Claude knows whats available
+     * yo this is the startup banner that lets  know we loaded fr fr
+     * shows all tools, skills, and dashboard URL so  knows whats available
      */
-    private announceToClaudeOnStartup;
+    private announceToOnStartup;
     /**
      * Send announcement with retry logic
      *

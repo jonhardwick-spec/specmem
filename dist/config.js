@@ -23,6 +23,36 @@ for (const envPath of specmemEnvPaths) {
 // Also load .env if it exists (won't override specmem.env values)
 dotenv.config();
 // ============================================================================
+// SAFE MKDIR - Dies with clear message if permission denied
+// ============================================================================
+/**
+ * Create directory - dies with clear message if permission denied.
+ * If specmem can't create dirs, it needs to be run with sudo.
+ */
+export function safeMkdir(dirPath, opts = {}) {
+    try {
+        fs.mkdirSync(dirPath, { recursive: true, ...opts });
+    }
+    catch (e) {
+        if (e.code === 'EACCES' || e.code === 'EPERM') {
+            console.error('\n\x1b[31m\x1b[1m');
+            console.error('  ╔═══════════════════════════════════════════════════╗');
+            console.error('  ║  Hey, I need sudo!                               ║');
+            console.error('  ║                                                   ║');
+            console.error('  ║  SpecMem can\'t create directories without         ║');
+            console.error('  ║  proper permissions. Run with sudo:               ║');
+            console.error('  ║                                                   ║');
+            console.error('  ║    sudo npx specmem-hardwicksoftware              ║');
+            console.error('  ║                                                   ║');
+            console.error(`  ║  Failed path: ${dirPath.slice(0, 35).padEnd(35)} ║`);
+            console.error('  ╚═══════════════════════════════════════════════════╝');
+            console.error('\x1b[0m');
+            process.exit(1);
+        }
+        throw e;
+    }
+}
+// ============================================================================
 // ATOMIC DIRECTORY CREATION - Task #17 fix for socket path duplication race
 // This prevents race conditions when multiple MCP servers try to create
 // the same socket directory simultaneously. Uses O_EXCL for true atomicity.
@@ -137,7 +167,10 @@ function atomicMkdirSync(dirPath, mode = 0o755) {
         }
     }
     catch (e) {
-        // Ignore - another process likely created it
+        if (e.code === 'EACCES' || e.code === 'EPERM') {
+            safeMkdir(dirPath); // Will die with "Hey, I need sudo!" message
+        }
+        // Ignore other errors - another process likely created it
     }
     return false;
 }
@@ -221,7 +254,7 @@ export function getSpecmemRoot() {
 // ============================================================================
 // PROJECT PATH UTILITIES - For multi-instance isolation
 // These functions provide project-specific paths and identifiers
-// SPECMEM_PROJECT_PATH is set by Claude Code via MCP config or defaults to cwd
+// SPECMEM_PROJECT_PATH is set by  Code via MCP config or defaults to cwd
 // ============================================================================
 /**
  * MULTI-PROJECT ISOLATION FIX

@@ -51,11 +51,20 @@ export class BigBrainMigrations {
             return;
         }
         logger.info({ pendingCount: pending.length }, 'found pending migrations');
+        let applied_count = 0;
+        let failed_count = 0;
         for (const migration of pending.sort((a, b) => a.version - b.version)) {
-            await this.runMigration(migration);
+            try {
+                await this.runMigration(migration);
+                applied_count++;
+            } catch (migErr) {
+                failed_count++;
+                const errMsg = migErr instanceof Error ? migErr.message : String(migErr);
+                logger.warn({ version: migration.version, name: migration.name, error: errMsg }, 'migration failed - skipping to next');
+            }
         }
         const duration = Date.now() - start;
-        logger.info({ duration, migrationsApplied: pending.length }, 'all migrations complete - WE DID IT');
+        logger.info({ duration, migrationsApplied: applied_count, migrationsFailed: failed_count }, 'all migrations complete - WE DID IT');
     }
     // ensures the migration tracking table exists
     async ensureMigrationTable() {
@@ -627,8 +636,8 @@ export class BigBrainMigrations {
             )
           );
 
-          -- index for content hash deduplication
-          CREATE UNIQUE INDEX IF NOT EXISTS idx_codebase_files_content_hash
+          -- index for content hash lookup (NOT unique - multiple files can share same hash)
+          CREATE INDEX IF NOT EXISTS idx_codebase_files_content_hash
             ON codebase_files(content_hash);
 
           -- full-text search index for code search
@@ -786,20 +795,20 @@ export class BigBrainMigrations {
                 checksum: this.generateChecksum('create_dependency_history_table_v15')
             },
             // migration 16: create claude_code_history table
-            // yooo Claude about to remember EVERYTHING it writes
+            // yooo  about to remember EVERYTHING it writes
             // no more massive explores needed fr
             {
                 version: 16,
                 name: 'create_claude_code_history',
                 up: `
-          -- yooo Claude about to remember EVERYTHING it writes
+          -- yooo  about to remember EVERYTHING it writes
           -- no more massive explores needed fr
 
-          -- main table for tracking Claude's code
+          -- main table for tracking 's code
           CREATE TABLE IF NOT EXISTS claude_code_history (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
-            -- what did Claude write?
+            -- what did  write?
             file_path TEXT NOT NULL,
             file_name VARCHAR(255) NOT NULL,
             code_content TEXT NOT NULL,
@@ -807,7 +816,7 @@ export class BigBrainMigrations {
               encode(sha256(code_content::bytea), 'hex')
             ) STORED,
 
-            -- why did Claude write it?
+            -- why did  write it?
             purpose TEXT NOT NULL,
             conversation_context TEXT,
 
@@ -1966,7 +1975,7 @@ export class BigBrainMigrations {
         `,
                 checksum: this.generateChecksum('create_team_member_deployments_table_v23')
             },
-            // migration 24: Phase 4-6 - Direct Prompting and Claude Control tables
+            // migration 24: Phase 4-6 - Direct Prompting and  Control tables
             {
                 version: 24,
                 name: 'create_prompt_and_trigger_tables',
@@ -1999,7 +2008,7 @@ export class BigBrainMigrations {
           CREATE INDEX IF NOT EXISTS idx_prompt_history_status
             ON prompt_history(status);
 
-          -- Table for storing Claude trigger history (Phase 6)
+          -- Table for storing  trigger history (Phase 6)
           CREATE TABLE IF NOT EXISTS trigger_history (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             action VARCHAR(50) NOT NULL,
@@ -2258,7 +2267,7 @@ export class BigBrainMigrations {
                 checksum: this.generateChecksum('create_file_change_history_v25_fixed')
             },
             // migration 26: SPATIAL MEMORY EVOLUTION - Quadrants, Clusters, Hot Paths
-            // Makes Claude's memory ACTUALLY INTELLIGENT through spatial organization
+            // Makes 's memory ACTUALLY INTELLIGENT through spatial organization
             // This is where memory becomes self-organizing fr fr
             {
                 version: 26,
@@ -3848,6 +3857,16 @@ export class BigBrainMigrations {
           END $$;
 
           -- ============================================================================
+          -- ADD pointer_type TO codebase_pointers TABLE (if exists)
+          -- ============================================================================
+          DO $$ BEGIN
+            ALTER TABLE codebase_pointers
+            ADD COLUMN IF NOT EXISTS pointer_type VARCHAR(50) DEFAULT 'reference';
+          EXCEPTION WHEN duplicate_column THEN NULL;
+                   WHEN undefined_table THEN NULL;
+          END $$;
+
+          -- ============================================================================
           -- ADD project_id TO team_messages TABLE (if exists)
           -- ============================================================================
           DO $$ BEGIN
@@ -4184,10 +4203,11 @@ export class BigBrainMigrations {
           CREATE INDEX IF NOT EXISTS idx_memories_project_path_type
             ON memories(project_path, memory_type);
 
-          -- Composite index for codebase_files project + file_path
-          -- Used by: codebaseTools queries filtering by project_path and file_path
-          CREATE INDEX IF NOT EXISTS idx_codebase_files_project_path_file
-            ON codebase_files(project_path, file_path);
+          -- UNIQUE composite index for codebase_files project + file_path
+          -- MUST be UNIQUE for ON CONFLICT (file_path, project_path) upsert to work
+          -- Used by: changeHandler.updateCodebaseFiles, codebaseTools queries
+          CREATE UNIQUE INDEX IF NOT EXISTS idx_codebase_files_path_project_unique
+            ON codebase_files(file_path, project_path);
 
           -- Composite index for codebase_files project + content_hash (dedup check)
           -- Used by: codebaseIndexer for hash lookups per project

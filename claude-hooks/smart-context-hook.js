@@ -518,7 +518,7 @@ async function main() {
         includeWarning: true,
         flattenOutput: false
       });
-      // Add prefix reminding Claude to read the compressed content
+      // Add prefix reminding  to read the compressed content
       const prefixedOutput = `Read this for context (you understand Traditional Chinese compression with 99%+ accuracy) ⚠️壓縮:繁中→EN\n${compressed}`;
       console.log(prefixedOutput);
     }

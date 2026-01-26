@@ -1,10 +1,10 @@
 /**
- * triggerSystem.ts - Claude Trigger System for MCP Sampling
+ * triggerSystem.ts -  Trigger System for MCP Sampling
  *
- * Manages trigger actions that request Claude to perform tasks via MCP sampling.
+ * Manages trigger actions that request  to perform tasks via MCP sampling.
  * Includes support for immediate triggers, scheduled triggers, and confirmation flow.
  *
- * Phase 6 Implementation - MCP -> Claude Control Flow
+ * Phase 6 Implementation - MCP ->  Control Flow
  */
 export interface TriggerConfig {
     maxTokens?: number;
@@ -52,7 +52,7 @@ export interface ScheduledJob {
     nextRun?: Date;
     runCount: number;
 }
-export declare class ClaudeTriggerSystem {
+export declare class TriggerSystem {
     private scheduledJobs;
     private triggerLog;
     private maxLogSize;
@@ -113,17 +113,17 @@ export declare class ClaudeTriggerSystem {
     shutdown(): void;
 }
 /**
- * Get or create the Claude trigger system
+ * Get or create the  trigger system
  */
-export declare function getClaudeTriggerSystem(): ClaudeTriggerSystem;
+export declare function getTriggerSystem(): TriggerSystem;
 /**
  * Reset the trigger system (for testing)
  */
-export declare function resetClaudeTriggerSystem(): void;
+export declare function resetTriggerSystem(): void;
 declare const _default: {
-    ClaudeTriggerSystem: typeof ClaudeTriggerSystem;
-    getClaudeTriggerSystem: typeof getClaudeTriggerSystem;
-    resetClaudeTriggerSystem: typeof resetClaudeTriggerSystem;
+    TriggerSystem: typeof TriggerSystem;
+    getTriggerSystem: typeof getTriggerSystem;
+    resetTriggerSystem: typeof resetTriggerSystem;
 };
 export default _default;
 //# sourceMappingURL=triggerSystem.d.ts.map

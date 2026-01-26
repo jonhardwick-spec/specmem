@@ -1,13 +1,13 @@
 /**
  * selfMessage - Send a message to yourself via terminal injection
  *
- * This tool allows Claude (or any subprocess) to inject a prompt into
- * the current Claude session. The message appears as user input and
- * triggers a Claude response.
+ * This tool allows  (or any subprocess) to inject a prompt into
+ * the current  session. The message appears as user input and
+ * triggers a  response.
  *
  * Use cases:
- * - Hooks can send notifications that Claude will respond to
- * - Subagents can request follow-up from the main Claude
+ * - Hooks can send notifications that  will respond to
+ * - Subagents can request follow-up from the main 
  * - Background processes can push status updates
  *
  * IMPORTANT: This uses the STY environment variable to find the correct
@@ -17,11 +17,11 @@ import { logger } from '../../utils/logger.js';
 import { selfMessage as sendSelfMessage, injectToCurrentSession, isInScreenSession, getCurrentScreenSession } from '../../utils/sessionInjector.js';
 export class SelfMessage {
     name = 'self_message';
-    description = `Send a message to yourself by injecting text into the current Claude session.
+    description = `Send a message to yourself by injecting text into the current  session.
 
 This allows you to:
 - Send status updates that appear as user messages
-- Request follow-up actions from your main Claude instance
+- Request follow-up actions from your main  instance
 - Communicate from background processes or hooks
 
 IMPORTANT:
@@ -35,7 +35,7 @@ Example:
   message: "Status update: Task X completed successfully"
   autoSubmit: true
 
-This will inject the message and submit it, causing Claude to respond.`;
+This will inject the message and submit it, causing  to respond.`;
     inputSchema = {
         type: 'object',
         properties: {

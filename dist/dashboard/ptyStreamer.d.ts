@@ -27,7 +27,7 @@
  * - Supports full keyboard input including special keys
  */
 import { EventEmitter } from 'events';
-export interface ClaudeInstance {
+export interface Instance {
     pid: number;
     tty: string;
     screenName: string;
@@ -64,15 +64,15 @@ export declare class PTYStreamer extends EventEmitter {
     /**
      * Find all screen sessions on the system
      */
-    findAllInstances(): ClaudeInstance[];
+    findAllInstances(): Instance[];
     /**
      * Get the newest (highest PID) instance
      */
-    getNewestInstance(): ClaudeInstance | null;
+    getNewestInstance(): Instance | null;
     /**
      * Get instance by session name or PID
      */
-    getInstance(identifier: string | number): ClaudeInstance | null;
+    getInstance(identifier: string | number): Instance | null;
     /**
      * Start streaming from a screen session
      * Automatically selects the best available streaming mode
@@ -158,7 +158,7 @@ export declare class PTYStreamer extends EventEmitter {
     /**
      * Get the currently streaming instance
      */
-    getCurrentStreamingInstance(): ClaudeInstance | null;
+    getCurrentStreamingInstance(): Instance | null;
 }
 export declare function getPtyStreamer(projectPath?: string): PTYStreamer;
 /**

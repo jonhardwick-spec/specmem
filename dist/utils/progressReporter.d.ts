@@ -3,14 +3,14 @@
  *
  * MCP-safe progress reporting with TWO output modes:
  * 1. stderr (fallback) - for bootstrap/pre-MCP
- * 2. MCP sendLoggingMessage - for visible output in Claude Code terminal
+ * 2. MCP sendLoggingMessage - for visible output in  Code terminal
  *
  * Features:
  * - ANSI spinner animation for in-progress states
  * - Rate-limited output (max 4 updates/second to avoid spam)
  * - Clear phase indicators: start, progress, retry, complete, error
  * - Item counts and percentages for batch operations
- * - MCP protocol integration for VISIBLE progress in Claude Code
+ * - MCP protocol integration for VISIBLE progress in  Code
  */
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 export type ProgressPhase = 'start' | 'progress' | 'retry' | 'complete' | 'error' | 'info';
@@ -136,7 +136,7 @@ export declare function reportError(operation: string, message?: string): void;
 export declare function reportRetry(operation: string, attempt: number, maxAttempts?: number): void;
 /**
  * Set the MCP server for sendLoggingMessage output
- * Call this once the MCP server is initialized to enable visible progress in Claude Code
+ * Call this once the MCP server is initialized to enable visible progress in  Code
  */
 export declare function setMcpServer(server: Server): void;
 /**

@@ -10,13 +10,13 @@
  * it runs on every tool call and returns compact Chinese context.
  *
  * Flow:
- *   1. Claude calls a tool (any tool)
+ *   1.  calls a tool (any tool)
  *   2. Hook extracts query from tool args
  *   3. Search SpecMem for semantically similar memories
- *   4. Return Chinese-compacted context to Claude
- *   5. Claude uses context to inform tool execution
+ *   4. Return Chinese-compacted context to 
+ *   5.  uses context to inform tool execution
  *
- * For Claude Code integration, create a hook script that:
+ * For  Code integration, create a hook script that:
  *   - Reads tool name and arguments from stdin (JSON)
  *   - Calls this hook
  *   - Outputs context to stdout
@@ -49,7 +49,7 @@ declare function formatChineseContext(toolName: string, query: string, memories:
  */
 export declare function simpleContextHook(toolName: string, args: Record<string, unknown>, config?: Partial<SimpleContextHookConfig>): Promise<string>;
 /**
- * CLI entry point for Claude Code PreToolUse hook
+ * CLI entry point for  Code PreToolUse hook
  * Reads JSON from stdin: { "tool_name": "...", "tool_input": {...} }
  * Outputs context to stdout (or empty if none)
  */

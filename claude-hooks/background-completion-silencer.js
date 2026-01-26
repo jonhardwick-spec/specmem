@@ -4,17 +4,17 @@
  * ===============================
  *
  * Intercepts background task/shell completion notifications and:
- * 1. Silently logs them instead of spamming Claude
+ * 1. Silently logs them instead of spamming 
  * 2. Shows minimal 1-line notification to user terminal
- * 3. Prevents Claude from blocking on processing notifications
+ * 3. Prevents  from blocking on processing notifications
  *
  * Hook Event: PostToolUse (for Task, Bash with run_in_background)
  *
  * The problem: When multiple background tasks complete, their notifications
- * flood Claude and block user interaction until all are processed.
+ * flood  and block user interaction until all are processed.
  *
  * The fix: Intercept completions, show minimal terminal notification,
- * suppress the verbose output that makes Claude respond.
+ * suppress the verbose output that makes  respond.
  */
 
 const fs = require('fs');
@@ -31,7 +31,7 @@ const ANSI = {
 };
 
 /**
- * Write minimal notification to terminal (bypasses Claude's stdin)
+ * Write minimal notification to terminal (bypasses 's stdin)
  */
 function notifyTerminal(message) {
   try {
@@ -111,7 +111,7 @@ async function main() {
     const icon = status === 'completed' ? '✓' : status === 'failed' ? '✗' : '•';
     notifyTerminal(`${ANSI.gray}[bg]${ANSI.reset} ${icon} ${taskId.slice(0, 30)}${summary ? ': ' + summary.slice(0, 20) + '...' : ''}`);
 
-    // Return minimal output to Claude (doesn't trigger verbose processing)
+    // Return minimal output to  (doesn't trigger verbose processing)
     console.log(JSON.stringify({
       hookSpecificOutput: {
         hookEventName: 'PostToolUse',

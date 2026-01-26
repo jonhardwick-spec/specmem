@@ -4,6 +4,9 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import * as os from 'os';
+import { Worker } from 'worker_threads';
+import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../utils/logger.js';
 import { getProjectPath } from '../config.js';
@@ -12,6 +15,73 @@ import { WhatLanguageIsThis } from './languageDetection.js';
 import { processBatchesWithConcurrency, DEFAULT_CONCURRENCY_LIMIT } from '../db/batchOperations.js';
 import { TEXT_LIMITS } from '../constants.js';
 import { getCurrentProjectId } from '../services/ProjectContext.js';
+const __filename_ingestion = fileURLToPath(import.meta.url);
+const __dirname_ingestion = path.dirname(__filename_ingestion);
+/**
+ * FileReadWorkerPool - distributes file I/O across worker threads
+ * Uses worker_threads to parallelize file reading across CPU cores
+ */
+class FileReadWorkerPool {
+    workers = [];
+    poolSize;
+    workerPath;
+    constructor() {
+        this.poolSize = Math.min(os.cpus().length, 8);
+        this.workerPath = path.join(__dirname_ingestion, 'fileReadWorker.js');
+    }
+    async processFiles(filePaths, rootPath, maxFileSizeBytes) {
+        if (filePaths.length === 0) return [];
+        // Split files across workers
+        const filesPerWorker = Math.ceil(filePaths.length / this.poolSize);
+        const chunks = [];
+        for (let i = 0; i < filePaths.length; i += filesPerWorker) {
+            chunks.push(filePaths.slice(i, i + filesPerWorker));
+        }
+        const workerPromises = chunks.map(chunk => {
+            return new Promise((resolve, reject) => {
+                const worker = new Worker(this.workerPath);
+                const timeout = setTimeout(() => {
+                    worker.terminate();
+                    reject(new Error(`Worker timeout after 120s processing ${chunk.length} files`));
+                }, 120000);
+                worker.on('message', (msg) => {
+                    if (msg.type === 'results') {
+                        clearTimeout(timeout);
+                        worker.terminate();
+                        resolve(msg.results);
+                    } else if (msg.type === 'error') {
+                        clearTimeout(timeout);
+                        worker.terminate();
+                        reject(new Error(msg.error));
+                    }
+                });
+                worker.on('error', (err) => {
+                    clearTimeout(timeout);
+                    reject(err);
+                });
+                worker.on('exit', (code) => {
+                    clearTimeout(timeout);
+                    if (code !== 0) {
+                        reject(new Error(`Worker exited with code ${code}`));
+                    }
+                });
+                worker.postMessage({
+                    type: 'process',
+                    files: chunk,
+                    rootPath,
+                    maxFileSizeBytes
+                });
+            });
+        });
+        try {
+            const allResults = await Promise.all(workerPromises);
+            return allResults.flat();
+        } catch (err) {
+            logger.warn({ error: String(err) }, 'Worker pool failed, falling back to main thread');
+            return null; // Signal to caller to use fallback
+        }
+    }
+}
 /**
  * default options that hit different
  */
@@ -21,7 +91,7 @@ const DEFAULT_OPTIONS = {
     chunkOverlapChars: 1000, // 1K overlap
     generateEmbeddings: true,
     embeddingBatchSize: 50,
-    parallelReads: 10,
+    parallelReads: 50,
     includeHiddenFiles: false,
     maxDepth: 50
 };
@@ -117,54 +187,118 @@ export class IngestThisWholeAssMfCodebase {
             this.emitProgress();
             const files = [];
             const errors = [];
-            // process files in parallel batches
-            for (let i = 0; i < filePaths.length; i += this.options.parallelReads) {
-                const batch = filePaths.slice(i, i + this.options.parallelReads);
-                const batchResults = await Promise.allSettled(batch.map(fp => this.processFile(fp)));
-                for (let j = 0; j < batchResults.length; j++) {
-                    const fileResult = batchResults[j];
-                    const filePath = batch[j];
-                    if (fileResult?.status === 'fulfilled' && fileResult.value) {
-                        const processedFiles = fileResult.value;
-                        files.push(...processedFiles);
-                        // update stats
-                        for (const file of processedFiles) {
-                            result.totalBytes += file.sizeBytes;
-                            result.totalLines += file.lineCount;
-                            result.languageBreakdown[file.language.id] =
-                                (result.languageBreakdown[file.language.id] ?? 0) + 1;
-                            if (file.chunkIndex !== undefined) {
-                                result.totalChunks++;
-                            }
+            // For large codebases (1000+ files), use worker thread pool for I/O
+            const useWorkerPool = filePaths.length >= 1000 && this.options.useWorkerPool !== false;
+            if (useWorkerPool) {
+                logger.info({ fileCount: filePaths.length, cpus: os.cpus().length }, 'using worker thread pool for file reading');
+                const workerPool = new FileReadWorkerPool();
+                const workerResults = await workerPool.processFiles(
+                    filePaths, this.options.rootPath, this.options.maxFileSizeBytes
+                );
+                if (workerResults) {
+                    // Workers returned results - convert to our format
+                    for (const wr of workerResults) {
+                        if (wr.skipped) {
+                            this.progress.skippedFiles++;
+                            continue;
                         }
+                        const language = this.languageDetector.detect(wr.filePath, wr.content);
+                        const baseFile = {
+                            filePath: wr.relativePath,
+                            absolutePath: wr.filePath,
+                            fileName: wr.fileName,
+                            extension: wr.extension,
+                            language,
+                            content: wr.content,
+                            contentHash: wr.contentHash,
+                            sizeBytes: wr.sizeBytes,
+                            lineCount: wr.lineCount,
+                            charCount: wr.charCount,
+                            lastModified: new Date(wr.lastModified)
+                        };
+                        // chunk large files
+                        if (wr.charCount > this.options.chunkSizeChars) {
+                            const chunks = this.chunkFile(baseFile, wr.content);
+                            files.push(...chunks);
+                            result.totalChunks += chunks.length;
+                        } else {
+                            files.push({ ...baseFile, id: uuidv4() });
+                        }
+                        result.totalBytes += wr.sizeBytes;
+                        result.totalLines += wr.lineCount;
+                        result.languageBreakdown[language.id] =
+                            (result.languageBreakdown[language.id] ?? 0) + 1;
                         this.progress.processedFiles++;
                         this.progress.bytesProcessed = result.totalBytes;
                         this.progress.linesProcessed = result.totalLines;
                     }
-                    else if (fileResult?.status === 'rejected') {
-                        errors.push({ file: filePath, error: String(fileResult.reason) });
-                        result.errorFiles++;
-                        this.progress.errorFiles++;
-                    }
-                    this.progress.currentFile = filePath;
-                    this.updateProgressStats();
-                    this.emitProgress();
+                    logger.info({
+                        processed: files.length,
+                        skipped: this.progress.skippedFiles
+                    }, 'worker pool file reading complete');
+                } else {
+                    // Worker pool failed, fall through to standard processing
+                    logger.info('worker pool returned null, falling back to main thread processing');
+                    await this._processFilesMainThread(filePaths, files, errors, result);
                 }
+            } else {
+                await this._processFilesMainThread(filePaths, files, errors, result);
             }
             // count chunked files
             const chunkedFileIds = new Set(files.filter(f => f.originalFileId).map(f => f.originalFileId));
             result.chunkedFiles = chunkedFileIds.size;
-            // phase 3: generate embeddings if enabled
-            if (this.options.generateEmbeddings && this.embeddingProvider) {
-                this.progress.phase = 'embedding';
+            // Determine if we should use server-side embeddings for large codebases
+            const useServerSideEmbeddings = this.options.serverSideEmbeddings !== undefined
+                ? this.options.serverSideEmbeddings
+                : files.length > 1000;
+            if (useServerSideEmbeddings) {
+                // STORE-THEN-EMBED MODE: Skip Phase 3, store without embeddings,
+                // then trigger Python server's batch processing (200 files/batch, direct DB writes)
+                logger.info({ fileCount: files.length }, 'large codebase detected - using store-then-embed mode');
+                // phase 3: SKIP - store first, embed server-side after
+                // phase 4: store in database WITHOUT embeddings
+                this.progress.phase = 'storing';
                 this.emitProgress();
-                await this.generateEmbeddings(files);
+                const storedCount = await this.storeFiles(files);
+                result.storedFiles = storedCount;
+                // phase 5: trigger server-side embedding processing
+                if (this.options.generateEmbeddings) {
+                    this.progress.phase = 'embedding';
+                    this.emitProgress();
+                    try {
+                        const { getEmbeddingServerManager } = await import('../mcp/embeddingServerManager.js');
+                        const manager = getEmbeddingServerManager();
+                        if (manager && manager.triggerServerSideProcessing) {
+                            const projectPath = this.options.rootPath;
+                            logger.info({ projectPath }, 'triggering server-side codebase embedding processing');
+                            const ssResult = await manager.triggerServerSideProcessing(projectPath, 200);
+                            logger.info({ ssResult }, 'server-side embedding processing complete');
+                        }
+                        else {
+                            logger.warn('EmbeddingServerManager not available for server-side processing, falling back to client-side');
+                            await this.generateEmbeddings(files);
+                        }
+                    }
+                    catch (ssErr) {
+                        logger.warn({ error: String(ssErr) }, 'server-side embedding failed, falling back to client-side');
+                        await this.generateEmbeddings(files);
+                    }
+                }
             }
-            // phase 4: store in database
-            this.progress.phase = 'storing';
-            this.emitProgress();
-            const storedCount = await this.storeFiles(files);
-            result.storedFiles = storedCount;
+            else {
+                // STANDARD MODE: Generate embeddings client-side, then store
+                // phase 3: generate embeddings if enabled
+                if (this.options.generateEmbeddings && this.embeddingProvider) {
+                    this.progress.phase = 'embedding';
+                    this.emitProgress();
+                    await this.generateEmbeddings(files);
+                }
+                // phase 4: store in database
+                this.progress.phase = 'storing';
+                this.emitProgress();
+                const storedCount = await this.storeFiles(files);
+                result.storedFiles = storedCount;
+            }
             // done!
             this.progress.phase = 'complete';
             result.success = true;
@@ -179,7 +313,8 @@ export class IngestThisWholeAssMfCodebase {
                 chunkedFiles: result.chunkedFiles,
                 totalLines: result.totalLines,
                 totalBytes: result.totalBytes,
-                languageCount: Object.keys(result.languageBreakdown).length
+                languageCount: Object.keys(result.languageBreakdown).length,
+                serverSideEmbeddings: useServerSideEmbeddings
             }, 'codebase ingestion COMPLETE - we did it boys');
             return result;
         }
@@ -380,19 +515,23 @@ export class IngestThisWholeAssMfCodebase {
             embeddable: embeddableFiles.length
         }, 'generating embeddings for embeddable files');
         const batchSize = this.options.embeddingBatchSize;
+        // Split into batches
+        const embeddingBatches = [];
         for (let i = 0; i < embeddableFiles.length; i += batchSize) {
-            const batch = embeddableFiles.slice(i, i + batchSize);
-            // Prepare texts for batch embedding
+            embeddingBatches.push(embeddableFiles.slice(i, i + batchSize));
+        }
+        const totalBatches = embeddingBatches.length;
+        // Process batches with concurrency (3 concurrent embedding batches)
+        const embeddingConcurrency = this.options.embeddingConcurrency || 3;
+        await processBatchesWithConcurrency(embeddingBatches, 1, embeddingConcurrency, async (batchGroup, batchIndex) => {
+            const batch = batchGroup[0] || batchGroup;
             const textsForEmbedding = batch.map(file => this.createEmbeddingText(file));
-            // Use BATCH API if available - 5-10x faster!
             let embeddings;
             try {
                 if (this.embeddingProvider.generateEmbeddingsBatch) {
-                    const batchEmbeddings = await this.embeddingProvider.generateEmbeddingsBatch(textsForEmbedding);
-                    embeddings = batchEmbeddings;
+                    embeddings = await this.embeddingProvider.generateEmbeddingsBatch(textsForEmbedding);
                 }
                 else {
-                    // Fallback to parallel individual calls
                     embeddings = await Promise.all(textsForEmbedding.map(async (text, idx) => {
                         try {
                             return await this.embeddingProvider.generateEmbedding(text);
@@ -405,8 +544,7 @@ export class IngestThisWholeAssMfCodebase {
                 }
             }
             catch (error) {
-                logger.warn({ batchStart: i, error }, 'batch embedding failed, falling back to individual');
-                // Fallback on batch failure
+                logger.warn({ batchIndex, error }, 'batch embedding failed, falling back to individual');
                 embeddings = await Promise.all(textsForEmbedding.map(async (text, idx) => {
                     try {
                         return await this.embeddingProvider.generateEmbedding(text);
@@ -417,7 +555,6 @@ export class IngestThisWholeAssMfCodebase {
                     }
                 }));
             }
-            // store embeddings on the file objects
             for (let j = 0; j < batch.length; j++) {
                 const file = batch[j];
                 const embedding = embeddings[j];
@@ -426,10 +563,11 @@ export class IngestThisWholeAssMfCodebase {
                 }
             }
             logger.debug({
-                batch: Math.floor(i / batchSize) + 1,
-                totalBatches: Math.ceil(embeddableFiles.length / batchSize)
+                batch: batchIndex + 1,
+                totalBatches
             }, 'embedding batch complete');
-        }
+            return batch.length;
+        });
     }
     /**
      * createEmbeddingText - creates optimal text for embedding
@@ -541,6 +679,49 @@ export class IngestThisWholeAssMfCodebase {
         if (this.options.onProgress) {
             this.options.onProgress({ ...this.progress });
         }
+    }
+    /**
+     * _processFilesMainThread - standard main-thread file processing (fallback from worker pool)
+     */
+    async _processFilesMainThread(filePaths, files, errors, result) {
+        const readBatches = [];
+        for (let i = 0; i < filePaths.length; i += this.options.parallelReads) {
+            readBatches.push(filePaths.slice(i, i + this.options.parallelReads));
+        }
+        const readConcurrency = Math.min(4, Math.ceil(filePaths.length / this.options.parallelReads));
+        await processBatchesWithConcurrency(readBatches, 1, readConcurrency, async (batchGroup) => {
+            const batch = batchGroup[0] || batchGroup;
+            const batchResults = await Promise.allSettled(batch.map(fp => this.processFile(fp)));
+            for (let j = 0; j < batchResults.length; j++) {
+                const fileResult = batchResults[j];
+                const filePath = batch[j];
+                if (fileResult?.status === 'fulfilled' && fileResult.value) {
+                    const processedFiles = fileResult.value;
+                    files.push(...processedFiles);
+                    for (const file of processedFiles) {
+                        result.totalBytes += file.sizeBytes;
+                        result.totalLines += file.lineCount;
+                        result.languageBreakdown[file.language.id] =
+                            (result.languageBreakdown[file.language.id] ?? 0) + 1;
+                        if (file.chunkIndex !== undefined) {
+                            result.totalChunks++;
+                        }
+                    }
+                    this.progress.processedFiles++;
+                    this.progress.bytesProcessed = result.totalBytes;
+                    this.progress.linesProcessed = result.totalLines;
+                }
+                else if (fileResult?.status === 'rejected') {
+                    errors.push({ file: filePath, error: String(fileResult.reason) });
+                    result.errorFiles++;
+                    this.progress.errorFiles++;
+                }
+                this.progress.currentFile = filePath;
+                this.updateProgressStats();
+                this.emitProgress();
+            }
+            return batch.length;
+        });
     }
     /**
      * getProgress - get current progress

@@ -12,7 +12,7 @@
  *
  * Attribution Types:
  *   - 'user': Code written/discussed by the user
- *   - 'assistant': Code generated/explained by Claude
+ *   - 'assistant': Code generated/explained by 
  *   - 'unknown': Role not determined
  */
 /**

@@ -57,6 +57,13 @@ const getMachineSocketPath = () => {
 const SOCKET_PATH = process.env.SOCKET_PATH || getMachineSocketPath();
 const MODEL_NAME = 'Xenova/all-MiniLM-L6-v2';
 
+// Bundled model: shipped with npm package, used as fallback when HF cache unavailable
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename_esm = fileURLToPath(import.meta.url);
+const __dirname_esm = dirname(__filename_esm);
+const BUNDLED_MODEL_DIR = join(__dirname_esm, 'models', 'all-MiniLM-L6-v2');
+
 // Dynamic dimensions - detected from model and database
 let NATIVE_DIM = null;
 let TARGET_DIM = null;
@@ -78,13 +85,39 @@ async function loadModel() {
   try {
     console.log('[Sandbox] Loading model from local cache...');
 
-    // Force local-only mode - will fail if model not pre-downloaded
-    extractor = await pipeline('feature-extraction', MODEL_NAME, {
-      // Use local cache only - no downloads allowed
-      local_files_only: true,
-      // Use CPU only (safer, no GPU driver access)
-      device: 'cpu'
-    });
+    // Try HF cache first, fall back to bundled model
+    let modelSource = MODEL_NAME;
+    try {
+      extractor = await pipeline('feature-extraction', MODEL_NAME, {
+        local_files_only: true,
+        device: 'cpu'
+      });
+    } catch (hfErr) {
+      // HF cache miss — try bundled model shipped with npm package
+      if (existsSync(BUNDLED_MODEL_DIR)) {
+        console.log(`[Sandbox] HF cache miss, loading bundled model: ${BUNDLED_MODEL_DIR}`);
+        // Ensure model.onnx exists (bundled may only have model_quint8_avx2.onnx)
+        const onnxDir = join(BUNDLED_MODEL_DIR, 'onnx');
+        const modelOnnx = join(onnxDir, 'model.onnx');
+        if (!existsSync(modelOnnx) && existsSync(onnxDir)) {
+          // Find any .onnx file and symlink as model.onnx
+          const { readdirSync, symlinkSync } = await import('fs');
+          const onnxFiles = readdirSync(onnxDir).filter(f => f.endsWith('.onnx'));
+          if (onnxFiles.length > 0) {
+            try { symlinkSync(onnxFiles[0], modelOnnx); } catch {}
+          }
+        }
+        extractor = await pipeline('feature-extraction', BUNDLED_MODEL_DIR, {
+          local_files_only: true,
+          device: 'cpu'
+        });
+        modelSource = BUNDLED_MODEL_DIR;
+      } else {
+        throw hfErr;
+      }
+    }
+
+    // Skip the duplicate pipeline call below — extractor is already loaded
 
     modelReady = true;
 

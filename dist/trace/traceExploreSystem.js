@@ -1,7 +1,7 @@
 /**
  * traceExploreSystem.ts - Trace & Root Cause Analysis System
  *
- * yo this is the BIG BRAIN system for Claude Code fr fr
+ * yo this is the BIG BRAIN system for  Code fr fr
  * reduces full codebase searches by 80%+ through intelligent recall
  *
  * Features:
@@ -23,7 +23,7 @@ import { logger } from '../utils/logger.js';
 /**
  * TraceExploreSystem - the brain for error tracing and dependency exploration
  *
- * reduces Claude's search overhead by:
+ * reduces 's search overhead by:
  * 1. Mapping errors to known root causes
  * 2. Caching successful search patterns
  * 3. Pre-computing dependency graphs

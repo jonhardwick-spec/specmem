@@ -4,7 +4,7 @@
  * - Pauses during user typing
  * - Captures user input (handles backspaces)
  * - Only fires auto-improve when user is idle
- * - Feeds captured input to Claude
+ * - Feeds captured input to 
  *
  * Works in standalone mode (no PM2 required)
  */

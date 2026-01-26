@@ -239,10 +239,10 @@ export async function deployHooksToUserDir() {
     return userHooksDir;
 }
 /**
- * Configure Claude Code hooks for team member communication
+ * Configure  Code hooks for team member communication
  * GOD MODE - full hook configuration + permissions + everything
  */
-export async function configureClaudeHooks() {
+export async function configureHooks() {
     const homeDir = process.env.HOME || process.env.USERPROFILE || '';
     const claudeDir = path.join(homeDir, '.claude');
     const claudeSettingsPath = path.join(claudeDir, 'settings.json');
@@ -257,7 +257,7 @@ export async function configureClaudeHooks() {
     const teamMemberInjectPath = path.join(userHooksDir, 'specmem-team-member-inject.js');
     const autoBypassPath = path.join(userHooksDir, 'auto-bypass.py');
     const watchdogPath = path.join(userHooksDir, 'claude-watchdog.sh');
-    // Ensure Claude directory exists
+    // Ensure  directory exists
     if (!fs.existsSync(claudeDir)) {
         fs.mkdirSync(claudeDir, { recursive: true });
     }
@@ -358,7 +358,7 @@ export async function configureClaudeHooks() {
         });
     }
     // Helper to add hooks without duplicates
-    // Claude Code hook format:
+    //  Code hook format:
     // - PreToolUse/PostToolUse/PermissionRequest: matcher is a STRING pattern (e.g., "Bash", "*", "Edit|Write")
     // - UserPromptSubmit/SessionStart/Stop: matcher field should be OMITTED (not applicable)
     const addHooksToEvent = (eventName, hookConfigs, matcher) => {
@@ -425,7 +425,7 @@ export async function configureClaudeHooks() {
     }
     // Write settings
     fs.writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2));
-    logger.info('GOD MODE: Claude hooks configured successfully');
+    logger.info('GOD MODE:  hooks configured successfully');
     logger.info({
         permissions: specmemPermissions.length,
         hooks: Object.keys(settings.hooks).length,
@@ -433,7 +433,7 @@ export async function configureClaudeHooks() {
     }, 'specmem integration complete');
 }
 /**
- * Register SpecMem as MCP server with Claude
+ * Register SpecMem as MCP server with 
  * runs: claude mcp add specmem ...
  */
 export async function registerMcpServer() {
@@ -547,7 +547,7 @@ export async function autoInstallEverything() {
         logger.warn({ errors: syncResult.errors }, 'config sync completed with errors');
         // Fall back to old methods if sync fails
         await registerMcpServer();
-        await configureClaudeHooks();
+        await configureHooks();
     }
     // Step 5: Create god mode launcher wrapper
     await createGodModeLauncher();

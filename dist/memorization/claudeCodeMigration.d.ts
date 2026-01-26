@@ -1,8 +1,8 @@
 /**
- * claudeCodeMigration.ts - Database migrations for Claude code tracking
+ * claudeCodeMigration.ts - Database migrations for  code tracking
  *
- * yooo this migration lets Claude REMEMBER what it wrote
- * no more massive explores because Claude will KNOW
+ * yooo this migration lets  REMEMBER what it wrote
+ * no more massive explores because  will KNOW
  * what code it created and WHY
  *
  * EMBEDDING DIMENSION NOTE:
@@ -14,7 +14,7 @@ import pg from 'pg';
 /**
  * Migration to create claude_code_history table
  *
- * fr fr tracking everything Claude writes so it never forgets
+ * fr fr tracking everything  writes so it never forgets
  */
 export declare const claudeCodeHistoryMigration: {
     version: number;
@@ -26,9 +26,9 @@ export declare const claudeCodeHistoryMigration: {
 /**
  * Run the migration using a connection pool
  */
-export declare function runClaudeCodeMigration(client: pg.PoolClient): Promise<void>;
+export declare function runCodeMigration(client: pg.PoolClient): Promise<void>;
 /**
  * Check if migration has been applied
  */
-export declare function isClaudeCodeMigrationApplied(client: pg.PoolClient): Promise<boolean>;
+export declare function isCodeMigrationApplied(client: pg.PoolClient): Promise<boolean>;
 //# sourceMappingURL=claudeCodeMigration.d.ts.map

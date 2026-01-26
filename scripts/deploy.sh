@@ -23,7 +23,12 @@ if [[ ! "$BUMP_TYPE" =~ ^(patch|minor|major)$ ]]; then
 fi
 
 echo "1. Building..."
-npm run build
+# Skip build if no src/ folder (pre-built distribution)
+if [ -d "src" ]; then
+  npm run build
+else
+  echo "   Skipping build (pre-built distribution - no src/ folder)"
+fi
 
 echo "2. Bumping version ($BUMP_TYPE)..."
 npm version "$BUMP_TYPE" --no-git-tag-version

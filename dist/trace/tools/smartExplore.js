@@ -8,7 +8,7 @@
  * - code access patterns
  * - error-to-solution mappings
  *
- * reduces Claude's need for full codebase searches by 80%+
+ * reduces 's need for full codebase searches by 80%+
  */
 import { getTraceExploreSystem } from '../traceExploreSystem.js';
 import { logger } from '../../utils/logger.js';

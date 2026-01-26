@@ -17,7 +17,7 @@
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// WARNING PREFIX - Prevents Claude from responding in Chinese
+// WARNING PREFIX - Prevents  from responding in Chinese
 // Compact version: 120 chars vs original 260 chars (54% smaller!)
 // ═══════════════════════════════════════════════════════════════════════════
 const COMPRESSION_WARNING = `⚠️ CONTEXT COMPRESSION ACTIVE ⚠️
@@ -808,7 +808,7 @@ function compressHookOutput(text, options = {}) {
   const includeWarning = options.includeWarning !== false;
   // Default to compact warning (saves 200+ chars) unless explicitly verbose
   const useVerboseWarning = options.verboseWarning === true;
-  // NEW: flattenOutput option to avoid newlines breaking Claude's formatting
+  // NEW: flattenOutput option to avoid newlines breaking 's formatting
   const flattenOutput = options.flattenOutput === true;
 
   if (!text || text.length < minLength) return text;

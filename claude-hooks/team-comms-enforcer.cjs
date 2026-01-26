@@ -29,6 +29,20 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+// AGENT DETECTION: Use shared is-agent.cjs for reliable env-var-based detection
+// This checks CLAUDE_SUBAGENT, CLAUDE_AGENT_ID, SPECMEM_AGENT_MODE, etc.
+let isAgentFn;
+try {
+  isAgentFn = require('./is-agent.cjs').isAgent;
+} catch {
+  // Fallback: try from specmem package
+  try {
+    isAgentFn = require('/usr/lib/node_modules/specmem-hardwicksoftware/claude-hooks/is-agent.cjs').isAgent;
+  } catch {
+    isAgentFn = () => false; // Can't detect agents, skip enforcement
+  }
+}
+
 // Project paths - CRITICAL: Use cwd() FIRST, not inherited env vars
 // This prevents cross-project enforcement (specmem agents blocking /newServer)
 const _projectPath = process.cwd();  // ALWAYS use current working directory
@@ -48,7 +62,8 @@ try {
 // CONFIGURATION
 // ============================================================================
 const MAX_SEARCHES_BEFORE_BLOCK = 3;
-const BROADCAST_CHECK_INTERVAL = 5;   // Check broadcasts every 5 tool usages
+const TEAM_COMMS_CHECK_INTERVAL = 4;  // MUST read_team_messages every 4 tool usages
+const BROADCAST_CHECK_INTERVAL = 5;   // MUST read_team_messages w/ include_broadcasts every 5 tool usages
 const HELP_CHECK_INTERVAL = 8;        // Check help requests every 8 tool usages
 
 // Tools that count as "announcing"
@@ -142,11 +157,14 @@ function getAgentState(tracking, sessionId) {
       usedMemoryTools: false,
       searchCount: 0,
       blockedCount: 0,
-      toolUsageCount: 0,           // Total tool calls since last broadcast check
-      helpToolUsageCount: 0,       // Total tool calls since last help check
+      commsToolCount: 0,           // Tool calls since last team comms check (every 4)
+      broadcastToolCount: 0,       // Tool calls since last broadcast check (every 5)
+      helpToolUsageCount: 0,       // Tool calls since last help check (every 8)
+      lastCommsCheck: Date.now(),
       lastBroadcastCheck: Date.now(),
       lastHelpCheck: Date.now(),
-      needsBroadcastCheck: false,  // Flag when they hit the limit
+      needsCommsCheck: false,      // HARD BLOCK until they read team messages
+      needsBroadcastCheck: false,  // HARD BLOCK until they read broadcasts
       needsHelpCheck: false,       // Flag when they hit the limit
       lastActivity: Date.now()
     };
@@ -165,66 +183,55 @@ function isSpecmemProject() {
   return indicators.some(p => fs.existsSync(p));
 }
 
-function hasActiveAgents() {
-  try {
-    // CRITICAL: Only enforce on specmem-enabled projects
-    if (!isSpecmemProject()) return false;
+/**
+ * Detect if this hook is running inside an agent context.
+ *
+ * THREE detection methods (any one = agent):
+ * 1. Environment vars: CLAUDE_SUBAGENT, CLAUDE_AGENT_ID, SPECMEM_AGENT_MODE, etc.
+ *    (set by Claude Code for subagents, or by deployTeamMember for team members)
+ * 2. Subagent tracking: agents.json written by subagent-loading-hook.js on SubagentStart
+ *    has active agents with no endTime = currently running subagent
+ * 3. Active agents file: active-agents.json written by agent-loading-hook.js
+ *    has recently spawned agents
+ *
+ * CRITICAL: session_id is NOT reliable because subagents share the parent's session_id.
+ */
+function isRunningAsAgent() {
+  // Method 1: Environment variable detection (most reliable)
+  if (isAgentFn()) return true;
 
+  // Method 2: Check subagent tracking (from subagent-loading-hook.js SubagentStart)
+  try {
+    const agentsFile = `${PROJECT_TMP_DIR}/agents.json`;
+    if (fs.existsSync(agentsFile)) {
+      const data = JSON.parse(fs.readFileSync(agentsFile, 'utf8'));
+      const now = Date.now();
+      for (const agent of Object.values(data.agents || {})) {
+        // Agent started within last 10 min AND has no endTime = still running
+        if (!agent.endTime && agent.startTime && (now - agent.startTime < 600000)) {
+          return true;
+        }
+      }
+    }
+  } catch {}
+
+  return false;
+}
+
+function isSpecmemEnabled() {
+  if (!isSpecmemProject()) return false;
+  // Check that enforcement makes sense (agents exist or we are one)
+  if (isAgentFn()) return true;
+  try {
+    // Check active-agents.json for recently spawned agents
     if (!fs.existsSync(ACTIVE_AGENTS_FILE)) return false;
     const agents = JSON.parse(fs.readFileSync(ACTIVE_AGENTS_FILE, 'utf8'));
     const now = Date.now();
-    // Only count agents spawned in the last 10 minutes
     for (const agent of Object.values(agents)) {
       if (now - agent.spawnedAt < 600000) return true;
     }
-    return false;
-  } catch (e) {
-    return false;
-  }
-}
-
-function isAgentSession(sessionId) {
-  // Check if THIS session is a spawned agent (vs main Claude window)
-  // Main Claude should NEVER be blocked - only enforce on subagents
-  //
-  // FIX: Since sessionIds aren't stored when agents spawn, we need a different approach:
-  // 1. Check if this is explicitly the MAIN session (stored in main-session.json)
-  // 2. If not main AND agents are active, treat as agent
-  try {
-    if (!fs.existsSync(ACTIVE_AGENTS_FILE)) return false;
-    const agents = JSON.parse(fs.readFileSync(ACTIVE_AGENTS_FILE, 'utf8'));
-
-    // Check if sessionId is explicitly registered (legacy check)
-    for (const [agentId, agent] of Object.entries(agents)) {
-      if (agent.sessionId === sessionId || agentId === sessionId) {
-        return true;
-      }
-    }
-
-    // NEW: Check if this is the MAIN session
-    const mainSessionFile = `${PROJECT_TMP_DIR}/main-session.json`;
-    if (fs.existsSync(mainSessionFile)) {
-      const mainData = JSON.parse(fs.readFileSync(mainSessionFile, 'utf8'));
-      if (mainData.sessionId === sessionId) {
-        return false; // This IS the main session, not an agent
-      }
-    }
-
-    // If agents are active and we're not the main session, assume we're an agent
-    // This catches spawned agents whose sessionIds weren't captured at spawn time
-    const now = Date.now();
-    for (const agent of Object.values(agents)) {
-      if (now - agent.spawnedAt < 600000) {
-        // There ARE active agents, and we're not the main session
-        // So we must be one of the agents
-        return true;
-      }
-    }
-
-    return false;
-  } catch (e) {
-    return false;
-  }
+  } catch {}
+  return false;
 }
 
 // ============================================================================
@@ -255,6 +262,7 @@ function allowWithReminder(reminder) {
 // ============================================================================
 
 // FAST TIMEOUT - Never block main Claude
+// If stdin takes too long, bail and allow the tool call
 setTimeout(() => {
   console.log(JSON.stringify({ continue: true }));
   process.exit(0);
@@ -270,11 +278,18 @@ process.stdin.on('end', () => {
     const sessionId = data.session_id || 'unknown';
 
     // ========================================================================
-    // MAIN WINDOW CHECK - ONLY ENFORCE ON AGENT SESSIONS
-    // Main Claude window should NEVER be blocked, only subagents
+    // AGENT DETECTION - ONLY ENFORCE ON AGENT SESSIONS
+    // Uses env vars (CLAUDE_SUBAGENT, CLAUDE_AGENT_ID, etc.) + subagent tracking
+    // Main Claude window is NEVER blocked, only subagents/team members
     // ========================================================================
-    if (!hasActiveAgents() || !isAgentSession(sessionId)) {
-      // No agents running OR this is the main Claude window - pass through
+    if (!isRunningAsAgent()) {
+      // Not an agent - pass through immediately
+      console.log(JSON.stringify({ continue: true }));
+      return;
+    }
+
+    // Verify this is a specmem-enabled project
+    if (!isSpecmemProject()) {
       console.log(JSON.stringify({ continue: true }));
       return;
     }
@@ -287,93 +302,78 @@ process.stdin.on('end', () => {
     state.lastActivity = Date.now();
 
     // ========================================================================
-    // ALWAYS ALLOWED TOOLS - but track state
+    // TRACK STATE FOR ALL TOOLS (announcements, claims, memory, comms)
     // ========================================================================
-    if (ALWAYS_ALLOWED.includes(toolName)) {
-      // Track announcements
-      if (ANNOUNCE_TOOLS.includes(toolName)) {
-        state.announced = true;
-      }
-      // Track claims + write to shared claims file
-      if (CLAIM_TOOLS.includes(toolName)) {
-        state.claimed = true;
-        // Write claim to shared file so other agents can see it
-        const params = data.tool_input || {};
-        const claimFiles = params.files || [];
-        const claimDesc = params.description || 'unnamed task';
-        const claimsFile = `${PROJECT_TMP_DIR}/active-claims.json`;
-        try {
-          let claims = {};
-          if (fs.existsSync(claimsFile)) {
-            claims = JSON.parse(fs.readFileSync(claimsFile, 'utf8'));
-          }
-          // Add this claim
-          const claimId = `claim-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-          claims[claimId] = {
-            sessionId,
-            agentId: sessionId,
-            files: claimFiles,
-            description: claimDesc,
-            createdAt: Date.now()
-          };
-          // Clean up old claims (>30 min)
-          const now = Date.now();
+    if (ANNOUNCE_TOOLS.includes(toolName)) {
+      state.announced = true;
+    }
+    if (CLAIM_TOOLS.includes(toolName)) {
+      state.claimed = true;
+      const params = data.tool_input || {};
+      const claimFiles = params.files || [];
+      const claimDesc = params.description || 'unnamed task';
+      const claimsFile = `${PROJECT_TMP_DIR}/active-claims.json`;
+      try {
+        let claims = {};
+        if (fs.existsSync(claimsFile)) {
+          claims = JSON.parse(fs.readFileSync(claimsFile, 'utf8'));
+        }
+        const claimId = `claim-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        claims[claimId] = {
+          sessionId, agentId: sessionId, files: claimFiles,
+          description: claimDesc, createdAt: Date.now()
+        };
+        const now = Date.now();
+        for (const [id, claim] of Object.entries(claims)) {
+          if (now - claim.createdAt > 1800000) delete claims[id];
+        }
+        fs.writeFileSync(claimsFile, JSON.stringify(claims, null, 2));
+        state.currentClaimId = claimId;
+      } catch (e) {}
+    }
+    if (toolName === 'mcp__specmem__release_task') {
+      const claimsFile = `${PROJECT_TMP_DIR}/active-claims.json`;
+      try {
+        if (fs.existsSync(claimsFile)) {
+          let claims = JSON.parse(fs.readFileSync(claimsFile, 'utf8'));
           for (const [id, claim] of Object.entries(claims)) {
-            if (now - claim.createdAt > 1800000) delete claims[id];
+            if (claim.sessionId === sessionId) delete claims[id];
           }
           fs.writeFileSync(claimsFile, JSON.stringify(claims, null, 2));
-          state.currentClaimId = claimId;
-        } catch (e) {}
-      }
-      // Track release_task - remove from shared claims
-      if (toolName === 'mcp__specmem__release_task') {
-        const claimsFile = `${PROJECT_TMP_DIR}/active-claims.json`;
-        try {
-          if (fs.existsSync(claimsFile)) {
-            let claims = JSON.parse(fs.readFileSync(claimsFile, 'utf8'));
-            // Remove claims from this session
-            for (const [id, claim] of Object.entries(claims)) {
-              if (claim.sessionId === sessionId) delete claims[id];
-            }
-            fs.writeFileSync(claimsFile, JSON.stringify(claims, null, 2));
-          }
-        } catch (e) {}
-        state.claimed = false;
-        state.editedFiles = [];
-      }
-      // Track memory tool usage
-      if (MEMORY_TOOLS.includes(toolName)) {
-        state.usedMemoryTools = true;
-        state.searchCount = 0; // Reset search count
-      }
-      // Track broadcast checks (read_team_messages with broadcasts)
-      if (BROADCAST_CHECK_TOOLS.includes(toolName)) {
-        // Check if they included broadcasts in the params
-        const params = data.tool_input || {};
-        if (params.include_broadcasts !== false) {  // Default is true
-          state.toolUsageCount = 0;  // Reset counter
-          state.lastBroadcastCheck = Date.now();
-          state.needsBroadcastCheck = false;
         }
+      } catch (e) {}
+      state.claimed = false;
+      state.editedFiles = [];
+    }
+    if (MEMORY_TOOLS.includes(toolName)) {
+      state.usedMemoryTools = true;
+      state.searchCount = 0;
+    }
+    // Track team comms reads - resets comms counter
+    if (BROADCAST_CHECK_TOOLS.includes(toolName)) {
+      state.commsToolCount = 0;
+      state.lastCommsCheck = Date.now();
+      state.needsCommsCheck = false;
+      // Also reset broadcast counter IF they included broadcasts
+      const params = data.tool_input || {};
+      if (params.include_broadcasts !== false) {
+        state.broadcastToolCount = 0;
+        state.lastBroadcastCheck = Date.now();
+        state.needsBroadcastCheck = false;
       }
-      // Track help checks
-      if (HELP_CHECK_TOOLS.includes(toolName)) {
-        state.helpToolUsageCount = 0;  // Reset counter
-        state.lastHelpCheck = Date.now();
-        state.needsHelpCheck = false;
-      }
-      saveTracking(tracking);
-      console.log(JSON.stringify({ continue: true }));
-      return;
+    }
+    if (HELP_CHECK_TOOLS.includes(toolName)) {
+      state.helpToolUsageCount = 0;
+      state.lastHelpCheck = Date.now();
+      state.needsHelpCheck = false;
     }
 
     // ========================================================================
-    // CHECK: Must announce first
+    // CHECK: Must announce first (before anything else)
     // ========================================================================
-    if (!state.announced) {
+    if (!state.announced && !ALWAYS_ALLOWED.includes(toolName)) {
       state.blockedCount++;
       saveTracking(tracking);
-      // Make the announcement requirement very clear with proper channel guidance
       console.log(blockResponse(
         `[BLOCKED] You MUST ANNOUNCE yourself first!\n\n` +
         `This is your MANDATORY FIRST ACTION before any other tool:\n\n` +
@@ -386,23 +386,43 @@ process.stdin.on('end', () => {
     }
 
     // ========================================================================
-    // INCREMENT TOOL USAGE COUNTERS (for broadcast/help enforcement)
+    // INCREMENT ALL COUNTERS ON EVERY TOOL CALL (per-agent, per-session)
+    // This counts ALL tools including ALWAYS_ALLOWED - no dodging
     // ========================================================================
-    state.toolUsageCount = (state.toolUsageCount || 0) + 1;
+    state.commsToolCount = (state.commsToolCount || 0) + 1;
+    state.broadcastToolCount = (state.broadcastToolCount || 0) + 1;
     state.helpToolUsageCount = (state.helpToolUsageCount || 0) + 1;
 
     // ========================================================================
-    // CHECK: Must check broadcasts every 5 tool usages
+    // HARD BLOCK: Must read team messages every 4 tool usages
+    // read_team_messages() satisfies this - any mode
     // ========================================================================
-    if (state.toolUsageCount >= BROADCAST_CHECK_INTERVAL) {
+    if (state.commsToolCount >= TEAM_COMMS_CHECK_INTERVAL && !BROADCAST_CHECK_TOOLS.includes(toolName)) {
+      state.needsCommsCheck = true;
+      state.blockedCount++;
+      saveTracking(tracking);
+      console.log(blockResponse(
+        `[BLOCKED] MANDATORY team comms check! (${state.commsToolCount} tools since last check)\n\n` +
+        `REQUIRED: read_team_messages({include_swarms: true, limit: 5})\n\n` +
+        `You MUST check team messages every 4 tool calls. This is non-negotiable.\n` +
+        `Other agents may have critical updates for you. CHECK NOW.`
+      ));
+      return;
+    }
+
+    // ========================================================================
+    // HARD BLOCK: Must read broadcasts every 5 tool usages
+    // read_team_messages({include_broadcasts: true}) satisfies this
+    // ========================================================================
+    if (state.broadcastToolCount >= BROADCAST_CHECK_INTERVAL && !BROADCAST_CHECK_TOOLS.includes(toolName)) {
       state.needsBroadcastCheck = true;
       state.blockedCount++;
       saveTracking(tracking);
       console.log(blockResponse(
-        `[BLOCKED] Time to check broadcasts! (${state.toolUsageCount} tools since last check)\n\n` +
-        `REQUIRED: read_team_messages({include_broadcasts: true, limit: 10})\n\n` +
-        `Stay informed about team updates. Other swarms might need your help!\n` +
-        `After checking, you can continue working.`
+        `[BLOCKED] MANDATORY broadcast check! (${state.broadcastToolCount} tools since last broadcast check)\n\n` +
+        `REQUIRED: read_team_messages({include_broadcasts: true, include_swarms: true, limit: 10})\n\n` +
+        `You MUST check broadcasts every 5 tool calls. This is non-negotiable.\n` +
+        `Team-wide announcements and status updates require your attention. CHECK NOW.`
       ));
       return;
     }
@@ -410,7 +430,7 @@ process.stdin.on('end', () => {
     // ========================================================================
     // CHECK: Must check help requests every 8 tool usages
     // ========================================================================
-    if (state.helpToolUsageCount >= HELP_CHECK_INTERVAL) {
+    if (state.helpToolUsageCount >= HELP_CHECK_INTERVAL && !HELP_CHECK_TOOLS.includes(toolName)) {
       state.needsHelpCheck = true;
       state.blockedCount++;
       saveTracking(tracking);
@@ -425,12 +445,20 @@ process.stdin.on('end', () => {
     }
 
     // ========================================================================
-    // WARN: Approaching broadcast check
+    // ALWAYS ALLOWED TOOLS - pass through after counter checks
     // ========================================================================
-    if (state.toolUsageCount === BROADCAST_CHECK_INTERVAL - 1) {
-      // Don't block, just warn
+    if (ALWAYS_ALLOWED.includes(toolName)) {
+      saveTracking(tracking);
+      console.log(JSON.stringify({ continue: true }));
+      return;
+    }
+
+    // ========================================================================
+    // WARN: Approaching comms check
+    // ========================================================================
+    if (state.commsToolCount === TEAM_COMMS_CHECK_INTERVAL - 1) {
       console.log(allowWithReminder(
-        `[HEADS UP] Next tool call will require broadcast check. Consider checking now with read_team_messages({include_broadcasts: true})`
+        `[HEADS UP] Next tool call will require team comms check. Do it now: read_team_messages({include_swarms: true, limit: 5})`
       ));
       // Don't return - continue to other checks
     }

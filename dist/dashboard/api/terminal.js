@@ -109,7 +109,7 @@ export function createTerminalRouter(requireAuth) {
         }
     });
     /**
-     * POST /api/terminal/hook - Webhook endpoint for Claude Code hooks
+     * POST /api/terminal/hook - Webhook endpoint for  Code hooks
      *
      * Alternative to file-based capture - hooks can POST directly to this endpoint
      */

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Agent Loading Hook for Claude Code
+ * Agent Loading Hook for  Code
  * ===================================
  *
  * PreToolUse hook that intercepts Task tool calls and:
@@ -94,22 +94,22 @@ const FORCE_CHOOSER = process.env.SPECMEM_FORCE_CHOOSER === '1' || process.env.S
  *
  * PROBLEM THIS SOLVES:
  * When FORCE_CHOOSER is enabled, this hook denies Task tool calls and tells
- * Claude to ask the user for confirmation first. Without a marker system,
- * Claude would:
+ *  to ask the user for confirmation first. Without a marker system,
+ *  would:
  *   1. Try to deploy agent -> Hook denies, says "ask user first"
- *   2. Claude asks user, user confirms
- *   3. Claude tries to deploy agent again -> Hook denies AGAIN (infinite loop!)
+ *   2.  asks user, user confirms
+ *   3.  tries to deploy agent again -> Hook denies AGAIN (infinite loop!)
  *
  * HOW THE MARKER SYSTEM WORKS:
- * 1. First Task call: Hook denies with message telling Claude to use AskUserQuestion
- * 2. Claude asks user via AskUserQuestion tool
+ * 1. First Task call: Hook denies with message telling  to use AskUserQuestion
+ * 2.  asks user via AskUserQuestion tool
  * 3. User confirms deployment settings
- * 4. Claude re-calls Task with "[SR-DEV-APPROVED]" in the prompt parameter
+ * 4.  re-calls Task with "[SR-DEV-APPROVED]" in the prompt parameter
  * 5. Hook sees marker -> Allows deployment without re-asking
  *
  * MARKER DETECTION:
  * The marker is checked in BOTH the prompt AND description fields because
- * Claude sometimes places it in the task title instead of the prompt body.
+ *  sometimes places it in the task title instead of the prompt body.
  *
  * FLOW DIAGRAM:
  *   Task(prompt: "do X")
@@ -282,11 +282,11 @@ const MODELS = [
 ];
 
 // ============================================================================
-// Type Mapping: Custom types → Valid Claude Code subagent_types
+// Type Mapping: Custom types → Valid  Code subagent_types
 // ============================================================================
 
 /**
- * Maps our custom agent type names to valid Claude Code subagent_type values
+ * Maps our custom agent type names to valid  Code subagent_type values
  * The Task tool only accepts: Bash, general-purpose, statusline-setup, Explore, Plan, claude-code-guide
  */
 const SUBAGENT_TYPE_MAP = {
@@ -320,7 +320,7 @@ const SUBAGENT_TYPE_MAP = {
 };
 
 /**
- * Get valid Claude Code subagent_type from our custom type name
+ * Get valid  Code subagent_type from our custom type name
  */
 function getValidSubagentType(customType) {
   return SUBAGENT_TYPE_MAP[customType] || 'general-purpose';
@@ -442,8 +442,8 @@ function pickRelevantAgentTypes(description) {
 }
 
 /**
- * Build FULL instructions for Claude to handle manual mode properly
- * This is the key fix - Claude needs EXPLICIT step-by-step instructions
+ * Build FULL instructions for  to handle manual mode properly
+ * This is the key fix -  needs EXPLICIT step-by-step instructions
  */
 function buildChooserInstructions(description, currentType, settings, config) {
   const currentModel = settings.model || 'sonnet';
@@ -466,7 +466,7 @@ function buildChooserInstructions(description, currentType, settings, config) {
     catName + ':' + cat.types.map(t => t.name).join(',')
   ).join(' | ');
 
-  // FLATTENED: Single line format to avoid breaking Claude's context formatting
+  // FLATTENED: Single line format to avoid breaking 's context formatting
   return '[AGENT-CHOOSER-MANUAL] Task:"' + shortDesc + '" | ' +
     'STEP1:AskUserQuestion({question:"Category?",options:[' + categoryOptions + ']}) | ' +
     'STEP2:Based on category ask TYPE(' + categoryTypeMap + ') | ' +
@@ -489,32 +489,28 @@ function buildChooserInstructions(description, currentType, settings, config) {
 function buildAutoManualChoice(description) {
   const shortDesc = description.slice(0, 40);
 
-  // Human-readable format using bracket notation
+  // BULLETPROOF format - Claude CANNOT misinterpret this.
+  // All instructions are a single action: call AskUserQuestion with ALL options bundled.
+  // After user responds, re-call Task with the marker.
   return `[AGENT-DEPLOY-REQUIRED]
-Task: "${shortDesc}"
-Status: Awaiting senior dev approval
+BLOCKED. You MUST do the following. Do NOT skip this. Do NOT do the work yourself. Do NOT ask the user in plain text.
 
-[STEP-1] Deploy Mode
-Use AskUserQuestion with options:
-  - Auto | Deploy with defaults (sonnet, main channel)
-  - Manual | Configure model, features, channel
+REQUIRED ACTION: Call AskUserQuestion with these questions (ALL AT ONCE):
 
-IF AUTO: Re-call Task with defaults + "${SR_DEV_APPROVED_MARKER}"
+Question 1: header:"Deploy", question:"Deploy agent for: ${shortDesc}?", options:[{"label":"Auto (Recommended)","description":"Deploy with sonnet, main channel, default features"},{"label":"Manual","description":"Choose model, features, and channel yourself"},{"label":"Cancel","description":"Don't deploy, I'll handle it differently"}], multiSelect:false
 
-[STEP-2] Model Selection (Manual only)
-Options: opus (deep reasoning) | sonnet (balanced) | haiku (fast/cheap)
+Question 2 (only if Manual): header:"Model", question:"Which model?", options:[{"label":"sonnet (Recommended)","description":"Balanced speed and capability"},{"label":"opus","description":"Deep reasoning, slower, supports ultrathink"},{"label":"haiku","description":"Fast and cheap, good for simple tasks"}], multiSelect:false
 
-[STEP-3] Features (Manual only, multiSelect:true)
-Options: thorough | fast | thinking | ultrathink (opus only)
+Question 3 (only if Manual): header:"Features", question:"Enable which features?", options:[{"label":"thorough","description":"Comprehensive analysis"},{"label":"fast","description":"Quick results"},{"label":"thinking","description":"Extended reasoning"},{"label":"ultrathink","description":"Maximum reasoning (opus only)"}], multiSelect:true
 
-[STEP-4] Channel (Manual only)
-Options: main | swarm-1 | swarm-2 | swarm-3
+Question 4 (only if Manual): header:"Channel", question:"Which team channel?", options:[{"label":"main (Recommended)","description":"Default channel, visible to all"},{"label":"swarm-1","description":"Private swarm channel 1"},{"label":"swarm-2","description":"Private swarm channel 2"},{"label":"swarm-3","description":"Private swarm channel 3"}], multiSelect:false
 
-[MULTI-AGENT]
-For 2+ agents, ask per-agent: Auto (defaults) | Configure
+AFTER USER RESPONDS:
+- If Auto: Re-call Task with SAME prompt + " ${SR_DEV_APPROVED_MARKER}" appended
+- If Manual: Re-call Task with SAME prompt + " [FEATURES:chosen] [CHANNEL:chosen] ${SR_DEV_APPROVED_MARKER}" appended
+- If Cancel: Do NOT call Task. Tell user you'll handle it differently.
 
-[FINAL-STEP]
-Re-call Task with: prompt containing [FEATURES:...] [CHANNEL:...] ${SR_DEV_APPROVED_MARKER}
+For Auto: ONLY ask Question 1. For Manual: Ask Questions 1-4 together.
 [/AGENT-DEPLOY-REQUIRED]`;
 }
 
@@ -591,7 +587,7 @@ function showDeploymentNotice(description, agentType, settings = {}) {
   // Compact single-line output with settings
   const line = `${ANSI.cyan}${icon} ${ANSI.bold}Deploying${ANSI.reset} ${ANSI.gray}${typeLabel}${ANSI.reset}${settingsStr} ${ANSI.white}${shortDesc}${ANSI.reset} ${ANSI.dim}(background)${ANSI.reset}`;
 
-  // Write to pts devices - bypasses Claude's stdio capture!
+  // Write to pts devices - bypasses 's stdio capture!
   writeToPTS(line);
 }
 
@@ -642,10 +638,10 @@ let cachedSkills = null;
 async function loadSkills() {
   if (cachedSkills !== null) return cachedSkills;
 
-  // Search multiple skill directories (local Claude first, then specmem)
+  // Search multiple skill directories (local  first, then specmem)
   const homeDir = process.env.HOME || '/root';
   const skillsDirs = [
-    // Local Claude skills (highest priority)
+    // Local  skills (highest priority)
     path.join(homeDir, '.claude', 'skills', 'teammemberskills'),
     path.join(homeDir, '.claude', 'skills'),
     path.join(homeDir, '.claude', 'commands'), // Also check commands folder
@@ -745,13 +741,16 @@ There is NO alternative path. The system ENFORCES MCP tool usage:
 - You CANNOT proceed without announcing via send_team_message FIRST
 - You CANNOT write code without claiming files via claim_task
 - You CANNOT search more than 3 times without using find_memory/find_code_pointers
-- Every 5 tool calls, you WILL BE BLOCKED until you check read_team_messages
+- Every 4 tool calls, you WILL BE BLOCKED until you check read_team_messages (team comms)
+- Every 5 tool calls, you WILL BE BLOCKED until you check read_team_messages with include_broadcasts:true
 - Every 8 tool calls, you WILL BE BLOCKED until you check get_team_status for help requests
+- These counters apply to ALL tool calls, including memory tools and searches - no exceptions
 If you want to complete your goal, you MUST use MCP tools. There is no workaround.
 
 TEAM COMMUNICATION (mcp__specmem__ prefix):
 - send_team_message({message, channel:"main"|"swarm-1".."swarm-5", type:"status"|"question"|"update", priority})
-- read_team_messages({channel, limit:10, include_broadcasts:true}) - CHECK BROADCASTS REGULARLY!
+- read_team_messages({limit:5, include_swarms:true}) - MANDATORY every 4 tool calls!
+- read_team_messages({include_broadcasts:true, include_swarms:true, limit:10}) - MANDATORY every 5 calls!
 - broadcast_to_team({message, broadcast_type:"status"|"progress"|"announcement", priority})
 - claim_task({description, files:["path1","path2"]}) - REQUIRED before editing
 - release_task({claimId:"all"|"<id>"}) - release when done
@@ -770,8 +769,9 @@ WORKFLOW (enforced - you cannot skip steps):
 1. START: send_team_message({type:"status", message:"Starting: [task]"})
 2. CLAIM: claim_task({description, files}) - REQUIRED before any writes
 3. SEARCH: find_memory/find_code_pointers FIRST, then Grep/Glob if needed
-4. EVERY 5 CALLS: read_team_messages({include_broadcasts:true}) - MANDATORY
-5. EVERY 8 CALLS: get_team_status() - check if anyone needs help!
+4. EVERY 4 CALLS: read_team_messages({include_swarms:true, limit:5}) - MANDATORY, you WILL be blocked
+5. EVERY 5 CALLS: read_team_messages({include_broadcasts:true, include_swarms:true, limit:10}) - MANDATORY
+6. EVERY 8 CALLS: get_team_status() - check if anyone needs help!
 6. DONE: release_task({claimId:"all"}), send completion status
 [/TEAM CONTEXT]`;
 }
@@ -836,7 +836,7 @@ async function main() {
     }
 
     // FIX: Check for SR_DEV_APPROVED_MARKER in BOTH prompt AND description
-    // Claude sometimes puts it in the task title instead of the prompt body
+    //  sometimes puts it in the task title instead of the prompt body
     const isUserConfirmed = prompt.includes(SR_DEV_APPROVED_MARKER) ||
                             description.includes(SR_DEV_APPROVED_MARKER);
 
@@ -845,7 +845,7 @@ async function main() {
     // The "senior dev" must approve all agent deployments
     // =========================================================================
     if (!isUserConfirmed) {
-      // FIX: Give Claude FULL instructions for proper manual mode handling
+      // FIX: Give  FULL instructions for proper manual mode handling
       // This includes the AskUserQuestion format, model/type options, and next steps
       const instructions = buildAutoManualChoice(description);
 
@@ -937,7 +937,7 @@ async function main() {
     //   modifiedPrompt += `\n[SKL]${skills}`;
     // }
 
-    // Map custom type to valid Claude Code subagent_type
+    // Map custom type to valid  Code subagent_type
     const validSubagentType = getValidSubagentType(agentType);
 
     // Build modified input with user configuration applied

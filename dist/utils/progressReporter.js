@@ -3,18 +3,18 @@
  *
  * MCP-safe progress reporting with TWO output modes:
  * 1. stderr (fallback) - for bootstrap/pre-MCP
- * 2. MCP sendLoggingMessage - for visible output in Claude Code terminal
+ * 2. MCP sendLoggingMessage - for visible output in  Code terminal
  *
  * Features:
  * - ANSI spinner animation for in-progress states
  * - Rate-limited output (max 4 updates/second to avoid spam)
  * - Clear phase indicators: start, progress, retry, complete, error
  * - Item counts and percentages for batch operations
- * - MCP protocol integration for VISIBLE progress in Claude Code
+ * - MCP protocol integration for VISIBLE progress in  Code
  */
 // MCP server reference for sendLoggingMessage
 let mcpServer = null;
-// Rate limiting for MCP messages (don't spam Claude Code terminal)
+// Rate limiting for MCP messages (don't spam  Code terminal)
 let lastMcpMessageTime = 0;
 const MCP_MIN_INTERVAL_MS = 500; // Max 2 messages per second
 // ANSI escape codes
@@ -166,9 +166,9 @@ class ProgressReporter {
      * Write a line - uses MCP sendLoggingMessage if available, else stderr
      */
     writeLine(line, phase) {
-        // Strip ANSI codes for MCP logging (Claude Code handles formatting)
+        // Strip ANSI codes for MCP logging ( Code handles formatting)
         const plainLine = line.replace(/\x1b\[[0-9;]*m/g, '');
-        // Try MCP sendLoggingMessage first (visible in Claude Code terminal!)
+        // Try MCP sendLoggingMessage first (visible in  Code terminal!)
         if (mcpServer) {
             const now = Date.now();
             // Rate limit: skip 'start' phase if too frequent, always show complete/error/retry
@@ -323,7 +323,7 @@ export function reportRetry(operation, attempt, maxAttempts) {
 }
 /**
  * Set the MCP server for sendLoggingMessage output
- * Call this once the MCP server is initialized to enable visible progress in Claude Code
+ * Call this once the MCP server is initialized to enable visible progress in  Code
  */
 export function setMcpServer(server) {
     mcpServer = server;

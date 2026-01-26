@@ -55,7 +55,7 @@ const SPECMEM_HOME = getSpecmemHome();
 const SPECMEM_PKG = getSpecmemPkg();
 const SPECMEM_RUN_DIR = expandCwd(process.env.SPECMEM_RUN_DIR) || getProjectSocketDir();
 
-// Project path will be set from Claude's hook input (cwd field)
+// Project path will be set from 's hook input (cwd field)
 // Fallback: 1. SPECMEM_PROJECT_PATH env var, 2. process.cwd()
 let PROJECT_PATH = expandCwd(process.env.SPECMEM_PROJECT_PATH) || process.cwd() || '/';
 
@@ -295,7 +295,7 @@ async function searchSpecMem(query) {
  * Format memories for injection - FLATTENED single-line format
  * Matches grep hook format: [SM-FIND] ... | ... | [/SM-FIND] drill_down(N)
  * Sorted by similarity (highest first) with drilldown IDs
- * Uses pipe separators instead of newlines to avoid breaking Claude's formatting
+ * Uses pipe separators instead of newlines to avoid breaking 's formatting
  */
 function formatMemories(memories) {
   if (!memories.length) return '';
@@ -391,7 +391,7 @@ async function main() {
   // CRIT-07 FIX: Read input with timeout instead of indefinite for-await
   let input = await readStdinWithTimeout(5000);
 
-  // Parse input - Claude passes { sessionId, prompt, cwd, ... }
+  // Parse input -  passes { sessionId, prompt, cwd, ... }
   let prompt = '';
   let sessionId = 'unknown';
   let eventName = '';
@@ -407,7 +407,7 @@ async function main() {
       process.exit(0);
     }
 
-    // Use cwd from Claude's input for project filtering (critical for multi-project support!)
+    // Use cwd from 's input for project filtering (critical for multi-project support!)
     // CRITICAL: Also update socket path dynamically - it was set at module load time with wrong cwd!
     if (data.cwd) {
       PROJECT_PATH = data.cwd;
@@ -443,7 +443,7 @@ async function main() {
     const memories = await searchSpecMem(prompt);
 
     // Output context if found - compressed for token efficiency
-    // Use flattenOutput to avoid newlines breaking Claude's formatting
+    // Use flattenOutput to avoid newlines breaking 's formatting
     if (memories.length > 0) {
       const formatted = formatMemories(memories);
       // Compress with flattenOutput to avoid newlines
@@ -452,7 +452,7 @@ async function main() {
         minLength: 100,   // Don't compress short sections
         flattenOutput: true  // FLATTENED: Join with pipe instead of newlines
       });
-      // Prepend reminder for Claude to read the compressed Chinese
+      // Prepend reminder for  to read the compressed Chinese
       const prefixedOutput = `Read this for context (you understand Traditional Chinese compression with 99%+ accuracy) ⚠️壓縮:繁中→EN │ ${compressed}`;
       console.log(prefixedOutput);
 

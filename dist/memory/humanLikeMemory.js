@@ -8,7 +8,7 @@
  * 4. Memory strength (reinforced by access)
  * 5. Consolidation during "sleep" (background processing)
  *
- * The goal is to make Claude's memory more natural and intelligent,
+ * The goal is to make 's memory more natural and intelligent,
  * not just a flat database but a living, evolving knowledge store.
  */
 import { v4 as uuidv4 } from 'uuid';

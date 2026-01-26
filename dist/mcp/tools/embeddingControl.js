@@ -12,6 +12,7 @@
  */
 import { getEmbeddingServerManager } from '../embeddingServerManager.js';
 import { logger } from '../../utils/logger.js';
+import { execSync } from 'child_process';
 // Module-level reference to embedding provider for socket reset
 let embeddingProviderRef = null;
 /**
@@ -55,6 +56,36 @@ export class EmbeddingStart {
                     message: 'Embedding server already running and healthy',
                     status: manager.getExtendedStatus()
                 };
+            }
+            // ═══════════════════════════════════════════════════════════════
+            // HARD KILL: Force kill ALL frankenstein processes before restart
+            // This ensures force start actually works even when manager lost
+            // track of the process (e.g., after MCP reconnect)
+            // ═══════════════════════════════════════════════════════════════
+            try {
+                const pids = execSync('pgrep -f "frankenstein-embeddings.py" 2>/dev/null || true', { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+                if (pids.length > 0) {
+                    logger.info({ pids, count: pids.length }, '[EmbeddingStart] Hard killing all frankenstein processes');
+                    for (const pidStr of pids) {
+                        const pid = parseInt(pidStr, 10);
+                        if (pid && pid !== process.pid) {
+                            try { process.kill(pid, 'SIGTERM'); } catch { /* already dead */ }
+                        }
+                    }
+                    // Wait for them to die
+                    const killWaitMs = parseInt(process.env['SPECMEM_ORPHAN_KILL_WAIT_MS'] || '2000', 10);
+                    await new Promise(r => setTimeout(r, killWaitMs));
+                    // Force kill survivors
+                    for (const pidStr of pids) {
+                        const pid = parseInt(pidStr, 10);
+                        if (pid && pid !== process.pid) {
+                            try { process.kill(pid, 'SIGKILL'); } catch { /* already dead */ }
+                        }
+                    }
+                    logger.info('[EmbeddingStart] All old frankenstein processes killed');
+                }
+            } catch (killErr) {
+                logger.debug({ error: killErr }, '[EmbeddingStart] Hard kill failed (non-fatal)');
             }
             const result = await manager.userStart();
             // CRITICAL: Reset the MCP's socket connection to pick up new server

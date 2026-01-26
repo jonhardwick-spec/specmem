@@ -11,7 +11,7 @@
  * INPUT: Large context restoration memory like:
  *   "This session is being continued...
  *    **User's First Request**: 'fix this bug'
- *    **Claude Response**: Fixed the bug by...
+ *    ** Response**: Fixed the bug by...
  *    **User Feedback**: 'now add tests'"
  *
  * OUTPUT: Individual memories with proper project_path, timestamps, and pairing metadata
@@ -64,29 +64,29 @@ const USER_PATTERNS = [
     /^###?\s*User\s*(?:Message|Request)?\s*\n+([^\n#]{5,})/gim,
 ];
 /**
- * Patterns to extract Claude responses from context restorations
+ * Patterns to extract  responses from context restorations
  *
  * FIX LOW-30: Added fallback patterns for varied context restoration formats
  */
 const CLAUDE_PATTERNS = [
     // PRIMARY PATTERNS - Most specific
-    // **Claude Response**: "response"
-    /\*\*Claude(?:'s)?\s+Response[^:]*\*\*:\s*([^\n]{15,})/gi,
+    // ** Response**: "response"
+    /\*\*(?:'s)?\s+Response[^:]*\*\*:\s*([^\n]{15,})/gi,
     // **Assistant**: "response"
     /\*\*Assistant[^:]*\*\*:\s*([^\n]{15,})/gi,
-    // Claude responded/replied: "response"
-    /Claude\s+(?:responded|replied|said|answered)[:\s]+([^\n]{15,})/gi,
+    //  responded/replied: "response"
+    /\s+(?:responded|replied|said|answered)[:\s]+([^\n]{15,})/gi,
     // FIX LOW-30: FALLBACK PATTERNS - Less specific but catch edge cases
     // **AI**: or **Model**: format
     /\*\*(?:AI|Model)[^:]*\*\*:\s*([^\n]{15,})/gi,
-    // [Claude] or [Assistant] prefix format
-    /\[(?:Claude|Assistant)\]\s*:?\s*([^\[\]\n]{15,})/gi,
-    // > Claude: quote block format
-    /^>\s*(?:Claude|Assistant):\s*(.{15,}?)(?:\s*$|\s*\n)/gim,
-    // ### Claude/Assistant heading format
-    /^###?\s*(?:Claude|Assistant)\s*(?:Response|Reply)?\s*\n+([^\n#]{15,})/gim,
-    // Claude/Assistant action descriptions
-    /(?:Claude|Assistant)\s+(?:implemented|created|fixed|updated|added|modified)[:\s]+([^\n]{10,})/gi,
+    // [] or [Assistant] prefix format
+    /\[(?:|Assistant)\]\s*:?\s*([^\[\]\n]{15,})/gi,
+    // > : quote block format
+    /^>\s*(?:|Assistant):\s*(.{15,}?)(?:\s*$|\s*\n)/gim,
+    // ### /Assistant heading format
+    /^###?\s*(?:|Assistant)\s*(?:Response|Reply)?\s*\n+([^\n#]{15,})/gim,
+    // /Assistant action descriptions
+    /(?:|Assistant)\s+(?:implemented|created|fixed|updated|added|modified)[:\s]+([^\n]{10,})/gi,
 ];
 // ============================================================================
 // Helper Functions
@@ -219,7 +219,7 @@ function isProjectPathMatch(extractedPath) {
  * FIX LOW-30: Added fallback markers for varied context restoration formats
  */
 export function isContextRestoration(content) {
-    // Primary markers - most common Claude Code format
+    // Primary markers - most common  Code format
     const primaryMarkers = [
         'This session is being continued',
         'conversation is summarized below',
@@ -297,7 +297,7 @@ export function parseContextRestoration(memoryId, content, existingMetadata) {
             }
         }
     }
-    // Extract Claude responses
+    // Extract  responses
     for (const pattern of CLAUDE_PATTERNS) {
         let match;
         pattern.lastIndex = 0;

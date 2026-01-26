@@ -24,10 +24,21 @@ export class EmbeddingQueue {
     projectId;
     initialized = false;
     pendingCallbacks = new Map();
+    // Track when each callback was queued for expiry cleanup
+    callbackTimestamps = new Map();
     isDraining = false;
+    // Configurable limits via environment variables
+    maxQueueAge = parseInt(process.env['SPECMEM_EMBED_QUEUE_MAX_AGE_MS'] || '300000'); // 5 min default
+    cleanupIntervalMs = parseInt(process.env['SPECMEM_EMBED_QUEUE_CLEANUP_INTERVAL_MS'] || '60000'); // 1 min default
+    maxQueueSize = parseInt(process.env['SPECMEM_EMBED_QUEUE_MAX_SIZE'] || '500');
+    cleanupTimer = null;
     constructor(pool) {
         this.pool = pool;
         this.projectId = getProjectDirName();
+        // Start periodic cleanup of expired callbacks
+        this.cleanupTimer = setInterval(() => {
+            this.expireStaleCallbacks();
+        }, this.cleanupIntervalMs);
         // CRITICAL: Set search_path on every new connection to ensure queries
         // hit the correct project schema, not public
         this.pool.on('connect', async (client) => {
@@ -82,6 +93,12 @@ export class EmbeddingQueue {
      */
     async queueForEmbedding(text, priority = 5) {
         await this.initialize();
+        // Reject new items when queue is full
+        if (this.pendingCallbacks.size >= this.maxQueueSize) {
+            const err = new Error(`EmbeddingQueue full (${this.pendingCallbacks.size}/${this.maxQueueSize}) - rejecting new request`);
+            logger.warn({ pendingCount: this.pendingCallbacks.size, maxQueueSize: this.maxQueueSize }, err.message);
+            throw err;
+        }
         return new Promise(async (resolve, reject) => {
             try {
                 // Insert into queue
@@ -107,6 +124,8 @@ export class EmbeddingQueue {
                         reject(new Error('No embedding returned'));
                     }
                 });
+                // Track when this callback was added for expiry
+                this.callbackTimestamps.set(queueId, Date.now());
             }
             catch (err) {
                 logger.error({ err, text: text.substring(0, 50) }, 'Failed to queue embedding');
@@ -191,6 +210,7 @@ export class EmbeddingQueue {
                         if (callback) {
                             callback(embedding);
                             this.pendingCallbacks.delete(item.id);
+                            this.callbackTimestamps.delete(item.id);
                         }
                         processed++;
                         logger.debug({ queueId: item.id, processed }, 'Processed queued embedding');
@@ -206,6 +226,7 @@ export class EmbeddingQueue {
                         if (callback) {
                             callback(null, err instanceof Error ? err : new Error(errorMsg));
                             this.pendingCallbacks.delete(item.id);
+                            this.callbackTimestamps.delete(item.id);
                         }
                         logger.warn({ queueId: item.id, error: errorMsg }, 'Failed to process queued embedding');
                     }
@@ -217,6 +238,49 @@ export class EmbeddingQueue {
             this.isDraining = false;
         }
         return processed;
+    }
+    /**
+     * Expire stale callbacks that have been waiting longer than maxQueueAge.
+     * Called periodically by the cleanup timer to prevent unbounded callback growth.
+     */
+    expireStaleCallbacks() {
+        const now = Date.now();
+        let expiredCount = 0;
+        for (const [queueId, timestamp] of this.callbackTimestamps.entries()) {
+            if (now - timestamp > this.maxQueueAge) {
+                const callback = this.pendingCallbacks.get(queueId);
+                if (callback) {
+                    callback(null, new Error(`EmbeddingQueue callback expired after ${this.maxQueueAge}ms (queueId: ${queueId})`));
+                    this.pendingCallbacks.delete(queueId);
+                }
+                this.callbackTimestamps.delete(queueId);
+                expiredCount++;
+            }
+        }
+        if (expiredCount > 0) {
+            logger.warn({ expiredCount, remainingCallbacks: this.pendingCallbacks.size }, 'Expired stale EmbeddingQueue callbacks');
+        }
+    }
+    /**
+     * Shutdown the queue - clears cleanup timer and rejects all pending callbacks.
+     * Must be called when the EmbeddingQueue is no longer needed.
+     */
+    shutdown() {
+        if (this.cleanupTimer) {
+            clearInterval(this.cleanupTimer);
+            this.cleanupTimer = null;
+        }
+        // Reject all remaining pending callbacks
+        let rejectedCount = 0;
+        for (const [queueId, callback] of this.pendingCallbacks.entries()) {
+            callback(null, new Error('EmbeddingQueue shutting down'));
+            rejectedCount++;
+        }
+        this.pendingCallbacks.clear();
+        this.callbackTimestamps.clear();
+        if (rejectedCount > 0) {
+            logger.info({ rejectedCount }, 'EmbeddingQueue shutdown - rejected pending callbacks');
+        }
     }
     /**
      * Clean up old completed/failed entries

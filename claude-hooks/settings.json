@@ -5,9 +5,21 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node /root/.claude/hooks/bullshit-radar.cjs",
+            "timeout": 5,
+            "env": {
+              "SPECMEM_PROJECT_PATH": "${cwd}"
+            }
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "node /root/.claude/hooks/specmem-drilldown-hook.js",
             "timeout": 30,
-            "statusMessage": "🔍 Searching SpecMem...",
+            "statusMessage": "Searching SpecMem...",
             "env": {
               "SPECMEM_PROJECT_PATH": "${cwd}",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
@@ -44,22 +56,22 @@
           {
             "type": "command",
             "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
           },
           {
             "type": "command",
             "command": "node /root/.claude/hooks/smart-context-hook.js",
-            "timeout": 60,
+            "timeout": 8,
             "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}",
+              "SPECMEM_HOME": "/root/.specmem",
+              "SPECMEM_PKG": "/specmem",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
               "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_SEARCH_LIMIT": "5",
+              "SPECMEM_PROJECT_PATH": "${cwd}",
+              "SPECMEM_SEARCH_LIMIT": "3",
               "SPECMEM_THRESHOLD": "0.25",
-              "SPECMEM_MAX_CONTENT": "200"
+              "SPECMEM_MAX_CONTENT": "150"
             }
           }
         ]
@@ -70,10 +82,8 @@
           {
             "type": "command",
             "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
           }
         ]
       },
@@ -83,10 +93,8 @@
           {
             "type": "command",
             "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
           }
         ]
       },
@@ -96,22 +104,28 @@
           {
             "type": "command",
             "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
+          },
+          {
+            "type": "command",
+            "command": "node /root/.claude/hooks/use-code-pointers.cjs",
+            "timeout": 3,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
           },
           {
             "type": "command",
             "command": "node /root/.claude/hooks/smart-context-hook.js",
-            "timeout": 60,
+            "timeout": 8,
             "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}",
+              "SPECMEM_HOME": "/root/.specmem",
+              "SPECMEM_PKG": "/specmem",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
               "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_SEARCH_LIMIT": "5",
+              "SPECMEM_PROJECT_PATH": "${cwd}",
+              "SPECMEM_SEARCH_LIMIT": "3",
               "SPECMEM_THRESHOLD": "0.25",
-              "SPECMEM_MAX_CONTENT": "200"
+              "SPECMEM_MAX_CONTENT": "150"
             }
           }
         ]
@@ -122,49 +136,45 @@
           {
             "type": "command",
             "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
+          },
+          {
+            "type": "command",
+            "command": "node /root/.claude/hooks/use-code-pointers.cjs",
+            "timeout": 3,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
           },
           {
             "type": "command",
             "command": "node /root/.claude/hooks/smart-context-hook.js",
-            "timeout": 60,
+            "timeout": 8,
             "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}",
+              "SPECMEM_HOME": "/root/.specmem",
+              "SPECMEM_PKG": "/specmem",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
               "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_SEARCH_LIMIT": "5",
+              "SPECMEM_PROJECT_PATH": "${cwd}",
+              "SPECMEM_SEARCH_LIMIT": "3",
               "SPECMEM_THRESHOLD": "0.25",
-              "SPECMEM_MAX_CONTENT": "200"
+              "SPECMEM_MAX_CONTENT": "150"
             }
           }
         ]
       },
       {
-        "matcher": "mcp__specmem__find_memory",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
             "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__specmem__find_code_pointers",
-        "hooks": [
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
+          },
           {
             "type": "command",
-            "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
-            "timeout": 5,
-            "env": {
-              "SPECMEM_PROJECT_PATH": "${cwd}"
-            }
+            "command": "node /root/.claude/hooks/agent-output-interceptor.js",
+            "timeout": 3
           }
         ]
       },
@@ -190,62 +200,34 @@
         ]
       },
       {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node /root/.claude/hooks/agent-output-interceptor.js",
-            "timeout": 3,
-            "env": {
-              "SPECMEM_HOME": "/root/.specmem",
-              "SPECMEM_PKG": "/specmem",
-              "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
-              "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_PROJECT_PATH": "${cwd}",
-              "SPECMEM_SEARCH_LIMIT": "5",
-              "SPECMEM_THRESHOLD": "0.30",
-              "SPECMEM_MAX_CONTENT": "200"
-            }
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node /root/.claude/hooks/agent-output-interceptor.js",
-            "timeout": 3,
-            "env": {
-              "SPECMEM_HOME": "/root/.specmem",
-              "SPECMEM_PKG": "/specmem",
-              "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
-              "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_PROJECT_PATH": "${cwd}",
-              "SPECMEM_SEARCH_LIMIT": "5",
-              "SPECMEM_THRESHOLD": "0.30",
-              "SPECMEM_MAX_CONTENT": "200"
-            }
-          }
-        ]
-      },
-      {
         "matcher": "TaskOutput",
         "hooks": [
           {
             "type": "command",
             "command": "node /root/.claude/hooks/agent-output-interceptor.js",
-            "timeout": 3,
-            "env": {
-              "SPECMEM_HOME": "/root/.specmem",
-              "SPECMEM_PKG": "/specmem",
-              "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
-              "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_PROJECT_PATH": "${cwd}",
-              "SPECMEM_SEARCH_LIMIT": "5",
-              "SPECMEM_THRESHOLD": "0.30",
-              "SPECMEM_MAX_CONTENT": "200"
-            }
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__specmem__find_memory",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__specmem__find_code_pointers",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /root/.claude/hooks/team-comms-enforcer.cjs",
+            "timeout": 2,
+            "env": { "SPECMEM_PROJECT_PATH": "${cwd}" }
           }
         ]
       }
@@ -257,7 +239,7 @@
             "type": "command",
             "command": "node /root/.claude/hooks/specmem-session-start.cjs",
             "timeout": 30,
-            "statusMessage": "🚀 Loading SpecMem context...",
+            "statusMessage": "Loading SpecMem context...",
             "env": {
               "SPECMEM_PROJECT_PATH": "${cwd}",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
@@ -280,11 +262,17 @@
             "env": {
               "SPECMEM_PROJECT_PATH": "${cwd}",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
-              "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_SEARCH_LIMIT": "5",
-              "SPECMEM_THRESHOLD": "0.25",
-              "SPECMEM_MAX_CONTENT": "300"
+              "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock"
             }
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /root/.claude/hooks/specmem-drilldown-hook.js",
+            "timeout": 15
           }
         ]
       }
@@ -303,10 +291,7 @@
               "SPECMEM_PKG": "/specmem",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
               "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_PROJECT_PATH": "${cwd}",
-              "SPECMEM_SEARCH_LIMIT": "5",
-              "SPECMEM_THRESHOLD": "0.30",
-              "SPECMEM_MAX_CONTENT": "200"
+              "SPECMEM_PROJECT_PATH": "${cwd}"
             }
           }
         ]
@@ -359,10 +344,7 @@
               "SPECMEM_PKG": "/specmem",
               "SPECMEM_RUN_DIR": "${cwd}/specmem/sockets",
               "SPECMEM_EMBEDDING_SOCKET": "${cwd}/specmem/sockets/embeddings.sock",
-              "SPECMEM_PROJECT_PATH": "${cwd}",
-              "SPECMEM_SEARCH_LIMIT": "5",
-              "SPECMEM_THRESHOLD": "0.30",
-              "SPECMEM_MAX_CONTENT": "200"
+              "SPECMEM_PROJECT_PATH": "${cwd}"
             }
           }
         ]
@@ -395,23 +377,19 @@
   },
   "permissions": {
     "allow": [
-      "*",
       "mcp__specmem__*",
       "Skill(specmem)",
       "Skill(specmem-*)",
+      "Read",
       "Read(*)",
+      "Grep",
       "Grep(*)",
+      "Glob",
       "Glob(*)",
       "Bash",
-      "Read",
       "Write",
-      "Edit",
-      "Glob",
-      "Grep"
+      "Edit"
     ],
-    "deny": [],
-    "ask": [],
-    "defaultMode": "acceptEdits"
-  },
-  "model": "opus"
+    "deny": []
+  }
 }

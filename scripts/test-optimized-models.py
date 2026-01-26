@@ -66,7 +66,7 @@ except ImportError as e:
 # Test sentences
 TEST_SENTENCES = [
     "Hello world, this is a test.",
-    "SpecMem provides semantic memory for Claude Code.",
+    "SpecMem provides semantic memory for  Code.",
     "The quick brown fox jumps over the lazy dog.",
     "Machine learning models can be optimized for CPU inference.",
     "PostgreSQL with pgvector enables efficient vector similarity search.",

@@ -16,11 +16,11 @@ import { basename, extname } from 'path';
 import { logger } from '../utils/logger.js';
 import { getLanguageDetector } from '../codebase/languageDetection.js';
 /**
- * ClaudeCodeTracker - THE WATCHER that tracks code activity
+ * CodeTracker - THE WATCHER that tracks code activity
  *
  * fr fr never forgets what was written because this tracker catches EVERYTHING
  */
-export class ClaudeCodeTracker {
+export class CodeTracker {
     memorizer;
     config;
     currentSession = null;
@@ -161,7 +161,7 @@ export class ClaudeCodeTracker {
     /**
      * setPurposeForNextEdits - manually set the purpose for upcoming edits
      *
-     * Claude can call this to set context for what it's about to write
+     *  can call this to set context for what it's about to write
      */
     setPurposeForNextEdits(filePaths, purpose, context) {
         for (const filePath of filePaths) {
@@ -409,16 +409,16 @@ export class ClaudeCodeTracker {
  * Export singleton creator
  */
 let _tracker = null;
-export function getClaudeCodeTracker(memorizer, config) {
+export function getCodeTracker(memorizer, config) {
     if (!_tracker && memorizer) {
-        _tracker = new ClaudeCodeTracker(memorizer, config);
+        _tracker = new CodeTracker(memorizer, config);
     }
     if (!_tracker) {
-        throw new Error('ClaudeCodeTracker not initialized');
+        throw new Error('CodeTracker not initialized');
     }
     return _tracker;
 }
-export function resetClaudeCodeTracker() {
+export function resetCodeTracker() {
     _tracker = null;
 }
 //# sourceMappingURL=claudeCodeTracker.js.map

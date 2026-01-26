@@ -386,18 +386,25 @@ export class CodebaseIndexer {
         const startTime = Date.now();
         logger.info({ path: this.config.codebasePath }, '🚀 starting PARALLEL codebase scan...');
         coordinator?.emitCodebaseScanStart(this.config.codebasePath, 'full');
-        // Load existing hashes for deduplication (like session watcher)
-        const existingHashes = new Map();
+        // Load existing hashes AND mtimes for fast deduplication
+        // OPTIMIZATION: mtime check is ~100x faster than reading file to compute hash
+        const existingFiles = new Map(); // file_path -> { hash, mtime }
         if (this.db) {
             try {
-                const result = await this.db.query(`SELECT file_path, content_hash FROM codebase_files WHERE content_hash IS NOT NULL AND project_path = $1`, [projectPath]);
+                const result = await this.db.query(
+                    `SELECT file_path, content_hash, last_modified FROM codebase_files WHERE content_hash IS NOT NULL AND project_path = $1`,
+                    [projectPath]
+                );
                 for (const row of result.rows) {
-                    existingHashes.set(row.file_path, row.content_hash);
+                    existingFiles.set(row.file_path, {
+                        hash: row.content_hash,
+                        mtime: row.last_modified ? new Date(row.last_modified).getTime() : 0
+                    });
                 }
-                logger.info({ existingCount: existingHashes.size }, 'loaded existing hashes for deduplication');
+                logger.info({ existingCount: existingFiles.size }, 'loaded existing files (hash+mtime) for fast deduplication');
             }
             catch (error) {
-                logger.warn({ error }, 'failed to load existing hashes');
+                logger.warn({ error }, 'failed to load existing file data');
             }
         }
         // Clear in-memory index - MEMORY FIX: Only store metadata, not full content
@@ -415,6 +422,8 @@ export class CodebaseIndexer {
         // Stats tracking with ACK counts
         let totalProcessed = 0;
         let totalSkipped = 0;
+        let totalMtimeSkipped = 0;  // Fast path: skipped via mtime (no file read)
+        let totalHashSkipped = 0;   // Slow path: skipped via hash (file read required)
         let totalIndexed = 0;
         let totalAckSuccess = 0;
         let totalAckFailed = 0;
@@ -430,13 +439,20 @@ export class CodebaseIndexer {
                     const stats = await fs.stat(filePath);
                     if (stats.size > this.config.maxFileSizeBytes)
                         return null;
+                    // MTIME-FIRST OPTIMIZATION: Skip file read if mtime unchanged
+                    // stat() is ~100x faster than read(), saves massive I/O on unchanged files
+                    const existing = existingFiles.get(relativePath);
+                    if (existing && existing.mtime && stats.mtime.getTime() <= existing.mtime) {
+                        // mtime unchanged = file unchanged, skip without reading
+                        return { skipped: true, relativePath, mtimeSkip: true };
+                    }
                     if (await this.isBinaryFile(filePath))
                         return null;
                     const content = await fs.readFile(filePath, 'utf-8');
                     const contentHash = this.hashContent(content);
-                    // Check if unchanged
-                    if (existingHashes.get(relativePath) === contentHash) {
-                        return { skipped: true, relativePath };
+                    // Fallback: hash check for files with changed mtime but same content
+                    if (existing && existing.hash === contentHash) {
+                        return { skipped: true, relativePath, hashSkip: true };
                     }
                     const fileName = path.basename(filePath);
                     const extension = path.extname(filePath).toLowerCase();
@@ -471,6 +487,8 @@ export class CodebaseIndexer {
                     continue;
                 if (result.skipped) {
                     totalSkipped++;
+                    if (result.mtimeSkip) totalMtimeSkipped++;
+                    if (result.hashSkip) totalHashSkipped++;
                     continue;
                 }
                 filesToEmbed.push(result);
@@ -579,6 +597,8 @@ export class CodebaseIndexer {
                     processed: totalProcessed,
                     indexed: totalIndexed,
                     skipped: totalSkipped,
+                    mtimeSkip: totalMtimeSkipped,
+                    hashSkip: totalHashSkipped,
                     embeddings: totalEmbeddings,
                     ackSuccess: totalAckSuccess,
                     ackFailed: totalAckFailed,
@@ -599,6 +619,8 @@ export class CodebaseIndexer {
             filesProcessed: totalProcessed,
             filesIndexed: totalIndexed,
             filesSkipped: totalSkipped,
+            mtimeSkipped: totalMtimeSkipped,  // Fast path - no file read needed
+            hashSkipped: totalHashSkipped,    // Slow path - file read required
             embeddingsGenerated: totalEmbeddings,
             ackSuccess: totalAckSuccess,
             ackFailed: totalAckFailed,
@@ -606,7 +628,7 @@ export class CodebaseIndexer {
             durationSec: (duration / 1000).toFixed(1),
             filesPerSec: Math.round(totalProcessed / (duration / 1000)),
             linesIndexed: totalLines
-        }, '✅ PARALLEL codebase scan complete!');
+        }, `✅ PARALLEL codebase scan complete! (${totalMtimeSkipped} mtime-skipped, ${totalHashSkipped} hash-skipped)`);
     }
     /**
      * persistBatchWithAck - persist files with ACK verification using RETURNING
@@ -878,7 +900,7 @@ export class CodebaseIndexer {
         const analyzableLanguages = [
             'typescript', 'typescript-react', 'javascript', 'javascript-react',
             'python', 'go', 'rust', 'java', 'kotlin', 'scala',
-            'ruby', 'php', 'c', 'cpp', 'swift'
+            'ruby', 'php', 'c', 'cpp', 'swift', 'html'
         ];
         return analyzableLanguages.includes(language);
     }

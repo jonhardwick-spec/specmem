@@ -1,5 +1,5 @@
 /**
- * ContextCommands - conversation context management for Claude
+ * ContextCommands - conversation context management for 
  *
  * save and load conversation contexts fr
  * - /context save - save current conversation

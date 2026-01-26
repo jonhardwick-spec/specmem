@@ -3,7 +3,7 @@
  *
  * yo this tool is the DETECTIVE of the codebase fr fr
  * give it an error message and it finds the root cause
- * saves Claude from doing massive explores every time
+ * saves  from doing massive explores every time
  *
  * Features:
  * - Error pattern matching
@@ -20,8 +20,8 @@ import { logger } from '../../utils/logger.js';
  * Takes an error message and optionally a stack trace,
  * finds likely root causes and previous solutions
  *
- * This is THE key tool for reducing Claude's search overhead
- * Instead of exploring the whole codebase, Claude can:
+ * This is THE key tool for reducing 's search overhead
+ * Instead of exploring the whole codebase,  can:
  * 1. Call trace_error with the error
  * 2. Get suggested files to look at
  * 3. See how similar errors were fixed before

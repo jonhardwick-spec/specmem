@@ -13,7 +13,7 @@
  */
 import pg from 'pg';
 import { EmbeddingProvider } from '../tools/index.js';
-export type ClaudeOperationType = 'write' | 'edit' | 'notebook_edit' | 'create' | 'update' | 'delete';
+export type OperationType = 'write' | 'edit' | 'notebook_edit' | 'create' | 'update' | 'delete';
 /**
  * yooo parameters for remembering what the assistant wrote
  */
@@ -21,7 +21,7 @@ export interface RememberCodeParams {
     filePath: string;
     codeWritten: string;
     purpose: string;
-    operationType?: ClaudeOperationType;
+    operationType?: OperationType;
     relatedFiles?: string[];
     tags?: string[];
     conversationContext?: string;
@@ -48,7 +48,7 @@ export interface StoredCodeEntry {
     codeHash: string;
     purpose: string;
     conversationContext?: string;
-    operationType: ClaudeOperationType;
+    operationType: OperationType;
     language: string;
     relatedFiles: string[];
     relatedMemoryIds: string[];
@@ -112,7 +112,7 @@ export declare class CodeMemorizer {
      */
     getRecentCode(options?: {
         limit?: number;
-        operationType?: ClaudeOperationType;
+        operationType?: OperationType;
         language?: string;
     }): Promise<StoredCodeEntry[]>;
     /**

@@ -9,7 +9,7 @@
  * 3. INJECTS relevant code memories (>25% file-specific, >30% general)
  * 4. BLOCKS original command, returns enriched compacted result
  *
- * RESULT: Claude gets compacted search + code context = fewer tokens!
+ * RESULT:  gets compacted search + code context = fewer tokens!
  *
  * Hook Event: PreToolUse
  * Triggers On: Grep, Glob
@@ -218,7 +218,7 @@ async function searchCodeMemories(query) {
 
 /**
  * Format enriched output - FLATTENED single line with pipe separators
- * Avoids newlines that could break Claude's context formatting
+ * Avoids newlines that could break 's context formatting
  */
 function formatEnrichedOutput(toolOutput, codeMemories, toolName, query) {
   const parts = [];

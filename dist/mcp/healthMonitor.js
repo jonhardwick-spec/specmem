@@ -31,7 +31,9 @@ export var ComponentHealth;
     ComponentHealth["UNKNOWN"] = "unknown";
 })(ComponentHealth || (ComponentHealth = {}));
 const DEFAULT_CONFIG = {
-    checkIntervalMs: parseInt(process.env['SPECMEM_HEALTH_CHECK_INTERVAL'] || '30000', 10),
+    checkIntervalMs: parseInt(process.env['SPECMEM_HEALTH_CHECK_INTERVAL_MS'] || process.env['SPECMEM_HEALTH_CHECK_INTERVAL'] || '30000', 10),
+    // Adaptive interval for unhealthy state (Issue #16)
+    unhealthyCheckIntervalMs: parseInt(process.env['SPECMEM_HEALTH_CHECK_UNHEALTHY_INTERVAL_MS'] || '5000', 10),
     dbTimeoutMs: parseInt(process.env['SPECMEM_HEALTH_DB_TIMEOUT'] || '5000', 10),
     // Use unified timeout config for embedding health checks
     embeddingTimeoutMs: getEmbeddingTimeout('health'),
@@ -58,6 +60,14 @@ export class HealthMonitor extends EventEmitter {
     checkTimer = null;
     logTimer = null;
     isRunning = false;
+    // Issue #16: Concurrency guard - prevents overlapping health checks
+    isCheckRunning = false;
+    // Issue #16: Diagnostics
+    totalHealthChecks = 0;
+    lastCheckTimestamp = 0;
+    // Issue #16: Adaptive interval tracking
+    currentCheckIntervalMs = 0;
+    consecutiveHealthyChecks = 0;
     // Component references
     resilientTransport = null;
     database = null;
@@ -76,8 +86,11 @@ export class HealthMonitor extends EventEmitter {
         this.transportHealth = this.createInitialHealth('transport');
         this.databaseHealth = this.createInitialHealth('database');
         this.embeddingHealth = this.createInitialHealth('embedding');
+        // Issue #16: Initialize adaptive interval to healthy rate
+        this.currentCheckIntervalMs = this.config.checkIntervalMs;
         logger.info({
             checkIntervalMs: this.config.checkIntervalMs,
+            unhealthyCheckIntervalMs: this.config.unhealthyCheckIntervalMs,
             autoRecoveryEnabled: this.config.autoRecoveryEnabled,
             logHealthStatus: this.config.logHealthStatus
         }, '[HealthMonitor] Initialized with config');
@@ -116,6 +129,10 @@ export class HealthMonitor extends EventEmitter {
     }
     /**
      * Start the health monitoring loop
+     *
+     * Issue #16: Uses setTimeout + recursive scheduling instead of setInterval
+     * to prevent check stacking when a health check takes longer than the interval.
+     * Uses adaptive intervals: faster checks when unhealthy, slower when healthy.
      */
     start() {
         if (this.isRunning) {
@@ -124,13 +141,9 @@ export class HealthMonitor extends EventEmitter {
         }
         this.isRunning = true;
         this.startTime = Date.now();
-        // Start periodic health checks
-        this.checkTimer = setInterval(() => {
-            this.runHealthChecks().catch(err => {
-                logger.error({ error: err }, '[HealthMonitor] Health check error');
-            });
-        }, this.config.checkIntervalMs);
-        this.checkTimer.unref();
+        this.currentCheckIntervalMs = this.config.checkIntervalMs;
+        // Issue #16: Start recursive setTimeout-based health check loop
+        this.scheduleNextHealthCheck();
         // Start periodic health logging if enabled
         if (this.config.logHealthStatus) {
             this.logTimer = setInterval(() => {
@@ -138,11 +151,40 @@ export class HealthMonitor extends EventEmitter {
             }, this.config.logIntervalMs);
             this.logTimer.unref();
         }
-        // Run initial health check
+        // Run initial health check immediately
         this.runHealthChecks().catch(err => {
             logger.error({ error: err }, '[HealthMonitor] Initial health check error');
         });
-        logger.info('[HealthMonitor] Health monitoring started');
+        logger.info({
+            initialIntervalMs: this.currentCheckIntervalMs,
+            unhealthyIntervalMs: this.config.unhealthyCheckIntervalMs,
+        }, '[HealthMonitor] Health monitoring started (adaptive setTimeout scheduling)');
+    }
+    /**
+     * Issue #16: Schedule the next health check using setTimeout (prevents stacking)
+     * Each check schedules the next one after completing, so checks never overlap from the timer.
+     */
+    scheduleNextHealthCheck() {
+        if (!this.isRunning) {
+            return;
+        }
+        // Clear any existing timer to prevent duplicates
+        if (this.checkTimer) {
+            clearTimeout(this.checkTimer);
+            this.checkTimer = null;
+        }
+        this.checkTimer = setTimeout(async () => {
+            if (!this.isRunning) return;
+            try {
+                await this.runHealthChecks();
+            }
+            catch (err) {
+                logger.error({ error: err }, '[HealthMonitor] Health check error');
+            }
+            // Schedule the next check (recursive scheduling)
+            this.scheduleNextHealthCheck();
+        }, this.currentCheckIntervalMs);
+        this.checkTimer.unref();
     }
     /**
      * Stop the health monitoring loop
@@ -152,36 +194,122 @@ export class HealthMonitor extends EventEmitter {
             return;
         }
         this.isRunning = false;
+        // Issue #16: checkTimer is now a setTimeout, use clearTimeout
         if (this.checkTimer) {
-            clearInterval(this.checkTimer);
+            clearTimeout(this.checkTimer);
             this.checkTimer = null;
         }
         if (this.logTimer) {
             clearInterval(this.logTimer);
             this.logTimer = null;
         }
-        logger.info('[HealthMonitor] Health monitoring stopped');
+        logger.info({
+            totalHealthChecks: this.totalHealthChecks,
+            lastCheckTimestamp: this.lastCheckTimestamp > 0 ? new Date(this.lastCheckTimestamp).toISOString() : null,
+            uptimeMs: Date.now() - this.startTime,
+        }, '[HealthMonitor] Health monitoring stopped');
+    }
+    /**
+     * Issue #16: Full cleanup/destroy method for graceful shutdown
+     * Stops all timers, removes all listeners, and resets all state.
+     */
+    destroy() {
+        this.stop();
+        this.removeAllListeners();
+        this.resilientTransport = null;
+        this.database = null;
+        this.embeddingSocketPath = null;
+        this.isCheckRunning = false;
+        this.totalHealthChecks = 0;
+        this.lastCheckTimestamp = 0;
+        this.consecutiveHealthyChecks = 0;
+        logger.info('[HealthMonitor] Destroyed - all resources released');
     }
     /**
      * Run all health checks (non-blocking)
+     *
+     * Issue #16: Added concurrency guard to prevent overlapping checks,
+     * diagnostic counters, and adaptive interval adjustment.
      */
     async runHealthChecks() {
-        const checkPromises = [
-            this.checkTransportHealth(),
-            this.checkDatabaseHealth(),
-            this.checkEmbeddingHealth()
-        ];
-        // Run all checks in parallel - they shouldn't block each other
-        await Promise.allSettled(checkPromises);
-        // Calculate overall health
-        const result = this.getSystemHealth();
-        // Emit health event
-        this.emit('health', result);
-        // Check for auto-recovery needs
-        if (this.config.autoRecoveryEnabled) {
-            await this.attemptAutoRecovery();
+        // Issue #16: Concurrency guard - prevent overlapping health checks
+        if (this.isCheckRunning) {
+            logger.debug('[HealthMonitor] Health check already in progress, skipping to prevent stacking');
+            return this.getSystemHealth();
         }
-        return result;
+        this.isCheckRunning = true;
+        try {
+            const checkPromises = [
+                this.checkTransportHealth(),
+                this.checkDatabaseHealth(),
+                this.checkEmbeddingHealth()
+            ];
+            // Run all checks in parallel - they shouldn't block each other
+            await Promise.allSettled(checkPromises);
+            // Issue #16: Update diagnostics
+            this.totalHealthChecks++;
+            this.lastCheckTimestamp = Date.now();
+            // Calculate overall health
+            const result = this.getSystemHealth();
+            // Issue #16: Adaptive interval adjustment
+            this.adjustCheckInterval(result.overallHealth);
+            // Emit health event
+            this.emit('health', result);
+            // Check for auto-recovery needs
+            if (this.config.autoRecoveryEnabled) {
+                await this.attemptAutoRecovery();
+            }
+            return result;
+        }
+        finally {
+            this.isCheckRunning = false;
+        }
+    }
+    /**
+     * Issue #16: Adjust the check interval based on current system health
+     *
+     * - Healthy: use normal interval (SPECMEM_HEALTH_CHECK_INTERVAL_MS, default 30s)
+     * - Unhealthy: use fast interval (SPECMEM_HEALTH_CHECK_UNHEALTHY_INTERVAL_MS, default 5s)
+     * - Recovering: gradually increase from unhealthy to healthy interval
+     *   (each consecutive healthy check increases interval by 25% toward the healthy rate)
+     */
+    adjustCheckInterval(overallHealth) {
+        const healthyInterval = this.config.checkIntervalMs;
+        const unhealthyInterval = this.config.unhealthyCheckIntervalMs;
+        const previousInterval = this.currentCheckIntervalMs;
+        if (overallHealth === ComponentHealth.UNHEALTHY) {
+            // Unhealthy: switch to fast polling immediately
+            this.currentCheckIntervalMs = unhealthyInterval;
+            this.consecutiveHealthyChecks = 0;
+        }
+        else if (overallHealth === ComponentHealth.DEGRADED) {
+            // Degraded: use midpoint between unhealthy and healthy
+            this.currentCheckIntervalMs = Math.round((unhealthyInterval + healthyInterval) / 2);
+            this.consecutiveHealthyChecks = 0;
+        }
+        else if (overallHealth === ComponentHealth.HEALTHY) {
+            this.consecutiveHealthyChecks++;
+            if (this.currentCheckIntervalMs < healthyInterval) {
+                // Recovering: gradually increase interval back to healthy rate
+                // Each consecutive healthy check moves 25% closer to the healthy interval
+                const step = (healthyInterval - this.currentCheckIntervalMs) * 0.25;
+                this.currentCheckIntervalMs = Math.round(
+                    Math.min(this.currentCheckIntervalMs + Math.max(step, 1000), healthyInterval)
+                );
+            }
+            else {
+                this.currentCheckIntervalMs = healthyInterval;
+            }
+        }
+        // Log interval changes
+        if (previousInterval !== this.currentCheckIntervalMs) {
+            logger.info({
+                previousIntervalMs: previousInterval,
+                newIntervalMs: this.currentCheckIntervalMs,
+                overallHealth,
+                consecutiveHealthyChecks: this.consecutiveHealthyChecks,
+            }, '[HealthMonitor] Adaptive interval adjusted');
+        }
     }
     /**
      * Check transport health
@@ -370,7 +498,7 @@ export class HealthMonitor extends EventEmitter {
      *
      * DYNAMIC PATH RESOLUTION (in priority order):
      * 1. Environment variable: SPECMEM_EMBEDDING_SOCKET (explicit configuration)
-     * 2. Claude home: ~/.claude/run (standard Claude Code location, uses os.homedir())
+     * 2.  home: ~/.claude/run (standard  Code location, uses os.homedir())
      * 3. SpecMem run dir: /specmem/run (container mount)
      * 4. Project-specific instances paths
      * 5. Legacy fallback paths
@@ -590,7 +718,12 @@ export class HealthMonitor extends EventEmitter {
                 embedding: { ...this.embeddingHealth }
             },
             uptime: Date.now() - this.startTime,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            // Issue #16: Diagnostics
+            totalHealthChecks: this.totalHealthChecks,
+            lastCheckTimestamp: this.lastCheckTimestamp > 0 ? new Date(this.lastCheckTimestamp).toISOString() : null,
+            currentCheckIntervalMs: this.currentCheckIntervalMs,
+            consecutiveHealthyChecks: this.consecutiveHealthyChecks,
         };
     }
     /**
@@ -667,7 +800,7 @@ export function resetHealthMonitor(projectPath) {
     const targetProject = projectPath || getProjectPath();
     const monitor = healthMonitorsByProject.get(targetProject);
     if (monitor) {
-        monitor.stop();
+        monitor.destroy();
         healthMonitorsByProject.delete(targetProject);
         logger.debug({ projectPath: targetProject }, '[HealthMonitor] Reset instance for project');
     }
@@ -677,8 +810,8 @@ export function resetHealthMonitor(projectPath) {
  */
 export function resetAllHealthMonitors() {
     for (const [projectPath, monitor] of healthMonitorsByProject) {
-        monitor.stop();
-        logger.debug({ projectPath }, '[HealthMonitor] Stopped instance for project');
+        monitor.destroy();
+        logger.debug({ projectPath }, '[HealthMonitor] Destroyed instance for project');
     }
     healthMonitorsByProject.clear();
 }

@@ -1,7 +1,7 @@
 /**
  * Silent Auto-Install System
  *
- * This module provides GUARANTEED silent installation of SpecMem into Claude Code.
+ * This module provides GUARANTEED silent installation of SpecMem into  Code.
  * It handles both config.json (MCP server registration) and settings.json (hooks).
  *
  * Key principles:
@@ -22,20 +22,20 @@ const __dirname = path.dirname(__filename);
 // ============================================================================
 // PATHS
 // ============================================================================
-function getClaudeDir() {
+function getDir() {
     return path.join(os.homedir(), '.claude');
 }
 function getConfigPath() {
-    return path.join(getClaudeDir(), 'config.json');
+    return path.join(getDir(), 'config.json');
 }
 function getSettingsPath() {
-    return path.join(getClaudeDir(), 'settings.json');
+    return path.join(getDir(), 'settings.json');
 }
 function getHooksDir() {
-    return path.join(getClaudeDir(), 'hooks');
+    return path.join(getDir(), 'hooks');
 }
 function getCommandsDir() {
-    return path.join(getClaudeDir(), 'commands');
+    return path.join(getDir(), 'commands');
 }
 function getSpecmemDir() {
     // Go up from dist/installer to specmem root
@@ -82,7 +82,7 @@ function safeWriteJson(filePath, data) {
 }
 /**
  * Ensure SpecMem is registered in ~/.claude/config.json
- * This is what makes Claude Code load SpecMem as an MCP server
+ * This is what makes  Code load SpecMem as an MCP server
  */
 export function ensureConfigJson() {
     const configPath = getConfigPath();
@@ -103,7 +103,7 @@ export function ensureConfigJson() {
     }
     // Build the SpecMem MCP server config - TRULY MINIMAL
     // Code handles ALL defaults internally - zero config needed!
-    // CRITICAL: ${cwd} is expanded by Claude Code dynamically per-invocation
+    // CRITICAL: ${cwd} is expanded by  Code dynamically per-invocation
     // NOTE: ${PWD} only resolves at startup, ${cwd} resolves per-directory change
     const specmemConfig = {
         command: 'node',
@@ -250,7 +250,7 @@ export function copyCommandFiles() {
 /**
  * Ensure hooks are properly configured in ~/.claude/settings.json
  *
- * Hook format rules (discovered from Claude Code source):
+ * Hook format rules (discovered from  Code source):
  * - UserPromptSubmit, SessionStart, Stop: NO matcher field (not applicable)
  * - PreToolUse, PostToolUse, PermissionRequest: matcher is a STRING pattern ("*", "Bash", "Edit|Write")
  */
@@ -450,7 +450,7 @@ export function runSilentInstall() {
     return result;
 }
 /**
- * Check if SpecMem is already installed in Claude
+ * Check if SpecMem is already installed in 
  */
 export function isSpecmemInstalled() {
     const configPath = getConfigPath();

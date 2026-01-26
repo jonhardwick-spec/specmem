@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * AI TeamMember Worker - Claude-powered team member worker
+ * AI TeamMember Worker - -powered team member worker
  *
- * Extends BaseWorker with Claude API integration for intelligent task execution.
+ * Extends BaseWorker with  API integration for intelligent task execution.
  * Supports streaming responses, token tracking, and inter-team member communication.
  */
 import { BaseWorker, WorkerConfig } from './baseWorker.js';
@@ -33,20 +33,20 @@ declare class AIWorker extends BaseWorker {
     private handleLimitWarning;
     protected executeTask(task: AITask): Promise<void>;
     private handleChat;
-    private executeWithClaude;
-    private analyzeWithClaude;
+    private executeWith;
+    private analyzeWith;
     private handleCommunication;
     private handleListenCommand;
     private handleSayCommand;
     private handleGetTeamMembers;
     /**
-     * Send message to Claude API with streaming
+     * Send message to  API with streaming
      */
-    private sendToClaudeWithStreaming;
+    private sendToWithStreaming;
     /**
-     * Simple send to Claude (non-streaming)
+     * Simple send to  (non-streaming)
      */
-    sendToClaude(prompt: string): Promise<string>;
+    sendTo(prompt: string): Promise<string>;
     protected cleanup(): Promise<void>;
 }
 export { AIWorker, AIWorkerConfig, AITask };

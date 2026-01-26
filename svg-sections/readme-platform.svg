@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="50%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#00bfff"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <linearGradient id="pyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3776AB"/>
+      <stop offset="100%" style="stop-color:#FFD43B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="420" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="420" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">Platform Requirements</text>
+  <text x="400" y="56" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">specmem setup auto-installs everything, including Claude Code itself</text>
+
+  <!-- THREE MAIN REQUIREMENTS - large cards -->
+
+  <!-- Python 3 -->
+  <g transform="translate(50, 78)">
+    <rect width="220" height="140" rx="12" fill="url(#cardGrad)" stroke="#FFD43B" stroke-width="1.5"/>
+    <rect width="220" height="3" rx="1.5" fill="#FFD43B"/>
+
+    <!-- Python logo approximation -->
+    <g transform="translate(85, 20)">
+      <rect x="0" y="0" width="22" height="22" rx="5" fill="#3776AB"/>
+      <rect x="26" y="0" width="22" height="22" rx="5" fill="#FFD43B"/>
+      <rect x="0" y="26" width="22" height="22" rx="5" fill="#FFD43B"/>
+      <rect x="26" y="26" width="22" height="22" rx="5" fill="#3776AB"/>
+      <circle cx="9" cy="9" r="3" fill="#FFD43B"/>
+      <circle cx="39" cy="39" r="3" fill="#3776AB"/>
+    </g>
+
+    <text x="110" y="88" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#FFD43B">Python 3</text>
+    <text x="110" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">Embedding server runs on</text>
+    <text x="110" y="123" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">sentence-transformers</text>
+  </g>
+
+  <!-- Node.js -->
+  <g transform="translate(290, 78)">
+    <rect width="220" height="140" rx="12" fill="url(#cardGrad)" stroke="#68A063" stroke-width="1.5"/>
+    <rect width="220" height="3" rx="1.5" fill="#68A063"/>
+
+    <!-- Node.js logo approximation -->
+    <g transform="translate(85, 18)">
+      <polygon points="24,0 48,14 48,42 24,56 0,42 0,14" fill="none" stroke="#68A063" stroke-width="2.5"/>
+      <text x="24" y="34" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#68A063">N</text>
+    </g>
+
+    <text x="110" y="88" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#68A063">Node.js 18+</text>
+    <text x="110" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">MCP server, CLI tools,</text>
+    <text x="110" y="123" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">hooks, and dashboard</text>
+  </g>
+
+  <!-- Debian-based -->
+  <g transform="translate(530, 78)">
+    <rect width="220" height="140" rx="12" fill="url(#cardGrad)" stroke="#A80030" stroke-width="1.5"/>
+    <rect width="220" height="3" rx="1.5" fill="#A80030"/>
+
+    <!-- Debian logo approximation - swirl -->
+    <g transform="translate(85, 16)">
+      <circle cx="24" cy="24" r="22" fill="none" stroke="#A80030" stroke-width="2.5"/>
+      <path d="M24 6 C38 6 42 20 36 30 C30 40 18 38 14 28" fill="none" stroke="#D70751" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="24" cy="24" r="6" fill="#D70751"/>
+    </g>
+
+    <text x="110" y="88" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#D70751">Debian-based</text>
+    <text x="110" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">apt package manager</text>
+    <text x="110" y="123" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">for Docker + PostgreSQL</text>
+  </g>
+
+  <!-- SUPPORTED DISTROS - smaller row -->
+  <text x="400" y="248" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#8b949e">Tested On</text>
+
+  <!-- Ubuntu -->
+  <g transform="translate(80, 265)">
+    <rect width="145" height="70" rx="8" fill="url(#cardGrad)" stroke="#E95420" stroke-width="1"/>
+    <circle cx="30" cy="35" r="16" fill="none" stroke="#E95420" stroke-width="2"/>
+    <circle cx="30" cy="35" r="4" fill="#E95420"/>
+    <circle cx="30" cy="19" r="3" fill="#E95420"/>
+    <circle cx="16" cy="43" r="3" fill="#E95420"/>
+    <circle cx="44" cy="43" r="3" fill="#E95420"/>
+    <text x="90" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#E95420">Ubuntu</text>
+    <text x="90" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#6e7681">22.04 / 24.04</text>
+  </g>
+
+  <!-- Ubuntu LTS -->
+  <g transform="translate(245, 265)">
+    <rect width="145" height="70" rx="8" fill="url(#cardGrad)" stroke="#E95420" stroke-width="1"/>
+    <circle cx="30" cy="35" r="16" fill="none" stroke="#E95420" stroke-width="2"/>
+    <circle cx="30" cy="35" r="4" fill="#E95420"/>
+    <circle cx="30" cy="19" r="3" fill="#77216F"/>
+    <circle cx="16" cy="43" r="3" fill="#77216F"/>
+    <circle cx="44" cy="43" r="3" fill="#77216F"/>
+    <text x="95" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E95420">Ubuntu LTS</text>
+    <text x="95" y="43" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#6e7681">Yes, unironically.</text>
+    <text x="95" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#6e7681">20.04+</text>
+  </g>
+
+  <!-- Linux Mint -->
+  <g transform="translate(410, 265)">
+    <rect width="145" height="70" rx="8" fill="url(#cardGrad)" stroke="#87CF3E" stroke-width="1"/>
+    <rect x="14" y="19" width="32" height="32" rx="8" fill="none" stroke="#87CF3E" stroke-width="2"/>
+    <text x="30" y="42" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#87CF3E">LM</text>
+    <text x="92" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#87CF3E">Mint</text>
+    <text x="92" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#6e7681">20+</text>
+  </g>
+
+  <!-- Kali -->
+  <g transform="translate(575, 265)">
+    <rect width="145" height="70" rx="8" fill="url(#cardGrad)" stroke="#557C94" stroke-width="1"/>
+    <!-- Kali dragon approximation -->
+    <g transform="translate(14, 19)">
+      <path d="M16 0 L28 12 L24 20 L32 32 L16 24 L0 32 L8 20 L4 12 Z" fill="none" stroke="#557C94" stroke-width="2" stroke-linejoin="round"/>
+    </g>
+    <text x="92" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#557C94">Kali</text>
+    <text x="92" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#6e7681">Debian-based</text>
+  </g>
+
+  <!-- Auto-install note -->
+  <rect x="50" y="352" width="700" height="52" rx="10" fill="#22c55e" fill-opacity="0.08" stroke="#22c55e" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="400" y="374" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#4ade80">specmem setup handles everything for you</text>
+  <text x="400" y="393" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">Docker, PostgreSQL, pgvector, embedding models, Claude Code itself. You don't have to read their docs. We did.</text>
+</svg>

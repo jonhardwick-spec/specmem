@@ -43,13 +43,22 @@ const CONFIG = {
     maxRetries: 3, // Max retry attempts before DLQ
     baseRetryDelayMs: 1000, // Base delay for exponential backoff (1s, 2s, 4s)
     maxRetryDelayMs: 30000, // Cap retry delay at 30s
-    leaseTimeoutMs: 60000, // 60s lease - requeue if not completed
+    leaseTimeoutMs: parseInt(process.env['SPECMEM_QOMS_LEASE_TIMEOUT'] || '120000'), // 120s lease (was 60s) - configurable via env
     agePromotionMs: 30000, // Promote priority after 30s waiting
     // DLQ settings
-    dlqMaxSize: 1000, // Max DLQ size (oldest evicted)
+    dlqMaxSize: parseInt(process.env['SPECMEM_QOMS_MAX_DLQ_SIZE'] || '500'), // Max DLQ size (oldest evicted) - Issue #8
     dlqRetentionMs: 3600000, // Keep DLQ items for 1 hour
     // Metrics cache
     metricsCacheMs: 500, // Cache metrics for 500ms
+    // Issue #5: Periodic lease expiry check interval (default 10s)
+    leaseCheckIntervalMs: parseInt(process.env['SPECMEM_QOMS_LEASE_CHECK_INTERVAL_MS'] || '10000'),
+    // Issue #8: Queue size limits (backpressure)
+    maxQueueSize: parseInt(process.env['SPECMEM_QOMS_MAX_QUEUE_SIZE'] || '1000'), // Total max across all priorities
+    maxHighQueue: parseInt(process.env['SPECMEM_QOMS_MAX_HIGH_QUEUE'] || '500'),
+    maxMediumQueue: parseInt(process.env['SPECMEM_QOMS_MAX_MEDIUM_QUEUE'] || '300'),
+    maxLowQueue: parseInt(process.env['SPECMEM_QOMS_MAX_LOW_QUEUE'] || '200'),
+    // Issue #8: Queue depth metrics logging interval (default 1min)
+    metricsIntervalMs: parseInt(process.env['SPECMEM_QOMS_METRICS_INTERVAL_MS'] || '60000'),
 };
 // ============================================================================
 // Types
@@ -91,6 +100,18 @@ let lastCpuInfo = null;
 let lastCpuTime = 0;
 // Operation ID counter
 let operationIdCounter = 0;
+// Issue #5: Periodic lease check interval handle
+let leaseCheckInterval = null;
+// Issue #8: Periodic metrics logging interval handle
+let metricsInterval = null;
+// Issue #8: Per-priority max queue size map
+const perPriorityMaxSize = new Map([
+    [Priority.CRITICAL, Infinity], // Critical operations are never rejected
+    [Priority.HIGH, CONFIG.maxHighQueue],
+    [Priority.MEDIUM, CONFIG.maxMediumQueue],
+    [Priority.LOW, CONFIG.maxLowQueue],
+    [Priority.IDLE, CONFIG.maxLowQueue], // IDLE shares LOW limit
+]);
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -355,16 +376,37 @@ function nack(opId, error) {
 }
 /**
  * Check for lease timeouts and requeue expired items
+ * @param {boolean} periodic - Whether this was triggered by the periodic check (Issue #5)
  */
-function checkLeaseTimeouts() {
+function checkLeaseTimeouts(periodic = false) {
     const now = Date.now();
+    let expiredCount = 0;
     for (const [opId, item] of processingItems.entries()) {
         if (item.leaseExpiresAt && now > item.leaseExpiresAt) {
-            __debugLog('[QOMS DEBUG]', Date.now(), 'LEASE_TIMEOUT', { opId, expiredAgo: now - item.leaseExpiresAt });
+            const expiredAgoMs = now - item.leaseExpiresAt;
+            if (periodic) {
+                // Issue #5: Log with more detail when periodic check catches expired leases
+                logger.warn({
+                    opId,
+                    priority: Priority[item.priority],
+                    expiredAgoMs,
+                    enqueuedAt: item.enqueuedAt,
+                    startedAt: item.startedAt,
+                    retryCount: item.retryCount,
+                }, 'QOMS: Periodic lease check expired stale operation');
+            }
+            __debugLog('[QOMS DEBUG]', Date.now(), 'LEASE_TIMEOUT', {
+                opId,
+                expiredAgo: expiredAgoMs,
+                periodic,
+                priority: Priority[item.priority],
+            });
             // Treat as failure, trigger retry
             nack(opId, new Error('Lease timeout - operation took too long'));
+            expiredCount++;
         }
     }
+    return expiredCount;
 }
 // ============================================================================
 // Queue Processor
@@ -475,6 +517,116 @@ async function processQueue() {
     }
 }
 // ============================================================================
+// Issue #5: Periodic Lease Expiry Check
+// ============================================================================
+/**
+ * Start periodic lease expiry check.
+ * Runs every SPECMEM_QOMS_LEASE_CHECK_INTERVAL_MS (default 10s).
+ * If expired leases are found and released, triggers queue processing
+ * so waiting items can take the freed slots.
+ */
+function startPeriodicLeaseCheck() {
+    if (leaseCheckInterval) {
+        return; // Already running
+    }
+    const intervalMs = CONFIG.leaseCheckIntervalMs;
+    __debugLog('[QOMS DEBUG]', Date.now(), 'PERIODIC_LEASE_CHECK_START', { intervalMs });
+    leaseCheckInterval = setInterval(() => {
+        try {
+            const expiredCount = checkLeaseTimeouts(true);
+            if (expiredCount > 0) {
+                __debugLog('[QOMS DEBUG]', Date.now(), 'PERIODIC_LEASE_CHECK_EXPIRED', { expiredCount });
+                // Trigger queue processing to fill freed slots
+                processQueue().catch(err => {
+                    logger.error({ error: err }, 'QOMS: queue processing error after periodic lease check');
+                });
+            }
+        }
+        catch (err) {
+            logger.error({ error: err }, 'QOMS: periodic lease check error');
+        }
+    }, intervalMs);
+    // Prevent the interval from keeping the process alive
+    if (leaseCheckInterval && typeof leaseCheckInterval.unref === 'function') {
+        leaseCheckInterval.unref();
+    }
+}
+// ============================================================================
+// Issue #8: Periodic Queue Depth Metrics Logging
+// ============================================================================
+/**
+ * Start periodic queue depth metrics logging.
+ * Runs every SPECMEM_QOMS_METRICS_INTERVAL_MS (default 60s).
+ * Logs queue depths, processing count, DLQ size for monitoring.
+ */
+function startMetricsLogging() {
+    if (metricsInterval) {
+        return; // Already running
+    }
+    const intervalMs = CONFIG.metricsIntervalMs;
+    __debugLog('[QOMS DEBUG]', Date.now(), 'METRICS_LOGGING_START', { intervalMs });
+    metricsInterval = setInterval(() => {
+        try {
+            const queueDepths = {};
+            let totalQueued = 0;
+            for (const [priority, queue] of priorityQueues.entries()) {
+                const name = Priority[priority];
+                queueDepths[name] = queue.length;
+                totalQueued += queue.length;
+            }
+            logger.info({
+                queueDepths,
+                totalQueued,
+                processing: processingItems.size,
+                dlqSize: dlq.length,
+                totalProcessed,
+                totalRetries,
+                maxQueueSize: CONFIG.maxQueueSize,
+            }, 'QOMS: queue depth metrics');
+            __debugLog('[QOMS DEBUG]', Date.now(), 'METRICS_LOG', {
+                queueDepths,
+                totalQueued,
+                processing: processingItems.size,
+                dlqSize: dlq.length,
+            });
+        }
+        catch (err) {
+            logger.error({ error: err }, 'QOMS: metrics logging error');
+        }
+    }, intervalMs);
+    // Prevent the interval from keeping the process alive
+    if (metricsInterval && typeof metricsInterval.unref === 'function') {
+        metricsInterval.unref();
+    }
+}
+// ============================================================================
+// Issue #5 + #8: Cleanup / Destroy
+// ============================================================================
+/**
+ * Cleanup QOMS - clears all intervals and timers.
+ * Call this on shutdown to prevent resource leaks.
+ */
+function cleanup() {
+    if (leaseCheckInterval) {
+        clearInterval(leaseCheckInterval);
+        leaseCheckInterval = null;
+        __debugLog('[QOMS DEBUG]', Date.now(), 'PERIODIC_LEASE_CHECK_STOPPED');
+    }
+    if (metricsInterval) {
+        clearInterval(metricsInterval);
+        metricsInterval = null;
+        __debugLog('[QOMS DEBUG]', Date.now(), 'METRICS_LOGGING_STOPPED');
+    }
+    logger.info('QOMS: cleanup complete - all intervals cleared');
+}
+// Alias for cleanup
+const destroy = cleanup;
+// ============================================================================
+// Auto-start periodic checks
+// ============================================================================
+startPeriodicLeaseCheck();
+startMetricsLogging();
+// ============================================================================
 // Public API
 // ============================================================================
 /**
@@ -491,6 +643,26 @@ export async function enqueue(operation, priority = Priority.MEDIUM) {
         priority: Priority[priority],
         totalQueued: getTotalQueueLength()
     });
+    // Issue #8: Check queue size limits (backpressure) - skip for CRITICAL priority
+    if (priority !== Priority.CRITICAL) {
+        const totalQueued = getTotalQueueLength();
+        // Check total queue size limit
+        if (totalQueued >= CONFIG.maxQueueSize) {
+            const errMsg = `QOMS: Queue full (${totalQueued}/${CONFIG.maxQueueSize}). Rejecting operation ${opId} with priority ${Priority[priority]}. Configure SPECMEM_QOMS_MAX_QUEUE_SIZE to increase limit.`;
+            logger.warn({ opId, priority: Priority[priority], totalQueued, maxQueueSize: CONFIG.maxQueueSize }, errMsg);
+            __debugLog('[QOMS DEBUG]', Date.now(), 'QUEUE_FULL_REJECTED', { opId, totalQueued, maxQueueSize: CONFIG.maxQueueSize });
+            throw new Error(errMsg);
+        }
+        // Check per-priority queue size limit
+        const priorityQueue = priorityQueues.get(priority);
+        const maxForPriority = perPriorityMaxSize.get(priority) ?? CONFIG.maxQueueSize;
+        if (priorityQueue.length >= maxForPriority) {
+            const errMsg = `QOMS: ${Priority[priority]} queue full (${priorityQueue.length}/${maxForPriority}). Rejecting operation ${opId}. Configure SPECMEM_QOMS_MAX_${Priority[priority]}_QUEUE to increase limit.`;
+            logger.warn({ opId, priority: Priority[priority], queueLength: priorityQueue.length, maxForPriority }, errMsg);
+            __debugLog('[QOMS DEBUG]', Date.now(), 'PRIORITY_QUEUE_FULL_REJECTED', { opId, priority: Priority[priority], queueLength: priorityQueue.length, maxForPriority });
+            throw new Error(errMsg);
+        }
+    }
     // Check if we can execute immediately (empty queue, resources available)
     const queue = priorityQueues.get(priority);
     if (getTotalQueueLength() === 0 && processingItems.size === 0 && canExecute(priority, opId)) {
@@ -568,10 +740,19 @@ export function getQueueStats() {
         pendingRetries,
         totalRetries,
         dlqSize: dlq.length,
+        dlqMaxSize: CONFIG.dlqMaxSize,
         isProcessing,
         avgWaitTimeMs: totalProcessed > 0 ? totalWaitTimeMs / totalProcessed : 0,
         metrics: getSystemMetrics(),
         limits: CONFIG,
+        // Issue #8: Queue capacity info
+        queueCapacity: {
+            maxTotal: CONFIG.maxQueueSize,
+            maxHigh: CONFIG.maxHighQueue,
+            maxMedium: CONFIG.maxMediumQueue,
+            maxLow: CONFIG.maxLowQueue,
+            remainingTotal: CONFIG.maxQueueSize - getTotalQueueLength(),
+        },
     };
 }
 /**
@@ -644,6 +825,8 @@ export const qoms = {
     getDLQ,
     clearDLQ,
     retryDLQItem,
+    cleanup,
+    destroy,
     Priority,
 };
 export default qoms;

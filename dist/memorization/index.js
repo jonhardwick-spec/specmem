@@ -14,17 +14,17 @@
  */
 // Core components
 export { CodeMemorizer, getCodeMemorizer, resetCodeMemorizer } from './codeMemorizer.js';
-export { ClaudeCodeTracker, getClaudeCodeTracker, resetClaudeCodeTracker } from './claudeCodeTracker.js';
+export { CodeTracker, getCodeTracker, resetCodeTracker } from './claudeCodeTracker.js';
 export { CodeRecall, getCodeRecall, resetCodeRecall } from './codeRecall.js';
 // MCP Tools
 export { RememberWhatIWroteTool, WhatDidIWriteForTool, AllMyCodeTool, CodeHistoryTool, WhyDidIWriteThisTool, SetCodingPurposeTool, CodeStatsTool, createMemorizationTools } from './memorizationTools.js';
 // Database migration
-export { claudeCodeHistoryMigration, runClaudeCodeMigration, isClaudeCodeMigrationApplied } from './claudeCodeMigration.js';
+export { claudeCodeHistoryMigration, runCodeMigration, isCodeMigrationApplied } from './claudeCodeMigration.js';
 // Watcher integration
 export { WatcherMemorizationBridge, setupWatcherMemorization, getWatcherMemorizationBridge, setWatcherMemorizationBridge, resetWatcherMemorizationBridge } from './watcherIntegration.js';
 import { getCodeMemorizer, resetCodeMemorizer } from './codeMemorizer.js';
 import { getCodeRecall, resetCodeRecall } from './codeRecall.js';
-import { getClaudeCodeTracker, resetClaudeCodeTracker } from './claudeCodeTracker.js';
+import { getCodeTracker, resetCodeTracker } from './claudeCodeTracker.js';
 import { createMemorizationTools } from './memorizationTools.js';
 import { logger } from '../utils/logger.js';
 /**
@@ -38,7 +38,7 @@ export function initializeMemorizationSystem(config) {
     // create core components
     const memorizer = getCodeMemorizer(config.pool, config.embeddingProvider);
     const recall = getCodeRecall(config.pool, config.embeddingProvider);
-    const tracker = getClaudeCodeTracker(memorizer, config.trackerConfig);
+    const tracker = getCodeTracker(memorizer, config.trackerConfig);
     // create MCP tools
     const tools = createMemorizationTools(memorizer, recall, tracker);
     logger.info({
@@ -58,7 +58,7 @@ export function initializeMemorizationSystem(config) {
 export function resetMemorizationSystem() {
     resetCodeMemorizer();
     resetCodeRecall();
-    resetClaudeCodeTracker();
+    resetCodeTracker();
     logger.info('memorization system reset');
 }
 //# sourceMappingURL=index.js.map

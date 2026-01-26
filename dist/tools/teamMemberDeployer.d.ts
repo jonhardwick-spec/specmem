@@ -1,7 +1,7 @@
 /**
  * Team Member Deployer Tool
  *
- * "Skidded" version of Claude Code's Task tool that actually works with MCP
+ * "Skidded" version of  Code's Task tool that actually works with MCP
  * Spawns team members with full SpecMem MCP access
  *
  * Now integrates with TeamCommsService for team-based team member coordination:
@@ -22,7 +22,7 @@ interface DeployTeamMemberArgs {
     parentTaskId?: string;
     /** Enable team communication features (default: true if parentTaskId provided) */
     enableTeamComms?: boolean;
-    /** Native Claude agent type (optional - uses Claude's --agent flag) */
+    /** Native  agent type (optional - uses 's --agent flag) */
     nativeAgentType?: NativeAgentType;
 }
 interface TeamMemberDeployResult {

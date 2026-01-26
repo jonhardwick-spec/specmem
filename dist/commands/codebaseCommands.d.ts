@@ -1,5 +1,5 @@
 /**
- * CodebaseCommands - codebase indexing and search commands for Claude
+ * CodebaseCommands - codebase indexing and search commands for 
  *
  * yooo this is where we ingest whole ass codebases
  * - /codebase ingest - scan and index entire codebase

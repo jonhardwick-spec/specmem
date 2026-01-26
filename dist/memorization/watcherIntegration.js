@@ -2,15 +2,15 @@
  * watcherIntegration.ts - Integrate Memorization with File Watcher
  *
  * yooo this connects the file watcher to the memorization system
- * when files change, Claude's code gets auto-memorized
+ * when files change, 's code gets auto-memorized
  *
  * This is the SECRET SAUCE that makes auto-memorization work:
  * 1. File watcher detects changes
  * 2. This integration routes changes to the tracker
  * 3. Tracker auto-memorizes with detected purposes
- * 4. Claude can recall what it wrote later
+ * 4.  can recall what it wrote later
  */
-import { getClaudeCodeTracker } from './claudeCodeTracker.js';
+import { getCodeTracker } from './claudeCodeTracker.js';
 import { logger } from '../utils/logger.js';
 import { getCurrentProjectPath } from '../services/ProjectContext.js';
 /**
@@ -159,7 +159,7 @@ export class WatcherMemorizationBridge {
  * fr fr one function to rule them all
  */
 export function setupWatcherMemorization(watcher, memorizer, config) {
-    const tracker = getClaudeCodeTracker(memorizer);
+    const tracker = getCodeTracker(memorizer);
     const bridge = new WatcherMemorizationBridge(watcher, tracker, config);
     logger.info('watcher-memorization setup complete');
     return bridge;

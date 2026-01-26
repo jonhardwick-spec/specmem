@@ -6,7 +6,7 @@
  * Fires AFTER Write/Edit operations to link conversation context to modified files.
  *
  * Flow:
- *   1. Claude writes/edits a file
+ *   1.  writes/edits a file
  *   2. This hook intercepts the PostToolUse event
  *   3. Captures recent conversation context (from session or memories)
  *   4. Creates a memory with context about WHY the file was modified
@@ -408,10 +408,10 @@ async function main() {
     updateMemoryEmbedding(memoryId, memoryContent).catch(() => {});
 
     // Output nothing - this is a silent hook that just records context
-    // We don't want to clutter Claude's output
+    // We don't want to clutter 's output
 
   } catch (e) {
-    // Silent fail - don't break Claude's operation
+    // Silent fail - don't break 's operation
   }
 
   // Clean up pool

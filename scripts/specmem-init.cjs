@@ -14,9 +14,9 @@
  *   5. CODEBASE INDEXING   - Index codebase with embeddings for find_code_pointers
  *   6. TOKEN COMPRESSION   - Compress commands with Chinese encoding
  *   7. COMMAND DEPLOYMENT  - Deploy all slash commands
- *   8. SESSION EXTRACTION  - Extract Claude session history into memories
+ *   8. SESSION EXTRACTION  - Extract  session history into memories
  *   9. FINAL VERIFICATION  - Verify everything is ready
- *  10. SCREEN SESSIONS     - Launch brain & Claude (default, --no-console to skip)
+ *  10. SCREEN SESSIONS     - Launch brain &  (default, --no-console to skip)
  *
  * BULLETPROOF: Running init multiple times never breaks anything.
  * Existing sessions are detected and reused. No duplicates.
@@ -50,6 +50,143 @@ function getPythonPath() {
   return 'python3';
 }
 
+/**
+ * Get the Claude binary path, preferring claudefix wrapper over raw binary.
+ * Detects claudefix in common install locations and symlinks it into the
+ * user's local bin so screen sessions (which resolve /root/.local/bin first)
+ * route through claudefix instead of the raw Claude binary.
+ *
+ * If claudefix is NOT installed, auto-detects the raw Claude binary location
+ * and returns its full absolute path so screen sessions don't depend on PATH order.
+ */
+function getClaudeBinary() {
+  const claudefixCandidates = [
+    '/usr/local/bin/claude-fixed',
+    '/usr/lib/node_modules/claudefix/bin/claude-fixed.js',
+    '/usr/local/lib/node_modules/claudefix/bin/claude-fixed.js',
+    path.join(os.homedir(), '.npm-global/lib/node_modules/claudefix/bin/claude-fixed.js'),
+    path.join(os.homedir(), 'node_modules/claudefix/bin/claude-fixed.js'),
+  ];
+
+  // Auto-detect raw Claude binary location (used for backup + fallback)
+  function findRawClaude() {
+    const rawCandidates = [
+      path.join(os.homedir(), '.local', 'bin', 'claude'),
+      '/usr/local/bin/claude',
+      '/usr/bin/claude',
+    ];
+    // Check Claude versions directory (managed installs)
+    const versionsDir = path.join(os.homedir(), '.local', 'share', 'claude', 'versions');
+    try {
+      if (fs.existsSync(versionsDir)) {
+        const versions = fs.readdirSync(versionsDir)
+          .filter(v => /^\d+\.\d+\.\d+$/.test(v))
+          .sort((a, b) => {
+            const [aMaj, aMin, aPat] = a.split('.').map(Number);
+            const [bMaj, bMin, bPat] = b.split('.').map(Number);
+            return bMaj - aMaj || bMin - aMin || bPat - aPat;
+          });
+        if (versions.length) return path.join(versionsDir, versions[0]);
+      }
+    } catch {}
+    for (const candidate of rawCandidates) {
+      try {
+        if (!fs.existsSync(candidate)) continue;
+        // Resolve symlinks and check it's an actual binary, not a claudefix wrapper
+        const resolved = fs.realpathSync(candidate);
+        if (resolved.includes('claudefix')) continue;
+        // Read first bytes to make sure it's not the wrapper script
+        const head = fs.readFileSync(candidate, 'utf8').slice(0, 500);
+        if (head.includes('claudefix')) continue;
+        return resolved;
+      } catch {}
+    }
+    // Last resort: ask the shell
+    try {
+      return execSync('which claude 2>/dev/null', { encoding: 'utf8' }).trim();
+    } catch {}
+    return 'claude';
+  }
+
+  // Check for the claudefix wrapper script at /usr/local/bin/claude
+  const wrapperPath = '/usr/local/bin/claude';
+  let claudefixWrapper = null;
+  try {
+    if (fs.existsSync(wrapperPath)) {
+      const content = fs.readFileSync(wrapperPath, 'utf8');
+      if (content.includes('claudefix')) {
+        claudefixWrapper = wrapperPath;
+      }
+    }
+  } catch {}
+
+  // Find a working claudefix binary
+  let claudefixBin = claudefixWrapper;
+  if (!claudefixBin) {
+    for (const candidate of claudefixCandidates) {
+      if (fs.existsSync(candidate)) {
+        claudefixBin = candidate;
+        break;
+      }
+    }
+  }
+
+  if (claudefixBin) {
+    // Ensure the local bin claude symlink points to claudefix so screen sessions use it
+    const localBin = path.join(os.homedir(), '.local', 'bin');
+    const localClaude = path.join(localBin, 'claude');
+    try {
+      if (fs.existsSync(localClaude)) {
+        const stat = fs.lstatSync(localClaude);
+        if (stat.isSymbolicLink()) {
+          const target = fs.readlinkSync(localClaude);
+          // If it's pointing at a raw Claude binary (not claudefix), repoint it
+          if (!target.includes('claudefix')) {
+            // Back up original symlink target so claudefix can find the real binary
+            const backupPath = path.join(localBin, 'claude-original');
+            if (!fs.existsSync(backupPath)) {
+              fs.symlinkSync(target, backupPath);
+            }
+            fs.unlinkSync(localClaude);
+            fs.symlinkSync(claudefixBin, localClaude);
+            initLog(`Relinked ${localClaude} -> ${claudefixBin} (was: ${target})`);
+          }
+        }
+      }
+    } catch (e) {
+      initLog(`Could not relink local claude to claudefix: ${e.message}`, true);
+    }
+    return claudefixBin;
+  }
+
+  // No claudefix found - return the raw Claude binary's absolute path
+  const rawBin = findRawClaude();
+  initLog(`claudefix not found, using raw claude: ${rawBin}`);
+  return rawBin;
+}
+
+/**
+ * ROOT/NON-ROOT DETECTION - Dynamic paths based on user privileges
+ * Root: uses /usr/lib/node_modules/specmem-hardwicksoftware/
+ * Non-root: uses ~/.specmem/
+ */
+function isRootUser() {
+  // Check UID on Unix systems
+  if (process.getuid && process.getuid() === 0) return true;
+  // Check EUID (effective UID)
+  if (process.geteuid && process.geteuid() === 0) return true;
+  // Fallback: check if we can write to /usr/lib
+  try {
+    fs.accessSync('/usr/lib', fs.constants.W_OK);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+const IS_ROOT = isRootUser();
+const USER_SPECMEM_DIR = IS_ROOT ? path.dirname(__dirname) : path.join(os.homedir(), '.specmem');
+
 // yooo DRY PRINCIPLE - use shared codebase logic instead of reimplementing
 // this bridges CJS (specmem-init.cjs) to ESM (dist/codebase/*)
 let codebaseBridge = null;
@@ -61,6 +198,37 @@ async function getCodebaseBridge() {
   } catch (e) {
     // fallback - bridge not available, use inline logic
     return null;
+  }
+}
+
+// ============================================================================
+// SAFE MKDIR - Falls back to sudo if permission denied
+// ============================================================================
+
+/**
+ * Create directory - dies with clear message if permission denied.
+ * If specmem can't create dirs, it needs to be run with sudo.
+ */
+function safeMkdir(dirPath, opts = {}) {
+  try {
+    fs.mkdirSync(dirPath, { recursive: true, ...opts });
+  } catch (e) {
+    if (e.code === 'EACCES' || e.code === 'EPERM') {
+      console.error('\n\x1b[31m\x1b[1m');
+      console.error('  ╔═══════════════════════════════════════════════════╗');
+      console.error('  ║  Hey, I need sudo!                               ║');
+      console.error('  ║                                                   ║');
+      console.error('  ║  SpecMem can\'t create directories without         ║');
+      console.error('  ║  proper permissions. Run with sudo:               ║');
+      console.error('  ║                                                   ║');
+      console.error('  ║    sudo npx specmem-hardwicksoftware              ║');
+      console.error('  ║                                                   ║');
+      console.error(`  ║  Failed path: ${dirPath.slice(0, 35).padEnd(35)} ║`);
+      console.error('  ╚═══════════════════════════════════════════════════╝');
+      console.error('\x1b[0m');
+      process.exit(1);
+    }
+    throw e;
   }
 }
 
@@ -87,7 +255,7 @@ function initLog(msg, error) {
   try {
     // Ensure log dir exists
     if (!fs.existsSync(_initLogDir)) {
-      fs.mkdirSync(_initLogDir, { recursive: true });
+      safeMkdir(_initLogDir);
     }
 
     // First write clears the file (fresh log each run), subsequent writes append
@@ -144,7 +312,7 @@ function saveUserConfig(config) {
   try {
     const dir = path.dirname(USER_CONFIG_PATH);
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+      safeMkdir(dir);
     }
     fs.writeFileSync(USER_CONFIG_PATH, JSON.stringify(config, null, 2));
     initLog(`Saved user-config.json: ${JSON.stringify(config)}`);
@@ -237,11 +405,11 @@ initLog(`Args: ${args.join(' ') || '(none)'}`);
 // ============================================================================
 
 function detectAndExitScreen() {
-  // SAFETY: Never kill screen if running from Claude Code session
-  // This prevents Claude from accidentally killing its own environment
+  // SAFETY: Never kill screen if running from  Code session
+  // This prevents  from accidentally killing its own environment
   if (process.env.CLAUDE_CODE || process.env.CLAUDE_SESSION_ID || process.env.ANTHROPIC_API_KEY) {
-    initLog('Running from Claude Code session - skipping screen detection');
-    return; // NEVER kill when Claude is running us
+    initLog('Running from  Code session - skipping screen detection');
+    return; // NEVER kill when  is running us
   }
 
   // SAFETY: Skip if --no-screen-check flag is passed
@@ -331,7 +499,7 @@ ${'\x1b[2m'}What happens:${'\x1b[0m'}
   1. Scorched earth - wipes old configs (preserves user-config.json)
   2. Analyzes project & optimizes settings
   3. Compresses commands with Chinese tokens
-  4. Launches Claude in centered window
+  4. Launches  in centered window
   5. Current terminal becomes SpecMem Brain
 
 ${'\x1b[2m'}Config files:${'\x1b[0m'}
@@ -408,14 +576,14 @@ const fireGradient = [c.red, c.brightRed, c.yellow, c.brightYellow, c.white];
 // ============================================================================
 const TIMEOUTS = {
   // Embedding socket operations
-  // RELIABILITY FIX: Increased warmup from 15s to 60s for first-time model loading
-  // Model download/load can take 20-30s on first startup
-  EMBEDDING_WARMUP: 60000,      // 60s - initial warmup request (cold model loading)
+  // NOTE: EMBEDDING_WARMUP is now DEPRECATED - we use event-based polling instead
+  // The warmup function polls the 'ready' endpoint until model reports loaded,
+  // which is superior to hardcoded timeouts that assume model loads in X seconds
+  EMBEDDING_WARMUP: 5000,       // 5s - per-request timeout during polling (not total)
   EMBEDDING_REQUEST: 90000,     // 90s - standard embedding generation (increased from 60s)
   EMBEDDING_BATCH: 60000,       // 60s - batch embedding operations (increased from 30s)
 
   // Connection testing
-  // RELIABILITY FIX: Increased from 10s to 30s - model may be loading during test
   CONNECTION_TEST: 30000,       // 30s - socket/db connection checks
 
   // Database
@@ -710,7 +878,7 @@ function checkAndFixEmojiSupport() {
 </fontconfig>
 `;
     try {
-      fs.mkdirSync(fontconfigDir, { recursive: true });
+      safeMkdir(fontconfigDir);
       fs.writeFileSync(fontconfigFile, fontconfigXml, 'utf8');
       // Rebuild cache so xterm picks it up immediately
       execSync('fc-cache -f 2>/dev/null || true', { stdio: 'ignore' });
@@ -902,7 +1070,7 @@ TitleMode=TERMINAL_TITLE_REPLACE
 `;
 
     try {
-      fs.mkdirSync(terminalrcDir, { recursive: true });
+      safeMkdir(terminalrcDir);
 
       if (terminalrcExists) {
         // Append to existing config
@@ -939,7 +1107,7 @@ TitleMode=TERMINAL_TITLE_REPLACE
     const termFix = `
 ${bashrcMarker}
 # SpecMem: Force 256-color terminal support for proper ANSI rendering
-# Fixes XFCE terminal rainbow display issue with Claude Code output
+# Fixes XFCE terminal rainbow display issue with  Code output
 if [[ "$TERM" != *"256color"* ]] && [[ -n "$DISPLAY" ]]; then
   export TERM=xterm-256color
 fi
@@ -1021,6 +1189,12 @@ class ProgressUI {
 
     // Render lock to prevent concurrent stdout writes
     this.isRendering = false;
+
+    // TUI file feed - shows what's being embedded in real-time
+    this.fileFeed = [];          // [{file, status, time}] - last N files
+    this.fileFeedMax = 3;        // How many files to show
+    this.fileFeedEnabled = false; // Show content during embedding phase
+    this.fileFeedAllocated = false; // Once allocated, space persists for stable layout
   }
 
   // Add a warning - shows in footer and logs to file
@@ -1047,8 +1221,8 @@ class ProgressUI {
 
     // Add separator to protect info above
     process.stdout.write(`${c.dim}${'─'.repeat(this.width)}${c.reset}\n`);
-    // Print initial 5 lines that we'll update in place (single write for atomicity)
-    process.stdout.write('\n\n\n\n\n');
+    // Print initial lines that we'll update in place (13 max for buffer against cursor drift)
+    process.stdout.write('\n\n\n\n\n\n\n\n\n\n\n\n\n');
 
     this.interval = setInterval(() => this.render(), 60);
   }
@@ -1148,16 +1322,57 @@ class ProgressUI {
         displayStageName = 'BEGINNING CODEBASE INDEXATION';
       }
 
+      // ROBUST CURSOR HANDLING: Always go up MAX lines and clear them all
+      // This prevents ghost lines from cursor drift (any extra newlines between renders)
+      // Base: 5 lines + File feed: 5 lines + Buffer: 3 lines for safety = 13 max
+      const maxLines = 13;
+      const contentLines = this.fileFeedAllocated ? 10 : 5;
+
       const output = [
-        c.cursorUp(5),
+        c.cursorUp(maxLines),
+      ];
+
+      // Clear buffer lines at top (handles cursor drift from rogue newlines)
+      for (let i = 0; i < maxLines - contentLines; i++) {
+        output.push(`${c.clearLine}${c.cursorStart}\n`);
+      }
+
+      // Main UI content
+      output.push(
         `${c.clearLine}${c.cursorStart}  ${fire} ${c.cyan}${spinner}${c.reset} ${c.bold}[${this.currentStage}/${this.totalStages}]${c.reset} ${c.brightCyan}${displayStageName}${c.reset} ${c.dim}(${elapsed}s)${c.reset}\n`,
         `${c.clearLine}${c.cursorStart}     ${c.white}${statusText}${c.reset}\n`,
         `${c.clearLine}${c.cursorStart}  ${bar} ${c.bold}${barColor}${percent}%${c.reset}\n`,
         `${c.clearLine}${c.cursorStart}     ${c.dim}${this.subStatus || ''}${c.reset}\n`,
         `${c.clearLine}${c.cursorStart}${line5}\n`
-      ].join('');
+      );
 
-      process.stdout.write(output);
+      // Add file feed area if ever allocated (persists for stable layout)
+      if (this.fileFeedAllocated) {
+        if (this.fileFeedEnabled && this.fileFeed.length > 0) {
+          // Show active file feed with content
+          output.push(`${c.clearLine}${c.cursorStart}  ${c.dim}┌${'─'.repeat(this.width - 4)}┐${c.reset}\n`);
+          for (let i = 0; i < this.fileFeedMax; i++) {
+            const entry = this.fileFeed[i];
+            if (entry) {
+              const age = Math.round((Date.now() - entry.time) / 1000);
+              const ageStr = age < 60 ? `${age}s` : `${Math.floor(age/60)}m`;
+              const line = `${entry.status} ${entry.file}`;
+              const padded = line.length > this.width - 12 ? line.slice(0, this.width - 15) + '...' : line;
+              output.push(`${c.clearLine}${c.cursorStart}  ${c.dim}│${c.reset} ${padded.padEnd(this.width - 12)}${c.dim}${ageStr.padStart(4)}${c.reset} ${c.dim}│${c.reset}\n`);
+            } else {
+              output.push(`${c.clearLine}${c.cursorStart}  ${c.dim}│${' '.repeat(this.width - 4)}│${c.reset}\n`);
+            }
+          }
+          output.push(`${c.clearLine}${c.cursorStart}  ${c.dim}└${'─'.repeat(this.width - 4)}┘${c.reset}\n`);
+        } else {
+          // Empty placeholder (keeps layout stable)
+          for (let i = 0; i < 5; i++) {
+            output.push(`${c.clearLine}${c.cursorStart}\n`);
+          }
+        }
+      }
+
+      process.stdout.write(output.join(''));
     } finally {
       this.isRendering = false;
     }
@@ -1226,6 +1441,72 @@ class ProgressUI {
   }
 
   /**
+   * Enable/disable the file feed TUI panel
+   * IMPORTANT: File feed area is ALWAYS allocated once enabled the first time.
+   * This keeps the loading bar position stable.
+   * NOTE: We no longer write newlines here - start() allocates 13 lines upfront.
+   */
+  enableFileFeed(enabled = true) {
+    if (enabled && !this.fileFeedAllocated) {
+      // Just set the flag - no newlines needed (start() allocates 13 lines for buffer)
+      this.fileFeedAllocated = true;
+    }
+    this.fileFeedEnabled = enabled;
+    if (!enabled) {
+      this.fileFeed = [];
+    }
+  }
+
+  /**
+   * Add a file to the embedding feed
+   * @param {string} filePath - Relative file path
+   * @param {string} status - 'reading', 'embedding', 'done', 'skip', 'error', 'def'
+   * @param {string} detail - Optional detail (e.g., definition name, size)
+   */
+  addFileToFeed(filePath, status = 'embedding', detail = null) {
+    if (!this.fileFeedEnabled) return;
+
+    const statusIcons = {
+      reading: '📖',
+      embedding: '🧠',
+      done: '✅',
+      skip: '⏭️',
+      error: '❌',
+      def: '🔧',  // For definitions
+      user: '👤',  // User prompt (session extraction)
+      assistant: '🤖'  // Claude response (session extraction)
+    };
+
+    // Format display string
+    let displayText;
+    if (status === 'def' && detail) {
+      // Show definition: "🔧 function createLogger() → logger.ts"
+      const shortFile = filePath.split('/').pop();
+      displayText = `${detail} → ${shortFile}`;
+    } else if ((status === 'user' || status === 'assistant') && detail) {
+      // Session entry: "👤 [abc123] "message preview...""
+      displayText = `[${filePath}] ${detail}`;
+    } else if (detail) {
+      // Show file with detail: "logger.ts (3.2KB)"
+      const fileName = filePath.length > 35 ? '...' + filePath.slice(-32) : filePath;
+      displayText = `${fileName} ${detail}`;
+    } else {
+      displayText = filePath.length > 45 ? '...' + filePath.slice(-42) : filePath;
+    }
+
+    this.fileFeed.unshift({
+      file: displayText,
+      status: statusIcons[status] || '⏳',
+      time: Date.now()
+    });
+
+    // Keep only last N files
+    if (this.fileFeed.length > this.fileFeedMax) {
+      this.fileFeed.pop();
+    }
+  }
+
+  /**
    * Resume rendering after console.log output is done.
    * Call this AFTER console.log statements are complete.
    */
@@ -1257,23 +1538,42 @@ class ProgressUI {
 
   complete(message) {
     this.stop();
-    // Move up and clear the 5 lines
-    process.stdout.write(c.cursorUp(5));
-    for (let i = 0; i < 5; i++) {
-      process.stdout.write(`${c.clearLine}${c.cursorStart}\n`);
+    // Calculate lines to clear (5 base + 5 if file feed was enabled)
+    const linesToClear = this.fileFeedEnabled ? 10 : 5;
+
+    // Clear terminal and show completion banner
+    process.stdout.write('\x1b[2J\x1b[H'); // Clear screen and move to top
+
+    // Show the SPECMEM banner in cyan (completed state)
+    for (const line of BANNER_LINES) {
+      console.log(c.cyan + c.bold + line + c.reset);
     }
-    process.stdout.write(c.cursorUp(5));
+    console.log(`${c.dim}  Developed by Hardwick Software Services | https://justcalljon.pro${c.reset}`);
+    console.log('');
     console.log(`  ${c.brightGreen}✓${c.reset} ${c.bold}${message}${c.reset}`);
+
+    // Disable file feed
+    this.fileFeedEnabled = false;
+    this.fileFeed = [];
   }
 
   fail(message) {
     this.stop();
-    process.stdout.write(c.cursorUp(5));
-    for (let i = 0; i < 5; i++) {
-      process.stdout.write(`${c.clearLine}${c.cursorStart}\n`);
+
+    // Clear terminal and show failure banner
+    process.stdout.write('\x1b[2J\x1b[H'); // Clear screen and move to top
+
+    // Show the SPECMEM banner in red (failed state)
+    for (const line of BANNER_LINES) {
+      console.log(c.red + line + c.reset);
     }
-    process.stdout.write(c.cursorUp(5));
+    console.log(`${c.dim}  Developed by Hardwick Software Services | https://justcalljon.pro${c.reset}`);
+    console.log('');
     console.log(`  ${c.red}✗${c.reset} ${message}`);
+
+    // Disable file feed
+    this.fileFeedEnabled = false;
+    this.fileFeed = [];
   }
 }
 
@@ -1614,12 +1914,30 @@ async function cleanupDockerContainers() {
       const isSpecmem = name?.includes('specmem') || image?.includes('specmem');
       const isEmbedding = name?.includes('embedding') || image?.includes('embedding') || image?.includes('frankenstein');
 
+      // FIX: Check if container belongs to THIS project before any cleanup
+      // Only manage containers from the current project - don't touch other projects!
+      let belongsToThisProject = false;
+      if (isSpecmem || isEmbedding) {
+        try {
+          const containerPath = execSync(
+            `docker inspect --format='{{index .Config.Labels "specmem.path"}}' ${id} 2>/dev/null`,
+            { encoding: 'utf8' }
+          ).trim();
+          const currentPath = process.cwd();
+          belongsToThisProject = containerPath === currentPath;
+        } catch (e) {
+          // No label = legacy container, check by name pattern
+          const projectDirName = path.basename(process.cwd()).toLowerCase().replace(/[^a-z0-9]/g, '');
+          belongsToThisProject = name?.includes(projectDirName);
+        }
+      }
+
       // VERSION CHECK for specmem containers (critical safety!)
       let versionCheck = { matches: true, needsRebuild: false };
-      if (isSpecmem || isEmbedding) {
+      if ((isSpecmem || isEmbedding) && belongsToThisProject) {
         versionCheck = checkContainerVersion(id);
 
-        // Kill containers with version mismatch (OLD CODE!)
+        // Kill containers with version mismatch (OLD CODE!) - ONLY for THIS project
         if (versionCheck.needsRebuild && status !== 'Dead') {
           const oldVersion = versionCheck.version || 'MISSING';
           if (killOutdatedContainer(id, `version mismatch: ${oldVersion} != ${SPECMEM_VERSION}`)) {
@@ -1637,9 +1955,9 @@ async function cleanupDockerContainers() {
         }
       }
 
-      // Track PAUSED containers - warm-start gold! (only if version matches)
+      // Track PAUSED containers - warm-start gold! (only if version matches AND belongs to this project)
       if (status?.includes('Paused')) {
-        if ((isSpecmem || isEmbedding) && versionCheck.matches) {
+        if ((isSpecmem || isEmbedding) && belongsToThisProject && versionCheck.matches) {
           results.paused++;
           results.pausedContainers.push({
             id, name, status, image,
@@ -1651,9 +1969,9 @@ async function cleanupDockerContainers() {
         continue;
       }
 
-      // Track RUNNING containers (only if version matches)
+      // Track RUNNING containers (only if version matches AND belongs to this project)
       if (status?.startsWith('Up') && !status?.includes('Paused')) {
-        if ((isSpecmem || isEmbedding) && versionCheck.matches) {
+        if ((isSpecmem || isEmbedding) && belongsToThisProject && versionCheck.matches) {
           results.running++;
           results.runningContainers.push({
             id, name, status, image,
@@ -1674,8 +1992,8 @@ async function cleanupDockerContainers() {
           results.errors.push({ id, name, error: e.message });
         }
       }
-      // Clean exited specmem containers older than 1 hour
-      else if (isSpecmem && status?.startsWith('Exited')) {
+      // Clean exited specmem containers older than 1 hour (ONLY for this project)
+      else if (isSpecmem && belongsToThisProject && status?.startsWith('Exited')) {
         // Parse time from status like "Exited (0) 42 hours ago"
         const timeMatch = status.match(/(\d+)\s+(second|minute|hour|day|week)/);
         if (timeMatch) {
@@ -2119,7 +2437,7 @@ async function scorchedEarth(projectPath, ui) {
   ui.setStage(2, 'CLEANUP');
 
   const specmemDir = path.join(projectPath, 'specmem');
-  const projectClaudeDir = path.join(projectPath, '.claude');
+  const projectDir = path.join(projectPath, '.claude');
 
   let wipedItems = 0;
 
@@ -2211,7 +2529,7 @@ async function scorchedEarth(projectPath, ui) {
   // Wipe project commands (will redeploy fresh)
   ui.setStatus('Wiping project commands...');
   ui.setSubProgress(0.45);
-  const projectCmdsDir = path.join(projectClaudeDir, 'commands');
+  const projectCmdsDir = path.join(projectDir, 'commands');
   if (fs.existsSync(projectCmdsDir)) {
     const cmds = fs.readdirSync(projectCmdsDir).filter(f => f.startsWith('specmem') && f.endsWith('.md'));
     for (const cmd of cmds) {
@@ -2223,9 +2541,9 @@ async function scorchedEarth(projectPath, ui) {
   }
 
   // Wipe settings.local.json (will recreate)
-  ui.setStatus('Wiping local Claude settings...');
+  ui.setStatus('Wiping local  settings...');
   ui.setSubProgress(0.65);
-  const localSettings = path.join(projectClaudeDir, 'settings.local.json');
+  const localSettings = path.join(projectDir, 'settings.local.json');
   if (fs.existsSync(localSettings)) {
     fs.unlinkSync(localSettings);
     wipedItems++;
@@ -2398,7 +2716,7 @@ async function optimizeModel(projectPath, analysis, ui) {
 
   // Write config first
   const configDir = path.join(projectPath, 'specmem');
-  fs.mkdirSync(configDir, { recursive: true });
+  safeMkdir(configDir);
   const configPath = path.join(configDir, 'model-config.json');
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
@@ -2458,7 +2776,7 @@ async function optimizeModel(projectPath, analysis, ui) {
 // ============================================================================
 /**
  * Cold-start the embedding Docker container and feed it with the indexed codebase.
- * This ensures the overflow queue is pre-populated before Claude launches.
+ * This ensures the overflow queue is pre-populated before  launches.
  */
 async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseResult) {
   ui.setStage(4, 'EMBEDDING DOCKER');
@@ -2487,7 +2805,21 @@ async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseRe
 
   // Ensure sockets directory exists
   ui.setStatus('Preparing embedding environment...');
-  fs.mkdirSync(socketsDir, { recursive: true });
+  safeMkdir(socketsDir);
+
+  // Create statusbar-state.json for claudefix footer integration
+  const statusbarPath = path.join(socketsDir, 'statusbar-state.json');
+  if (!fs.existsSync(statusbarPath)) {
+    fs.writeFileSync(statusbarPath, JSON.stringify({
+      embeddingHealth: 'unknown',
+      lastToolCall: null,
+      lastToolDuration: 0,
+      memoryCount: 0,
+      mcpConnected: false,
+      lastUpdate: Date.now()
+    }, null, 2));
+  }
+
   ui.setSubProgress(0.1);
   await qqms();
 
@@ -2512,6 +2844,43 @@ async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseRe
 
   if (!fs.existsSync(warmStartScript)) {
     ui.setSubStatus('⚠️ warm-start.sh not found - skipping Docker');
+    return { serverRunning: false, warmupLatency: null, timeoutConfig };
+  }
+
+  // EARLY BAIL-OUT: Check if Docker is actually usable before wasting time
+  // 1. Docker daemon must be running
+  // 2. The embedding image must exist locally (warm-start.sh uses specmem-embedding:latest)
+  // 3. OR there must be an existing container we can resume
+  // If none of these are true, skip Docker entirely — Stage 5 will use native Python.
+  try {
+    const { execSync } = require('child_process');
+    // Check if Docker daemon is accessible
+    try { execSync('docker info', { stdio: 'ignore', timeout: 5000 }); } catch {
+      initLog('[DOCKER] Docker daemon not accessible - skipping Docker stage');
+      ui.setSubStatus('⚠️ Docker not available - will use native Python');
+      return { serverRunning: false, warmupLatency: null, timeoutConfig };
+    }
+    // Check for existing specmem embedding containers (any state)
+    const containers = execSync(
+      `docker ps -a --filter "name=specmem-embedding" --format "{{.Names}}" 2>/dev/null`,
+      { encoding: 'utf8', timeout: 5000 }
+    ).trim();
+    if (!containers) {
+      // No containers — check if the image exists to cold-start from
+      const images = execSync(
+        `docker images -q specmem-embedding:latest 2>/dev/null`,
+        { encoding: 'utf8', timeout: 5000 }
+      ).trim();
+      if (!images) {
+        initLog('[DOCKER] No embedding containers and no specmem-embedding:latest image - skipping Docker');
+        ui.setSubStatus('⚠️ No Docker embedding image - will use native Python');
+        return { serverRunning: false, warmupLatency: null, timeoutConfig };
+      }
+    }
+    initLog(`[DOCKER] Found containers/image - proceeding with Docker warm-start`);
+  } catch (e) {
+    initLog(`[DOCKER] Pre-check failed (${e.message}) - skipping Docker`);
+    ui.setSubStatus('⚠️ Docker pre-check failed - will use native Python');
     return { serverRunning: false, warmupLatency: null, timeoutConfig };
   }
 
@@ -2553,21 +2922,26 @@ async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseRe
   });
 
   // Wait for Docker to start (up to 60s)
-  // RELIABILITY FIX: Increased from 24s (120x200ms) to 60s (300x200ms) to match
-  // warm-start.sh wait times. First-time model loading can take 20-30s.
+  // DYNAMIC WAIT: Poll for Docker socket with adaptive intervals (max 5min)
+  const MAX_DOCKER_WAIT_MS = 300000; // 5 minute absolute cap
   const dockerStart = Date.now();
   ui.setStatus('Waiting for Docker container...');
   ui.setSubProgress(0.3);
 
-  for (let i = 0; i < 300; i++) {
+  let dockerPollInterval = 200; // start fast for Docker
+  while (Date.now() - dockerStart < MAX_DOCKER_WAIT_MS) {
     if (dockerStarted || fs.existsSync(socketPath)) {
       break;
     }
-    await new Promise(r => setTimeout(r, 200));  // Faster polling (200ms)
-
-    // Smooth progress increment
-    if (i % 25 === 0) {
-      ui.setSubProgress(0.3 + (i / 300) * 0.4); // Progress from 30% to 70%
+    await new Promise(r => setTimeout(r, dockerPollInterval));
+    const elapsed = Date.now() - dockerStart;
+    // Slow down polling after 10s
+    if (elapsed > 10000) dockerPollInterval = Math.min(dockerPollInterval + 100, 2000);
+    // Progress update every ~5s
+    if (Math.floor(elapsed / 5000) !== Math.floor((elapsed - dockerPollInterval) / 5000)) {
+      const progress = Math.min(0.7, 0.3 + (elapsed / MAX_DOCKER_WAIT_MS) * 0.4);
+      ui.setSubProgress(progress);
+      ui.setSubStatus(`Waiting for Docker... (${Math.round(elapsed / 1000)}s)`);
     }
   }
 
@@ -2585,55 +2959,104 @@ async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseRe
   ui.setSubProgress(0.8);
   await qqms();
 
-  // Test connection with warmup request
+  // EVENT-BASED WARMUP: Wait for actual embed response instead of fixed timeout
+  // The warmup request triggers model loading (if lazy) and we wait for the real response
+  // No fixed timeout - the embed request itself is the proof the model is ready
   ui.setStatus('Warming up embedding model...');
   let warmupLatency = null;
 
   try {
     const net = require('net');
-    const start = Date.now();
+    const warmupStart = Date.now();
 
+    // Progress animation during warmup (updates every 500ms until response)
+    let progressInterval = null;
+    let elapsed = 0;
+
+    const startProgressAnimation = () => {
+      progressInterval = setInterval(() => {
+        elapsed = Math.round((Date.now() - warmupStart) / 1000);
+        // Asymptotic progress: 80% -> 98% over time (never reaches 100 until done)
+        const progressFactor = 1 - Math.exp(-elapsed / 30);
+        ui.setSubProgress(0.8 + progressFactor * 0.18);
+        ui.setSubStatus(`⏳ Loading model... (${elapsed}s)`);
+      }, 500);
+    };
+
+    const stopProgressAnimation = () => {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    };
+
+    startProgressAnimation();
+
+    // Send warmup embed request and wait for ACTUAL response (no timeout!)
+    // This triggers lazy model loading and waits until model is ready
     await new Promise((resolve, reject) => {
       const client = new net.Socket();
       let data = '';
-      client.setTimeout(TIMEOUTS.EMBEDDING_WARMUP);
+
+      // No socket timeout - we wait as long as needed for model to load
+      // The server will respond once model is loaded and embedding is ready
 
       client.connect(socketPath, () => {
-        ui.setSubStatus('Sending warmup request...');
-        // yooo MUST include type:'embed' - server requires this format fr
+        ui.setSubStatus('🔄 Sending warmup request...');
         client.write(JSON.stringify({ type: 'embed', text: 'specmem initialization warmup test' }) + '\n');
       });
 
       client.on('data', chunk => {
         data += chunk.toString();
-        // yooo TCP can split responses - process ALL complete lines
-        // Server sends heartbeat {"status":"processing"} FIRST, then actual embedding
+        // Process all complete lines (server sends "processing" status first, then embedding)
         let newlineIdx;
         while ((newlineIdx = data.indexOf('\n')) !== -1) {
-          const completeLine = data.slice(0, newlineIdx);
-          data = data.slice(newlineIdx + 1); // consume the line
+          const line = data.slice(0, newlineIdx);
+          data = data.slice(newlineIdx + 1);
           try {
-            const parsed = JSON.parse(completeLine);
-            // yooo skip heartbeat/processing status - keep waiting
+            const parsed = JSON.parse(line);
+            // Skip "processing" heartbeat - model is still loading
             if (parsed.status === 'processing') {
-              continue; // wait for actual embedding
+              ui.setSubStatus(`⏳ Processing... (${elapsed}s)`);
+              continue;
             }
+            // Got actual response - model is ready!
             client.destroy();
-            resolve(completeLine);
+            stopProgressAnimation();
+
+            if (parsed.embedding || parsed.embeddings) {
+              warmupLatency = Date.now() - warmupStart;
+              ui.setStatus('Embedding model ready!');
+              ui.setSubStatus(`⚡ Model loaded in ${Math.round(warmupLatency/1000)}s`);
+              ui.setSubProgress(1);
+              resolve(parsed);
+            } else if (parsed.error) {
+              reject(new Error(parsed.error));
+            } else {
+              reject(new Error('Invalid response format'));
+            }
             return;
           } catch (e) {
-            // Not JSON, keep waiting
+            // Not valid JSON, keep waiting
           }
         }
       });
-      client.on('error', reject);
-      client.on('timeout', () => reject(new Error('timeout')));
+
+      client.on('error', (err) => {
+        stopProgressAnimation();
+        reject(err);
+      });
+
+      // Only timeout after 5 minutes as safety limit (not the normal case)
+      setTimeout(() => {
+        if (client.connecting || client.readable) {
+          client.destroy();
+          stopProgressAnimation();
+          reject(new Error('Model loading exceeded 5 minutes'));
+        }
+      }, 300000);
     });
 
-    warmupLatency = Date.now() - start;
-    ui.setStatus('Embedding model ready!');
-    ui.setSubStatus(`⚡ Warmup latency: ${warmupLatency}ms`);
-    ui.setSubProgress(1);
   } catch (e) {
     ui.setSubStatus(`⚠️ Warmup failed: ${e.message}`);
   }
@@ -2657,7 +3080,14 @@ async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseRe
 // ============================================================================
 // This stage indexes the codebase with embeddings so find_code_pointers works
 // from the start. Previously, indexing only happened when MCP server started,
-// which meant the first Claude session had no code search capability.
+// which meant the first  session had no code search capability.
+
+// CRITICAL BUG FIX: Track the PID of the embedding server spawned by THIS init
+// process. killExistingEmbeddingServer() must NEVER kill our own child.
+// Without this, the init process spawns the server, the server writes its PID
+// to embedding.pid, and then a later call to killExistingEmbeddingServer()
+// reads that PID file and SIGTERMs our own child process.
+let spawnedEmbeddingPid = null;
 
 async function indexCodebase(projectPath, ui, embeddingResult) {
   ui.setStage(5, 'CODEBASE INDEXING');
@@ -2690,36 +3120,184 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
   initLog(`Socket paths: project=${projectSocketPath}, shared=${sharedSocketPath}`);
   initLog(`Project socket exists: ${fs.existsSync(projectSocketPath)}, Shared socket exists: ${fs.existsSync(sharedSocketPath)}`);
 
+  // SOCKET LIVENESS CHECK - validate socket is alive, not just that file exists
+  // Orphaned socket files (process died, socket file remains) cause ECONNREFUSED
+  // and stall the entire indexing pipeline.
+  function quickSocketAlive(sockPath) {
+    return new Promise((resolve) => {
+      const client = new net.Socket();
+      const timeout = setTimeout(() => { client.destroy(); resolve(false); }, 3000);
+      client.on('connect', () => { clearTimeout(timeout); client.destroy(); resolve(true); });
+      client.on('error', () => { clearTimeout(timeout); client.destroy(); resolve(false); });
+      client.connect(sockPath);
+    });
+  }
+
+  // DYNAMIC READINESS POLLING — no hardcoded timeouts.
+  // Polls for socket file + health check with adaptive intervals.
+  // Starts fast (500ms), slows down after 10s (2s intervals).
+  // Max wait: 300s (5 minutes). Returns true if server is ready.
+  const MAX_EMBED_WAIT_MS = 300000; // 5 minute absolute cap
+  async function waitForEmbeddingReady(sockPath, opts = {}) {
+    const { ui: _ui, label = 'server', logFn = initLog } = opts;
+    const start = Date.now();
+    let pollInterval = 500;   // start fast
+    let lastLogTime = 0;
+
+    while (Date.now() - start < MAX_EMBED_WAIT_MS) {
+      const elapsed = Date.now() - start;
+
+      // Phase 1: Wait for socket FILE to appear
+      if (!fs.existsSync(sockPath)) {
+        if (elapsed - lastLogTime > 5000) {
+          const elapsedSec = Math.round(elapsed / 1000);
+          if (_ui) _ui.setSubStatus(`Waiting for ${label} socket... (${elapsedSec}s)`);
+          logFn(`[EMBED] Waiting for socket file: ${sockPath} (${elapsedSec}s elapsed)`);
+          lastLogTime = elapsed;
+        }
+        await new Promise(r => setTimeout(r, pollInterval));
+        if (elapsed > 10000) pollInterval = Math.min(pollInterval + 250, 2000);
+        continue;
+      }
+
+      // Phase 2: Socket file exists — check if server is actually responding
+      const alive = await quickSocketAlive(sockPath);
+      if (alive) {
+        const elapsedSec = Math.round((Date.now() - start) / 1000);
+        logFn(`[EMBED] ${label} ready after ${elapsedSec}s`);
+        if (_ui) _ui.setSubStatus(`✓ ${label} ready (${elapsedSec}s)`);
+        return true;
+      }
+
+      // Socket exists but not responding yet — server still warming up
+      if (elapsed - lastLogTime > 3000) {
+        const elapsedSec = Math.round(elapsed / 1000);
+        if (_ui) _ui.setSubStatus(`${label} warming up... (${elapsedSec}s)`);
+        lastLogTime = elapsed;
+      }
+      await new Promise(r => setTimeout(r, pollInterval));
+      if (elapsed > 10000) pollInterval = Math.min(pollInterval + 250, 2000);
+    }
+
+    const totalSec = Math.round((Date.now() - start) / 1000);
+    logFn(`[EMBED] ${label} failed to become ready after ${totalSec}s (max ${MAX_EMBED_WAIT_MS / 1000}s)`);
+    if (_ui) _ui.setSubStatus(`⚠️ ${label} not ready after ${totalSec}s`);
+    return false;
+  }
+
   // Project socket takes priority - it's the fresh one from Docker stage 4
   let activeSocketPath = null;
   if (fs.existsSync(projectSocketPath)) {
-    activeSocketPath = projectSocketPath;
-    initLog(`Using PROJECT socket: ${projectSocketPath}`);
-  } else if (fs.existsSync(sharedSocketPath)) {
-    activeSocketPath = sharedSocketPath;
-    initLog(`Using SHARED socket: ${sharedSocketPath}`);
-  } else {
-    initLog('WARNING: No embedding socket found!');
+    const alive = await quickSocketAlive(projectSocketPath);
+    if (alive) {
+      activeSocketPath = projectSocketPath;
+      initLog(`Using PROJECT socket: ${projectSocketPath} (verified alive)`);
+    } else {
+      // CRITICAL FIX: Don't remove socket if our spawned server owns it.
+      // Check the PID file to see if this socket belongs to our child process.
+      const pidFile = path.join(projectPath, 'specmem', 'sockets', 'embedding.pid');
+      let ownedByUs = false;
+      if (spawnedEmbeddingPid) {
+        try {
+          if (fs.existsSync(pidFile)) {
+            const pidContent = fs.readFileSync(pidFile, 'utf8').trim();
+            const filePid = parseInt(pidContent.split(':')[0], 10);
+            if (filePid === spawnedEmbeddingPid) {
+              ownedByUs = true;
+              initLog(`PROJECT socket not yet responsive but owned by our spawned PID ${spawnedEmbeddingPid} - keeping socket, server may still be warming up`);
+              activeSocketPath = projectSocketPath; // Trust our child, it's just warming up
+            }
+          }
+        } catch { /* ignore */ }
+      }
+      if (!ownedByUs) {
+        initLog(`PROJECT socket exists but DEAD (ECONNREFUSED) - removing orphaned socket: ${projectSocketPath}`);
+        try { fs.unlinkSync(projectSocketPath); } catch {}
+      }
+    }
+  }
+  if (!activeSocketPath && fs.existsSync(sharedSocketPath)) {
+    const alive = await quickSocketAlive(sharedSocketPath);
+    if (alive) {
+      activeSocketPath = sharedSocketPath;
+      initLog(`Using SHARED socket: ${sharedSocketPath} (verified alive)`);
+    } else {
+      initLog(`SHARED socket exists but DEAD - removing orphaned socket: ${sharedSocketPath}`);
+      try { fs.unlinkSync(sharedSocketPath); } catch {}
+    }
+  }
+  if (!activeSocketPath) {
+    initLog('WARNING: No live embedding socket found! Will spawn new server.');
   }
 
   // Check if embedding server is available from Stage 4
   const serverRunning = embeddingResult?.serverRunning || false;
   const socketExists = activeSocketPath !== null;
 
+  // Helper: Kill any existing embedding server for this project before spawning a new one
+  // CRITICAL FIX: Never kill a server that was spawned by THIS init process.
+  // The spawnedEmbeddingPid variable tracks our child's PID to prevent self-kill.
+  function killExistingEmbeddingServer(projectPath) {
+    const pidFile = path.join(projectPath, 'specmem', 'sockets', 'embedding.pid');
+    try {
+      if (!fs.existsSync(pidFile)) return false;
+      const content = fs.readFileSync(pidFile, 'utf8').trim();
+      const pid = parseInt(content.split(':')[0], 10);
+      if (!pid || isNaN(pid)) return false;
+
+      // CRITICAL FIX: Never kill our own child process!
+      // This prevents the race condition where:
+      // 1. Init spawns embedding server
+      // 2. Server writes PID to embedding.pid
+      // 3. Later code path calls killExistingEmbeddingServer()
+      // 4. It reads the PID file and kills our own child
+      if (spawnedEmbeddingPid && pid === spawnedEmbeddingPid) {
+        initLog(`[EMBED] Skipping kill of PID ${pid} - this is OUR spawned server`);
+        return false;
+      }
+
+      // Check if process is alive
+      try { process.kill(pid, 0); } catch {
+        // Process dead, clean up PID file
+        try { fs.unlinkSync(pidFile); } catch {}
+        return false;
+      }
+      // Process alive — kill it gracefully
+      initLog(`[EMBED] Killing existing embedding server PID ${pid} before respawn`);
+      process.kill(pid, 'SIGTERM');
+      // Wait up to 3 seconds for it to die
+      for (let i = 0; i < 6; i++) {
+        const { execSync } = require('child_process');
+        try { execSync(`sleep 0.5`); } catch {}
+        try { process.kill(pid, 0); } catch { return true; } // Dead
+      }
+      // Force kill if still alive
+      try { process.kill(pid, 'SIGKILL'); } catch {}
+      try { fs.unlinkSync(pidFile); } catch {}
+      return true;
+    } catch (e) {
+      initLog(`[EMBED] PID file check error: ${e.message}`);
+      return false;
+    }
+  }
+
   // CRITICAL: If no embedding server, START IT NOW - never skip embeddings!
   if (!serverRunning && !socketExists) {
     ui.setStatus('Starting embedding server...');
     ui.setSubStatus('No socket found - launching Python embedding server');
 
-    // Find the Python embedding script
-    const possiblePaths = [
+    // USE PYTHON DIRECTLY - frankenstein-embeddings.py has built-in torch.set_num_threads()
+    // for CPU control, no need for external cpulimit wrapper
+    const possiblePythonPaths = [
       path.join(__dirname, '..', 'embedding-sandbox', 'frankenstein-embeddings.py'),
       path.join(projectPath, 'embedding-sandbox', 'frankenstein-embeddings.py'),
       '/opt/specmem/embedding-sandbox/frankenstein-embeddings.py'
     ];
 
     let embeddingScript = null;
-    for (const p of possiblePaths) {
+
+    // Find frankenstein-embeddings.py
+    for (const p of possiblePythonPaths) {
       if (fs.existsSync(p)) {
         embeddingScript = p;
         break;
@@ -2727,10 +3305,15 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
     }
 
     if (embeddingScript) {
-      // Start the Python embedding server
+      // Start the embedding server directly with Python
       const { spawn } = require('child_process');
       const socketsDir = path.join(projectPath, 'specmem', 'sockets');
-      fs.mkdirSync(socketsDir, { recursive: true });
+      safeMkdir(socketsDir);
+
+      // Kill any existing embedding server before spawning a new one
+      // Reset spawnedEmbeddingPid since we're about to spawn a replacement
+      spawnedEmbeddingPid = null;
+      killExistingEmbeddingServer(projectPath);
 
       // Clean up stale socket
       if (fs.existsSync(projectSocketPath)) {
@@ -2742,48 +3325,48 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         }
       }
 
-      // Task #22 fix: Use getPythonPath() instead of hardcoded 'python3'
+      // Use Python directly - built-in thread limiting via torch.set_num_threads()
+      initLog('[EMBED] Starting frankenstein-embeddings.py directly');
       const pythonPath = getPythonPath();
+
+      // Redirect stdout/stderr to log file instead of piping
+      // CRITICAL: Piped stdio keeps a reference to the child process even after unref(),
+      // which can cause SIGTERM/SIGPIPE when the parent's event loop is under heavy load
+      // (e.g. during batch embedding). Using 'ignore' or file descriptors prevents this.
+      const embedLogPath = path.join(projectPath, 'specmem', 'sockets', 'embedding-autostart.log');
+      const embedLogFd = fs.openSync(embedLogPath, 'a');
+
       const embeddingProcess = spawn(pythonPath, [embeddingScript], {
         cwd: path.dirname(embeddingScript),
         env: {
           ...process.env,
+          SPECMEM_EMBEDDING_SOCKET: projectSocketPath,
           SPECMEM_SOCKET_PATH: projectSocketPath,
           SPECMEM_PROJECT_PATH: projectPath
         },
         detached: true,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', embedLogFd, embedLogFd]
       });
+
+      // CRITICAL FIX: Track spawned PID so killExistingEmbeddingServer() won't kill it
+      spawnedEmbeddingPid = embeddingProcess.pid;
+      initLog(`[EMBED] Spawned embedding server with PID ${spawnedEmbeddingPid} - tracking to prevent self-kill`);
 
       // error handler BEFORE unref - prevents silent spawn failures
       embeddingProcess.on('error', (err) => {
         ui.setSubStatus('Embedding spawn error: ' + err.message);
       });
 
-      // CRITICAL: Consume stdout/stderr so Python startup banner doesn't leak to terminal
-      embeddingProcess.stdout.on('data', (chunk) => {
-        initLog('[EMBED-STDOUT] ' + chunk.toString().trim());
-      });
-      embeddingProcess.stderr.on('data', (chunk) => {
-        initLog('[EMBED-STDERR] ' + chunk.toString().trim());
-      });
+      // Close the fd in the parent so only the child holds it
+      fs.closeSync(embedLogFd);
 
       embeddingProcess.unref();
 
-      // Wait for socket to appear (up to 60s)
-      // RELIABILITY FIX: Increased from 30s (60x500ms) to 60s (120x500ms)
-      // First-time model loading can take 20-30s, need enough buffer
+      // DYNAMIC WAIT: Poll for socket + health check with adaptive intervals (max 5min)
       ui.setSubStatus('Waiting for embedding server to start...');
-      for (let i = 0; i < 120; i++) {
-        await new Promise(r => setTimeout(r, 500));
-        if (fs.existsSync(projectSocketPath)) {
-          activeSocketPath = projectSocketPath;
-          ui.setSubStatus('✓ Embedding server started!');
-          break;
-        }
-        if (i % 10 === 0) {
-          ui.setSubStatus(`Waiting for embedding server... (${i/2}s)`);
-        }
+      const serverReady = await waitForEmbeddingReady(projectSocketPath, { ui, label: 'Embedding server' });
+      if (serverReady) {
+        activeSocketPath = projectSocketPath;
       }
 
       if (!activeSocketPath) {
@@ -2843,12 +3426,24 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
       ui.setSubStatus('✓ Embedding server responding');
       initLog('Embedding socket test passed');
     } catch (e) {
-      ui.setSubStatus(`⚠️ Socket exists but not responding: ${e.message}`);
-      initLog(`Embedding socket test FAILED: ${e.message}`, e);
+      ui.setSubStatus(`⚠️ Socket test failed: ${e.message} - retrying...`);
+      initLog(`Embedding socket test FAILED: ${e.message} - will retry before killing`, e);
 
-      // CRITICAL FIX: Stale socket exists but nothing listening - clean up and restart!
+      // DYNAMIC READINESS POLL: Don't immediately kill — poll with adaptive intervals (max 5min)
+      const recovered = await waitForEmbeddingReady(activeSocketPath, { ui, label: 'Embedding server warmup' });
+
+      if (recovered) {
+        // Server is alive after retries - continue to indexing
+      } else {
+      // Server truly dead after 15s of retries - now kill and restart
+      // If this is our spawned server, it's been unresponsive for 15s - allow the kill
+      // by resetting spawnedEmbeddingPid (we're giving up on it)
       initLog('Attempting socket recovery - cleaning stale socket and restarting server...');
       ui.setStatus('Recovering embedding server...');
+
+      // Reset PID tracking since we're abandoning this server
+      spawnedEmbeddingPid = null;
+      killExistingEmbeddingServer(projectPath);
 
       // Clean up the stale socket file
       try {
@@ -2886,49 +3481,15 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
           ui.setSubStatus('Waiting for Docker container to recover...');
           const recoverStart = Date.now();
 
-          for (let i = 0; i < 120; i++) {
-            if (fs.existsSync(projectSocketPath)) {
-              break;
-            }
-            await new Promise(r => setTimeout(r, 500));
-            if (i % 10 === 0) {
-              ui.setSubStatus(`Recovery in progress... (${Math.round(i/2)}s)`);
-            }
-          }
-
+          // DYNAMIC WAIT: Poll for recovery with adaptive intervals (max 5min)
+          const recoveryReady = await waitForEmbeddingReady(projectSocketPath, { ui, label: 'Docker recovery' });
           const recoverLatency = Date.now() - recoverStart;
 
-          if (fs.existsSync(projectSocketPath)) {
+          if (recoveryReady) {
             initLog(`Docker recovery successful in ${recoverLatency}ms`);
-            ui.setSubStatus('✓ Embedding server recovered!');
             activeSocketPath = projectSocketPath;
-
-            // Verify the recovered socket is actually responding
-            try {
-              await new Promise((resolve, reject) => {
-                const verifyClient = new net.Socket();
-                let verifyData = '';
-                verifyClient.setTimeout(10000);
-                verifyClient.connect(projectSocketPath, () => {
-                  verifyClient.write(JSON.stringify({ type: 'embed', text: 'recovery test' }) + '\n');
-                });
-                verifyClient.on('data', chunk => {
-                  verifyData += chunk.toString();
-                  if (verifyData.includes('embedding') || verifyData.includes('processing')) {
-                    verifyClient.destroy();
-                    resolve(true);
-                  }
-                });
-                verifyClient.on('error', reject);
-                verifyClient.on('timeout', () => reject(new Error('timeout')));
-              });
-              initLog('Recovered socket verified - responding correctly');
-            } catch (verifyErr) {
-              initLog(`Recovered socket not responding: ${verifyErr.message}`);
-              activeSocketPath = null;
-            }
           } else {
-            initLog(`Docker recovery failed - socket not created after ${recoverLatency}ms`);
+            initLog(`Docker recovery failed after ${recoverLatency}ms`);
             activeSocketPath = null;
           }
         } catch (recoverErr) {
@@ -2939,7 +3500,8 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         initLog('warm-start.sh not found - cannot recover Docker container');
         activeSocketPath = null;  // Mark as unavailable
       }
-    }
+    } // end else (server truly dead after retries)
+    } // end catch
     await qqms();
   }
 
@@ -2970,11 +3532,34 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
     await pool.query('SELECT 1');
     initLog('Database connection test passed');
 
-    // CRITICAL FIX: Set search_path to project schema for proper isolation
-    const schemaName = 'specmem_' + path.basename(projectPath).toLowerCase().replace(/[^a-z0-9]/g, '');
+    // CRITICAL FIX: Create and set search_path to project schema for proper isolation
+    const schemaName = 'specmem_' + path.basename(projectPath).toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+
+    // Create schema if it doesn't exist
+    await pool.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName}`);
+    initLog(`Project schema ensured: ${schemaName}`);
+
+    // Set search_path for ALL pool connections (not just the current one)
+    // pool.query() checks out different connections; SET only affects one.
+    // Using pool.on('connect') ensures every new connection gets the right search_path.
+    pool.on('connect', (client) => {
+      client.query(`SET search_path TO ${schemaName}, public`).catch(() => {});
+    });
+    // Also set it on the existing connection
     await pool.query(`SET search_path TO ${schemaName}, public`);
     initLog(`Database schema set to: ${schemaName}`);
     ui.setSubStatus(`Database connected (schema: ${schemaName})`);
+
+    // Initialize schema tables from SQL file
+    const schemaInitPath = path.join(__dirname, '..', 'dist', 'db', 'projectSchemaInit.sql');
+    if (fs.existsSync(schemaInitPath)) {
+      const schemaInitSql = fs.readFileSync(schemaInitPath, 'utf8');
+      await pool.query(schemaInitSql);
+      initLog(`Schema tables initialized from ${schemaInitPath}`);
+    } else {
+      initLog(`WARNING: Schema init SQL not found at ${schemaInitPath}`);
+    }
+
     await qqms();
   } catch (e) {
     ui.setSubStatus(`Database error: ${e.message}`);
@@ -3070,6 +3655,50 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
     return results;
   }
 
+  // AUTO-CREATE codebase_files table if it doesn't exist
+  // CRITICAL: Init must not depend on MCP migrations having run first
+  // FIX: Use gen_random_uuid() (built-in PG13+) instead of uuid_generate_v4() (uuid-ossp extension)
+  // The uuid-ossp extension is installed in specmem_specmem schema, NOT public,
+  // so uuid_generate_v4() is unavailable when search_path is set to other project schemas.
+  // Also ensure vector extension exists in public schema (accessible to all project schemas).
+  try {
+    // vector extension must be in public schema so all project schemas can use vector type
+    await pool.query(`CREATE EXTENSION IF NOT EXISTS "vector" SCHEMA public`);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS codebase_files (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        file_path TEXT NOT NULL,
+        absolute_path TEXT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        extension VARCHAR(50),
+        language_id VARCHAR(50) NOT NULL DEFAULT 'unknown',
+        language_name VARCHAR(100) NOT NULL DEFAULT 'Unknown',
+        language_type VARCHAR(50) NOT NULL DEFAULT 'data',
+        content TEXT NOT NULL,
+        content_hash VARCHAR(64),
+        size_bytes INTEGER NOT NULL DEFAULT 0,
+        line_count INTEGER NOT NULL DEFAULT 0,
+        char_count INTEGER NOT NULL DEFAULT 0,
+        last_modified TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        chunk_index INTEGER,
+        total_chunks INTEGER,
+        original_file_id UUID,
+        embedding vector(384),
+        project_path TEXT DEFAULT '/',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT content_not_empty CHECK (length(content) > 0)
+      )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_codebase_files_content_hash ON codebase_files(content_hash)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_codebase_files_path ON codebase_files(file_path)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_codebase_files_project_path_file ON codebase_files(file_path, project_path)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_codebase_files_project_path_hash ON codebase_files(project_path, content_hash)`);
+    initLog('[CODEBASE] Table codebase_files ensured');
+  } catch (e) {
+    initLog(`[CODEBASE] Table ensure warning: ${e.message}`);
+  }
+
   // Load existing hashes to skip unchanged files ONLY if they have embeddings
   // CRITICAL: Files without embeddings need to be re-indexed even if content matches!
   ui.setStatus('Checking existing index...');
@@ -3110,6 +3739,10 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
   // Track consecutive failures to detect dead socket
   let consecutiveEmbeddingFailures = 0;
   const MAX_CONSECUTIVE_FAILURES = 3;
+
+  // Respawn backoff for revalidateSocket() — prevents rapid-fire restarts
+  let lastRevalidateTime = 0;
+  let revalidateBackoffMs = 1000; // Start at 1s, doubles each time up to 30s
 
   // FIX: Categorize embedding errors for better debugging and error tracking
   function categorizeEmbeddingError(error) {
@@ -3193,8 +3826,19 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
 
   // Revalidate socket path after failures (may have been restarted externally)
   async function revalidateSocket() {
+    // Backoff: prevent rapid-fire revalidation/respawn loops
+    const now = Date.now();
+    const timeSinceLastRevalidate = now - lastRevalidateTime;
+    if (timeSinceLastRevalidate < revalidateBackoffMs) {
+      initLog(`[EMBED] Revalidation throttled (${revalidateBackoffMs}ms backoff, ${timeSinceLastRevalidate}ms elapsed)`);
+      return false;
+    }
+    lastRevalidateTime = now;
+    revalidateBackoffMs = Math.min(revalidateBackoffMs * 2, 30000);
+
     const projectSocketPath = path.join(projectPath, 'specmem', 'sockets', 'embeddings.sock');
-    const sharedSocketPath = path.join(os.homedir(), '.specmem', projectName.replace(/[^a-zA-Z0-9_-]/g, '_'), 'sockets', 'embeddings.sock');
+    const projDirName = path.basename(projectPath).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sharedSocketPath = path.join(os.homedir(), '.specmem', projDirName, 'sockets', 'embeddings.sock');
 
     // Check project socket first (preferred)
     if (fs.existsSync(projectSocketPath)) {
@@ -3203,19 +3847,92 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
       if (healthy) {
         initLog(`Revalidated socket: using project socket at ${projectSocketPath}`);
         consecutiveEmbeddingFailures = 0;
+        revalidateBackoffMs = 1000;
         return true;
       }
     }
 
-    // Fallback to shared socket
+    // Fallback to shared socket (home dir)
     if (fs.existsSync(sharedSocketPath)) {
       activeSocketPath = sharedSocketPath;
       const healthy = await checkSocketHealth();
       if (healthy) {
         initLog(`Revalidated socket: using shared socket at ${sharedSocketPath}`);
         consecutiveEmbeddingFailures = 0;
+        revalidateBackoffMs = 1000;
         return true;
       }
+    }
+
+    // Fallback to /tmp shared sockets
+    for (let i = 0; i < 5; i++) {
+      const tmpSocket = `/tmp/specmem-embed-${i}.sock`;
+      if (fs.existsSync(tmpSocket)) {
+        activeSocketPath = tmpSocket;
+        const healthy = await checkSocketHealth();
+        if (healthy) {
+          initLog(`Revalidated socket: using /tmp shared socket at ${tmpSocket}`);
+          consecutiveEmbeddingFailures = 0;
+          revalidateBackoffMs = 1000;
+          return true;
+        }
+      }
+    }
+
+    // AUTO-RESTART: If no socket found, try restarting the embedding server
+    initLog('Socket revalidation: no socket found, attempting auto-restart of embedding server...');
+    try {
+      const { spawn } = require('child_process');
+      const possiblePythonPaths = [
+        path.join(__dirname, '..', 'embedding-sandbox', 'frankenstein-embeddings.py'),
+        path.join(projectPath, 'embedding-sandbox', 'frankenstein-embeddings.py'),
+        '/opt/specmem/embedding-sandbox/frankenstein-embeddings.py'
+      ];
+      let embeddingScript = null;
+      for (const p of possiblePythonPaths) {
+        if (fs.existsSync(p)) { embeddingScript = p; break; }
+      }
+      if (embeddingScript) {
+        const socketsDir = path.join(projectPath, 'specmem', 'sockets');
+        if (!fs.existsSync(socketsDir)) fs.mkdirSync(socketsDir, { recursive: true });
+        // Kill any existing embedding server before respawn
+        // Reset spawnedEmbeddingPid since we're about to spawn a replacement
+        spawnedEmbeddingPid = null;
+        killExistingEmbeddingServer(projectPath);
+        // Clean stale socket
+        if (fs.existsSync(projectSocketPath)) {
+          try { fs.unlinkSync(projectSocketPath); } catch { /* ignore */ }
+        }
+        const pythonPath = getPythonPath();
+        // CRITICAL: Use file descriptor stdio, NOT pipes. Piped stdio causes SIGTERM
+        // when parent event loop is under heavy load during batch indexing.
+        const revalLogPath = path.join(projectPath, 'specmem', 'sockets', 'embedding-autostart.log');
+        const revalLogFd = fs.openSync(revalLogPath, 'a');
+        const proc = spawn(pythonPath, [embeddingScript], {
+          cwd: path.dirname(embeddingScript),
+          env: { ...process.env, SPECMEM_EMBEDDING_SOCKET: projectSocketPath, SPECMEM_SOCKET_PATH: projectSocketPath, SPECMEM_PROJECT_PATH: projectPath },
+          detached: true,
+          stdio: ['ignore', revalLogFd, revalLogFd]
+        });
+        // CRITICAL FIX: Track spawned PID so killExistingEmbeddingServer() won't kill it
+        spawnedEmbeddingPid = proc.pid;
+        initLog(`[EMBED] Revalidation spawned embedding server with PID ${spawnedEmbeddingPid} - tracking to prevent self-kill`);
+        proc.on('error', () => {});
+        fs.closeSync(revalLogFd);
+        proc.unref();
+        // DYNAMIC WAIT: Poll for readiness with adaptive intervals (max 5min)
+        const revalReady = await waitForEmbeddingReady(projectSocketPath, { label: 'Revalidation restart' });
+        if (revalReady) {
+          activeSocketPath = projectSocketPath;
+          initLog(`Embedding server auto-restarted successfully, socket at ${projectSocketPath}`);
+          consecutiveEmbeddingFailures = 0;
+          revalidateBackoffMs = 1000;
+          return true;
+        }
+        initLog('Embedding server auto-restart: server did not become ready');
+      }
+    } catch (restartErr) {
+      initLog(`Embedding server auto-restart failed: ${restartErr.message || restartErr}`);
     }
 
     initLog('Socket revalidation failed: no healthy socket found');
@@ -3264,8 +3981,20 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
 
           client.setTimeout(TIMEOUTS.EMBEDDING_REQUEST * 2); // Longer timeout for batch
 
+          // HARD WALL-CLOCK TIMEOUT: Cannot be reset by data/heartbeats
+          // Prevents infinite hangs on large files where server keeps sending heartbeats
+          const HARD_TIMEOUT_MS = TIMEOUTS.EMBEDDING_REQUEST * 3; // 270s absolute max
+          const hardTimeout = setTimeout(() => {
+            if (!settled) {
+              settled = true;
+              if (!client.destroyed) client.destroy();
+              reject(new Error(`Hard wall-clock timeout after ${HARD_TIMEOUT_MS}ms - embedding took too long (heartbeats: ${heartbeatCount})`));
+            }
+          }, HARD_TIMEOUT_MS);
+
           // Cleanup helper to avoid leaked resources
           const cleanup = () => {
+            clearTimeout(hardTimeout);
             if (!client.destroyed) client.destroy();
           };
 
@@ -3599,11 +4328,144 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
   // CRITICAL: Slow rendering during heavy I/O to prevent line splits from race conditions
   ui.slowRendering(300);
   ui.setStatus('Indexing codebase...');
+
+  // Enable TUI file feed - shows what's being embedded in real-time
+  ui.enableFileFeed(true);
   // SPEED OPTIMIZED: larger batches + more parallelism = faster indexing
   const batchSize = 50; // was 20 - larger batches = fewer UI updates
   const parallelLimit = 16; // was 8 - embedding server handles more concurrent requests
   let processed = 0;
   let lastUIUpdate = Date.now(); // throttle UI updates to reduce overhead
+
+  // Read maxConcurrent from model-config.json for parallel embedding batches
+  let embeddingMaxConcurrent = 3; // default
+  try {
+    const mcPath = path.join(projectPath, 'specmem', 'model-config.json');
+    if (fs.existsSync(mcPath)) {
+      const mc = JSON.parse(fs.readFileSync(mcPath, 'utf8'));
+      if (mc.embedding && mc.embedding.maxConcurrent) {
+        embeddingMaxConcurrent = mc.embedding.maxConcurrent;
+      }
+    }
+  } catch { /* use default */ }
+  initLog(`Embedding concurrency: ${embeddingMaxConcurrent} parallel batches`);
+
+  // STORE-THEN-EMBED: For large codebases (>1000 files), store files first
+  // then trigger Python server's batch processing (200 files/batch, direct DB)
+  if (files.length > 1000 && activeSocketPath) {
+    initLog(`Large codebase detected (${files.length} files) - using store-then-embed mode`);
+    ui.setStatus('Store-then-embed mode (large codebase)');
+    ui.setSubStatus('Phase 1: Storing files without embeddings...');
+
+    // Phase 1: Store all files without embeddings (fast - no socket calls)
+    await runWithConcurrency(files, async (filePath, idx) => {
+      try {
+        const relativePath = path.relative(projectPath, filePath);
+        const stats = fs.statSync(filePath);
+        if (stats.size > 500 * 1024) { results.filesSkipped++; return; }
+
+        // Binary check
+        const fd = fs.openSync(filePath, 'r');
+        const buf = Buffer.alloc(Math.min(8192, stats.size));
+        fs.readSync(fd, buf, 0, buf.length, 0);
+        fs.closeSync(fd);
+        if (buf.includes(0)) { results.filesSkipped++; return; }
+
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const contentHash = crypto.createHash('sha256').update(content).digest('hex');
+
+        // Skip if already indexed with embedding
+        if (existingHashes.get(relativePath) === contentHash) {
+          results.filesSkipped++;
+          return;
+        }
+
+        const ext = path.extname(filePath).toLowerCase();
+        const lang = fileLanguageMap.get(filePath) || { id: 'unknown', name: 'Unknown' };
+        const lineCount = content.split('\n').length;
+        const fileId = uuidv4();
+
+        try {
+          await pool.query(`DELETE FROM codebase_files WHERE file_path = $1 AND project_path = $2`, [relativePath, projectPath]);
+        } catch { /* ignore */ }
+
+        await pool.query(`
+          INSERT INTO codebase_files (
+            id, file_path, absolute_path, file_name, extension,
+            language_id, language_name, content, content_hash,
+            size_bytes, line_count, project_path
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        `, [
+          fileId, relativePath, filePath, path.basename(filePath), ext,
+          (lang.id || 'unknown').toLowerCase(), lang.name || 'Unknown',
+          content, contentHash, stats.size, lineCount, projectPath
+        ]);
+
+        results.filesIndexed++;
+        if (idx % 100 === 0) {
+          ui.setSubStatus(`Stored ${results.filesIndexed} / ${files.length} files...`);
+        }
+      } catch (e) {
+        results.errors.push(path.relative(projectPath, filePath) + ': ' + e.message);
+      }
+    }, parallelLimit);
+
+    initLog(`Phase 1 complete: ${results.filesIndexed} files stored without embeddings`);
+    ui.setSubStatus(`${results.filesIndexed} files stored, triggering server-side embedding...`);
+
+    // Phase 2: Trigger Python server's process_codebase endpoint
+    try {
+      const ssResult = await new Promise((resolve, reject) => {
+        const client = new net.Socket();
+        let buffer = '';
+        let settled = false;
+        const timeout = setTimeout(() => {
+          if (!settled) { settled = true; client.destroy(); reject(new Error('Server-side processing timeout (10min)')); }
+        }, 600000);
+        client.on('connect', () => {
+          client.write(JSON.stringify({ process_codebase: true, batch_size: 200, limit: 0, project_path: projectPath }) + '\n');
+        });
+        client.on('data', (data) => {
+          buffer += data.toString();
+          let newlineIdx;
+          while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
+            if (settled) return;
+            const line = buffer.slice(0, newlineIdx);
+            buffer = buffer.slice(newlineIdx + 1);
+            try {
+              const resp = JSON.parse(line);
+              if (resp.error) { clearTimeout(timeout); settled = true; client.end(); reject(new Error(resp.error)); return; }
+              if (resp.status === 'processing') continue;
+              if (resp.total_processed !== undefined || resp.processed !== undefined) {
+                clearTimeout(timeout); settled = true; client.end(); resolve(resp); return;
+              }
+            } catch { /* keep waiting */ }
+          }
+        });
+        client.on('error', (e) => { clearTimeout(timeout); if (!settled) { settled = true; reject(e); } });
+        client.connect(activeSocketPath);
+      });
+
+      results.embeddingsGenerated = ssResult.total_processed || ssResult.processed || 0;
+      initLog(`Server-side embedding complete: ${results.embeddingsGenerated} embeddings generated`);
+      ui.setSubStatus(`Server-side: ${results.embeddingsGenerated} embeddings generated`);
+    } catch (ssErr) {
+      initLog(`Server-side embedding failed: ${ssErr.message} - falling back to client-side`);
+      ui.setSubStatus('Server-side failed, falling back to client-side...');
+      // Fall through to standard loop below (it will handle the remaining files)
+    }
+
+    // Skip the standard indexing loop
+    results.durationMs = Date.now() - startTime;
+    ui.enableFileFeed(false);
+    ui.slowRendering(0);
+    await pool.end();
+
+    initLog(`=== CODEBASE INDEXING COMPLETE (store-then-embed) ===`);
+    initLog(`Files: ${results.filesScanned} scanned, ${results.filesIndexed} indexed, ${results.embeddingsGenerated} embeddings`);
+    initLog(`Duration: ${results.durationMs}ms`);
+    return results;
+  }
 
   // Track current file for better progress display
   let currentFile = '';
@@ -3708,6 +4570,7 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         // Skip large files (>500KB)
         if (stats.size > 500 * 1024) {
           results.filesSkipped++;
+          ui.addFileToFeed(relativePath, 'skip');
           return;
         }
 
@@ -3721,6 +4584,7 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
           // Binary file detected - skip it
           if (process.env.SPECMEM_DEBUG) initLog(`Skipping binary file: ${relativePath}`);
           results.filesSkipped++;
+          ui.addFileToFeed(relativePath, 'skip');
           return;
         }
 
@@ -3730,6 +4594,7 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         if (!content || content.trim().length === 0) {
           if (process.env.SPECMEM_DEBUG) initLog(`Skipping empty file: ${relativePath}`);
           results.filesSkipped++;
+          ui.addFileToFeed(relativePath, 'skip');
           return;
         }
 
@@ -3738,6 +4603,7 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         // Skip unchanged files
         if (existingHashes.get(relativePath) === contentHash) {
           results.filesSkipped++;
+          ui.addFileToFeed(relativePath, 'skip');
           return;
         }
 
@@ -3759,12 +4625,18 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         const maxDefsPerFile = 30;
         const defsToProcess = definitions.slice(0, maxDefsPerFile);
 
+        // Show what was extracted
+        const sizeKB = (stats.size / 1024).toFixed(1);
+        const defCount = defsToProcess.length;
+        ui.addFileToFeed(relativePath, 'reading', `(${sizeKB}KB, ${defCount} defs)`);
+
         fileDataList.push({
           filePath, relativePath, fileName, ext, language, content, contentHash,
           stats, lineCount, fileId, definitions: defsToProcess
         });
       } catch (e) {
         results.errors.push(path.relative(projectPath, filePath) + ': ' + e.message);
+        ui.addFileToFeed(path.relative(projectPath, filePath), 'error');
       }
     }, parallelLimit);
 
@@ -3773,21 +4645,47 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
     setPhase('Embedding');
 
     let fileEmbeddings = [];
+    // FIX: If activeSocketPath is gone (socket died), try to revalidate before skipping
+    if (fileEmbedTexts.length > 0 && !activeSocketPath) {
+      initLog('No active socket for embedding phase - attempting revalidation...');
+      const revalidated = await revalidateSocket();
+      if (revalidated) {
+        initLog(`Socket revalidated successfully: ${activeSocketPath}`);
+      } else {
+        initLog('Socket revalidation failed - embeddings will be skipped for this batch');
+      }
+    }
     if (fileEmbedTexts.length > 0 && activeSocketPath) {
       try {
         ui.setSubStatus(`Generating ${fileEmbedTexts.length} embeddings in batch...`);
 
-        // Split into smaller batches if needed
+        // Split into smaller batches
+        const embBatches = [];
         for (let j = 0; j < fileEmbedTexts.length; j += EMBEDDING_BATCH_SIZE) {
-          const textBatch = fileEmbedTexts.slice(j, j + EMBEDDING_BATCH_SIZE);
-          // FIX: Show which batch we're processing
-          const batchNum = Math.floor(j / EMBEDDING_BATCH_SIZE) + 1;
-          const totalBatches = Math.ceil(fileEmbedTexts.length / EMBEDDING_BATCH_SIZE);
-          if (totalBatches > 1) {
-            ui.setSubStatus(`Embedding batch ${batchNum}/${totalBatches} (${textBatch.length} files)...`);
+          embBatches.push({ start: j, texts: fileEmbedTexts.slice(j, j + EMBEDDING_BATCH_SIZE) });
+        }
+
+        // Process embedding batches with concurrency (uses maxConcurrent from model config)
+        const embResults = new Array(embBatches.length);
+        await runWithConcurrency(embBatches, async (batch, batchIdx) => {
+          const batchNum = batchIdx + 1;
+          if (embBatches.length > 1) {
+            ui.setSubStatus(`Embedding batch ${batchNum}/${embBatches.length} (${batch.texts.length} files)...`);
           }
-          const batchResults = await generateBatchEmbeddings(textBatch);
-          fileEmbeddings.push(...batchResults);
+          for (let k = 0; k < batch.texts.length; k++) {
+            const fileIdx = batch.start + k;
+            if (fileDataList[fileIdx]) {
+              const fd = fileDataList[fileIdx];
+              const sizeKB = (fd.stats.size / 1024).toFixed(1);
+              ui.addFileToFeed(fd.relativePath, 'embedding', `(${sizeKB}KB)`);
+            }
+          }
+          embResults[batchIdx] = await generateBatchEmbeddings(batch.texts);
+        }, embeddingMaxConcurrent);
+
+        // Flatten results in order
+        for (const br of embResults) {
+          if (br) fileEmbeddings.push(...br);
         }
 
         // Count successful embeddings
@@ -3801,7 +4699,6 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
       } catch (e) {
         initLog(`Batch embedding failed: ${e.message}`);
         results.embeddingsFailed = (results.embeddingsFailed || 0) + fileEmbedTexts.length;
-        // FIX: Categorize error types for better debugging
         results.errorTypes = results.errorTypes || {};
         const errorType = categorizeEmbeddingError(e);
         results.errorTypes[errorType] = (results.errorTypes[errorType] || 0) + 1;
@@ -3821,6 +4718,7 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
       try {
         // FIX: Update current file before each operation so UI shows correct file
         setCurrentFile(fileData.relativePath, 1, 1);
+        ui.addFileToFeed(fileData.relativePath, 'done');
 
         const textIdx = fileToTextIdx.get(idx);
         const embedding = textIdx !== undefined ? fileEmbeddings[textIdx] : null;
@@ -3870,18 +4768,31 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
     let defEmbeddings = [];
     if (defEmbedTexts.length > 0 && activeSocketPath) {
       try {
-        // FIX: Show definition embedding progress
         ui.setSubStatus(`Embedding ${defEmbedTexts.length} definitions...`);
+        // Split into batches
+        const defBatches = [];
         for (let j = 0; j < defEmbedTexts.length; j += EMBEDDING_BATCH_SIZE) {
-          const textBatch = defEmbedTexts.slice(j, j + EMBEDDING_BATCH_SIZE);
-          // FIX: Show batch progress for large definition sets
-          const batchNum = Math.floor(j / EMBEDDING_BATCH_SIZE) + 1;
-          const totalBatches = Math.ceil(defEmbedTexts.length / EMBEDDING_BATCH_SIZE);
-          if (totalBatches > 1) {
-            ui.setSubStatus(`[Defs] Batch ${batchNum}/${totalBatches} (${textBatch.length} defs)...`);
+          defBatches.push({ start: j, texts: defEmbedTexts.slice(j, j + EMBEDDING_BATCH_SIZE) });
+        }
+        // Process with concurrency
+        const defResults = new Array(defBatches.length);
+        await runWithConcurrency(defBatches, async (batch, batchIdx) => {
+          if (defBatches.length > 1) {
+            ui.setSubStatus(`[Defs] Batch ${batchIdx + 1}/${defBatches.length} (${batch.texts.length} defs)...`);
           }
-          const batchResults = await generateBatchEmbeddings(textBatch);
-          defEmbeddings.push(...batchResults);
+          for (let k = 0; k < batch.texts.length; k++) {
+            const defIdx = batch.start + k;
+            if (defDataList[defIdx]) {
+              const dd = defDataList[defIdx];
+              const defLabel = `${dd.def.type} ${dd.def.name}()`;
+              ui.addFileToFeed(dd.relativePath, 'def', defLabel);
+            }
+          }
+          defResults[batchIdx] = await generateBatchEmbeddings(batch.texts);
+        }, embeddingMaxConcurrent);
+        // Flatten in order
+        for (const dr of defResults) {
+          if (dr) defEmbeddings.push(...dr);
         }
       } catch (e) {
         initLog(`Definition batch embedding failed: ${e.message}`);
@@ -3964,6 +4875,10 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
   // Log summary to init log
   initLog(`Codebase indexing complete: ${results.filesIndexed} files, ${results.embeddingsGenerated} embeddings, ${results.embeddingsFailed || 0} failed, ${results.embeddingsSkipped || 0} skipped`);
   await qqms();
+
+  // Disable TUI file feed
+  ui.enableFileFeed(false);
+  ui.normalRendering();
 
   return results;
 }
@@ -4120,8 +5035,8 @@ async function compressTokens(projectPath, ui) {
   }
 
   // Ensure target directories exist
-  fs.mkdirSync(globalDir, { recursive: true });
-  fs.mkdirSync(projectDir, { recursive: true });
+  safeMkdir(globalDir);
+  safeMkdir(projectDir);
 
   ui.setStatus(`Compressing ${files.length} commands...`);
   ui.setSubStatus('Traditional Chinese token compression');
@@ -4195,8 +5110,8 @@ async function deployCommands(projectPath, ui) {
   const specmemSkillsDir = path.join(__dirname, '..', 'skills');
 
   // Ensure directories exist
-  fs.mkdirSync(globalCmdsDir, { recursive: true });
-  fs.mkdirSync(projectCmdsDir, { recursive: true });
+  safeMkdir(globalCmdsDir);
+  safeMkdir(projectCmdsDir);
 
   let deployedGlobal = 0;
   let deployedProject = 0;
@@ -4257,12 +5172,12 @@ async function deployCommands(projectPath, ui) {
 }
 
 // ============================================================================
-// STAGE 4: SESSION EXTRACTION - Extract Claude session history into memories
+// STAGE 4: SESSION EXTRACTION - Extract  session history into memories
 // ============================================================================
 
 /**
- * Parse Claude session files and store as memories.
- * This extracts user prompts and Claude responses from ~/.claude/projects/
+ * Parse  session files and store as memories.
+ * This extracts user prompts and  responses from ~/.claude/projects/
  * so they're searchable via find_memory from the start.
  */
 async function extractSessions(projectPath, ui, embeddingResult = null) {
@@ -4281,7 +5196,7 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
     embeddingsGenerated: 0
   };
 
-  ui.setStatus('Scanning for Claude session files...');
+  ui.setStatus('Scanning for  session files...');
   ui.setSubStatus('Looking in ~/.claude/projects/');
   await qqms();
 
@@ -4325,7 +5240,12 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
     if (embeddingScript) {
       const { spawn } = require('child_process');
       const socketsDir = path.join(projectPath, 'specmem', 'sockets');
-      fs.mkdirSync(socketsDir, { recursive: true });
+      safeMkdir(socketsDir);
+
+      // Kill any existing embedding server before spawning for session extraction
+      // Reset spawnedEmbeddingPid since we're about to spawn a replacement
+      spawnedEmbeddingPid = null;
+      killExistingEmbeddingServer(projectPath);
 
       // Clean up stale socket
       if (fs.existsSync(projectSocketPath)) {
@@ -4339,44 +5259,39 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
 
       // Task #22 fix: Use getPythonPath() instead of hardcoded 'python3'
       const pythonPath = getPythonPath();
+      // CRITICAL: Use file descriptor stdio, NOT pipes. Piped stdio causes SIGTERM
+      // when parent event loop is under heavy load during batch indexing.
+      const sessEmbedLogPath = path.join(projectPath, 'specmem', 'sockets', 'embedding-autostart.log');
+      const sessEmbedLogFd = fs.openSync(sessEmbedLogPath, 'a');
       const embeddingProcess = spawn(pythonPath, [embeddingScript], {
         cwd: path.dirname(embeddingScript),
         env: {
           ...process.env,
+          SPECMEM_EMBEDDING_SOCKET: projectSocketPath,
           SPECMEM_SOCKET_PATH: projectSocketPath,
           SPECMEM_PROJECT_PATH: projectPath
         },
         detached: true,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', sessEmbedLogFd, sessEmbedLogFd]
       });
+
+      // CRITICAL FIX: Track spawned PID so killExistingEmbeddingServer() won't kill it
+      spawnedEmbeddingPid = embeddingProcess.pid;
+      initLog(`[EMBED] Session extraction spawned embedding server with PID ${spawnedEmbeddingPid} - tracking to prevent self-kill`);
 
       // error handler BEFORE unref - prevents silent spawn failures
       embeddingProcess.on('error', (err) => {
         ui.setSubStatus('Embedding spawn error: ' + err.message);
       });
 
-      // CRITICAL: Consume stdout/stderr so Python startup banner doesn't leak to terminal
-      embeddingProcess.stdout.on('data', (chunk) => {
-        initLog('[EMBED-STDOUT] ' + chunk.toString().trim());
-      });
-      embeddingProcess.stderr.on('data', (chunk) => {
-        initLog('[EMBED-STDERR] ' + chunk.toString().trim());
-      });
-
+      fs.closeSync(sessEmbedLogFd);
       embeddingProcess.unref();
 
-      // Wait for socket to appear (up to 30s)
+      // DYNAMIC WAIT: Poll for readiness with adaptive intervals (max 5min)
       ui.setSubStatus('Waiting for embedding server to start...');
-      for (let i = 0; i < 60; i++) {
-        await new Promise(r => setTimeout(r, 500));
-        if (fs.existsSync(projectSocketPath)) {
-          socketPath = projectSocketPath;
-          ui.setSubStatus('✓ Embedding server started!');
-          break;
-        }
-        if (i % 10 === 0) {
-          ui.setSubStatus(`Waiting for embedding server... (${i/2}s)`);
-        }
+      const sessReady = await waitForEmbeddingReady(projectSocketPath, { ui, label: 'Session embedding server' });
+      if (sessReady) {
+        socketPath = projectSocketPath;
       }
 
       if (!socketPath) {
@@ -4424,7 +5339,7 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
 
   if (sessionFiles.length === 0) {
     ui.setStatus('No session files found');
-    ui.setSubStatus('⚠️ No Claude sessions to extract');
+    ui.setSubStatus('⚠️ No  sessions to extract');
     await qqms();
     return { ...result, reason: 'no_sessions' };
   }
@@ -4433,7 +5348,7 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
   ui.setSubStatus('Parsing session entries...');
   await qqms();
 
-  // Parse session files - extract user prompts and Claude responses
+  // Parse session files - extract user prompts and  responses
   const entries = [];
   const crypto = require('crypto');
 
@@ -4595,16 +5510,31 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
     pool.on('error', (err) => initLog('[PG-ERROR] ' + (err.message || err)));
     await pool.query('SELECT 1');
 
-    // CRITICAL FIX: Set search_path to project schema for proper isolation
-    const schemaName = 'specmem_' + path.basename(projectPath).toLowerCase().replace(/[^a-z0-9]/g, '');
+    // CRITICAL FIX: Create and set search_path to project schema for proper isolation
+    const schemaName = 'specmem_' + path.basename(projectPath).toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+
+    // Create schema if it doesn't exist
+    await pool.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName}`);
+
+    // Set search_path for ALL pool connections (not just the current one)
+    pool.on('connect', (client) => {
+      client.query(`SET search_path TO ${schemaName}, public`).catch(() => {});
+    });
     await pool.query(`SET search_path TO ${schemaName}, public`);
     ui.setSubStatus(`Connected (schema: ${schemaName})`);
+
+    // Initialize schema tables from SQL file
+    const schemaInitPath = path.join(__dirname, '..', 'dist', 'db', 'projectSchemaInit.sql');
+    if (fs.existsSync(schemaInitPath)) {
+      const schemaInitSql = fs.readFileSync(schemaInitPath, 'utf8');
+      await pool.query(schemaInitSql);
+    }
   } catch (dbErr) {
     ui.setStatus('Database connection failed');
     ui.setSubStatus('Will extract on first MCP connect');
 
     const markerPath = path.join(projectPath, 'specmem', 'sockets', 'needs-session-extraction');
-    fs.mkdirSync(path.dirname(markerPath), { recursive: true });
+    safeMkdir(path.dirname(markerPath));
     fs.writeFileSync(markerPath, JSON.stringify({
       requested: new Date().toISOString(),
       reason: 'database_connection_failed',
@@ -4644,6 +5574,9 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
 
   ui.setStatus(`Storing ${newEntries.length} new entries...`);
   ui.setSubStatus(`(${entries.length - newEntries.length} already exist)`);
+
+  // Enable file feed for session embedding - shows what's being embedded
+  ui.enableFileFeed(true);
   await qqms();
 
   // ============================================================================
@@ -4768,6 +5701,14 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
       const entry = batch[idx];
       const embedding = embeddings[idx];
 
+      // Show in file feed: preview of what user/claude said
+      const preview = entry.content.slice(0, 50).replace(/\n/g, ' ');
+      ui.addFileToFeed(
+        entry.sessionId.slice(0, 8),
+        entry.type === 'user' ? 'user' : 'assistant',
+        `"${preview}${entry.content.length > 50 ? '...' : ''}"`
+      );
+
       try {
         const tags = [
           'claude-session', 'conversation',
@@ -4806,6 +5747,9 @@ async function extractSessions(projectPath, ui, embeddingResult = null) {
   await pool.end();
   result.stored = stored;
   result.failed = failed;
+
+  // Disable file feed after session extraction
+  ui.enableFileFeed(false);
 
   ui.setStatus(`Session extraction complete`);
   ui.setSubStatus(`${stored} stored, ${failed} failed, ${entries.length - newEntries.length} existed`);
@@ -4871,7 +5815,7 @@ async function finalVerification(projectPath, analysis, modelConfig, ui) {
   await qqms();
 
   // Create/verify local settings
-  ui.setStatus('Verifying Claude local settings...');
+  ui.setStatus('Verifying  local settings...');
   ui.setSubProgress(0.75);
   const settingsPath = path.join(projectPath, '.claude', 'settings.local.json');
 
@@ -4896,7 +5840,7 @@ async function finalVerification(projectPath, analysis, modelConfig, ui) {
     }
   }
 
-  fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+  safeMkdir(path.dirname(settingsPath));
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
   checks.localSettings = true;
   ui.setSubStatus('✓ Local settings configured');
@@ -4942,21 +5886,25 @@ function detectTerminal() {
   }
 
   // Terminal configs: { command to open new window with command }
+  // Priority: system default first, then Ptyxis/GNOME 45+, then others, xterm last (fallback)
   const terminals = {
+    'x-terminal-emulator': { name: 'System Default', cmd: 'x-terminal-emulator', newWindow: '-e' },
+    'ptyxis': { name: 'Ptyxis', cmd: 'ptyxis', newWindow: '--' },
     'xfce4-terminal': { name: 'XFCE Terminal', cmd: 'xfce4-terminal', newWindow: '-x' },
     'gnome-terminal': { name: 'GNOME Terminal', cmd: 'gnome-terminal', newWindow: '--' },
     'konsole': { name: 'Konsole', cmd: 'konsole', newWindow: '-e' },
-    'xterm': { name: 'XTerm', cmd: 'xterm', newWindow: '-e' },
     'alacritty': { name: 'Alacritty', cmd: 'alacritty', newWindow: '-e' },
     'kitty': { name: 'Kitty', cmd: 'kitty', newWindow: '' },
     'terminator': { name: 'Terminator', cmd: 'terminator', newWindow: '-x' },
     'tilix': { name: 'Tilix', cmd: 'tilix', newWindow: '-e' },
+    'foot': { name: 'Foot', cmd: 'foot', newWindow: '--' },
     'urxvt': { name: 'URxvt', cmd: 'urxvt', newWindow: '-e' },
     'st': { name: 'st', cmd: 'st', newWindow: '-e' },
     'mate-terminal': { name: 'MATE Terminal', cmd: 'mate-terminal', newWindow: '-x' },
     'lxterminal': { name: 'LXTerminal', cmd: 'lxterminal', newWindow: '-e' },
     'qterminal': { name: 'QTerminal', cmd: 'qterminal', newWindow: '-e' },
     'terminology': { name: 'Terminology', cmd: 'terminology', newWindow: '-e' },
+    'xterm': { name: 'XTerm', cmd: 'xterm', newWindow: '-e' },
   };
 
   // Detection order
@@ -4975,7 +5923,8 @@ function detectTerminal() {
   for (const check of checks) {
     if (!check) continue;
     for (const [key, config] of Object.entries(terminals)) {
-      if (check.includes(key) || check.includes(config.cmd)) {
+      // Match bidirectionally: "xfce" matches "xfce4-terminal" and vice versa
+      if (check.includes(key) || key.includes(check) || check.includes(config.cmd) || config.cmd.includes(check)) {
         // Verify it exists
         try {
           execSync(`which ${config.cmd}`, { stdio: 'ignore' });
@@ -5035,6 +5984,15 @@ function openTerminalWithCommand(terminal, command, title = '', options = {}) {
       cmd = `${terminal.cmd} --title="${title}" --geometry=${geometry} ${terminal.newWindow} ${command} &`;
     } else if (terminal.cmd === 'gnome-terminal') {
       cmd = `${terminal.cmd} --title="${title}" --geometry=${geometry} ${terminal.newWindow} ${command} &`;
+    } else if (terminal.cmd === 'ptyxis') {
+      // Ptyxis (GNOME 45+) - no -geometry support, uses --title and -- separator
+      cmd = `${terminal.cmd} --title="${title}" -- ${command} &`;
+    } else if (terminal.cmd === 'x-terminal-emulator') {
+      // System default via Debian alternatives - try --title, fall back to generic
+      cmd = `${terminal.cmd} --title="${title}" -e ${command} &`;
+    } else if (terminal.cmd === 'foot') {
+      // Foot (Wayland) - uses --title and no -geometry
+      cmd = `${terminal.cmd} --title="${title}" ${command} &`;
     } else if (terminal.cmd === 'konsole') {
       cmd = `${terminal.cmd} --new-tab -p tabtitle="${title}" ${terminal.newWindow} ${command} &`;
     } else if (terminal.cmd === 'kitty') {
@@ -5095,7 +6053,7 @@ async function launchScreenSessions(projectPath, ui) {
   // Show what's running
   const runningParts = [];
   if (brainRunning) runningParts.push('🧠 Brain');
-  if (claudeRunning) runningParts.push('🤖 Claude');
+  if (claudeRunning) runningParts.push('🤖 ');
   if (runningParts.length > 0) {
     ui.setSubStatus(`Already running: ${runningParts.join(', ')}`);
     await qqms();
@@ -5137,34 +6095,35 @@ async function launchScreenSessions(projectPath, ui) {
     await qqms();
   }
 
-  // Launch Claude if not running
+  // Launch  if not running
   if (!claudeRunning) {
-    ui.setStatus('Launching Claude session...');
+    ui.setStatus('Launching  session...');
 
     try {
-      // Launch Claude in a screen session with the project path
+      // Launch  in a screen session with the project path
       // PTY MEMORY APPROACH: NO -L -Logfile (zero disk I/O)
       // Uses screen hardcopy to tmpfs on-demand instead of continuous logging
       // -h 5000 sets scrollback buffer to 5000 lines for hardcopy capture
-      execSync(`screen -h 5000 -dmS ${claudeSession} bash -c 'cd "${projectPath}" && claude 2>&1; exec bash'`, { stdio: 'ignore' });
+      const claudeBin = getClaudeBinary();
+      execSync(`screen -h 5000 -dmS ${claudeSession} bash -c 'cd "${projectPath}" && "${claudeBin}" 2>&1; exec bash'`, { stdio: 'ignore' });
       await sleep(300);
 
       // Verify it started
       const checkScreens = execSync('screen -ls 2>/dev/null || true', { encoding: 'utf8' });
       if (checkScreens.includes(claudeSession)) {
         result.claude = true;
-        ui.setSubStatus(`✓ Claude launched: ${claudeSession}`);
+        ui.setSubStatus(`✓  launched: ${claudeSession}`);
       } else {
-        ui.setSubStatus('⚠️ Claude failed to start');
+        ui.setSubStatus('⚠️  failed to start');
       }
     } catch (e) {
-      ui.setSubStatus(`⚠️ Claude launch error: ${e.message}`);
+      ui.setSubStatus(`⚠️  launch error: ${e.message}`);
     }
     await qqms();
   } else {
     result.claude = true;
     result.claudeAlreadyRunning = true;
-    ui.setStatus('Claude already running...');
+    ui.setStatus(' already running...');
     ui.setSubStatus(`✓ Reusing: ${claudeSession}`);
     await qqms();
   }
@@ -5173,7 +6132,7 @@ async function launchScreenSessions(projectPath, ui) {
   ui.setStatus('Screen sessions ready');
   const parts = [];
   if (result.brain) parts.push(result.brainAlreadyRunning ? '🧠 Brain (existing)' : '🧠 Brain (new)');
-  if (result.claude) parts.push(result.claudeAlreadyRunning ? '🤖 Claude (existing)' : '🤖 Claude (new)');
+  if (result.claude) parts.push(result.claudeAlreadyRunning ? '🤖  (existing)' : '🤖  (new)');
   ui.setSubStatus(parts.length > 0 ? parts.join(' + ') : 'No sessions launched');
   await qqms();
 
@@ -5184,22 +6143,22 @@ async function launchScreenSessions(projectPath, ui) {
   result.claudeSession = claudeSession;
 
   if (terminal && result.claude) {
-    ui.setStatus('Opening Claude terminal...');
+    ui.setStatus('Opening  terminal...');
     ui.setSubStatus(`Detected: ${terminal.name}${terminal.fallback ? ' (fallback)' : ''}`);
     await qqms();
 
-    // Open Claude in a centered window (smaller, in front)
+    // Open  in a centered window (smaller, in front)
     const success = openTerminalWithCommand(
       terminal,
       `screen -r ${claudeSession}`,
-      `Claude - ${projectId}`,
+      ` - ${projectId}`,
       { centered: true, width: 100, height: 30 }
     );
 
     if (success) {
-      ui.setSubStatus(`✓ Claude window opened (centered)`);
+      ui.setSubStatus(`✓  window opened (centered)`);
     } else {
-      ui.setSubStatus(`⚠️ Could not open Claude window - attach with: screen -r ${claudeSession}`);
+      ui.setSubStatus(`⚠️ Could not open  window - attach with: screen -r ${claudeSession}`);
     }
     await qqms();
   }
@@ -5229,7 +6188,7 @@ async function verifySetupPrerequisites(projectPath) {
   const globalDir = path.join(os.homedir(), '.specmem');
   checks.globalDir = fs.existsSync(globalDir);
 
-  // Check for Claude hooks directory AND settings.json with hooks configured
+  // Check for  hooks directory AND settings.json with hooks configured
   const hooksDir = path.join(os.homedir(), '.claude', 'hooks');
   const claudeSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');
   let hooksConfigured = false;
@@ -5317,13 +6276,13 @@ async function runAutoSetup(projectPath) {
     setupUI.setSubStatus(dbOk ? '✓ Database connected' : '✗ Database failed');
     await qqms();
 
-    // Step 2: Claude hooks
+    // Step 2:  hooks
     setupUI.setStage(2, 'CLAUDE HOOKS');
     setupUI.setStatus('Installing hooks...');
     setupUI.setSubProgress(0);
 
     const hooksDir = path.join(os.homedir(), '.claude', 'hooks');
-    fs.mkdirSync(hooksDir, { recursive: true });
+    safeMkdir(hooksDir);
 
     const srcHooksDir = path.join(__dirname, '..', 'claude-hooks');
     let hookCount = 0;
@@ -5339,7 +6298,7 @@ async function runAutoSetup(projectPath) {
       }
     }
 
-    // CRITICAL: MERGE settings.json to enable hooks in Claude (don't clobber existing)
+    // CRITICAL: MERGE settings.json to enable hooks in  (don't clobber existing)
     const srcSettingsPath = path.join(srcHooksDir, 'settings.json');
     const claudeSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');
     let hooksConfigured = false;
@@ -5360,16 +6319,143 @@ async function runAutoSetup(projectPath) {
           }
         }
 
-        // MERGE hooks - SpecMem hooks replace any existing hook config for same event types
-        // but preserve non-hook settings (permissions, etc)
+        // MERGE hooks - Deep merge that preserves user's non-specmem hooks
+        // SpecMem hooks take priority for same event types + matchers
         const mergedSettings = { ...existingSettings };
-        if (srcSettings.hooks) {
-          mergedSettings.hooks = srcSettings.hooks;
+
+        // Fix hardcoded paths in srcSettings for actual install environment
+        const homeDir = os.homedir();
+        const pkgRoot = path.resolve(__dirname, '..');
+        let srcSettingsStr = JSON.stringify(srcSettings);
+        if (homeDir !== '/root') {
+          srcSettingsStr = srcSettingsStr.replace(/\/root\//g, homeDir + '/');
+          srcSettingsStr = srcSettingsStr.replace(/"\/root"/g, '"' + homeDir + '"');
+        }
+        // Fix SPECMEM_PKG to point to actual install location (not dev /specmem)
+        srcSettingsStr = srcSettingsStr.replace(/"SPECMEM_PKG":\s*"\/specmem"/g, `"SPECMEM_PKG": "${pkgRoot}"`);
+        // Fix SPECMEM_HOME to use actual home directory
+        srcSettingsStr = srcSettingsStr.replace(/"SPECMEM_HOME":\s*"\/root\/.specmem"/g, `"SPECMEM_HOME": "${path.join(homeDir, '.specmem')}"`);
+        const fixedSrcSettings = JSON.parse(srcSettingsStr);
+
+        if (fixedSrcSettings.hooks) {
+          mergedSettings.hooks = mergeHooksDeep(existingSettings.hooks || {}, fixedSrcSettings.hooks);
+        }
+
+        // Helper: check if a hook command belongs to specmem
+        function isSpecmemHookCmd(hookEntry) {
+          const cmd = (hookEntry.command || '');
+          return cmd.includes('specmem') || cmd.includes('team-comms-enforcer') ||
+                 cmd.includes('agent-loading-hook') || cmd.includes('agent-output-interceptor') ||
+                 cmd.includes('task-progress-hook') || cmd.includes('subagent-loading-hook') ||
+                 cmd.includes('use-code-pointers') || cmd.includes('post-write-memory-hook') ||
+                 cmd.includes('bullshit-radar') || cmd.includes('input-aware-improver') ||
+                 cmd.includes('smart-context-hook');
+        }
+
+        // Deep merge hooks: specmem hooks take priority per-matcher, but user's
+        // custom (non-specmem) hooks within the same matcher are preserved.
+        // On re-init, old specmem hooks are cleaned up and replaced with new ones.
+        function mergeHooksDeep(existingHooks, specmemHooks) {
+          const merged = {};
+
+          // Copy all existing event types (deep clone to avoid mutations)
+          for (const eventType of Object.keys(existingHooks)) {
+            merged[eventType] = JSON.parse(JSON.stringify(existingHooks[eventType]));
+          }
+
+          // Process each specmem event type
+          for (const eventType of Object.keys(specmemHooks)) {
+            const specmemGroups = specmemHooks[eventType];
+
+            if (!merged[eventType]) {
+              merged[eventType] = specmemGroups;
+              continue;
+            }
+
+            // Build specmem's desired state: one entry per matcher
+            const specmemByMatcher = new Map();
+            for (const group of specmemGroups) {
+              const key = group.matcher || '__CATCHALL__';
+              if (!specmemByMatcher.has(key)) {
+                specmemByMatcher.set(key, { ...group, hooks: [...(group.hooks || [])] });
+              } else {
+                // Consolidate duplicate matchers from source
+                specmemByMatcher.get(key).hooks.push(...(group.hooks || []));
+              }
+            }
+
+            // Extract user's custom (non-specmem) hooks per matcher from existing config
+            const userHooksByMatcher = new Map();
+            for (const group of merged[eventType]) {
+              const key = group.matcher || '__CATCHALL__';
+              const userHooks = (group.hooks || []).filter(h => !isSpecmemHookCmd(h));
+              if (userHooks.length > 0) {
+                if (!userHooksByMatcher.has(key)) {
+                  userHooksByMatcher.set(key, []);
+                }
+                userHooksByMatcher.get(key).push(...userHooks);
+              }
+            }
+
+            // Build final result for this event type
+            const result = [];
+            const handledMatchers = new Set();
+
+            // First: all specmem matchers (with user's custom hooks merged in)
+            for (const [key, group] of specmemByMatcher) {
+              const userHooks = userHooksByMatcher.get(key) || [];
+              result.push({ ...group, hooks: [...group.hooks, ...userHooks] });
+              handledMatchers.add(key);
+            }
+
+            // Then: existing matchers that specmem doesn't touch
+            for (const group of merged[eventType]) {
+              const key = group.matcher || '__CATCHALL__';
+              if (handledMatchers.has(key)) continue;
+              handledMatchers.add(key);
+
+              // Clean orphaned specmem hooks from non-specmem matchers
+              const cleanHooks = (group.hooks || []).filter(h => !isSpecmemHookCmd(h));
+              if (cleanHooks.length > 0) {
+                result.push({ ...group, hooks: cleanHooks });
+              }
+              // If 100% specmem hooks and specmem no longer uses this matcher, drop it
+            }
+
+            merged[eventType] = result;
+          }
+
+          return merged;
+        }
+
+        // Also merge permissions (add specmem permissions without clobbering user's)
+        if (fixedSrcSettings.permissions) {
+          mergedSettings.permissions = mergedSettings.permissions || {};
+
+          // Merge allow arrays - add specmem permissions, dedupe
+          const existingAllow = mergedSettings.permissions.allow || [];
+          const specmemAllow = fixedSrcSettings.permissions.allow || [];
+          mergedSettings.permissions.allow = [...new Set([...existingAllow, ...specmemAllow])];
+
+          // Merge deny arrays - add specmem denies, dedupe
+          const existingDeny = mergedSettings.permissions.deny || [];
+          const specmemDeny = fixedSrcSettings.permissions.deny || [];
+          mergedSettings.permissions.deny = [...new Set([...existingDeny, ...specmemDeny])];
+
+          // Don't clobber user's ask array or defaultMode unless they're missing
+          if (!mergedSettings.permissions.ask) {
+            mergedSettings.permissions.ask = fixedSrcSettings.permissions.ask || [];
+          }
+          if (!mergedSettings.permissions.defaultMode) {
+            mergedSettings.permissions.defaultMode = fixedSrcSettings.permissions.defaultMode;
+          }
         }
 
         // Write merged settings
         fs.writeFileSync(claudeSettingsPath, JSON.stringify(mergedSettings, null, 2));
-        initLog('[SETUP] settings.json merged (hooks updated, other settings preserved)');
+        const hookEventCount = Object.keys(mergedSettings.hooks || {}).length;
+        const permCount = (mergedSettings.permissions?.allow || []).length;
+        initLog('[SETUP] settings.json deep-merged: ' + hookEventCount + ' hook events, ' + permCount + ' permissions (user hooks preserved)');
 
         // VERIFICATION: Confirm hooks are properly configured
         const verifySettings = JSON.parse(fs.readFileSync(claudeSettingsPath, 'utf8'));
@@ -5385,6 +6471,77 @@ async function runAutoSetup(projectPath) {
       }
     }
 
+    // ========== CRITICAL: Configure MCP server in .claude.json for THIS project ==========
+    // Claude Code v2.x reads project-level MCP config from ~/.claude.json projects section
+    const claudeJsonPath = path.join(os.homedir(), '.claude.json');
+    try {
+      let claudeJson = {};
+      if (fs.existsSync(claudeJsonPath)) {
+        claudeJson = JSON.parse(fs.readFileSync(claudeJsonPath, 'utf8'));
+      }
+
+      // Ensure projects object exists
+      if (!claudeJson.projects) claudeJson.projects = {};
+      if (!claudeJson.projects[projectPath]) {
+        claudeJson.projects[projectPath] = {
+          allowedTools: [],
+          mcpContextUris: [],
+          mcpServers: {},
+          hasTrustDialogAccepted: true
+        };
+      }
+
+      // Find specmem package location - use __dirname since we're running from the package
+      // Fallback to require.resolve for edge cases
+      let specmemPkg;
+      try {
+        specmemPkg = path.dirname(__dirname); // We're in scripts/, so parent is package root
+        if (!fs.existsSync(path.join(specmemPkg, 'bootstrap.cjs'))) {
+          // Try require.resolve as fallback
+          specmemPkg = require.resolve('specmem-hardwicksoftware/bootstrap.cjs').replace('/bootstrap.cjs', '');
+        }
+      } catch (e) {
+        // Ultimate fallback - we're in /usr/lib/node_modules or similar
+        specmemPkg = IS_ROOT
+          ? '/usr/lib/node_modules/specmem-hardwicksoftware'
+          : path.join(os.homedir(), '.specmem');
+        initLog('[WARN] Could not resolve specmem package, using fallback: ' + specmemPkg);
+      }
+      const projectSocketDir = path.join(projectPath, 'specmem', 'sockets');
+
+      // Configure MCP server for this project
+      claudeJson.projects[projectPath].mcpServers = claudeJson.projects[projectPath].mcpServers || {};
+      // Prefer mcp-proxy.cjs for resilient connections (auto-reconnect)
+      const mcpEntry = fs.existsSync(path.join(specmemPkg, 'mcp-proxy.cjs'))
+        ? path.join(specmemPkg, 'mcp-proxy.cjs')
+        : path.join(specmemPkg, 'bootstrap.cjs');
+      claudeJson.projects[projectPath].mcpServers.specmem = {
+        type: "stdio",
+        command: "node",
+        args: [
+          mcpEntry
+        ],
+        env: {
+          HOME: os.homedir(),
+          SPECMEM_PROJECT_PATH: projectPath,
+          SPECMEM_RUN_DIR: projectSocketDir,
+          SPECMEM_EMBEDDING_SOCKET: path.join(projectSocketDir, 'embeddings.sock'),
+          SPECMEM_DB_HOST: "localhost",
+          SPECMEM_DB_PORT: "5432",
+          SPECMEM_DB_NAME: "specmem_westayunprofessional",
+          SPECMEM_DB_USER: "specmem_westayunprofessional",
+          SPECMEM_DB_PASSWORD: "specmem_westayunprofessional",
+          SPECMEM_MAX_HEAP_MB: "1024"
+        }
+      };
+      claudeJson.projects[projectPath].hasTrustDialogAccepted = true;
+
+      fs.writeFileSync(claudeJsonPath, JSON.stringify(claudeJson, null, 2));
+      initLog('[SETUP] ✓ MCP server configured in ~/.claude.json for ' + projectPath);
+    } catch (e) {
+      initLog('[SETUP] ⚠ Failed to configure MCP in .claude.json: ' + e.message);
+    }
+
     setupUI.setSubProgress(1);
     const hooksStatus = hooksConfigured ? '✓' : '⚠';
     setupUI.setSubStatus(`${hooksStatus} ${hookCount} hooks installed, settings ${hooksConfigured ? 'verified' : 'NEEDS CHECK'}`);
@@ -5396,9 +6553,9 @@ async function runAutoSetup(projectPath) {
     setupUI.setSubProgress(0);
 
     const globalDir = path.join(os.homedir(), '.specmem');
-    fs.mkdirSync(globalDir, { recursive: true });
-    fs.mkdirSync(path.join(globalDir, 'cache'), { recursive: true });
-    fs.mkdirSync(path.join(globalDir, 'logs'), { recursive: true });
+    safeMkdir(globalDir);
+    safeMkdir(path.join(globalDir, 'cache'));
+    safeMkdir(path.join(globalDir, 'logs'));
 
     setupUI.setSubProgress(1);
     setupUI.setSubStatus('✓ ~/.specmem ready');
@@ -5410,12 +6567,12 @@ async function runAutoSetup(projectPath) {
     setupUI.setSubProgress(0);
 
     const specmemDir = path.join(projectPath, 'specmem');
-    fs.mkdirSync(specmemDir, { recursive: true });
-    fs.mkdirSync(path.join(specmemDir, 'sockets'), { recursive: true });
-    fs.mkdirSync(path.join(specmemDir, 'cache'), { recursive: true });
+    safeMkdir(specmemDir);
+    safeMkdir(path.join(specmemDir, 'sockets'));
+    safeMkdir(path.join(specmemDir, 'cache'));
 
     const claudeDir = path.join(projectPath, '.claude');
-    fs.mkdirSync(path.join(claudeDir, 'commands'), { recursive: true });
+    safeMkdir(path.join(claudeDir, 'commands'));
 
     setupUI.setSubProgress(1);
     setupUI.setSubStatus('✓ Project dirs ready');
@@ -5444,6 +6601,45 @@ async function main() {
   const projectPath = process.cwd();
   const startTime = Date.now();
 
+  // ========== DIRECTORY CHECK - Warn if not in a project directory ==========
+  const homeDir = os.homedir();
+  const badDirs = [
+    homeDir,
+    '/',
+    '/root',
+    '/home',
+    '/usr',
+    '/var',
+    '/tmp',
+    '/etc',
+    '/opt'
+  ];
+
+  const isBadDir = badDirs.some(bad => projectPath === bad || projectPath === bad + '/');
+
+  if (isBadDir) {
+    console.log(`
+${c.red}${c.bright}╔════════════════════════════════════════════════════════════════╗
+║  ⚠ WARNING: You're running specmem from a system directory!   ║
+╠════════════════════════════════════════════════════════════════╣
+║                                                                ║
+║  Current directory: ${projectPath.padEnd(41)}║
+║                                                                ║
+║  SpecMem should be run from a PROJECT directory, not:          ║
+║    • Your home folder (~)                                      ║
+║    • System directories (/root, /usr, /etc, etc)               ║
+║    • Temporary directories (/tmp)                              ║
+║                                                                ║
+║  Please cd into your project first:                            ║
+║    $ cd /path/to/your/project                                  ║
+║    $ specmem init                                              ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝${c.reset}
+`);
+    console.log(`${c.yellow}Continuing anyway in 5 seconds... (Ctrl+C to cancel)${c.reset}`);
+    await new Promise(r => setTimeout(r, 5000));
+  }
+
   // Speed mode enabled by default - no need to wait for SPACE
 
   // Animated banner with sliding red highlight (screen already cleared at startup)
@@ -5451,6 +6647,56 @@ async function main() {
   console.log(`${c.dim}  Project: ${projectPath}${c.reset}`);
   console.log(`${c.brightYellow}⚡ TURBO MODE${c.reset}${c.dim} - Fast initialization enabled${c.reset}`);
   console.log('');
+
+  // ========== PRE-STAGE 0: Auto-run setup if not done ==========
+  // Check if first-run setup has been completed (models downloaded, deps installed)
+  // Dynamic: root uses package dir, non-root uses ~/.specmem
+  const specmemPkgDir = path.dirname(__dirname);
+  const modelsDir = path.join(USER_SPECMEM_DIR, 'models', 'optimized');
+  const setupMarker = path.join(USER_SPECMEM_DIR, '.setup-complete');
+
+  // Ensure user dir exists for non-root
+  if (!IS_ROOT) {
+    safeMkdir(USER_SPECMEM_DIR)
+  }
+
+  // Check if setup is needed: no models dir OR no setup marker OR missing Python deps
+  let needsSetup = false;
+  if (!fs.existsSync(modelsDir) || !fs.existsSync(setupMarker)) {
+    needsSetup = true;
+  } else {
+    // Also check if sentence_transformers is available
+    try {
+      execSync('python3 -c "import sentence_transformers" 2>/dev/null', { stdio: 'pipe' });
+    } catch (e) {
+      needsSetup = true;
+    }
+  }
+
+  if (needsSetup) {
+    console.log(`${c.yellow}═══ First-time setup required ═══${c.reset}`);
+    console.log(`${c.dim}Downloading models and installing dependencies...${c.reset}\n`);
+
+    try {
+      // Run first-run-model-setup.cjs with SPECMEM_CALLED_FROM_INIT to skip redundant banner
+      const setupScript = path.join(specmemPkgDir, 'scripts', 'first-run-model-setup.cjs');
+      if (fs.existsSync(setupScript)) {
+        execSync(`node "${setupScript}"`, {
+          stdio: 'inherit',
+          timeout: 600000,
+          env: { ...process.env, SPECMEM_CALLED_FROM_INIT: '1' }
+        });
+        // Create marker file to indicate setup is complete
+        fs.writeFileSync(setupMarker, new Date().toISOString());
+        console.log(`\n${c.green}✓ Setup complete!${c.reset}\n`);
+      } else {
+        console.log(`${c.yellow}⚠ Setup script not found, continuing anyway...${c.reset}\n`);
+      }
+    } catch (e) {
+      console.log(`${c.yellow}⚠ Setup had issues but continuing with init...${c.reset}`);
+      console.log(`${c.dim}You can run 'specmem setup' manually later${c.reset}\n`);
+    }
+  }
 
   // ========== PRE-STAGE: Kill Old Stuck Init Processes ==========
   // Prevent resource conflicts by killing old specmem-init processes for THIS PROJECT ONLY
@@ -5623,7 +6869,7 @@ async function main() {
   // Warn if re-initializing with running sessions
   const projectId = path.basename(projectPath).replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
   const existingBrain = `specmem-${projectId}`;
-  const existingClaude = `claude-${projectId}`;
+  const existing = `claude-${projectId}`;
 
   let runningScreens = '';
   try {
@@ -5634,7 +6880,7 @@ async function main() {
   }
 
   const brainRunning = runningScreens.includes(existingBrain);
-  const claudeRunning = runningScreens.includes(existingClaude);
+  const claudeRunning = runningScreens.includes(existing);
 
   // Smart session detection with user-friendly options
   let respawnBrainOnly = false;
@@ -5645,15 +6891,15 @@ async function main() {
     // Prompt for confirmation
     const readline = require('readline');
 
-    // CASE 1: Brain dead, Claude alive - offer "Respawn Brain" option
+    // CASE 1: Brain dead,  alive - offer "Respawn Brain" option
     if (!brainRunning && claudeRunning) {
       console.log(`${c.bgCyan}${c.white}${c.bold} 🧠 BRAIN DEAD - CLAUDE STILL RUNNING  ${c.reset}`);
       console.log('');
       console.log(`  ${c.red}✗${c.reset} Brain: ${c.dim}not running${c.reset}`);
-      console.log(`  ${c.green}●${c.reset} Claude running: ${c.cyan}${existingClaude}${c.reset}`);
+      console.log(`  ${c.green}●${c.reset}  running: ${c.cyan}${existing}${c.reset}`);
       console.log('');
       console.log(`${c.cyan}  Options:${c.reset}`);
-      console.log(`  ${c.brightGreen}[R]${c.reset} Respawn Brain ${c.dim}- Just relaunch Brain console (Claude keeps working)${c.reset}`);
+      console.log(`  ${c.brightGreen}[R]${c.reset} Respawn Brain ${c.dim}- Just relaunch Brain console ( keeps working)${c.reset}`);
       console.log(`  ${c.brightRed}[H]${c.reset} Hard restart  ${c.dim}- Kill everything, scorched earth, fresh start${c.reset}`);
       console.log(`  ${c.dim}[C]${c.reset} Cancel        ${c.dim}- Exit without changes${c.reset}`);
       console.log('');
@@ -5669,22 +6915,22 @@ async function main() {
       if (answer === 'c' || answer === 'cancel') {
         console.log('');
         console.log(`${c.dim}  Cancelled.${c.reset}`);
-        console.log(`${c.dim}  Attach to Claude:${c.reset} ${c.cyan}screen -r ${existingClaude}${c.reset}`);
+        console.log(`${c.dim}  Attach to :${c.reset} ${c.cyan}screen -r ${existing}${c.reset}`);
         console.log('');
         process.exit(0);
       } else if (answer === 'r' || answer === 'respawn' || answer === '') {
         console.log('');
-        console.log(`${c.green}  ✓ Respawning Brain only - Claude will keep working${c.reset}`);
+        console.log(`${c.green}  ✓ Respawning Brain only -  will keep working${c.reset}`);
         console.log('');
         respawnBrainOnly = true;
         skipScorchedEarth = true;
       } else {
         // Hard restart
         console.log('');
-        console.log(`${c.yellow}  Hard restart selected - stopping Claude...${c.reset}`);
+        console.log(`${c.yellow}  Hard restart selected - stopping ...${c.reset}`);
         try {
-          execSync(`screen -S ${existingClaude} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
-          console.log(`  ${c.green}✓${c.reset} Stopped Claude session`);
+          execSync(`screen -S ${existing} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
+          console.log(`  ${c.green}✓${c.reset} Stopped  session`);
         } catch (e) {
           // yooo screen quit failed - session probably already dead
           if (process.env.SPECMEM_DEBUG) console.log('[MAIN] screen quit failed: ' + e.message);
@@ -5700,7 +6946,7 @@ async function main() {
       console.log(`${c.bgRed}${c.white}${c.bold} ⚠️  BOTH SESSIONS RUNNING  ${c.reset}`);
       console.log('');
       console.log(`  ${c.green}●${c.reset} Brain running:  ${c.cyan}${existingBrain}${c.reset}`);
-      console.log(`  ${c.green}●${c.reset} Claude running: ${c.cyan}${existingClaude}${c.reset}`);
+      console.log(`  ${c.green}●${c.reset}  running: ${c.cyan}${existing}${c.reset}`);
       console.log('');
       console.log(`${c.yellow}  Options:${c.reset}`);
       console.log(`  ${c.brightRed}[H]${c.reset} Hard restart  ${c.dim}- Kill all, scorched earth, fresh start${c.reset}`);
@@ -5737,7 +6983,7 @@ async function main() {
         console.log(`${c.dim}  Cancelled. Sessions preserved.${c.reset}`);
         console.log(`${c.dim}  Attach to:${c.reset}`);
         console.log(`    ${c.cyan}screen -r ${existingBrain}${c.reset}  ${c.dim}(Brain)${c.reset}`);
-        console.log(`    ${c.cyan}screen -r ${existingClaude}${c.reset}  ${c.dim}(Claude)${c.reset}`);
+        console.log(`    ${c.cyan}screen -r ${existing}${c.reset}  ${c.dim}()${c.reset}`);
         console.log('');
         process.exit(0);
       }
@@ -5748,13 +6994,13 @@ async function main() {
       // CRITICAL: Check if we're running INSIDE a screen that we're about to kill
       const currentScreen = process.env.STY || '';
       const isInsideBrain = currentScreen.includes(existingBrain.split('.')[0]);
-      const isInsideClaude = currentScreen.includes(existingClaude.split('.')[0]);
+      const isInside = currentScreen.includes(existing.split('.')[0]);
 
-      if (isInsideBrain || isInsideClaude) {
+      if (isInsideBrain || isInside) {
         console.log('');
         console.log(`${c.bgYellow}${c.black}${c.bold} ⚠️  RUNNING INSIDE SCREEN  ${c.reset}`);
         console.log('');
-        console.log(`  ${c.yellow}You're running this from inside ${isInsideBrain ? 'Brain' : 'Claude'} screen.${c.reset}`);
+        console.log(`  ${c.yellow}You're running this from inside ${isInsideBrain ? 'Brain' : ''} screen.${c.reset}`);
         console.log(`  ${c.yellow}Hard restart will kill this terminal!${c.reset}`);
         console.log('');
         console.log(`  ${c.cyan}Options:${c.reset}`);
@@ -5773,14 +7019,14 @@ async function main() {
         console.log('');
       }
 
-      // Save Claude progress before stopping
+      // Save  progress before stopping
       try {
         const logFile = path.join(projectPath, 'specmem', 'sockets', 'claude-screen.log');
         const lastSessionFile = path.join(projectPath, 'specmem', 'sockets', 'last-session.txt');
         let lastOutput = '';
         try {
           const tmpFile = `/tmp/specmem-save-${Date.now()}.txt`;
-          execSync(`screen -S ${existingClaude} -p 0 -X hardcopy ${tmpFile}`, { stdio: 'ignore' });
+          execSync(`screen -S ${existing} -p 0 -X hardcopy ${tmpFile}`, { stdio: 'ignore' });
           lastOutput = fs.readFileSync(tmpFile, 'utf8');
           fs.unlinkSync(tmpFile);
         } catch (e) {
@@ -5790,11 +7036,11 @@ async function main() {
           }
         }
         if (lastOutput) {
-          fs.mkdirSync(path.dirname(lastSessionFile), { recursive: true });
-          const recoveryContent = `# Claude Session HARD RESTART RECOVERY
+          safeMkdir(path.dirname(lastSessionFile));
+          const recoveryContent = `#  Session HARD RESTART RECOVERY
 # =====================================
 # Project: ${projectPath}
-# Session: ${existingClaude}
+# Session: ${existing}
 # Saved: ${new Date().toISOString()}
 # Reason: hard_restart_reinit
 #
@@ -5807,12 +7053,12 @@ ${lastOutput}
 # End of recovery capture
 `;
           fs.writeFileSync(lastSessionFile, recoveryContent, 'utf8');
-          console.log(`  ${c.green}✓${c.reset} Saved Claude context to last-session.txt`);
+          console.log(`  ${c.green}✓${c.reset} Saved  context to last-session.txt`);
         }
-        execSync(`screen -S ${existingClaude} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
-        console.log(`  ${c.green}✓${c.reset} Stopped Claude session`);
+        execSync(`screen -S ${existing} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
+        console.log(`  ${c.green}✓${c.reset} Stopped  session`);
       } catch (e) {
-        execSync(`screen -S ${existingClaude} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
+        execSync(`screen -S ${existing} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
       }
 
       execSync(`screen -S ${existingBrain} -X quit 2>/dev/null || true`, { stdio: 'ignore' });
@@ -5823,15 +7069,15 @@ ${lastOutput}
       process.stdout.write('\x1b[2J\x1b[H\x1b[3J');
       await showAnimatedBanner();
     }
-    // CASE 3: Only Brain running (no Claude) - just reuse or restart
+    // CASE 3: Only Brain running (no ) - just reuse or restart
     else if (brainRunning && !claudeRunning) {
       console.log(`${c.bgYellow}${c.white}${c.bold} 🧠 BRAIN RUNNING - NO CLAUDE  ${c.reset}`);
       console.log('');
       console.log(`  ${c.green}●${c.reset} Brain running: ${c.cyan}${existingBrain}${c.reset}`);
-      console.log(`  ${c.red}✗${c.reset} Claude: ${c.dim}not running${c.reset}`);
+      console.log(`  ${c.red}✗${c.reset} : ${c.dim}not running${c.reset}`);
       console.log('');
       console.log(`${c.cyan}  Options:${c.reset}`);
-      console.log(`  ${c.brightGreen}[S]${c.reset} Spawn Claude  ${c.dim}- Just launch Claude, keep existing Brain${c.reset}`);
+      console.log(`  ${c.brightGreen}[S]${c.reset} Spawn   ${c.dim}- Just launch , keep existing Brain${c.reset}`);
       console.log(`  ${c.brightCyan}[B]${c.reset} Brain CLI     ${c.dim}- Enter SpecMem Brain console for debugging${c.reset}`);
       console.log(`  ${c.brightRed}[H]${c.reset} Hard restart  ${c.dim}- Kill Brain, scorched earth, fresh start${c.reset}`);
       console.log(`  ${c.dim}[C]${c.reset} Cancel        ${c.dim}- Exit without changes${c.reset}`);
@@ -5868,10 +7114,10 @@ ${lastOutput}
         process.exit(0);
       } else if (answer === 's' || answer === 'spawn' || answer === '') {
         console.log('');
-        console.log(`${c.green}  ✓ Spawning Claude only - keeping existing Brain${c.reset}`);
+        console.log(`${c.green}  ✓ Spawning  only - keeping existing Brain${c.reset}`);
         console.log('');
         skipScorchedEarth = true;
-        // Will skip to screen sessions and only launch Claude
+        // Will skip to screen sessions and only launch 
       } else {
         // Hard restart
         console.log('');
@@ -5911,7 +7157,7 @@ ${lastOutput}
     // Stage 1: Analyze (always run)
     const analysis = await analyzeProject(projectPath, ui);
 
-    // Skip stages 2-9 if respawning brain or just spawning Claude
+    // Skip stages 2-9 if respawning brain or just spawning 
     let scorched = { wipedItems: 0 };
     let modelConfig = null;
     let embeddingResult = { serverRunning: false };
@@ -5981,7 +7227,7 @@ ${lastOutput}
       // This helps the watcher sync any files modified between init and MCP startup
       const markerPath = path.join(projectPath, 'specmem', 'sockets', 'init-complete.json');
       try {
-        fs.mkdirSync(path.dirname(markerPath), { recursive: true });
+        safeMkdir(path.dirname(markerPath));
         fs.writeFileSync(markerPath, JSON.stringify({
           timestamp: new Date().toISOString(),
           unixTimestamp: Date.now(),
@@ -6006,8 +7252,42 @@ ${lastOutput}
     // Complete - different message based on mode
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     const completionMsg = skipScorchedEarth
-      ? (respawnBrainOnly ? `Brain respawned in ${elapsed}s` : `Claude spawned in ${elapsed}s`)
+      ? (respawnBrainOnly ? `Brain respawned in ${elapsed}s` : ` spawned in ${elapsed}s`)
       : `Full initialization complete in ${elapsed}s`;
+
+    // Save init stats for console to display
+    const initStats = {
+      totalMs: Date.now() - startTime,
+      elapsed,
+      tier: analysis.tier,
+      complexity: analysis.complexity,
+      files: analysis.files.total,
+      size: analysis.size,
+      loc: analysis.lines.code,
+      commands: !skipScorchedEarth ? { project: deployResult.projectCommands, global: deployResult.globalCommands } : null,
+      embedding: !skipScorchedEarth ? {
+        running: embeddingResult.serverRunning,
+        warmupMs: embeddingResult.warmupLatency
+      } : null,
+      codebase: codebaseResult.filesIndexed > 0 ? {
+        files: codebaseResult.filesIndexed,
+        embeddings: codebaseResult.embeddingsGenerated
+      } : null,
+      sessions: sessionResult.extracted > 0 ? {
+        entries: sessionResult.extracted,
+        sessions: sessionResult.sessions
+      } : null,
+      scorched: !skipScorchedEarth ? scorched.wipedItems : null,
+      mode: skipScorchedEarth ? (respawnBrainOnly ? 'brain-respawn' : 'claude-spawn') : 'full'
+    };
+    try {
+      safeMkdir(path.join(projectPath, 'specmem', 'sockets'));
+      fs.writeFileSync(
+        path.join(projectPath, 'specmem', 'sockets', 'init-stats.json'),
+        JSON.stringify(initStats, null, 2)
+      );
+    } catch (e) { /* non-fatal */ }
+
     ui.complete(completionMsg);
 
     // Epic summary
@@ -6067,7 +7347,7 @@ ${lastOutput}
         }
       }
     } else {
-      console.log(`  ${c.dim}Mode:${c.reset}        ${c.cyan}Quick ${respawnBrainOnly ? '(Brain respawn)' : '(Claude spawn)'}${c.reset}`);
+      console.log(`  ${c.dim}Mode:${c.reset}        ${c.cyan}Quick ${respawnBrainOnly ? '(Brain respawn)' : '( spawn)'}${c.reset}`);
     }
 
     if (launchScreens) {
@@ -6076,7 +7356,7 @@ ${lastOutput}
       console.log(`${c.dim}  ─────────────────────────────────────────────${c.reset}`);
       console.log(`  ${c.dim}Screens:${c.reset}`);
       console.log(`    ${screenResult.brain ? c.green + '✓' : c.yellow + '○'} ${c.reset}Brain:  ${c.cyan}screen -r ${brainSession}${c.reset}`);
-      console.log(`    ${screenResult.claude ? c.green + '✓' : c.yellow + '○'} ${c.reset}Claude: ${c.cyan}screen -r ${claudeSession}${c.reset}`);
+      console.log(`    ${screenResult.claude ? c.green + '✓' : c.yellow + '○'} ${c.reset}: ${c.cyan}screen -r ${claudeSession}${c.reset}`);
     }
 
     console.log(`${c.dim}  ─────────────────────────────────────────────${c.reset}`);
@@ -6089,7 +7369,7 @@ ${lastOutput}
       if (screenResult.brain && screenResult.brainSession && !skipBrainAttach) {
         console.log('');
         console.log(`  ${c.cyan}Attaching to SpecMem Brain in 1s...${c.reset}`);
-        console.log(`  ${c.dim}(Claude is in the centered window above)${c.reset}`);
+        console.log(`  ${c.dim}( is in the centered window above)${c.reset}`);
 
         // Brief pause so user sees the message
         await sleep(300);
@@ -6116,10 +7396,10 @@ ${lastOutput}
         process.exit(0);
       } else if (screenResult.brain && screenResult.brainSession) {
         // Hard restart mode - still attach to Brain (new one was just launched)
-        // Claude window was already opened, no need to show attach instructions
+        //  window was already opened, no need to show attach instructions
         console.log('');
         console.log(`  ${c.cyan}Attaching to SpecMem Brain...${c.reset}`);
-        console.log(`  ${c.dim}(Claude window already opened)${c.reset}`);
+        console.log(`  ${c.dim}( window already opened)${c.reset}`);
 
         await sleep(500); // Brief delay for hard restart
 
@@ -6147,7 +7427,7 @@ ${lastOutput}
         if (screenResult.brainSession) {
           console.log(`  ${c.dim}Try manually:${c.reset} ${c.cyan}screen -r ${screenResult.brainSession}${c.reset}`);
         }
-        // Note: Claude window was already opened, don't show attach instructions for it
+        // Note:  window was already opened, don't show attach instructions for it
       }
     } else {
       console.log(`  ${c.brightGreen}${c.bold}Ready to flex!${c.reset} ${c.dim}Try:${c.reset} ${c.cyan}/specmem${c.reset}${c.dim},${c.reset} ${c.cyan}/specmem-find${c.reset}${c.dim},${c.reset} ${c.cyan}/specmem-code${c.reset}`);

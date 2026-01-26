@@ -11,7 +11,7 @@
  *   2. Hook generates embedding for prompt (via sandboxed container)
  *   3. Hook searches SpecMem for semantically similar memories
  *   4. Context is injected into the prompt
- *   5. Claude sees enriched prompt with related context
+ *   5.  sees enriched prompt with related context
  *
  * This hook uses:
  *   - Sandboxed embedding container (all-MiniLM-L6-v2, 384 dims)
@@ -242,7 +242,7 @@ export function formatContextInjection(memories, config = {}) {
     return output;
 }
 /**
- * Main hook handler - call this from Claude Code hooks
+ * Main hook handler - call this from  Code hooks
  */
 export async function contextInjectionHook(prompt, config = {}) {
     const cfg = { ...DEFAULT_CONFIG, ...config };

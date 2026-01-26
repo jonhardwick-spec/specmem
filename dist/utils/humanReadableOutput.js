@@ -4,7 +4,7 @@
  * Converts MCP tool results to hook-style format for easy reading.
  * Format: [SPECMEM-<TOOL>]...[/SPECMEM-<TOOL>] tags with grey text.
  *
- * This matches the format used by Claude Code hooks for consistency.
+ * This matches the format used by  Code hooks for consistency.
  * When humanReadable=true, tools output this instead of compactXmlResponse.
  *
  * SMART COMPRESSION (v1.0.44+):
@@ -13,9 +13,13 @@
  */
 import { smartCompress, shouldCompress } from './tokenCompressor.js';
 // ANSI color codes for terminal output
-const GREY = '\x1b[90m';
-const RESET = '\x1b[0m';
-const DIM = '\x1b[2m';
+// Colors DISABLED by default - MCP responses don't need terminal styling
+// Set SPECMEM_COLOR=1 to enable if your terminal handles it properly
+// Many terminals (esp XFCE) show garbled rainbow output with ANSI codes
+const USE_COLOR = process.env.SPECMEM_COLOR === '1';
+const GREY = USE_COLOR ? '\x1b[90m' : '';
+const RESET = USE_COLOR ? '\x1b[0m' : '';
+const DIM = USE_COLOR ? '\x1b[2m' : '';
 /**
  * Compress content text while preserving structural elements
  * Only compresses the actual content, not tags/metadata
@@ -79,7 +83,7 @@ function formatMemoryItem(item, index, opts) {
     else {
         // Single role - detect and format
         const isUser = content.startsWith('[USER]') || content.includes('用戶]') || content.includes('[戶');
-        const isClaude = content.startsWith('[CLAUDE]') || content.includes('助手]') || content.includes('[克勞德');
+        const is = content.startsWith('[CLAUDE]') || content.includes('助手]') || content.includes('[克勞德');
         let cleanContent = content
             .replace(/^\[USER\]\s*/i, '')
             .replace(/^\[CLAUDE\]\s*/i, '')
@@ -91,7 +95,7 @@ function formatMemoryItem(item, index, opts) {
         if (isUser) {
             userPart = maybeCompress(maybeTruncate(cleanContent, maxLen));
         }
-        else if (isClaude) {
+        else if (is) {
             claudePart = maybeCompress(maybeTruncate(cleanContent, maxLen));
         }
         else {

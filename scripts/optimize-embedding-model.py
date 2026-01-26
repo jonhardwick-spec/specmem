@@ -91,7 +91,7 @@ print(f"✓ PyTorch model loaded in {pytorch_load_time:.2f}s")
 TEST_SENTENCES = [
     "The quick brown fox jumps over the lazy dog.",
     "Machine learning models can be optimized for CPU inference.",
-    "SpecMem provides semantic memory for Claude Code.",
+    "SpecMem provides semantic memory for  Code.",
     "Quantization reduces model size and increases inference speed.",
     "PostgreSQL with pgvector enables efficient vector similarity search.",
 ] * 20  # 100 sentences total

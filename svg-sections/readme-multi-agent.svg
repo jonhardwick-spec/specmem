@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128"/>
+      <stop offset="100%" style="stop-color:#21262d"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#00bfff" flood-opacity="0.3"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowGreen" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#22c55e" flood-opacity="0.3"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowPurple" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#a855f7" flood-opacity="0.3"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#00bfff" opacity="0.7"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#22c55e" opacity="0.7"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#a855f7" opacity="0.7"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#f59e0b" opacity="0.7"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="420" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="420" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="url(#cyanPurple)">Multi-Agent Team Coordination</text>
+  <text x="400" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#6e7681">We run up to 4 agents in parallel on the same codebase. This is how they talk.</text>
+
+  <!-- ============ ROW 1: Trigger + Coordinator ============ -->
+
+  <!-- Node: You (trigger) -->
+  <g filter="url(#glow)">
+    <rect x="30" y="75" width="130" height="55" rx="8" fill="url(#nodeGrad)" stroke="#00bfff" stroke-width="1.5"/>
+  </g>
+  <circle cx="46" cy="95" r="8" fill="#00bfff" opacity="0.2"/>
+  <text x="46" y="99" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#00bfff">$</text>
+  <text x="100" y="98" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#e6edf3">You</text>
+  <text x="95" y="120" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#6e7681">specmem deploy-team</text>
+
+  <!-- Connection: You -> Coordinator -->
+  <path d="M160,102 C200,102 200,102 240,102" fill="none" stroke="#00bfff" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowCyan)" opacity="0.6"/>
+
+  <!-- Node: Coordination Server (center hub) -->
+  <g filter="url(#glowPurple)">
+    <rect x="250" y="70" width="180" height="65" rx="8" fill="url(#nodeGrad)" stroke="#a855f7" stroke-width="1.5"/>
+  </g>
+  <circle cx="272" cy="95" r="10" fill="#a855f7" opacity="0.15"/>
+  <text x="272" y="99" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#a855f7">&#9733;</text>
+  <text x="350" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#e6edf3">Coordination Server</text>
+  <text x="340" y="110" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#6e7681">Port 8596 - task routing + claims</text>
+  <text x="340" y="125" text-anchor="middle" font-family="'SF Mono', monospace" font-size="8" fill="#484f58">claim_task / release_task / broadcast</text>
+
+  <!-- Connection: Coordinator -> Dashboard -->
+  <path d="M430,102 C470,102 470,102 510,102" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowPurple)" opacity="0.6"/>
+
+  <!-- Node: Dashboard -->
+  <g>
+    <rect x="520" y="75" width="130" height="55" rx="8" fill="url(#nodeGrad)" stroke="#f59e0b" stroke-width="1.5"/>
+  </g>
+  <circle cx="540" cy="95" r="8" fill="#f59e0b" opacity="0.2"/>
+  <text x="540" y="99" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#f59e0b">&#9881;</text>
+  <text x="600" y="98" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#e6edf3">Dashboard</text>
+  <text x="585" y="120" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#6e7681">Port 8585 - live view</text>
+
+  <!-- ============ ROW 2: Agent nodes ============ -->
+
+  <!-- Connections from Coordinator down to agents -->
+  <!-- To Research Agent -->
+  <path d="M290,135 C290,155 130,155 130,175" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowGreen)" opacity="0.5"/>
+  <!-- To Frontend Agent -->
+  <path d="M340,135 C340,160 340,160 340,175" fill="none" stroke="#00bfff" stroke-width="1.5" marker-end="url(#arrowCyan)" opacity="0.5"/>
+  <!-- To Backend Agent -->
+  <path d="M390,135 C390,155 550,155 550,175" fill="none" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrowPurple)" opacity="0.5"/>
+  <!-- To Security Agent -->
+  <path d="M410,135 C420,155 700,155 710,175" fill="none" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowOrange)" opacity="0.5"/>
+
+  <!-- Agent 1: Research -->
+  <g filter="url(#glowGreen)">
+    <rect x="50" y="180" width="160" height="70" rx="8" fill="url(#nodeGrad)" stroke="#22c55e" stroke-width="1.5"/>
+  </g>
+  <rect x="50" y="180" width="160" height="3" rx="1.5" fill="#22c55e"/>
+  <text x="130" y="204" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4ade80">Research Agent</text>
+  <text x="130" y="220" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">find_memory</text>
+  <text x="130" y="233" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">find_code_pointers</text>
+
+  <!-- Agent 2: Frontend -->
+  <g filter="url(#glow)">
+    <rect x="260" y="180" width="160" height="70" rx="8" fill="url(#nodeGrad)" stroke="#00bfff" stroke-width="1.5"/>
+  </g>
+  <rect x="260" y="180" width="160" height="3" rx="1.5" fill="#00bfff"/>
+  <text x="340" y="204" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#00bfff">Frontend Agent</text>
+  <text x="340" y="220" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">claim_task(files)</text>
+  <text x="340" y="233" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">send_team_message</text>
+
+  <!-- Agent 3: Backend -->
+  <g filter="url(#glowPurple)">
+    <rect x="470" y="180" width="160" height="70" rx="8" fill="url(#nodeGrad)" stroke="#a855f7" stroke-width="1.5"/>
+  </g>
+  <rect x="470" y="180" width="160" height="3" rx="1.5" fill="#a855f7"/>
+  <text x="550" y="204" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#a855f7">Backend Agent</text>
+  <text x="550" y="220" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">claim_task(files)</text>
+  <text x="550" y="233" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">request_help</text>
+
+  <!-- Agent 4: Security -->
+  <g>
+    <rect x="650" y="180" width="130" height="70" rx="8" fill="url(#nodeGrad)" stroke="#f59e0b" stroke-width="1.5"/>
+  </g>
+  <rect x="650" y="180" width="130" height="3" rx="1.5" fill="#f59e0b"/>
+  <text x="715" y="204" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#fbbf24">Security Agent</text>
+  <text x="715" y="220" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">respond_to_help</text>
+  <text x="715" y="233" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" fill="#6e7681">broadcast_to_team</text>
+
+  <!-- ============ CROSS-TALK CONNECTIONS ============ -->
+
+  <!-- Research -> Frontend (help response) -->
+  <path d="M210,215 L260,215" fill="none" stroke="#22c55e" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowGreen)" opacity="0.4"/>
+
+  <!-- Frontend -> Backend (question) -->
+  <path d="M420,215 L470,215" fill="none" stroke="#00bfff" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowCyan)" opacity="0.4"/>
+
+  <!-- Backend -> Security (help request) -->
+  <path d="M630,215 L650,215" fill="none" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowPurple)" opacity="0.4"/>
+
+  <!-- ============ ROW 3: Team Channel (message bus) ============ -->
+
+  <!-- Connection lines from agents down to channel -->
+  <line x1="130" y1="250" x2="130" y2="278" stroke="#22c55e" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="340" y1="250" x2="340" y2="278" stroke="#00bfff" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="550" y1="250" x2="550" y2="278" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="715" y1="250" x2="715" y2="278" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+
+  <!-- Team Channel bar -->
+  <rect x="30" y="280" width="740" height="35" rx="6" fill="url(#nodeGrad)" stroke="#30363d" stroke-width="1"/>
+  <rect x="30" y="280" width="740" height="2" rx="1" fill="url(#cyanPurple)"/>
+  <text x="400" y="302" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#8b949e">Team Channel (main) - read_team_messages / send_team_message / broadcast_to_team</text>
+
+  <!-- ============ ROW 4: Shared Resources ============ -->
+
+  <!-- Connections down from channel -->
+  <line x1="200" y1="315" x2="200" y2="338" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="400" y1="315" x2="400" y2="338" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="600" y1="315" x2="600" y2="338" stroke="#30363d" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+
+  <!-- PostgreSQL -->
+  <rect x="100" y="340" width="200" height="38" rx="6" fill="url(#nodeGrad)" stroke="#336791" stroke-width="1"/>
+  <text x="200" y="363" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#336791">PostgreSQL + pgvector</text>
+
+  <!-- Embeddings -->
+  <rect x="320" y="340" width="160" height="38" rx="6" fill="url(#nodeGrad)" stroke="#22c55e" stroke-width="1"/>
+  <text x="400" y="363" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#4ade80">Frankenstein Embeddings</text>
+
+  <!-- File Watcher -->
+  <rect x="500" y="340" width="200" height="38" rx="6" fill="url(#nodeGrad)" stroke="#f59e0b" stroke-width="1"/>
+  <text x="600" y="363" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#fbbf24">File Watcher (chokidar)</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="405" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#484f58">This isn't theoretical. We use it ourselves with up to 4 agents running in parallel on the same codebase.</text>
+</svg>

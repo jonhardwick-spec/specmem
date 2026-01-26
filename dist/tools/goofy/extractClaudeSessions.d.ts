@@ -1,7 +1,7 @@
 /**
- * extractClaudeSessions.ts - Manual Claude Session Extraction Tool
+ * extractSessions.ts - Manual  Session Extraction Tool
  *
- * yo fr fr manually trigger Claude session extraction
+ * yo fr fr manually trigger  session extraction
  * extracts ALL sessions or just new ones since last check
  *
  * This is the MCP tool that lets you manually extract sessions
@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { MCPTool } from '../../mcp/toolRegistry.js';
 import { EmbeddingProvider } from '../index.js';
 import { DatabaseManager } from '../../database.js';
-declare const ExtractClaudeSessionsInputSchema: z.ZodObject<{
+declare const ExtractSessionsInputSchema: z.ZodObject<{
     mode: z.ZodDefault<z.ZodEnum<["all", "new"]>>;
     importance: z.ZodDefault<z.ZodEnum<["critical", "high", "medium", "low", "trivial"]>>;
     additionalTags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -27,14 +27,14 @@ declare const ExtractClaudeSessionsInputSchema: z.ZodObject<{
     additionalTags?: string[];
     claudeDir?: string;
 }>;
-type ExtractClaudeSessionsInput = z.infer<typeof ExtractClaudeSessionsInputSchema>;
+type ExtractSessionsInput = z.infer<typeof ExtractSessionsInputSchema>;
 /**
- * ExtractClaudeSessions - manually extracts Claude Code sessions
+ * ExtractSessions - manually extracts  Code sessions
  *
  * nah bruh this is the manual extraction tool
  * perfect for when you first set this up or want to refresh
  */
-export declare class ExtractClaudeSessions implements MCPTool {
+export declare class ExtractSessions implements MCPTool {
     name: string;
     description: string;
     inputSchema: {
@@ -68,7 +68,7 @@ export declare class ExtractClaudeSessions implements MCPTool {
     private embeddingProvider;
     private db;
     constructor(embeddingProvider: EmbeddingProvider, db: DatabaseManager);
-    execute(args: ExtractClaudeSessionsInput): Promise<{
+    execute(args: ExtractSessionsInput): Promise<{
         success: boolean;
         extracted: number;
         stored: number;
@@ -87,4 +87,4 @@ export declare class ExtractClaudeSessions implements MCPTool {
     }>;
 }
 export {};
-//# sourceMappingURL=extractClaudeSessions.d.ts.map
+//# sourceMappingURL=extractSessions.d.ts.map

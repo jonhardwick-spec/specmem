@@ -8,7 +8,7 @@
  *   1. PostgreSQL (if missing)
  *   2. pgvector extension
  *   3. SpecMem database and user
- *   4. Claude hooks
+ *   4.  hooks
  *   5. Docker (embedding service)
  *   6. All directories and configs
  *
@@ -20,6 +20,77 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
+
+// ============================================================================
+// GLOBAL INSTALL CHECK - Must be installed globally!
+// ============================================================================
+const isGlobalInstall = process.env.npm_config_global === 'true' ||
+                        __dirname.includes('/lib/node_modules/') ||
+                        __dirname.includes('\\node_modules\\npm\\') ||
+                        process.env.npm_lifecycle_event === 'postinstall' &&
+                        !__dirname.includes(process.cwd());
+
+// ============================================================================
+// UNINSTALL OLD VERSIONS FIRST
+// ============================================================================
+try {
+  const oldVersionCheck = require('child_process').execSync('npm list -g specmem-hardwicksoftware --depth=0 2>/dev/null || true', { encoding: 'utf8' });
+  if (oldVersionCheck.includes('specmem-hardwicksoftware@') && !oldVersionCheck.includes(require('../package.json').version)) {
+    console.log('\x1b[33m⚠ Removing old version before installing new one...\x1b[0m');
+    require('child_process').execSync('npm uninstall -g specmem-hardwicksoftware 2>/dev/null || true', { stdio: 'pipe' });
+  }
+} catch (e) { /* ignore */ }
+
+// ============================================================================
+// PLATFORM CHECK - Linux only for now
+// ============================================================================
+const currentPlatform = require('os').platform();
+if (currentPlatform === 'win32') {
+  console.log('\n\x1b[31m╔════════════════════════════════════════════════════════════╗\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m  \x1b[1m\x1b[31m⚠ SPECMEM IS LINUX-ONLY (for now)\x1b[0m                         \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m╠════════════════════════════════════════════════════════════╣\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m                                                            \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m  Windows support coming soon!                              \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m                                                            \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m  Options:                                                  \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m    • Use WSL2 (Windows Subsystem for Linux)               \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m    • Use a Linux VM or Docker container                   \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m    • Use a Linux VPS                                       \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m║\x1b[0m                                                            \x1b[31m║\x1b[0m');
+  console.log('\x1b[31m╚════════════════════════════════════════════════════════════╝\x1b[0m\n');
+  process.exit(0);
+}
+
+if (currentPlatform === 'darwin') {
+  console.log('\n\x1b[33m╔════════════════════════════════════════════════════════════╗\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  \x1b[1m\x1b[33m⚠ MACOS SUPPORT IS EXPERIMENTAL\x1b[0m                           \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m╠════════════════════════════════════════════════════════════╣\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  SpecMem is primarily developed for Linux.                \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  Some features may not work correctly on macOS.           \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  Proceeding with installation...                          \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m╚════════════════════════════════════════════════════════════╝\x1b[0m\n');
+  // Continue with install but warn
+}
+
+if (!isGlobalInstall) {
+  console.log('\n\x1b[33m╔════════════════════════════════════════════════════════════╗\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  \x1b[1m\x1b[31m⚠ SPECMEM MUST BE INSTALLED GLOBALLY\x1b[0m                      \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m╠════════════════════════════════════════════════════════════╣\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  You ran:  npm install specmem-hardwicksoftware           \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  \x1b[1m\x1b[32mCorrect command:\x1b[0m                                         \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  \x1b[1m\x1b[36m  npm install -g specmem-hardwicksoftware\x1b[0m                 \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  SpecMem is a CLI tool that integrates with Claude Code.  \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m  It must be installed globally to work properly.          \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m║\x1b[0m                                                            \x1b[33m║\x1b[0m');
+  console.log('\x1b[33m╚════════════════════════════════════════════════════════════╝\x1b[0m\n');
+  process.exit(0); // Exit cleanly so npm doesn't show error
+}
 
 // Colors for terminal output
 const c = {
@@ -66,6 +137,15 @@ const IS_MAC = PLATFORM === 'darwin';
 const IS_LINUX = PLATFORM === 'linux';
 const IS_WINDOWS = PLATFORM === 'win32';
 
+// Detect if running inside Docker container
+const IS_DOCKER = fs.existsSync('/.dockerenv') ||
+                  (fs.existsSync('/proc/1/cgroup') &&
+                   fs.readFileSync('/proc/1/cgroup', 'utf8').includes('docker'));
+
+// Skip embeddings flag (for low-resource or containerized environments)
+const SKIP_EMBEDDINGS = process.env.SPECMEM_SKIP_EMBEDDINGS === 'true' ||
+                        process.env.SPECMEM_LITE === 'true';
+
 /**
  * Run a command and return success/output
  */
@@ -106,6 +186,140 @@ function ensureDir(dir) {
 }
 
 // ============================================================================
+// CLAUDE CODE INSTALLATION
+// ============================================================================
+
+// ============================================================================
+// CORE SYSTEM DEPENDENCIES - Install EVERYTHING if missing
+// ============================================================================
+
+/**
+ * Install ALL core system dependencies before anything else
+ */
+function installCoreDeps() {
+  log.header('Installing Core System Dependencies');
+
+  const packages = [];
+
+  // Check what's missing
+  if (!commandExists('python3')) packages.push('python3');
+  if (!commandExists('pip3') && !commandExists('pip')) packages.push('python3-pip');
+  if (!commandExists('screen')) packages.push('screen');
+  if (!commandExists('curl')) packages.push('curl');
+  if (!commandExists('git')) packages.push('git');
+  if (!commandExists('sudo')) packages.push('sudo');
+
+  if (packages.length === 0) {
+    log.success('All core dependencies already installed');
+    return true;
+  }
+
+  log.info(`Missing packages: ${packages.join(', ')}`);
+  log.info('Installing via package manager...');
+
+  if (IS_LINUX) {
+    if (commandExists('apt-get')) {
+      // Debian/Ubuntu/Mint
+      const result = run(`apt-get update -qq && apt-get install -y ${packages.join(' ')} python3-venv build-essential`, { timeout: 300000 });
+      if (!result.success) {
+        // Try with sudo
+        run(`sudo apt-get update -qq && sudo apt-get install -y ${packages.join(' ')} python3-venv build-essential`, { timeout: 300000 });
+      }
+    } else if (commandExists('dnf')) {
+      run(`sudo dnf install -y ${packages.join(' ').replace('python3-pip', 'python3-pip python3-devel')} gcc make`, { timeout: 300000 });
+    } else if (commandExists('yum')) {
+      run(`sudo yum install -y ${packages.join(' ').replace('python3-pip', 'python3-pip python3-devel')} gcc make`, { timeout: 300000 });
+    } else if (commandExists('pacman')) {
+      run(`sudo pacman -Sy --noconfirm ${packages.join(' ').replace('python3-pip', 'python-pip')}`, { timeout: 300000 });
+    }
+  } else if (IS_MAC) {
+    if (commandExists('brew')) {
+      run(`brew install ${packages.join(' ').replace('python3-pip', 'python3')}`, { timeout: 300000 });
+    } else {
+      log.warn('Homebrew not found - install from https://brew.sh');
+    }
+  }
+
+  // Verify critical ones
+  const missing = [];
+  if (!commandExists('python3')) missing.push('python3');
+  if (!commandExists('pip3') && !commandExists('pip')) missing.push('pip');
+  if (!commandExists('screen')) missing.push('screen');
+
+  if (missing.length > 0) {
+    log.warn(`Still missing: ${missing.join(', ')}`);
+    log.info('Some features may not work without these dependencies');
+  } else {
+    log.success('All core dependencies installed');
+  }
+
+  return true;
+}
+
+/**
+ * Check if Claude Code is installed, install if missing
+ */
+function ensureClaudeCode() {
+  log.header('Checking Claude Code');
+
+  // Check if claude command exists
+  if (commandExists('claude')) {
+    const version = run('claude --version', { silent: true });
+    log.success(`Claude Code found: ${version.output?.trim() || 'installed'}`);
+    return true;
+  }
+
+  log.warn('Claude Code not found - installing...');
+  log.info('Installing @anthropic-ai/claude-code globally...');
+
+  const result = run('npm install -g @anthropic-ai/claude-code', { timeout: 300000 });
+
+  if (result.success) {
+    log.success('Claude Code installed successfully');
+    log.info('You will need to run "claude" and authenticate with Anthropic');
+    return true;
+  } else {
+    log.error('Failed to install Claude Code');
+    log.info('Install manually: npm install -g @anthropic-ai/claude-code');
+    return false;
+  }
+}
+
+/**
+ * Check if screen is installed, install if missing (needed for team members)
+ */
+function ensureScreen() {
+  log.header('Checking screen');
+
+  if (commandExists('screen')) {
+    log.success('screen found');
+    return true;
+  }
+
+  log.warn('screen not found - installing...');
+
+  let result;
+  if (IS_MAC) {
+    result = run('brew install screen', { timeout: 120000 });
+  } else if (IS_LINUX) {
+    // Try apt first, then yum/dnf
+    result = run('apt-get update -qq && apt-get install -y screen', { timeout: 120000 });
+    if (!result.success) {
+      result = run('yum install -y screen || dnf install -y screen', { timeout: 120000 });
+    }
+  }
+
+  if (result?.success) {
+    log.success('screen installed successfully');
+    return true;
+  } else {
+    log.warn('Could not auto-install screen');
+    log.info('Install manually: apt install screen (Debian/Ubuntu) or brew install screen (Mac)');
+    return false;
+  }
+}
+
+// ============================================================================
 // POSTGRESQL INSTALLATION
 // ============================================================================
 
@@ -138,56 +352,77 @@ function checkPostgres() {
 function installPostgres() {
   log.header('Installing PostgreSQL');
 
+  const PG_TIMEOUT = 180000; // 3 minute timeout for PG install
+
   if (IS_MAC) {
     log.step(1, 'Installing via Homebrew...');
 
     // Check if Homebrew exists
     if (!commandExists('brew')) {
       log.info('Installing Homebrew first...');
-      run('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"');
+      run('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"', { timeout: 300000 });
     }
 
-    run('brew install postgresql@16');
-    run('brew services start postgresql@16');
+    run('brew install postgresql@16', { timeout: PG_TIMEOUT });
+    run('brew services start postgresql@16', { timeout: 30000 });
 
     // Add to PATH
-    const brewPrefix = execSync('brew --prefix', { encoding: 'utf8' }).trim();
-    const pgPath = `${brewPrefix}/opt/postgresql@16/bin`;
-    log.info(`Add to PATH: export PATH="${pgPath}:$PATH"`);
+    try {
+      const brewPrefix = execSync('brew --prefix', { encoding: 'utf8', timeout: 10000 }).trim();
+      const pgPath = `${brewPrefix}/opt/postgresql@16/bin`;
+      log.info(`Add to PATH: export PATH="${pgPath}:$PATH"`);
+    } catch (e) {}
 
   } else if (IS_LINUX) {
     log.step(1, 'Detecting Linux distribution...');
 
     // Check for apt (Debian/Ubuntu)
     if (commandExists('apt-get')) {
-      log.step(2, 'Installing via apt...');
-      run('sudo apt-get update');
-      run('sudo apt-get install -y postgresql postgresql-contrib');
-      run('sudo systemctl start postgresql');
-      run('sudo systemctl enable postgresql');
+      log.step(2, 'Installing via apt (timeout: 3 min)...');
+      run('sudo apt-get update', { timeout: 60000 });
+      const result = run('sudo apt-get install -y postgresql postgresql-contrib', { timeout: PG_TIMEOUT });
+      if (!result.success) {
+        log.warn('PostgreSQL install timed out or failed');
+        log.info('Try manually: sudo apt-get install -y postgresql postgresql-contrib');
+        return false;
+      }
+      run('sudo systemctl start postgresql', { timeout: 30000 });
+      run('sudo systemctl enable postgresql', { timeout: 30000 });
     }
     // Check for yum/dnf (RHEL/CentOS/Fedora)
     else if (commandExists('dnf')) {
-      log.step(2, 'Installing via dnf...');
-      run('sudo dnf install -y postgresql-server postgresql-contrib');
-      run('sudo postgresql-setup --initdb');
-      run('sudo systemctl start postgresql');
-      run('sudo systemctl enable postgresql');
+      log.step(2, 'Installing via dnf (timeout: 3 min)...');
+      const result = run('sudo dnf install -y postgresql-server postgresql-contrib', { timeout: PG_TIMEOUT });
+      if (!result.success) {
+        log.warn('PostgreSQL install timed out');
+        return false;
+      }
+      run('sudo postgresql-setup --initdb', { timeout: 60000 });
+      run('sudo systemctl start postgresql', { timeout: 30000 });
+      run('sudo systemctl enable postgresql', { timeout: 30000 });
     }
     else if (commandExists('yum')) {
-      log.step(2, 'Installing via yum...');
-      run('sudo yum install -y postgresql-server postgresql-contrib');
-      run('sudo postgresql-setup initdb');
-      run('sudo systemctl start postgresql');
-      run('sudo systemctl enable postgresql');
+      log.step(2, 'Installing via yum (timeout: 3 min)...');
+      const result = run('sudo yum install -y postgresql-server postgresql-contrib', { timeout: PG_TIMEOUT });
+      if (!result.success) {
+        log.warn('PostgreSQL install timed out');
+        return false;
+      }
+      run('sudo postgresql-setup initdb', { timeout: 60000 });
+      run('sudo systemctl start postgresql', { timeout: 30000 });
+      run('sudo systemctl enable postgresql', { timeout: 30000 });
     }
     // Check for pacman (Arch)
     else if (commandExists('pacman')) {
-      log.step(2, 'Installing via pacman...');
-      run('sudo pacman -S --noconfirm postgresql');
-      run('sudo -u postgres initdb -D /var/lib/postgres/data');
-      run('sudo systemctl start postgresql');
-      run('sudo systemctl enable postgresql');
+      log.step(2, 'Installing via pacman (timeout: 3 min)...');
+      const result = run('sudo pacman -S --noconfirm postgresql', { timeout: PG_TIMEOUT });
+      if (!result.success) {
+        log.warn('PostgreSQL install timed out');
+        return false;
+      }
+      run('sudo -u postgres initdb -D /var/lib/postgres/data', { timeout: 60000 });
+      run('sudo systemctl start postgresql', { timeout: 30000 });
+      run('sudo systemctl enable postgresql', { timeout: 30000 });
     }
     else {
       log.error('Could not detect package manager. Please install PostgreSQL manually.');
@@ -201,8 +436,9 @@ function installPostgres() {
     return false;
   }
 
-  // Verify installation
-  const check = run('pg_isready', { silent: true });
+  // Verify installation with timeout
+  log.info('Verifying PostgreSQL installation...');
+  const check = run('pg_isready', { silent: true, timeout: 10000 });
   if (check.success) {
     log.success('PostgreSQL installed and running!');
     return true;
@@ -211,12 +447,23 @@ function installPostgres() {
   // Try starting the service
   log.info('Trying to start PostgreSQL service...');
   if (IS_MAC) {
-    run('brew services start postgresql@16');
+    run('brew services start postgresql@16', { timeout: 30000 });
   } else if (IS_LINUX) {
-    run('sudo systemctl start postgresql');
+    run('sudo systemctl start postgresql', { timeout: 30000 });
   }
 
-  return run('pg_isready', { silent: true }).success;
+  // Wait up to 30 seconds for PG to be ready
+  for (let i = 0; i < 6; i++) {
+    if (run('pg_isready', { silent: true, timeout: 5000 }).success) {
+      log.success('PostgreSQL is ready');
+      return true;
+    }
+    log.info('Waiting for PostgreSQL to start...');
+    run('sleep 5', { silent: true });
+  }
+
+  log.warn('PostgreSQL may not be fully started - continuing anyway');
+  return true; // Continue setup, might work
 }
 
 // ============================================================================
@@ -231,7 +478,7 @@ function checkPgvector() {
 
   const result = run(
     `sudo -u postgres psql -c "SELECT 1 FROM pg_available_extensions WHERE name = 'vector';" 2>/dev/null`,
-    { silent: true }
+    { silent: true, timeout: 15000 }
   );
 
   if (result.success && result.output && result.output.includes('1')) {
@@ -249,30 +496,33 @@ function checkPgvector() {
 function installPgvector() {
   log.header('Installing pgvector Extension');
 
+  const PGVECTOR_TIMEOUT = 120000; // 2 minute timeout
+
   if (IS_MAC) {
     log.step(1, 'Installing pgvector via Homebrew...');
-    run('brew install pgvector');
+    run('brew install pgvector', { timeout: PGVECTOR_TIMEOUT });
 
   } else if (IS_LINUX) {
     // Try apt first (Ubuntu/Debian have pgvector in repos now)
     if (commandExists('apt-get')) {
-      log.step(1, 'Trying apt install...');
-      const aptResult = run('sudo apt-get install -y postgresql-16-pgvector 2>/dev/null || sudo apt-get install -y postgresql-pgvector 2>/dev/null', { silent: true });
+      log.step(1, 'Trying apt install (timeout: 2 min)...');
+      const aptResult = run('sudo apt-get install -y postgresql-16-pgvector 2>/dev/null || sudo apt-get install -y postgresql-pgvector 2>/dev/null', { silent: true, timeout: PGVECTOR_TIMEOUT });
 
       if (!aptResult.success) {
-        log.step(2, 'Building pgvector from source...');
+        log.step(2, 'Building pgvector from source (timeout: 3 min)...');
         buildPgvectorFromSource();
       }
     } else {
-      log.step(1, 'Building pgvector from source...');
+      log.step(1, 'Building pgvector from source (timeout: 3 min)...');
       buildPgvectorFromSource();
     }
   }
 
-  // Verify
+  // Verify with timeout
+  log.info('Verifying pgvector installation...');
   const check = run(
     `sudo -u postgres psql -c "SELECT 1 FROM pg_available_extensions WHERE name = 'vector';" 2>/dev/null`,
-    { silent: true }
+    { silent: true, timeout: 15000 }
   );
 
   if (check.success && check.output && check.output.includes('1')) {
@@ -280,7 +530,8 @@ function installPgvector() {
     return true;
   }
 
-  log.warn('pgvector may need manual installation');
+  log.warn('pgvector install may have timed out - continuing anyway');
+  log.info('SpecMem can work without pgvector (reduced functionality)');
   return false;
 }
 
@@ -290,21 +541,33 @@ function installPgvector() {
 function buildPgvectorFromSource() {
   log.info('Building pgvector from source...');
 
+  const BUILD_TIMEOUT = 180000; // 3 minute timeout for build
+
   // Install build dependencies
   if (commandExists('apt-get')) {
-    run('sudo apt-get install -y build-essential git postgresql-server-dev-all');
+    run('sudo apt-get install -y build-essential git postgresql-server-dev-all', { timeout: 120000 });
   } else if (commandExists('dnf')) {
-    run('sudo dnf install -y gcc make git postgresql-devel');
+    run('sudo dnf install -y gcc make git postgresql-devel', { timeout: 120000 });
   } else if (commandExists('yum')) {
-    run('sudo yum install -y gcc make git postgresql-devel');
+    run('sudo yum install -y gcc make git postgresql-devel', { timeout: 120000 });
   }
 
-  // Clone and build
+  // Clone and build with timeout
   const tmpDir = '/tmp/pgvector-build';
-  run(`rm -rf ${tmpDir}`);
-  run(`git clone --branch v0.7.4 https://github.com/pgvector/pgvector.git ${tmpDir}`);
-  run(`cd ${tmpDir} && make && sudo make install`);
-  run(`rm -rf ${tmpDir}`);
+  run(`rm -rf ${tmpDir}`, { timeout: 10000 });
+
+  const cloneResult = run(`git clone --branch v0.7.4 https://github.com/pgvector/pgvector.git ${tmpDir}`, { timeout: 60000 });
+  if (!cloneResult.success) {
+    log.warn('Failed to clone pgvector repo - skipping');
+    return;
+  }
+
+  const buildResult = run(`cd ${tmpDir} && make && sudo make install`, { timeout: BUILD_TIMEOUT });
+  if (!buildResult.success) {
+    log.warn('pgvector build timed out or failed');
+  }
+
+  run(`rm -rf ${tmpDir}`, { timeout: 10000 });
 }
 
 // ============================================================================
@@ -414,6 +677,25 @@ function adjustPgAuth() {
 function setupDocker() {
   log.header('Checking Docker');
 
+  // Skip if requested or in lite mode
+  if (SKIP_EMBEDDINGS) {
+    log.info('Skipping Docker/embeddings setup (SPECMEM_SKIP_EMBEDDINGS=true)');
+    log.info('SpecMem will use API-based embeddings as fallback');
+    return true;
+  }
+
+  // Warn if running inside Docker (Docker-in-Docker is complex)
+  if (IS_DOCKER) {
+    log.warn('Running inside Docker container detected!');
+    log.info('Docker-in-Docker requires special setup.');
+    log.info('Options:');
+    log.info('  1. Mount host Docker socket: -v /var/run/docker.sock:/var/run/docker.sock');
+    log.info('  2. Use privileged mode: --privileged');
+    log.info('  3. Skip local embeddings: export SPECMEM_SKIP_EMBEDDINGS=true');
+    log.info('');
+    log.info('Attempting to continue anyway...');
+  }
+
   // Check if Docker is already installed
   if (commandExists('docker')) {
     log.success('Docker is installed');
@@ -481,7 +763,25 @@ function startDockerDaemon() {
     return false;
 
   } else if (IS_LINUX) {
-    // Try systemctl first
+    // In Docker container, systemctl won't work
+    if (IS_DOCKER) {
+      log.warn('Inside Docker container - systemctl unavailable');
+      log.info('Checking if Docker socket is mounted...');
+
+      if (fs.existsSync('/var/run/docker.sock')) {
+        if (run('docker info', { silent: true }).success) {
+          log.success('Docker socket available (mounted from host)');
+          return true;
+        }
+      }
+
+      log.warn('Docker socket not available in container');
+      log.info('SpecMem will work without local embeddings');
+      log.info('To enable: run container with -v /var/run/docker.sock:/var/run/docker.sock');
+      return false;
+    }
+
+    // Try systemctl first (only on non-containerized Linux)
     log.step(1, 'Starting Docker via systemctl...');
     run('sudo systemctl start docker');
     run('sudo systemctl enable docker');
@@ -648,6 +948,7 @@ function installDockerLinux() {
 
 /**
  * Configure Docker for non-root usage on Linux
+ * SECURITY: Binds Docker to 127.0.0.1 only (no external access)
  */
 function configureDockerLinux() {
   log.step('→', 'Configuring Docker for non-root usage...');
@@ -657,9 +958,46 @@ function configureDockerLinux() {
   // Add user to docker group
   run(`sudo usermod -aG docker ${user}`);
 
+  // SECURITY: Configure Docker to bind to localhost only
+  log.step('→', 'Securing Docker to localhost only (127.0.0.1)...');
+  const daemonConfig = {
+    "iptables": true,
+    "ip": "127.0.0.1",
+    "ip-forward": false,
+    "userland-proxy": true,
+    "live-restore": true,
+    "log-driver": "json-file",
+    "log-opts": {
+      "max-size": "10m",
+      "max-file": "3"
+    }
+  };
+
+  try {
+    const daemonJsonPath = '/etc/docker/daemon.json';
+    run('sudo mkdir -p /etc/docker');
+
+    // Check if config exists and merge
+    let existingConfig = {};
+    if (fs.existsSync(daemonJsonPath)) {
+      try {
+        existingConfig = JSON.parse(fs.readFileSync(daemonJsonPath, 'utf8'));
+      } catch (e) {}
+    }
+
+    const mergedConfig = { ...existingConfig, ...daemonConfig };
+    const configJson = JSON.stringify(mergedConfig, null, 2);
+
+    // Write via sudo
+    run(`echo '${configJson}' | sudo tee ${daemonJsonPath}`);
+    log.success('Docker configured for localhost-only access (127.0.0.1)');
+  } catch (e) {
+    log.warn('Could not configure Docker daemon.json - manual security review recommended');
+  }
+
   // Enable and start Docker service
   run('sudo systemctl enable docker');
-  run('sudo systemctl start docker');
+  run('sudo systemctl restart docker'); // Restart to apply new config
 
   // Set up Docker to start on boot
   run('sudo systemctl enable containerd');
@@ -764,7 +1102,7 @@ function loadEmbeddedDockerImages() {
 // ============================================================================
 
 /**
- * Install SpecMem slash commands to Claude's commands directory
+ * Install SpecMem slash commands to 's commands directory
  * These are the /specmem-* commands that provide memory operations
  */
 function installCommands() {
@@ -823,9 +1161,9 @@ function installCommands() {
 // ============================================================================
 
 /**
- * Install SpecMem skills to Claude's commands directory
+ * Install SpecMem skills to 's commands directory
  * Skills are .md files that provide specialized behaviors/prompts
- * They get deployed alongside commands (same directory in Claude Code)
+ * They get deployed alongside commands (same directory in  Code)
  */
 function installSkills() {
   log.header('Installing SpecMem Skills');
@@ -887,7 +1225,7 @@ function installSkills() {
 // ============================================================================
 
 /**
- * Install SpecMem plugins to Claude's plugins directory
+ * Install SpecMem plugins to 's plugins directory
  * Plugins contain agent definitions that get loaded by agent-loading-hook
  */
 function installPlugins() {
@@ -953,11 +1291,11 @@ function installPlugins() {
 // ============================================================================
 
 /**
- * Install Claude hooks
+ * Install  hooks
  * Copies ALL hook files including .cjs and .json support files
  */
 function installHooks() {
-  log.header('Installing Claude Hooks');
+  log.header('Installing  Hooks');
 
   ensureDir(CLAUDE_HOOKS_DIR);
 
@@ -995,10 +1333,10 @@ function installHooks() {
 }
 
 /**
- * Configure Claude settings.json with hooks
+ * Configure  settings.json with hooks
  */
-function configureClaudeSettings() {
-  log.header('Configuring Claude Settings');
+function configureSettings() {
+  log.header('Configuring  Settings');
 
   ensureDir(CLAUDE_DIR);
 
@@ -1049,29 +1387,48 @@ function configureClaudeSettings() {
   };
 
   /**
-   * Helper to merge hooks without clobbering existing ones
-   * Checks if a hook with matching command already exists
+   * Helper to merge hooks without clobbering user's custom hooks
+   * - Removes old specmem hooks (by matcher or command pattern)
+   * - Adds new specmem hooks
+   * - Preserves user's custom non-specmem hooks
    */
   function mergeHooks(existing, newHooks) {
     if (!existing) return newHooks;
 
-    const result = [...existing];
-    for (const newHook of newHooks) {
-      // Check if this hook command already exists
-      const newCmd = newHook.hooks?.[0]?.command || '';
-      const alreadyExists = result.some(h => {
-        const existingCmd = h.hooks?.[0]?.command || '';
-        // Match by filename to detect duplicates
-        const newFile = newCmd.split('/').pop();
-        const existingFile = existingCmd.split('/').pop();
-        return newFile && existingFile && newFile === existingFile;
-      });
-
-      if (!alreadyExists) {
-        result.push(newHook);
-      }
+    // Build set of specmem matchers for new hooks
+    const specmemMatchers = new Map();
+    for (const hook of newHooks) {
+      const matcherKey = hook.matcher || '__CATCHALL__';
+      specmemMatchers.set(matcherKey, hook);
     }
-    return result;
+
+    // Filter existing hooks:
+    // - Remove groups with same matcher as specmem (specmem takes priority)
+    // - Remove old specmem hooks (by command pattern)
+    const preserved = existing.filter(h => {
+      const matcherKey = h.matcher || '__CATCHALL__';
+
+      // If specmem has a hook for this matcher, remove existing
+      if (specmemMatchers.has(matcherKey)) {
+        return false;
+      }
+
+      // Check if this is a specmem hook (to avoid duplicates on re-init)
+      const hookStr = JSON.stringify(h);
+      if (hookStr.includes('specmem-') ||
+          hookStr.includes('/specmem/') ||
+          hookStr.includes('team-comms-enforcer') ||
+          hookStr.includes('smart-context-hook') ||
+          hookStr.includes('agent-loading-hook') ||
+          hookStr.includes('input-aware-improver')) {
+        return false;
+      }
+
+      return true; // Preserve user's custom hooks
+    });
+
+    // Return: preserved user hooks + new specmem hooks
+    return [...preserved, ...newHooks];
   }
 
   // UserPromptSubmit hooks - MERGE
@@ -1274,7 +1631,7 @@ function configureClaudeSettings() {
 
   // Write settings
   fs.writeFileSync(CLAUDE_SETTINGS, JSON.stringify(settings, null, 2));
-  log.success('Claude settings configured (merged with existing - no clobbering!)');
+  log.success(' settings configured (merged with existing - no clobbering!)');
 }
 
 // ============================================================================
@@ -1381,7 +1738,63 @@ ${c.reset}
   log.info('Starting SpecMem full auto-installation...');
   log.info(`Platform: ${PLATFORM}`);
 
+  // ============================================================================
+  // CRITICAL WARNING: YOU MUST RUN SETUP TO CUSTOMIZE!
+  // ============================================================================
+  console.log(`
+${c.red}${c.bright}╔═══════════════════════════════════════════════════════════════════════════════╗
+║                     ⚠️  IMPORTANT: RUN SETUP FIRST! ⚠️                          ║
+╠═══════════════════════════════════════════════════════════════════════════════╣${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  If you skip ${c.cyan}specmem setup${c.reset}, the following ${c.yellow}DEFAULTS${c.reset} will be applied:          ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  ${c.bright}DATABASE:${c.reset}                                                                ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Host: ${c.cyan}localhost:5432${c.reset}                                                   ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Database: ${c.cyan}specmem_westayunprofessional${c.reset}                                 ${c.red}║${c.reset}
+${c.red}║${c.reset}    • User: ${c.cyan}specmem_westayunprofessional${c.reset}                                     ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Password: ${c.cyan}specmem_westayunprofessional${c.reset}                                 ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  ${c.bright}HOOKS (auto-installed to ~/.claude/hooks/):${c.reset}                              ${c.red}║${c.reset}
+${c.red}║${c.reset}    • specmem-drilldown-hook.js (UserPromptSubmit, 30s timeout)              ${c.red}║${c.reset}
+${c.red}║${c.reset}    • input-aware-improver.js (UserPromptSubmit, 5s timeout)                 ${c.red}║${c.reset}
+${c.red}║${c.reset}    • agent-loading-hook.js (PreToolUse:Task, 10s timeout)                   ${c.red}║${c.reset}
+${c.red}║${c.reset}    • smart-context-hook.js (PreToolUse:Grep/Glob/Read, 8s timeout)          ${c.red}║${c.reset}
+${c.red}║${c.reset}    • specmem-session-start.cjs (SessionStart, 30s timeout)                  ${c.red}║${c.reset}
+${c.red}║${c.reset}    • specmem-precompact.js (PreCompact, 60s timeout)                        ${c.red}║${c.reset}
+${c.red}║${c.reset}    • task-progress-hook.js (PostToolUse:Task, 10s timeout)                  ${c.red}║${c.reset}
+${c.red}║${c.reset}    • subagent-loading-hook.js (SubagentStart/Stop, 5s timeout)              ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  ${c.bright}MCP SERVER:${c.reset}                                                              ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Command: ${c.cyan}node --max-old-space-size=250 bootstrap.cjs${c.reset}                   ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Project path: ${c.cyan}\${PWD}${c.reset} (current working directory)                       ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  ${c.bright}PERMISSIONS (auto-granted in settings.json):${c.reset}                             ${c.red}║${c.reset}
+${c.red}║${c.reset}    • mcp__specmem__* (all SpecMem MCP tools)                                ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Skill(specmem), Skill(specmem-*)                                        ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Bash, Read, Write, Edit, Glob, Grep                                     ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  ${c.bright}EMBEDDING MODEL (downloaded on first use):${c.reset}                               ${c.red}║${c.reset}
+${c.red}║${c.reset}    • sentence-transformers/all-MiniLM-L6-v2 (~90MB)                          ${c.red}║${c.reset}
+${c.red}║${c.reset}    • ONNX + INT8 quantization for 2-4x faster inference                      ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}║${c.reset}  ${c.bright}DOCKER:${c.reset}                                                                  ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Auto-install if missing (Linux official script, Mac via Homebrew)      ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Bound to 127.0.0.1 only (localhost, no external access)                ${c.red}║${c.reset}
+${c.red}║${c.reset}    • Memory limit: 2GB, CPU limit: 20%                                       ${c.red}║${c.reset}
+${c.red}║${c.reset}                                                                               ${c.red}║${c.reset}
+${c.red}${c.bright}╠═══════════════════════════════════════════════════════════════════════════════╣
+║  To customize these settings, run: ${c.cyan}specmem setup${c.reset}${c.red}${c.bright}                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝${c.reset}
+`);
+
+  // Give user a moment to read
+  log.info('Proceeding with default configuration in 3 seconds...');
+  log.info(`(Run ${c.cyan}specmem setup${c.reset} after install to customize)`);
+  console.log('');
+
   const results = {
+    claudeCode: false,
+    screen: false,
     postgres: false,
     pgvector: false,
     database: false,
@@ -1394,6 +1807,19 @@ ${c.reset}
   };
 
   try {
+    // Step 0: Install ALL core system deps FIRST (python3, pip, screen, curl, git)
+    installCoreDeps();
+
+    // Step 0a: Claude Code (REQUIRED)
+    results.claudeCode = ensureClaudeCode();
+    if (!results.claudeCode) {
+      log.warn('Claude Code not installed - SpecMem requires Claude Code to function');
+      log.info('Install manually: npm install -g @anthropic-ai/claude-code');
+    }
+
+    // Step 0b: screen (needed for team members) - should already be installed by installCoreDeps
+    results.screen = ensureScreen();
+
     // Step 1: PostgreSQL
     const pgStatus = checkPostgres();
     if (pgStatus === true) {
@@ -1432,7 +1858,7 @@ ${c.reset}
     createEnvTemplate();
     copyAgentConfig();
 
-    // Step 7: Claude hooks
+    // Step 7:  hooks
     installHooks();
     results.hooks = true;
 
@@ -1448,8 +1874,8 @@ ${c.reset}
     const pluginResult = installPlugins();
     results.plugins = pluginResult.installed;
 
-    // Step 9: Claude settings (with Skill permissions)
-    configureClaudeSettings();
+    // Step 9:  settings (with Skill permissions)
+    configureSettings();
     results.settings = true;
 
     // Summary
@@ -1478,7 +1904,7 @@ ${c.bright}Next steps:${c.reset}
      - Configures embedding timeouts and cache
      - Compresses commands with token optimization
      - Deploys to global and per-project locations
-  3. Start Claude Code - SpecMem auto-injects context!
+  3. Start  Code - SpecMem auto-injects context!
 
 ${c.bright}Commands:${c.reset}
   ${c.cyan}specmem-init${c.reset}      Full project initialization with loading bars

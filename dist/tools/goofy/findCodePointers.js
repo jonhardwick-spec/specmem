@@ -80,18 +80,27 @@ function isTransientError(error) {
  */
 async function withTimeout(operation, timeoutMs, operationName) {
     return new Promise((resolve, reject) => {
+        // SELF-HEALING: Ensure timeout is reasonable (min 10s)
+        const safeTimeout = Math.max(10000, timeoutMs);
         const timeoutId = setTimeout(() => {
-            reject(new Error(`[CodePointers] ${operationName} timed out after ${timeoutMs}ms. ` +
-                `Set SPECMEM_CODE_SEARCH_TIMEOUT env var to adjust (current: ${timeoutMs}ms). ` +
-                `This may indicate embedding service is slow or unresponsive.`));
-        }, timeoutMs);
-        operation()
+            // SELF-HEALING: Return graceful error instead of crashing
+            const err = new Error(`[CodePointers] ${operationName} deadline exceeded (${Math.round(safeTimeout/1000)}s remaining). ` +
+                `Increase SPECMEM_CODE_SEARCH_TIMEOUT env var (default: 60s) or check embedding service health.`);
+            err.isTimeout = true;
+            reject(err);
+        }, safeTimeout);
+        // SELF-HEALING: Wrap operation in try/catch to prevent unhandled rejections
+        Promise.resolve().then(() => operation())
             .then(result => {
             clearTimeout(timeoutId);
             resolve(result);
         })
             .catch(error => {
             clearTimeout(timeoutId);
+            // Mark as handled to prevent unhandled rejection
+            if (error && typeof error === 'object') {
+                error.handled = true;
+            }
             reject(error);
         });
     });
@@ -410,12 +419,17 @@ export class FindCodePointers {
         const includeTracebacks = params.includeTracebacks !== false;
         // Broadcast COT start to dashboard
         cotStart('find_code', params.query);
-        // FIXER AGENT 8: Get configurable timeout (default 30s)
+        // Get configurable timeout (default 60s, env: SPECMEM_CODE_SEARCH_TIMEOUT)
         const timeoutMs = getCodeSearchTimeout();
-        // FIX: Deadline-based timeout to prevent compounding (was worst-case 390s!)
-        // All operations share single deadline instead of stacking individual timeouts
-        const deadline = Date.now() + timeoutMs;
-        const remainingTime = () => Math.max(1000, deadline - Date.now()); // Min 1s
+        // FIX: Per-operation timeout budget instead of shared deadline
+        // The old shared deadline caused a cascade: by retry #2, only 10s remained (the Math.max floor).
+        // Now each operation phase gets its own timeout allocation:
+        // - Embedding generation (with retries): 50% of total budget per attempt
+        // - DB search + post-processing: remaining budget
+        const embeddingTimeoutPerAttempt = Math.max(15000, Math.floor(timeoutMs * 0.5));
+        const postEmbeddingDeadline = Date.now() + timeoutMs;
+        // For post-embedding operations, use remaining time from overall deadline (min 10s)
+        const remainingTime = () => Math.max(10000, postEmbeddingDeadline - Date.now());
         // FIXER AGENT 7: Log socket path for debugging (same detection as find_memory)
         const socketPath = getEmbeddingSocketPath();
         if (process.env['SPECMEM_DEBUG']) {
@@ -436,7 +450,7 @@ export class FindCodePointers {
                 maxRetries: getMaxRetries(),
                 socketPath // FIXER AGENT 7: Include socket path in logs
             }, '[CodePointers] Generating embedding for query');
-            const rawEmbedding = await withRetry(() => withTimeout(() => this.embeddingProvider.generateEmbedding(params.query), remainingTime(), 'Embedding generation'), 'Embedding generation');
+            const rawEmbedding = await withRetry(() => withTimeout(() => this.embeddingProvider.generateEmbedding(params.query), embeddingTimeoutPerAttempt, 'Embedding generation'), 'Embedding generation');
             // Validate and prepare embeddings for each table (may have different dimensions)
             // FIXER AGENT 8: Added timeout wrapper for dimension preparation
             const [queryEmbeddingFiles, queryEmbeddingDefs] = await withTimeout(() => Promise.all([
@@ -629,13 +643,16 @@ export class FindCodePointers {
                         const compressed = smartCompress(content, { threshold: 0.85 });
                         content = compressed.result;
                     }
-                    // CLEAN OUTPUT: Only essential fields (removed tags, hasMore, codePointers)
+                    // CLEAN OUTPUT: Essential fields + tracebacks for code navigation
                     return {
                         content,
                         drilldownID,
                         memoryID: codeId,
                         similarity: Math.round(result.similarity * 100) / 100,
-                        role: 'code'
+                        role: 'code',
+                        // Include tracebacks (callers/callees) for code navigation
+                        callers: result.callers?.map(c => c.source_file_path) || [],
+                        callees: result.callees?.map(c => c.target_path) || []
                     };
                 });
                 // Format as camera roll response - CLEAN, no extra fields

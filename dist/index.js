@@ -93,7 +93,7 @@ function startupLog(msg, error) {
 startupLog('index.ts ENTRY POINT - ES module loading');
 import { SpecMemServer } from './mcp/specMemServer.js';
 import { CachingEmbeddingProvider } from './mcp/toolRegistry.js';
-import { EmbeddingServerManager } from './mcp/embeddingServerManager.js';
+import { EmbeddingServerManager, getEmbeddingServerManager } from './mcp/embeddingServerManager.js';
 import { config, loadSkillsConfig, loadCodebaseConfig, getEmbeddingSocketPath, getRunDir, getProjectInfo, getProjectPath } from './config.js';
 import { logger } from './utils/logger.js';
 import { ensureProjectEnv, getSpawnEnv, getPythonPath } from './utils/projectEnv.js';
@@ -123,12 +123,12 @@ import { configureLazyCoordinationServer, disableLazyCoordinationServer, execute
 import { quickValidation, fullValidation, formatValidationErrors, EXIT_CODES, } from './startup/index.js';
 // Startup indexing - auto-index codebase and extract sessions on MCP startup
 import { runStartupIndexing } from './startup/startupIndexing.js';
-// Claude Config Injector - auto-injects hooks and hot-patches running instances
-import { injectClaudeConfig } from './init/claudeConfigInjector.js';
+//  Config Injector - auto-injects hooks and hot-patches running instances
+import { injectConfig } from './init/claudeConfigInjector.js';
 // Auto-config system - syncs config to ~/.specmem/config.json for hooks
 import { syncConfigToUserFile } from './config/autoConfig.js';
-// Auto-deploy hooks and commands to Claude's directories
-import { deployToClaude } from './cli/deploy-to-claude.js';
+// Auto-deploy hooks and commands to 's directories
+import { deployTo } from './cli/deploy-to-claude.js';
 // Centralized password management
 import { getPassword, isUsingDefaultPassword } from './config/password.js';
 // Unified embedding timeout configuration
@@ -137,14 +137,14 @@ import { getEmbeddingTimeout, getAllEmbeddingTimeouts, hasMasterTimeout } from '
 import { allocatePorts, setAllocatedPorts } from './utils/portAllocator.js';
 // Instance manager for per-project instance tracking
 import { getInstanceManager, cleanupSameProjectInstances, migrateFromOldStructure, } from './utils/instanceManager.js';
-// CLI Notifications - centralized notification system for Claude Code CLI
+// CLI Notifications - centralized notification system for  Code CLI
 import { getDashboardUrl } from './mcp/cliNotifications.js';
 /**
- * Display SpecMem LOADED banner in Claude Code CLI
+ * Display SpecMem LOADED banner in  Code CLI
  *
  * Uses the centralized CLINotifier system which:
  * 1. Writes a visual banner to stderr (appears in terminal)
- * 2. Can optionally send MCP logging message (appears in Claude's logs)
+ * 2. Can optionally send MCP logging message (appears in 's logs)
  *
  * The banner includes:
  * - "SpecMem Loaded" status message with emoji
@@ -155,7 +155,7 @@ import { getDashboardUrl } from './mcp/cliNotifications.js';
 function displayLoadedBanner(deployResult, dashboardUrl) {
     // Use centralized notification system
     // Note: We can't use the full CLINotifier here because we don't have the MCP server instance
-    // The MCP-level notifications are handled by specMemServer.ts announceToClaudeOnStartup()
+    // The MCP-level notifications are handled by specMemServer.ts announceToOnStartup()
     // This function focuses on the stderr banner display
     const c = {
         reset: '\x1b[0m',
@@ -190,7 +190,7 @@ ${c.yellow}+==================================================================+$
 ${c.yellow}|${c.reset}  ${c.dim}Type /specmem for commands | /specmem-find to search memories${c.reset}   ${c.yellow}|${c.reset}
 ${c.yellow}+==================================================================+${c.reset}
 `;
-    // Write to stderr so it appears in Claude Code CLI terminal
+    // Write to stderr so it appears in  Code CLI terminal
     // (stdout is reserved for MCP JSON-RPC protocol)
     process.stderr.write(banner);
 }
@@ -207,7 +207,7 @@ export { DatabaseManager, getDatabase, resetDatabase } from './database.js';
 // export all the goofy tools
 export { RememberThisShit, FindWhatISaid, WhatDidIMean, YeahNahDeleteThat, SmushMemoriesTogether, LinkTheVibes, ShowMeTheStats, FindCodePointers } from './tools/goofy/index.js';
 // export the command system - doobidoo style slash commands
-export { ClaudeCommandHandler, createCommandHandler, MemoryCommands, CodebaseCommands, ContextCommands, PromptCommands, getCommandsResource, getCommandHelpResource } from './commands/index.js';
+export { CommandHandler, createCommandHandler, MemoryCommands, CodebaseCommands, ContextCommands, PromptCommands, getCommandsResource, getCommandHelpResource } from './commands/index.js';
 // export skills system
 export { SkillScanner, getSkillScanner, resetSkillScanner } from './skills/skillScanner.js';
 export { SkillResourceProvider, getSkillResourceProvider } from './skills/skillsResource.js';
@@ -261,7 +261,7 @@ class LocalEmbeddingProvider {
     restartInProgress = false;
     dimensionFetched = false;
     // CRITICAL: Container name must be PROJECT-ISOLATED to prevent multi-instance conflicts!
-    // Without this, two Claude sessions on different projects fight over the same container
+    // Without this, two  sessions on different projects fight over the same container
     // Uses readable dir name for easier debugging (matches start-sandbox.sh)
     static CONTAINER_NAME = `specmem-embedding-${_projectDirName}`;
     static IMAGE_NAME = 'specmem-embedding:latest';
@@ -286,6 +286,12 @@ class LocalEmbeddingProvider {
     socketConnected = false;
     socketReconnecting = false;
     pendingRequests = new Map();
+    // FIX Issue #1: Track active sockets to prevent FD leaks over 24h+ sessions
+    // Each entry: { socket, createdAt, label }
+    activeSockets = new Set();
+    _socketCleanupInterval = null;
+    // FIX Issue #6: Track pending request ages for stale cleanup
+    _pendingCleanupInterval = null;
     // Timeout values - now centralized in config/embeddingTimeouts.ts
     // Set SPECMEM_EMBEDDING_TIMEOUT (in seconds) to control ALL timeouts at once
     // See config/embeddingTimeouts.ts for full documentation
@@ -327,6 +333,131 @@ class LocalEmbeddingProvider {
         }
         // Initialize persistent socket connection
         this.initPersistentSocket();
+        // FIX Issue #1: Start periodic socket FD cleanup
+        this._startSocketCleanup();
+        // FIX Issue #6: Start periodic stale pendingRequests cleanup
+        this._startPendingRequestsCleanup();
+    }
+    /**
+     * FIX Issue #1: Track a socket in the active set for FD leak prevention.
+     * Every socket created via createConnection() MUST be registered here.
+     */
+    _trackSocket(socket, label) {
+        const entry = { socket, createdAt: Date.now(), label };
+        this.activeSockets.add(entry);
+        // Auto-remove from tracking when socket is fully closed/destroyed
+        const removeFromTracking = () => {
+            this.activeSockets.delete(entry);
+        };
+        socket.once('close', removeFromTracking);
+        // If socket is already destroyed, remove immediately
+        if (socket.destroyed) {
+            this.activeSockets.delete(entry);
+        }
+        return entry;
+    }
+    /**
+     * FIX Issue #1: Periodic cleanup of leaked socket FDs.
+     * Destroys sockets that have been open longer than SPECMEM_SOCKET_MAX_AGE_MS.
+     * Runs every SPECMEM_SOCKET_CLEANUP_INTERVAL_MS (default 5min).
+     */
+    _startSocketCleanup() {
+        if (this._socketCleanupInterval) {
+            clearInterval(this._socketCleanupInterval);
+        }
+        const cleanupIntervalMs = parseInt(process.env['SPECMEM_SOCKET_CLEANUP_INTERVAL_MS'] || '300000', 10);
+        const maxAgeMs = parseInt(process.env['SPECMEM_SOCKET_MAX_AGE_MS'] || '60000', 10);
+        this._socketCleanupInterval = setInterval(() => {
+            const now = Date.now();
+            let cleaned = 0;
+            for (const entry of this.activeSockets) {
+                const age = now - entry.createdAt;
+                if (age > maxAgeMs) {
+                    try {
+                        if (!entry.socket.destroyed) {
+                            entry.socket.destroy();
+                            cleaned++;
+                            logger.debug({
+                                label: entry.label,
+                                ageMs: age,
+                                maxAgeMs
+                            }, 'LocalEmbeddingProvider: cleaned up stale socket (FD leak prevention)');
+                        }
+                    }
+                    catch (e) {
+                        // Ignore destroy errors during cleanup
+                    }
+                    this.activeSockets.delete(entry);
+                }
+            }
+            if (cleaned > 0) {
+                logger.info({
+                    cleaned,
+                    remaining: this.activeSockets.size,
+                    maxAgeMs,
+                    cleanupIntervalMs
+                }, 'LocalEmbeddingProvider: periodic socket FD cleanup completed');
+            }
+        }, cleanupIntervalMs);
+        // Don't let cleanup interval prevent process exit
+        if (this._socketCleanupInterval.unref) {
+            this._socketCleanupInterval.unref();
+        }
+        logger.debug({
+            cleanupIntervalMs,
+            maxAgeMs
+        }, 'LocalEmbeddingProvider: socket FD cleanup started');
+    }
+    /**
+     * FIX Issue #6: Periodic cleanup of stale pendingRequests entries.
+     * Rejects and removes requests older than SPECMEM_PENDING_REQUEST_MAX_AGE_MS.
+     * Runs every SPECMEM_PENDING_CLEANUP_INTERVAL_MS (default 60s).
+     */
+    _startPendingRequestsCleanup() {
+        if (this._pendingCleanupInterval) {
+            clearInterval(this._pendingCleanupInterval);
+        }
+        const cleanupIntervalMs = parseInt(process.env['SPECMEM_PENDING_CLEANUP_INTERVAL_MS'] || '60000', 10);
+        const maxAgeMs = parseInt(process.env['SPECMEM_PENDING_REQUEST_MAX_AGE_MS'] || '120000', 10);
+        this._pendingCleanupInterval = setInterval(() => {
+            const now = Date.now();
+            let cleaned = 0;
+            for (const [requestId, pending] of this.pendingRequests) {
+                const age = now - (pending.createdAt || 0);
+                if (age > maxAgeMs) {
+                    clearTimeout(pending.timeout);
+                    this.pendingRequests.delete(requestId);
+                    cleaned++;
+                    try {
+                        pending.reject(new Error(
+                            `Stale pending request cleaned up after ${Math.round(age / 1000)}s ` +
+                            `(max age: ${Math.round(maxAgeMs / 1000)}s). ` +
+                            `Request ID: ${requestId}. ` +
+                            `Increase SPECMEM_PENDING_REQUEST_MAX_AGE_MS if embeddings are legitimately slow.`
+                        ));
+                    }
+                    catch (e) {
+                        // Ignore rejection errors (promise may already be settled)
+                    }
+                }
+            }
+            if (cleaned > 0) {
+                logger.warn({
+                    cleaned,
+                    remaining: this.pendingRequests.size,
+                    maxAgeMs,
+                    cleanupIntervalMs
+                }, 'LocalEmbeddingProvider: cleaned up stale pending requests (memory leak prevention)');
+            }
+        }, cleanupIntervalMs);
+        // Don't let cleanup interval prevent process exit
+        if (this._pendingCleanupInterval.unref) {
+            this._pendingCleanupInterval.unref();
+        }
+        logger.debug({
+            cleanupIntervalMs,
+            maxAgeMs
+        }, 'LocalEmbeddingProvider: pending requests cleanup started');
     }
     /**
      * Initialize the persistent socket connection
@@ -392,6 +523,8 @@ class LocalEmbeddingProvider {
         logger.debug({ socketPath: this.sandboxSocketPath }, 'LocalEmbeddingProvider: initializing persistent socket');
         try {
             this.persistentSocket = createConnection(this.sandboxSocketPath);
+            // FIX Issue #1: Track persistent socket for FD leak prevention
+            this._trackSocket(this.persistentSocket, 'persistent');
             __debugLog('[EMBEDDING DEBUG]', Date.now(), 'INIT_PERSISTENT_SOCKET_CONNECTION_CREATED', {
                 elapsedMs: Date.now() - methodStart
             });
@@ -580,6 +713,18 @@ class LocalEmbeddingProvider {
             pending.reject(new Error('Socket reset by user'));
         }
         this.pendingRequests.clear();
+        // FIX Issue #1: Destroy all tracked active sockets on reset
+        for (const entry of this.activeSockets) {
+            try {
+                if (!entry.socket.destroyed) {
+                    entry.socket.destroy();
+                }
+            }
+            catch (e) {
+                // Ignore cleanup errors
+            }
+        }
+        this.activeSockets.clear();
         // Re-detect socket path and reinitialize
         this.sandboxSocketPath = getEmbeddingSocketPath();
         this.initPersistentSocket();
@@ -631,8 +776,9 @@ class LocalEmbeddingProvider {
             });
         }
         // Wait for connection with timeout - DYNAMIC via env var
-        // Previous 5s was too aggressive, causing unnecessary fallback to slow socket creation
-        const maxWait = parseInt(process.env['SPECMEM_SOCKET_CONNECT_TIMEOUT_MS'] || '30000', 10);
+        // Balance: not too short (causes fallback) but not too long (makes MCP unresponsive)
+        // 10s is a good middle ground - enough for most connections, fast enough to fail gracefully
+        const maxWait = parseInt(process.env['SPECMEM_SOCKET_CONNECT_TIMEOUT_MS'] || '10000', 10);
         const startTime = Date.now();
         __debugLog('[EMBEDDING DEBUG]', Date.now(), 'ENSURE_PERSISTENT_SOCKET_WAIT_LOOP_START', {
             maxWaitMs: maxWait,
@@ -816,7 +962,16 @@ class LocalEmbeddingProvider {
         // Step 1.5: Cleanup any stale socket files before starting container
         // A stale socket can prevent the container from binding properly
         await this.cleanupStaleSocket(containerSocketPath);
-        // Step 2: Check if Docker is available - if not, fallback to Python
+        // Step 2: ALWAYS prefer native Python over Docker
+        // Docker containers crash-loop when native Python owns the socket
+        // Native Python is faster, more reliable, and doesn't have permission issues
+        const pythonAvailable = await this.isPythonEmbeddingAvailable();
+        if (pythonAvailable) {
+            logger.info('Native Python embedding available - using Python (preferred over Docker)');
+            await this.autoStartPythonEmbedding();
+            return;
+        }
+        // Step 2b: Check if Docker is available - only use Docker if Python isn't available
         if (!this.isDockerAvailable()) {
             logger.info('Docker not available - falling back to Python embedding server');
             await this.autoStartPythonEmbedding();
@@ -914,6 +1069,31 @@ class LocalEmbeddingProvider {
                     error: fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
                 }, 'Python embedding fallback also failed - embedding service unavailable');
             }
+        }
+    }
+    /**
+     * Check if native Python embedding server can be started
+     * Always prefer Python over Docker - it's faster and doesn't have permission issues
+     */
+    async isPythonEmbeddingAvailable() {
+        try {
+            // Check if frankenstein-embeddings.py exists in the expected location
+            const projectPath = getProjectPath();
+            const embeddingScript = join(projectPath, 'embedding-sandbox', 'frankenstein-embeddings.py');
+            if (existsSync(embeddingScript)) {
+                logger.debug({ embeddingScript }, 'Python embedding script found');
+                return true;
+            }
+            // Also check relative to this file (for npm installed packages)
+            const altScript = join(path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url)))), 'embedding-sandbox', 'frankenstein-embeddings.py');
+            if (existsSync(altScript)) {
+                logger.debug({ altScript }, 'Python embedding script found (alt location)');
+                return true;
+            }
+            return false;
+        }
+        catch {
+            return false;
         }
     }
     /**
@@ -1208,6 +1388,41 @@ class LocalEmbeddingProvider {
             }
             catch { /* proceed to spawn */ }
         }
+        // ═══════════════════════════════════════════════════════════════════════════
+        // ORPHAN KILL: Kill any existing Frankenstein process BEFORE spawning new one
+        // This prevents multiple processes fighting over the same socket
+        // ═══════════════════════════════════════════════════════════════════════════
+        const pidFile = join(socketDir, 'embedding.pid');
+        try {
+            if (existsSync(pidFile)) {
+                const pidContent = readFileSync(pidFile, 'utf8').trim();
+                const oldPid = parseInt(pidContent.split(':')[0], 10);
+                if (oldPid && !isNaN(oldPid)) {
+                    try {
+                        process.kill(oldPid, 0); // Check if alive
+                        logger.info({ pid: oldPid }, '[LocalEmbeddingProvider] Killing existing embedding process before respawn');
+                        process.kill(oldPid, 'SIGTERM');
+                        // Give it 2s to die gracefully
+                        const killWaitMs = parseInt(process.env['SPECMEM_ORPHAN_KILL_WAIT_MS'] || '2000', 10);
+                        await new Promise(r => setTimeout(r, killWaitMs));
+                        try {
+                            process.kill(oldPid, 0); // Still alive?
+                            process.kill(oldPid, 'SIGKILL');
+                            logger.warn({ pid: oldPid }, '[LocalEmbeddingProvider] Force killed stubborn embedding process');
+                        } catch { /* dead - good */ }
+                    } catch { /* not running - fine */ }
+                }
+            }
+        } catch (pidErr) {
+            logger.debug({ error: pidErr }, '[LocalEmbeddingProvider] PID file cleanup failed (non-fatal)');
+        }
+        // Also remove stale socket file to prevent bind failures
+        if (existsSync(socketPath)) {
+            try {
+                unlinkSync(socketPath);
+                logger.debug('[LocalEmbeddingProvider] Removed stale socket before respawn');
+            } catch { /* ignore */ }
+        }
         // Find the embedding server script
         // Try multiple locations: SPECMEM_PKG env, relative to this file, project specmem dir
         // Docker location via env var (defaults to /opt/specmem if SPECMEM_DOCKER_PATH set)
@@ -1465,19 +1680,29 @@ class LocalEmbeddingProvider {
         this.lastSandboxCheck = Date.now();
     }
     // Async version - use this for all runtime checks (non-blocking)
+    // SELF-HEALING: If socket missing, attempt warm start immediately
     async checkSandboxAvailabilityAsync() {
         try {
             await access(this.sandboxSocketPath, constants.F_OK);
+            // Socket file exists - assume it's available (model may be lazy-loading)
             this.sandboxAvailable = true;
         }
         catch {
+            // Socket missing - MAKE IT!
+            logger.info({ socketPath: this.sandboxSocketPath }, '[SELF-HEAL] Socket missing - starting embedding server');
             this.sandboxAvailable = false;
+            // Try to start embedding server
+            const started = await this.autoStartPythonEmbedding();
+            if (started) {
+                this.sandboxAvailable = true;
+                logger.info({ socketPath: this.sandboxSocketPath }, '[SELF-HEAL] Embedding server started successfully');
+            }
         }
         if (this.sandboxAvailable) {
-            logger.info({ socketPath: this.sandboxSocketPath }, 'sandboxed embedding service available - using real ML embeddings');
+            logger.debug({ socketPath: this.sandboxSocketPath }, 'sandboxed embedding service available - using real ML embeddings');
         }
         else {
-            logger.debug({ socketPath: this.sandboxSocketPath }, 'sandbox not available - using hash fallback');
+            logger.warn({ socketPath: this.sandboxSocketPath }, 'sandbox not available after self-heal attempt');
         }
         this.lastSandboxCheck = Date.now();
     }
@@ -1512,32 +1737,37 @@ class LocalEmbeddingProvider {
             });
             // CRITICAL: ML model MUST be available - no fallback to hash embeddings!
             // Hash embeddings are in a completely different vector space and break semantic search.
-            // If sandbox unavailable, we WAIT for it with retries.
+            // SELF-HEALING: checkSandboxAvailabilityAsync now auto-starts server if socket missing/dead
             const MAX_RETRIES = 5;
-            const RETRY_DELAY_MS = 2000;
+            const RETRY_DELAY_MS = 1000; // Faster retries since self-healing is aggressive
             for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
                 __debugLog('[EMBEDDING DEBUG]', Date.now(), 'GENERATE_EMBEDDING_ATTEMPT_START', {
                     attempt,
                     maxRetries: MAX_RETRIES,
                     totalElapsedMs: Date.now() - methodStart
                 });
+                // SELF-HEAL: This now auto-starts server if socket missing or dead!
                 if (!(await this.isSandboxAvailableAsync())) {
                     __debugLog('[EMBEDDING DEBUG]', Date.now(), 'GENERATE_EMBEDDING_SANDBOX_UNAVAILABLE', {
                         attempt,
                         socketPath: this.sandboxSocketPath,
                         totalElapsedMs: Date.now() - methodStart
                     });
-                    logger.warn({ attempt, maxRetries: MAX_RETRIES, socketPath: this.sandboxSocketPath }, 'ML embedding service unavailable - waiting for it to come online');
+                    logger.warn({ attempt, maxRetries: MAX_RETRIES, socketPath: this.sandboxSocketPath }, '[SELF-HEAL] Embedding service unavailable - auto-healing in progress');
                     // Report retry progress
                     reportRetry('embedding', attempt, MAX_RETRIES);
-                    // Try to restart the container
+                    // SELF-HEAL: Try multiple restart strategies
                     if (attempt === 1) {
                         __debugLog('[EMBEDDING DEBUG]', Date.now(), 'GENERATE_EMBEDDING_RESTART_CONTAINER', {
                             attempt
                         });
                         this.tryRestartContainer();
+                    } else if (attempt === 2) {
+                        // Second attempt: try Python directly (in case Docker is the problem)
+                        logger.info('[SELF-HEAL] Attempt 2: Trying direct Python startup');
+                        await this.autoStartPythonEmbedding();
                     }
-                    // Wait before retry (exponential backoff)
+                    // Wait before retry - faster since self-healing is aggressive
                     const waitMs = RETRY_DELAY_MS * attempt;
                     __debugLog('[EMBEDDING DEBUG]', Date.now(), 'GENERATE_EMBEDDING_WAITING_FOR_SANDBOX', {
                         waitMs,
@@ -1719,9 +1949,22 @@ class LocalEmbeddingProvider {
         return new Promise((resolve, reject) => {
             const socketPath = getEmbeddingSocketPath();
             const socket = createConnection(socketPath);
+            // FIX Issue #1: Track socket for FD leak prevention
+            this._trackSocket(socket, `batch-${texts.length}`);
             let buffer = '';
             let resolved = false;
             const startTime = Date.now();
+            // FIX Issue #1: Ensure socket is destroyed on all exit paths
+            const ensureSocketCleanup = () => {
+                try {
+                    if (!socket.destroyed) {
+                        socket.destroy();
+                    }
+                }
+                catch (e) {
+                    // Ignore cleanup errors
+                }
+            };
             // Longer timeout for batches - scale with batch size
             const baseTimeout = this.getAdaptiveTimeout();
             const timeoutMs = Math.min(baseTimeout * Math.ceil(texts.length / 10), 300000); // Max 5 min
@@ -1733,7 +1976,7 @@ class LocalEmbeddingProvider {
             let timeout = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
-                    socket.destroy();
+                    ensureSocketCleanup();
                     reject(new Error(`Batch embedding timeout after ${Math.round(timeoutMs / 1000)}s for ${texts.length} texts`));
                 }
             }, timeoutMs);
@@ -1753,7 +1996,7 @@ class LocalEmbeddingProvider {
                 timeout = setTimeout(() => {
                     if (!resolved) {
                         resolved = true;
-                        socket.destroy();
+                        ensureSocketCleanup();
                         reject(new Error(`Batch embedding idle timeout for ${texts.length} texts`));
                     }
                 }, timeoutMs);
@@ -1780,7 +2023,7 @@ class LocalEmbeddingProvider {
                         // Got actual response - resolve or reject
                         clearTimeout(timeout);
                         resolved = true;
-                        socket.destroy();
+                        ensureSocketCleanup();
                         const responseTime = Date.now() - startTime;
                         this.recordResponseTime(responseTime / texts.length); // Per-text average
                         if (response.error) {
@@ -1802,7 +2045,7 @@ class LocalEmbeddingProvider {
                     catch (err) {
                         clearTimeout(timeout);
                         resolved = true;
-                        socket.destroy();
+                        ensureSocketCleanup();
                         reject(new Error(`Failed to parse batch embedding response: ${err}`));
                     }
                 }
@@ -1811,6 +2054,7 @@ class LocalEmbeddingProvider {
                 if (!resolved) {
                     resolved = true;
                     clearTimeout(timeout);
+                    ensureSocketCleanup();
                     reject(err);
                 }
             });
@@ -2022,19 +2266,30 @@ class LocalEmbeddingProvider {
             }, timeoutMs);
             const dataHandler = (data) => {
                 buffer += data.toString();
-                const newlineIndex = buffer.indexOf('\n');
-                if (newlineIndex !== -1 && !resolved) {
-                    clearTimeout(timeout);
-                    resolved = true;
-                    this.warmSocket?.removeListener('data', dataHandler);
-                    const responseTime = Date.now() - startTime;
-                    this.recordResponseTime(responseTime);
+                // Process all complete JSON lines in buffer
+                let newlineIndex;
+                while ((newlineIndex = buffer.indexOf('\n')) !== -1 && !resolved) {
+                    const line = buffer.slice(0, newlineIndex);
+                    buffer = buffer.slice(newlineIndex + 1); // Keep remainder for next line
                     try {
-                        const response = JSON.parse(buffer.slice(0, newlineIndex));
-                        // RACE CONDITION FIX: Don't keep buffer remainder for warm socket
-                        // Multiple concurrent requests would corrupt the buffer
-                        // Each request should be atomic - discard remainder
-                        buffer = '';
+                        const response = JSON.parse(line);
+                        // HEARTBEAT: "processing" status means server is working - reset timeout and keep waiting
+                        if (response.status === 'processing') {
+                            clearTimeout(timeout);
+                            timeout = setTimeout(() => {
+                                if (!resolved) {
+                                    resolved = true;
+                                    reject(new Error(`Warm socket timeout after ${timeoutMs}ms`));
+                                }
+                            }, timeoutMs);
+                            continue; // Keep reading for actual embedding
+                        }
+                        // Got actual response - resolve
+                        clearTimeout(timeout);
+                        resolved = true;
+                        this.warmSocket?.removeListener('data', dataHandler);
+                        const responseTime = Date.now() - startTime;
+                        this.recordResponseTime(responseTime);
                         if (response.error) {
                             reject(new Error(`Embedding service error: ${response.error}`));
                         }
@@ -2044,9 +2299,14 @@ class LocalEmbeddingProvider {
                         else {
                             reject(new Error('Invalid response from embedding service'));
                         }
+                        return;
                     }
                     catch (err) {
+                        clearTimeout(timeout);
+                        resolved = true;
+                        this.warmSocket?.removeListener('data', dataHandler);
                         reject(new Error(`Failed to parse embedding response: ${err}`));
+                        return;
                     }
                 }
             };
@@ -2095,6 +2355,8 @@ class LocalEmbeddingProvider {
             try {
                 __debugLog('[EMBEDDING DEBUG]', Date.now(), 'WARMING_SOCKET', { socketPath });
                 this.warmSocket = createConnection(socketPath);
+                // FIX Issue #1: Track warm socket for FD leak prevention
+                this._trackSocket(this.warmSocket, 'warm');
                 this.warmSocketPath = socketPath;
                 this.warmSocket.on('connect', () => {
                     __debugLog('[EMBEDDING DEBUG]', Date.now(), 'WARM_SOCKET_CONNECTED', { socketPath });
@@ -2334,10 +2596,23 @@ class LocalEmbeddingProvider {
     generateWithDirectSocketAttempt(text, socketPath, attempt) {
         return new Promise((resolve, reject) => {
             const socket = createConnection(socketPath);
+            // FIX Issue #1: Track socket for FD leak prevention
+            this._trackSocket(socket, `direct-attempt-${attempt}`);
             let buffer = '';
             let resolved = false;
             const startTime = Date.now();
             const timeoutMs = this.getAdaptiveTimeout();
+            // FIX Issue #1: Ensure socket is destroyed on all exit paths
+            const ensureSocketCleanup = () => {
+                try {
+                    if (!socket.destroyed) {
+                        socket.destroy();
+                    }
+                }
+                catch (e) {
+                    // Ignore cleanup errors
+                }
+            };
             __debugLog('[EMBEDDING DEBUG]', Date.now(), 'DIRECT_SOCKET_CONNECTING', {
                 socketPath,
                 attempt,
@@ -2348,7 +2623,7 @@ class LocalEmbeddingProvider {
             let timeout = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
-                    socket.destroy();
+                    ensureSocketCleanup(); // FIX Issue #1: Use cleanup helper
                     __debugLog('[EMBEDDING DEBUG]', Date.now(), 'DIRECT_SOCKET_INITIAL_TIMEOUT', {
                         socketPath,
                         attempt,
@@ -2377,7 +2652,7 @@ class LocalEmbeddingProvider {
                 timeout = setTimeout(() => {
                     if (!resolved) {
                         resolved = true;
-                        socket.destroy();
+                        ensureSocketCleanup(); // FIX Issue #1: Use cleanup helper
                         __debugLog('[EMBEDDING DEBUG]', Date.now(), 'DIRECT_SOCKET_IDLE_TIMEOUT', {
                             socketPath,
                             attempt,
@@ -2434,14 +2709,14 @@ class LocalEmbeddingProvider {
                         else {
                             reject(new Error(`Invalid response from embedding service (socket: ${socketPath})`));
                         }
-                        socket.end();
+                        ensureSocketCleanup(); // FIX Issue #1: destroy instead of end
                         return;
                     }
                     catch (err) {
                         clearTimeout(timeout);
                         resolved = true;
                         reject(new Error(`Failed to parse embedding response: ${err instanceof Error ? err.message : err} (socket: ${socketPath})`));
-                        socket.end();
+                        ensureSocketCleanup(); // FIX Issue #1: destroy instead of end
                         return;
                     }
                 }
@@ -2455,6 +2730,7 @@ class LocalEmbeddingProvider {
                 });
                 if (!resolved) {
                     resolved = true;
+                    ensureSocketCleanup(); // FIX Issue #1: Ensure socket destroyed on error
                     reject(new Error(`Socket error: ${err.message} (socket: ${socketPath})`));
                 }
             });
@@ -2632,7 +2908,8 @@ class LocalEmbeddingProvider {
                     resolve(embedding);
                 },
                 reject,
-                timeout
+                timeout,
+                createdAt: Date.now() // FIX Issue #6: Track creation time for stale cleanup
             });
             // Send request with ID so we can match responses
             const request = JSON.stringify({ type: 'embed', text, requestId }) + '\n';
@@ -2699,15 +2976,28 @@ class LocalEmbeddingProvider {
     generateWithNewSocketAttempt(text, attempt) {
         return new Promise((resolve, reject) => {
             const socket = createConnection(this.sandboxSocketPath);
+            // FIX Issue #1: Track socket for FD leak prevention
+            this._trackSocket(socket, `new-attempt-${attempt}`);
             let buffer = '';
             let resolved = false;
             const startTime = Date.now();
             const timeoutMs = this.getAdaptiveTimeout();
+            // FIX Issue #1: Ensure socket is destroyed on all exit paths
+            const ensureSocketCleanup = () => {
+                try {
+                    if (!socket.destroyed) {
+                        socket.destroy();
+                    }
+                }
+                catch (e) {
+                    // Ignore cleanup errors
+                }
+            };
             // IDLE-BASED TIMEOUT: Resets on any data received
             let timeout = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
-                    socket.destroy();
+                    ensureSocketCleanup();
                     reject(new Error(`Embedding idle timeout after ${Math.round(timeoutMs / 1000)}s of no activity ` +
                         `(attempt ${attempt}/${LocalEmbeddingProvider.SOCKET_MAX_RETRIES}). ` +
                         `Socket: ${this.sandboxSocketPath}. ` +
@@ -2725,7 +3015,7 @@ class LocalEmbeddingProvider {
                 timeout = setTimeout(() => {
                     if (!resolved) {
                         resolved = true;
-                        socket.destroy();
+                        ensureSocketCleanup();
                         reject(new Error(`Embedding idle timeout after ${Math.round(timeoutMs / 1000)}s of no activity ` +
                             `(attempt ${attempt}/${LocalEmbeddingProvider.SOCKET_MAX_RETRIES}). ` +
                             `Socket: ${this.sandboxSocketPath}. ` +
@@ -2759,14 +3049,14 @@ class LocalEmbeddingProvider {
                         else {
                             reject(new Error(`Invalid response from embedding service (socket: ${this.sandboxSocketPath})`));
                         }
-                        socket.end();
+                        ensureSocketCleanup(); // FIX Issue #1: destroy instead of end
                         return;
                     }
                     catch (err) {
                         clearTimeout(timeout);
                         resolved = true;
                         reject(new Error(`Failed to parse embedding response: ${err instanceof Error ? err.message : err} (socket: ${this.sandboxSocketPath})`));
-                        socket.end();
+                        ensureSocketCleanup(); // FIX Issue #1: destroy instead of end
                         return;
                     }
                 }
@@ -2775,6 +3065,7 @@ class LocalEmbeddingProvider {
                 clearTimeout(timeout);
                 if (!resolved) {
                     resolved = true;
+                    ensureSocketCleanup(); // FIX Issue #1: Ensure socket destroyed on error
                     reject(new Error(`Socket error: ${err.message} (socket: ${this.sandboxSocketPath})`));
                 }
             });
@@ -3512,17 +3803,17 @@ async function main() {
     // CRITICAL TIMING FIX: MCP CONNECTION MUST BE ESTABLISHED FIRST!
     // ==========================================================================
     //
-    // Claude Code has a short timeout (~5-10s) for MCP server connections.
-    // If we don't establish the stdio transport quickly, Claude shows:
+    //  Code has a short timeout (~5-10s) for MCP server connections.
+    // If we don't establish the stdio transport quickly,  shows:
     // "Failed to connect to MCP server"
     //
     // PREVIOUS BUG: We did heavy initialization BEFORE starting the server:
     // - Config sync (file I/O)
-    // - Deploy to Claude (file I/O)
+    // - Deploy to  (file I/O)
     // - Database init (can be 1-3s if cold)
     // - Config injection (file I/O)
     // - Embedding provider creation (DB queries)
-    // All of this could take 5-10+ seconds, causing Claude to timeout!
+    // All of this could take 5-10+ seconds, causing  to timeout!
     //
     // NEW APPROACH: Start MCP server IMMEDIATELY, defer everything else.
     // The server connects transport first, then initializes DB in background.
@@ -3536,7 +3827,8 @@ async function main() {
     let embeddingProviderReady = false;
     // HIGH-23 FIX: Queue for pending embedding requests instead of returning garbage
     // Requests wait for provider to be ready, with timeout to prevent indefinite hangs
-    const EMBEDDING_PROVIDER_TIMEOUT_MS = 30000; // 30 second timeout
+    // REDUCED from 30s to 5s to fail fast and not make MCP appear unresponsive
+    const EMBEDDING_PROVIDER_TIMEOUT_MS = 5000; // 5 second timeout - fail fast!
     const pendingEmbeddingQueue = [];
     // Process queued requests once provider is ready
     const processEmbeddingQueue = async () => {
@@ -3579,10 +3871,32 @@ async function main() {
                     const idx = pendingEmbeddingQueue.findIndex(r => r.resolve === resolve && r.timestamp === timestamp);
                     if (idx !== -1) {
                         pendingEmbeddingQueue.splice(idx, 1);
-                        reject(new Error(`Embedding provider not ready after ${EMBEDDING_PROVIDER_TIMEOUT_MS}ms - try again later`));
+                        reject(new Error(`Embedding service starting up - retry in a few seconds (waited ${EMBEDDING_PROVIDER_TIMEOUT_MS}ms)`));
                     }
                 }, EMBEDDING_PROVIDER_TIMEOUT_MS);
             });
+        },
+        async generateEmbeddingsBatch(texts) {
+            if (embeddingProviderReady && embeddingProvider) {
+                // Use batch method if available on real provider
+                if (embeddingProvider.generateEmbeddingsBatch) {
+                    return embeddingProvider.generateEmbeddingsBatch(texts);
+                }
+                // Try EmbeddingServerManager batch socket
+                try {
+                    const { EmbeddingServerManager } = await import('./mcp/embeddingServerManager.js');
+                    const manager = EmbeddingServerManager.getInstance();
+                    if (manager && manager.generateEmbeddingsBatchViaSocket) {
+                        return await manager.generateEmbeddingsBatchViaSocket(texts);
+                    }
+                } catch (batchErr) {
+                    logger.debug({ error: String(batchErr) }, 'Batch socket failed, falling back to sequential');
+                }
+                // Fallback to sequential
+                return Promise.all(texts.map(t => embeddingProvider.generateEmbedding(t)));
+            }
+            // Provider not ready - fall back to sequential with queueing
+            return Promise.all(texts.map(t => deferredEmbeddingProvider.generateEmbedding(t)));
         }
     };
     // Create server with deferred embedding provider
@@ -3596,11 +3910,96 @@ async function main() {
     await server.start();
     const startDuration = Date.now() - startTime;
     startupLog(`MCP SERVER STARTED in ${startDuration}ms - transport connection established!`);
-    logger.info('MCP server started - Claude connection established!');
+    logger.info('MCP server started -  connection established!');
+    // ==========================================================================
+    // EARLY EMBEDDING CHECK: If socket exists and responds, mark ready NOW!
+    // This allows find_memory to work IMMEDIATELY if server is already running
+    // ==========================================================================
+    const earlySocketPath = getEmbeddingSocketPath();
+    if (existsSync(earlySocketPath)) {
+        startupLog('Embedding socket exists - testing if server is already running...');
+        try {
+            const earlyTestResult = await new Promise((resolve) => {
+                const testSocket = createConnection(earlySocketPath);
+                const timeout = setTimeout(() => { testSocket.destroy(); resolve(false); }, 2000);
+                testSocket.on('connect', () => { testSocket.write('{"type":"health"}\n'); });
+                testSocket.on('data', () => { clearTimeout(timeout); testSocket.end(); resolve(true); });
+                testSocket.on('error', () => { clearTimeout(timeout); resolve(false); });
+            });
+            if (earlyTestResult) {
+                startupLog('FAST PATH: Embedding server already running! Creating early provider...');
+                // Create minimal provider that talks directly to socket
+                const socketPath = earlySocketPath;
+                embeddingProvider = {
+                    generateEmbedding: async (text) => {
+                        return new Promise((resolve, reject) => {
+                            const socket = createConnection(socketPath);
+                            let buffer = '';
+                            let resolved = false;
+                            const timeout = setTimeout(() => {
+                                if (!resolved) { resolved = true; socket.destroy(); reject(new Error('Embedding timeout')); }
+                            }, 60000);
+                            socket.on('connect', () => { socket.write(JSON.stringify({ text }) + '\n'); });
+                            socket.on('data', (data) => {
+                                buffer += data.toString();
+                                let idx;
+                                while ((idx = buffer.indexOf('\n')) !== -1) {
+                                    if (resolved) return;
+                                    const line = buffer.slice(0, idx);
+                                    buffer = buffer.slice(idx + 1);
+                                    try {
+                                        const resp = JSON.parse(line);
+                                        if (resp.error) { clearTimeout(timeout); resolved = true; socket.end(); reject(new Error(resp.error)); return; }
+                                        if (resp.status === 'processing') continue;
+                                        if (resp.embedding && Array.isArray(resp.embedding)) {
+                                            clearTimeout(timeout); resolved = true; socket.end(); resolve(resp.embedding); return;
+                                        }
+                                    } catch (e) { /* ignore parse errors */ }
+                                }
+                            });
+                            socket.on('error', (e) => { clearTimeout(timeout); if (!resolved) { resolved = true; reject(e); } });
+                        });
+                    },
+                    generateEmbeddingsBatch: async (texts) => {
+                        // Use batch socket for speed - single connection for all texts
+                        try {
+                            const { EmbeddingServerManager } = await import('./mcp/embeddingServerManager.js');
+                            const mgr = EmbeddingServerManager.getInstance();
+                            if (mgr && mgr.generateEmbeddingsBatchViaSocket) {
+                                return await mgr.generateEmbeddingsBatchViaSocket(texts);
+                            }
+                        } catch (batchErr) {
+                            logger.debug({ error: String(batchErr) }, 'Batch socket failed in early provider, falling back');
+                        }
+                        return Promise.all(texts.map(t => embeddingProvider.generateEmbedding(t)));
+                    }
+                };
+                embeddingProviderReady = true;
+                logger.info('EARLY EMBEDDING PROVIDER READY - find_memory will work immediately!');
+                // CRITICAL: Start KYS heartbeat to keep embedding server alive!
+                // Without this, the server will suicide after 90s of no heartbeat
+                const { EmbeddingServerManager } = await import('./mcp/embeddingServerManager.js');
+                const earlyManager = EmbeddingServerManager.getInstance();
+                earlyManager.startKysHeartbeat();
+                logger.info('KYS heartbeat started for early provider');
+                // Process any already-queued requests
+                if (pendingEmbeddingQueue.length > 0) {
+                    startupLog(`Processing ${pendingEmbeddingQueue.length} early-queued requests`);
+                    processEmbeddingQueue().catch(e => logger.warn({ e }, 'Early queue processing failed'));
+                }
+            } else {
+                startupLog('Embedding socket exists but server not responding - will initialize normally');
+            }
+        } catch (e) {
+            startupLog('Early embedding check failed (non-fatal): ' + e.message);
+        }
+    } else {
+        startupLog('No existing embedding socket - will initialize normally');
+    }
     // ==========================================================================
     // PHASE 2: DEFERRED INITIALIZATION (runs after MCP connection established)
     // ==========================================================================
-    // These can take time but Claude is already connected and won't timeout
+    // These can take time but  is already connected and won't timeout
     startupLog('PHASE 2: Beginning deferred initialization (MCP already connected)');
     // Initialize instance manager for per-project tracking
     // This replaces the old cleanupStaleLocks() with proper project isolation
@@ -3622,7 +4021,10 @@ async function main() {
     startupLog('Initializing EmbeddingServerManager for fresh start...');
     let embeddingManager = null;
     try {
-        embeddingManager = new EmbeddingServerManager({
+        // CRITICAL FIX: Use the singleton getter so MCP tools share the same instance!
+        // Previously this used `new EmbeddingServerManager()` directly, causing two separate
+        // manager instances - startup had heartbeat running, tools didn't share it
+        embeddingManager = getEmbeddingServerManager({
             healthCheckIntervalMs: 30000,
             // FIX: Increased from 5s to 15s - health checks during startup can take longer
             // while the model is still loading into memory. 5s was causing false negatives.
@@ -3651,8 +4053,16 @@ async function main() {
         process.env['SPECMEM_EMBEDDING_MANAGER_FAILED'] = 'true';
     }
     // Cleanup orphaned embedding processes for THIS project
-    // This is LEGACY - EmbeddingServerManager now handles this, but kept for backward compat
+    // CRITICAL FIX: SKIP if EmbeddingServerManager is active - it already handles this!
+    // The legacy cleanup was killing servers that the manager JUST started (race condition)
+    if (embeddingManager && embeddingManager.isRunning) {
+        startupLog('Skipping legacy orphan cleanup - EmbeddingServerManager is active');
+    }
     const cleanupOrphanedEmbeddings = async () => {
+        // CRITICAL: Skip cleanup if embedding manager started successfully
+        if (embeddingManager && embeddingManager.isRunning) {
+            return; // Manager owns the embedding server, don't kill it!
+        }
         const projectPath = getProjectPath();
         const socketDir = path.join(projectPath, 'specmem', 'sockets');
         const socketPath = path.join(socketDir, 'embeddings.sock');
@@ -3780,13 +4190,13 @@ async function main() {
         startupLog('Config sync failed (non-fatal)', error);
     }
     // --- Deploy Hooks and Commands (deferred, non-blocking) ---
-    startupLog('Deploy to Claude starting...');
+    startupLog('Deploy to  starting...');
     try {
-        deployResult = await deployToClaude();
+        deployResult = await deployTo();
         const totalDeployed = deployResult.hooksDeployed.length + deployResult.commandsDeployed.length;
         const totalSkipped = deployResult.hooksSkipped.length + deployResult.commandsSkipped.length;
         if (totalDeployed > 0) {
-            logger.info('[DeployToClaude] Deployed to Claude:', {
+            logger.info('[DeployTo] Deployed to :', {
                 version: deployResult.version,
                 hooksDeployed: deployResult.hooksDeployed.length,
                 hooksSkipped: deployResult.hooksSkipped.length,
@@ -3796,22 +4206,22 @@ async function main() {
             });
         }
         else if (totalSkipped > 0) {
-            logger.info('[DeployToClaude] All files up-to-date', {
+            logger.info('[DeployTo] All files up-to-date', {
                 version: deployResult.version,
                 filesChecked: totalSkipped
             });
         }
         else {
-            logger.info('[DeployToClaude] No files to deploy');
+            logger.info('[DeployTo] No files to deploy');
         }
         if (deployResult.errors.length > 0) {
-            logger.warn('[DeployToClaude] Deployment warnings:', deployResult.errors);
+            logger.warn('[DeployTo] Deployment warnings:', deployResult.errors);
         }
-        startupLog('Deploy to Claude complete');
+        startupLog('Deploy to  complete');
     }
     catch (error) {
-        logger.warn('[DeployToClaude] Failed to deploy (non-fatal):', error);
-        startupLog('Deploy to Claude failed (non-fatal)', error);
+        logger.warn('[DeployTo] Failed to deploy (non-fatal):', error);
+        startupLog('Deploy to  failed (non-fatal)', error);
     }
     // --- Database Initialization (critical but deferred) ---
     // Note: Server already initialized DB via its own deferred init
@@ -3887,7 +4297,7 @@ async function main() {
     }
     // --- Config Injection (deferred, non-blocking) ---
     try {
-        const injectionResult = await injectClaudeConfig();
+        const injectionResult = await injectConfig();
         logger.info('[ConfigInjector] Result:', {
             settingsUpdated: injectionResult.settingsUpdated,
             hooksCopied: injectionResult.hooksCopied,
@@ -3944,13 +4354,13 @@ async function main() {
     catch (error) {
         logger.error({ error }, 'failed to initialize file watcher - continuing without it');
     }
-    // initialize Claude session watcher if enabled
+    // initialize  session watcher if enabled
     let sessionWatcherInitialized = false;
     try {
         const sessionWatcher = await initializeSessionWatcher(embeddingProvider);
         sessionWatcherInitialized = sessionWatcher !== null;
         if (sessionWatcherInitialized) {
-            logger.info('Claude session watcher enabled and running');
+            logger.info(' session watcher enabled and running');
         }
     }
     catch (error) {
@@ -3959,7 +4369,7 @@ async function main() {
     // === STARTUP INDEXING - ENSURE EVERYTHING IS READY ===
     // Check if codebase is indexed and sessions are extracted
     // Triggers background indexing/extraction if needed
-    // This ensures Claude starts with a fully indexed codebase and extracted sessions
+    // This ensures  starts with a fully indexed codebase and extracted sessions
     try {
         startupLog('Running startup indexing checks...');
         const indexingResult = await runStartupIndexing(embeddingProvider, {
@@ -3985,7 +4395,7 @@ async function main() {
     // === ALLOCATE UNIQUE PORTS FOR THIS INSTANCE ===
     // Uses project path hash for deterministic allocation with conflict detection
     // CRITICAL: Must use SPECMEM_PROJECT_PATH (set by bootstrap.cjs) for per-instance isolation
-    // This ensures each Claude session gets unique ports based on project directory
+    // This ensures each  session gets unique ports based on project directory
     const projectPath = process.env['SPECMEM_PROJECT_PATH'] || process.cwd();
     logger.info({ projectPath, projectHash: process.env['SPECMEM_PROJECT_HASH'] }, 'Using project path for port allocation');
     let allocatedPorts = null;
@@ -4189,21 +4599,48 @@ async function main() {
     process.on('SIGTERM', gracefulShutdown);
     // SIGUSR1 handler for hot reload - triggers graceful restart
     // When code is updated, send SIGUSR1 to trigger graceful shutdown
-    // Claude will respawn the process with the new code
+    //  will respawn the process with the new code
     process.on('SIGUSR1', async () => {
         logger.info('SIGUSR1 received - initiating graceful restart for hot reload');
         startupLog('SIGUSR1 received - hot reload triggered');
         await gracefulShutdown();
-        // gracefulShutdown() calls process.exit(0), so Claude will respawn with new code
+        // gracefulShutdown() calls process.exit(0), so  will respawn with new code
     });
-    // handle uncaught errors
+    // handle uncaught errors - SELF-HEALING MODE
+    // Track recent errors to detect crash loops
+    let recentErrors = [];
+    const MAX_ERRORS_BEFORE_EXIT = 10;
+    const ERROR_WINDOW_MS = 60000; // 1 minute
+
     process.on('uncaughtException', (error) => {
-        logger.fatal({ error }, 'Uncaught exception');
-        process.exit(1);
+        // Log but don't crash for known non-fatal errors
+        const errMsg = error?.message || String(error);
+        const isFatal = errMsg.includes('EADDRINUSE') ||
+                        errMsg.includes('ENOMEM') ||
+                        errMsg.includes('heap') ||
+                        errMsg.includes('stack');
+
+        logger.error({ error, isFatal }, 'Uncaught exception - attempting recovery');
+
+        // Track error frequency
+        recentErrors.push(Date.now());
+        recentErrors = recentErrors.filter(t => Date.now() - t < ERROR_WINDOW_MS);
+
+        if (isFatal || recentErrors.length >= MAX_ERRORS_BEFORE_EXIT) {
+            logger.fatal({ error, recentErrorCount: recentErrors.length }, 'Fatal error or error loop detected - exiting');
+            process.exit(1);
+        }
+        // Non-fatal: log and continue (MCP stays alive)
+        startupLog(`Non-fatal uncaught exception (${recentErrors.length}/${MAX_ERRORS_BEFORE_EXIT}): ${errMsg}`);
     });
+
     process.on('unhandledRejection', (reason) => {
-        logger.fatal({ reason }, 'Unhandled promise rejection');
-        process.exit(1);
+        // SELF-HEALING: Log but DON'T exit for promise rejections
+        // These are usually timeout/network errors that can be safely ignored
+        const reasonStr = reason instanceof Error ? reason.message : String(reason);
+        logger.warn({ reason: reasonStr }, 'Unhandled promise rejection - continuing (MCP stays alive)');
+        startupLog(`Unhandled rejection (non-fatal): ${reasonStr.slice(0, 200)}`);
+        // Don't exit - let MCP continue serving
     });
     // Server already started at the beginning for fast MCP connection
     // Now everything is initialized and ready!
@@ -4239,7 +4676,7 @@ async function main() {
     }, 'SpecMem server fully initialized - THE BRAIN IS ALIVE');
     startupLog('SpecMem server FULLY INITIALIZED - all components ready');
     // === DISPLAY SPECMEM LOADED BANNER ===
-    // Show a nice banner in Claude Code CLI
+    // Show a nice banner in  Code CLI
     displayLoadedBanner(deployResult, dashboardUrl);
     startupLog('main() COMPLETE - server running and waiting for requests');
 }

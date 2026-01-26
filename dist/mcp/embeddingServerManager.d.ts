@@ -2,7 +2,7 @@
  * Embedding Server Lifecycle Manager
  *
  * Manages the embedding server process lifecycle for the MCP server.
- * Ensures embedding server is ALWAYS available when Claude needs it.
+ * Ensures embedding server is ALWAYS available when  needs it.
  *
  * Features:
  * 1. On MCP server start: Check for stale processes, kill them, start fresh

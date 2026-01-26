@@ -25,6 +25,38 @@ import { cotStart, cotResult, cotError } from '../../utils/cotBroadcast.js';
 const __debugLog = process.env['SPECMEM_DEBUG'] === '1'
     ? (...args) => console.error('[DEBUG]', ...args) // stderr, not stdout!
     : () => { };
+// ============================================================================
+// RETRY HELPER for find_memory embedding generation
+// ============================================================================
+const FIND_MEMORY_MAX_RETRIES = parseInt(process.env['SPECMEM_FIND_MEMORY_RETRIES'] || '2');
+function isTransientEmbeddingError(error) {
+    if (!(error instanceof Error)) return false;
+    const msg = error.message.toLowerCase();
+    return (msg.includes('timeout') || msg.includes('econnreset') ||
+        msg.includes('econnrefused') || msg.includes('socket hang up') ||
+        msg.includes('aborted') || msg.includes('etimedout') ||
+        msg.includes('qoms') || msg.includes('resource') || msg.includes('busy'));
+}
+async function withEmbeddingRetry(operation, operationName, maxRetries = FIND_MEMORY_MAX_RETRIES) {
+    let lastError = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await operation();
+        }
+        catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            if (attempt < maxRetries && isTransientEmbeddingError(error)) {
+                const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+                logger.warn({ operationName, attempt: attempt + 1, maxRetries: maxRetries + 1, error: lastError.message, retryInMs: delay }, `[find_memory] ${operationName} failed, retrying in ${delay}ms`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            else {
+                break;
+            }
+        }
+    }
+    throw lastError;
+}
 /**
  * Extract discoverable paths from memory content
  * This is the KEY to getting lots of info from few memories
@@ -99,7 +131,7 @@ function extractDiscoverablePaths(content) {
 }
 /**
  * Format discoverable paths as compact Chinese-annotated hints
- * These hints guide Claude on what to explore next
+ * These hints guide  on what to explore next
  */
 function formatDiscoverableHints(paths) {
     const hints = [];
@@ -248,7 +280,7 @@ function generateUserInteractionPrompt(results, query, drilldown, aggregatedPath
         // Results are good, no user interaction needed
         return null;
     }
-    // Default: Medium relevance - let Claude decide
+    // Default: Medium relevance - let  decide
     return null;
 }
 // Chinese compacted drilldown prompts (saves ~40% tokens)
@@ -343,9 +375,9 @@ function generateDrilldownSuggestion(results, query) {
 let _searchCount = 0;
 let _totalSearchTime = 0;
 // ============================================================================
-// DRILLDOWN REMINDERS - Force Claude to actually USE the memory!
+// DRILLDOWN REMINDERS - Force  to actually USE the memory!
 // ============================================================================
-// Compact reminder - at TOP of response so Claude sees it first
+// Compact reminder - at TOP of response so  sees it first
 const DRILLDOWN_REMINDER = `⚠️ MEMORY POINTERS - DRILL DOWN BEFORE PROCEEDING:
 1. get_memory({ id }) - get FULL content of relevant memories
 2. find_memory({ query: "related term" }) - check related topics
@@ -428,7 +460,7 @@ Results always include drilldownIDs (cameraRollMode is true by default):
 ## Tips
 
 1. **Time queries**: "yesterday", "last week", "3 days ago" are parsed automatically
-2. **Role filter**: Use \`role: "user"\` to find what YOU said (not Claude)
+2. **Role filter**: Use \`role: "user"\` to find what YOU said (not )
 3. **Low results?**: Try \`keywordFallback: true\` and lower threshold
 4. **Recent activity?**: Set \`includeRecent: 10\` to see latest memories
 `;
@@ -523,7 +555,7 @@ export class FindWhatISaid {
             role: {
                 type: 'string',
                 enum: ['user', 'assistant'],
-                description: 'filter by message role - use "user" to find only things YOU said, "assistant" for Claude responses'
+                description: 'filter by message role - use "user" to find only things YOU said, "assistant" for  responses'
             },
             summarize: {
                 type: 'boolean',
@@ -744,23 +776,35 @@ export class FindWhatISaid {
                 socketPath,
                 query: safeParams.query?.slice(0, 50)
             });
-            const embeddingPromise = this.embeddingProvider.generateEmbedding(safeParams.query);
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => {
-                    const timeoutError = new Error(`Embedding generation timeout after ${formatTimeout(EMBEDDING_TIMEOUT_MS)}. ` +
-                        `Socket: ${socketPath}. ` +
-                        `Set SPECMEM_EMBEDDING_TIMEOUT env var to increase timeout.`);
-                    timeoutError.socketPath = socketPath;
-                    timeoutError.code = 'EMBEDDING_TIMEOUT';
-                    reject(timeoutError);
-                }, EMBEDDING_TIMEOUT_MS);
-            });
             let rawEmbedding;
             try {
                 __debugLog('[FIND_MEMORY DEBUG]', Date.now(), 'AWAITING_EMBEDDING_PROMISE', {
                     elapsedMs: Date.now() - startTime
                 });
-                rawEmbedding = await Promise.race([embeddingPromise, timeoutPromise]);
+                // Retry wrapper: retries transient failures (timeouts, socket errors) with exponential backoff
+                rawEmbedding = await withEmbeddingRetry(async () => {
+                    const embeddingPromise = this.embeddingProvider.generateEmbedding(safeParams.query);
+                    let embeddingTimeoutId;
+                    const timeoutPromise = new Promise((_, reject) => {
+                        embeddingTimeoutId = setTimeout(() => {
+                            const timeoutError = new Error(`Embedding generation timeout after ${formatTimeout(EMBEDDING_TIMEOUT_MS)}. ` +
+                                `Socket: ${socketPath}. ` +
+                                `Set SPECMEM_EMBEDDING_TIMEOUT env var to increase timeout.`);
+                            timeoutError.socketPath = socketPath;
+                            timeoutError.code = 'EMBEDDING_TIMEOUT';
+                            reject(timeoutError);
+                        }, EMBEDDING_TIMEOUT_MS);
+                    });
+                    try {
+                        const result = await Promise.race([embeddingPromise, timeoutPromise]);
+                        clearTimeout(embeddingTimeoutId);
+                        return result;
+                    }
+                    catch (err) {
+                        clearTimeout(embeddingTimeoutId);
+                        throw err;
+                    }
+                }, 'Embedding generation');
                 const embeddingDuration = Date.now() - embeddingStartTime;
                 // ============================================================================
                 // DEEP DEBUG: After Embedding Generation (Success)
@@ -777,6 +821,7 @@ export class FindWhatISaid {
                 });
             }
             catch (embeddingError) {
+                // embeddingTimeoutId is scoped inside withEmbeddingRetry — already cleared there
                 const embeddingDuration = Date.now() - embeddingStartTime;
                 const err = embeddingError;
                 // ============================================================================
@@ -849,8 +894,9 @@ export class FindWhatISaid {
                 ...safeParams,
                 dateRange
             }, queryEmbedding);
+            let searchTimeoutId;
             const searchTimeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => {
+                searchTimeoutId = setTimeout(() => {
                     const timeoutError = new Error(`Search timeout after ${formatTimeout(SEARCH_TIMEOUT_MS)}. ` +
                         `Query: "${safeParams.query.slice(0, 50)}...". ` +
                         `Set SPECMEM_EMBEDDING_TIMEOUT env var to increase timeout.`);
@@ -864,6 +910,7 @@ export class FindWhatISaid {
                     elapsedMs: Date.now() - startTime
                 });
                 results = await Promise.race([searchPromise, searchTimeoutPromise]);
+                clearTimeout(searchTimeoutId);
                 const searchDuration = Date.now() - searchStartTime;
                 // ============================================================================
                 // DEEP DEBUG: After Database Query (Success)
@@ -881,6 +928,7 @@ export class FindWhatISaid {
                 });
             }
             catch (searchError) {
+                clearTimeout(searchTimeoutId); // Prevent dangling timer on error path
                 const searchDuration = Date.now() - searchStartTime;
                 const err = searchError;
                 // ============================================================================
@@ -946,12 +994,42 @@ export class FindWhatISaid {
                     semanticResults: results.length,
                     topSimilarity: results[0]?.similarity
                 }, '[I5 FIX] Low/no semantic results, triggering keyword fallback');
-                keywordResults = await this.keywordSearch(safeParams.query, safeParams);
+                const KEYWORD_FALLBACK_TIMEOUT = parseInt(process.env['SPECMEM_KEYWORD_FALLBACK_TIMEOUT_MS'] || '30000');
+                let keywordTimeoutId;
+                try {
+                    keywordResults = await Promise.race([
+                        this.keywordSearch(safeParams.query, safeParams),
+                        new Promise((_, reject) => {
+                            keywordTimeoutId = setTimeout(() => reject(new Error(`Keyword fallback timed out after ${KEYWORD_FALLBACK_TIMEOUT}ms`)), KEYWORD_FALLBACK_TIMEOUT);
+                        })
+                    ]);
+                    clearTimeout(keywordTimeoutId);
+                }
+                catch (err) {
+                    clearTimeout(keywordTimeoutId);
+                    logger.warn({ error: err?.message, timeoutMs: KEYWORD_FALLBACK_TIMEOUT, query: safeParams.query }, '[I5 FIX] Keyword fallback timed out or failed - continuing with semantic results only');
+                    keywordResults = [];
+                }
             }
             // I5 FIX: Get recent memories if requested
             let recentResults = [];
             if (includeRecentCount > 0) {
-                recentResults = await this.getRecentMemories(includeRecentCount, safeParams);
+                const RECENT_LOOKUP_TIMEOUT = parseInt(process.env['SPECMEM_RECENT_LOOKUP_TIMEOUT_MS'] || '15000');
+                let recentTimeoutId;
+                try {
+                    recentResults = await Promise.race([
+                        this.getRecentMemories(includeRecentCount, safeParams),
+                        new Promise((_, reject) => {
+                            recentTimeoutId = setTimeout(() => reject(new Error(`Recent memories lookup timed out after ${RECENT_LOOKUP_TIMEOUT}ms`)), RECENT_LOOKUP_TIMEOUT);
+                        })
+                    ]);
+                    clearTimeout(recentTimeoutId);
+                }
+                catch (err) {
+                    clearTimeout(recentTimeoutId);
+                    logger.warn({ error: err?.message, timeoutMs: RECENT_LOOKUP_TIMEOUT, includeRecentCount }, '[I5 FIX] Recent memories lookup timed out or failed - continuing without recent results');
+                    recentResults = [];
+                }
                 logger.info({
                     recentRequested: includeRecentCount,
                     recentFound: recentResults.length
@@ -1021,47 +1099,61 @@ export class FindWhatISaid {
             // ============================================================================
             if (safeParams.galleryMode === true) {
                 logger.info({ query: safeParams.query, resultCount: results.length }, 'Gallery mode enabled - sending to Mini COT');
+                const GALLERY_TIMEOUT = parseInt(process.env['SPECMEM_GALLERY_TIMEOUT_MS'] || '60000');
+                let galleryTimeoutId;
                 try {
-                    const miniCOT = new MiniCOTProvider();
-                    // Prepare memories for gallery creation (send ENGLISH to CoT!)
-                    const memoriesForGallery = results.map(result => ({
-                        id: result.memory.id,
-                        keywords: result.memory.metadata?._semanticHints || result.memory.tags.join(', '),
-                        snippet: result.memory.content.slice(0, 300), // First 300 chars
-                        timestamp: result.memory.metadata?.timestamp, // When it was said
-                        role: result.memory.metadata?.role // Who said it (user/assistant)
-                    }));
-                    // Call Mini COT to create gallery (CoT analyzes in ENGLISH)
-                    const gallery = await miniCOT.createGallery(safeParams.query, memoriesForGallery);
-                    // ROUND-TRIP VERIFIED compression - compress CoT OUTPUT for token efficiency
-                    // Uses smartCompress: EN→Chinese→EN comparison, keeps English where context lost
-                    // MED-40 FIX: Add null check before compression to avoid undefined errors
-                    gallery.gallery = gallery.gallery.map(item => ({
-                        ...item,
-                        thumbnail: item.thumbnail ? smartCompress(item.thumbnail, { threshold: 0.75 }).result : '',
-                        cot: item.cot ? smartCompress(item.cot, { threshold: 0.75 }).result : ''
-                    }));
-                    logger.info({
-                        query: safeParams.query,
-                        galleryItems: gallery.gallery.length,
-                        researchedTerms: gallery.total_researched_terms
-                    }, 'Gallery created by Mini COT and compressed');
-                    // Always use humanReadable format
-                    const humanReadableData = gallery.gallery.map((item, idx) => ({
-                        id: item.id || `gallery-${idx}`,
-                        similarity: item.relevance ? item.relevance / 100 : 0.5,
-                        content: `[GALLERY] ${item.thumbnail || item.cot || 'No preview'}`,
-                    }));
-                    return formatHumanReadable('find_memory', humanReadableData, {
-                        grey: true,
-                        showSimilarity: true,
-                        query: safeParams.query,
-                        mode: 'gallery'
-                    });
+                    const galleryOperation = async () => {
+                        const miniCOT = new MiniCOTProvider();
+                        // Prepare memories for gallery creation (send ENGLISH to CoT!)
+                        const memoriesForGallery = results.map(result => ({
+                            id: result.memory.id,
+                            keywords: result.memory.metadata?._semanticHints || result.memory.tags.join(', '),
+                            snippet: result.memory.content.slice(0, 300), // First 300 chars
+                            timestamp: result.memory.metadata?.timestamp, // When it was said
+                            role: result.memory.metadata?.role // Who said it (user/assistant)
+                        }));
+                        // Call Mini COT to create gallery (CoT analyzes in ENGLISH)
+                        const gallery = await miniCOT.createGallery(safeParams.query, memoriesForGallery);
+                        // ROUND-TRIP VERIFIED compression - compress CoT OUTPUT for token efficiency
+                        // Uses smartCompress: EN→Chinese→EN comparison, keeps English where context lost
+                        // MED-40 FIX: Add null check before compression to avoid undefined errors
+                        gallery.gallery = gallery.gallery.map(item => ({
+                            ...item,
+                            thumbnail: item.thumbnail ? smartCompress(item.thumbnail, { threshold: 0.75 }).result : '',
+                            cot: item.cot ? smartCompress(item.cot, { threshold: 0.75 }).result : ''
+                        }));
+                        logger.info({
+                            query: safeParams.query,
+                            galleryItems: gallery.gallery.length,
+                            researchedTerms: gallery.total_researched_terms
+                        }, 'Gallery created by Mini COT and compressed');
+                        // Always use humanReadable format
+                        const humanReadableData = gallery.gallery.map((item, idx) => ({
+                            id: item.id || `gallery-${idx}`,
+                            similarity: item.relevance ? item.relevance / 100 : 0.5,
+                            content: `[GALLERY] ${item.thumbnail || item.cot || 'No preview'}`,
+                        }));
+                        return formatHumanReadable('find_memory', humanReadableData, {
+                            grey: true,
+                            showSimilarity: true,
+                            query: safeParams.query,
+                            mode: 'gallery'
+                        });
+                    };
+                    const galleryResult = await Promise.race([
+                        galleryOperation(),
+                        new Promise((_, reject) => {
+                            galleryTimeoutId = setTimeout(() => reject(new Error(`Gallery mode timed out after ${GALLERY_TIMEOUT}ms`)), GALLERY_TIMEOUT);
+                        })
+                    ]);
+                    clearTimeout(galleryTimeoutId);
+                    return galleryResult;
                 }
                 catch (error) {
-                    logger.error({ error, query: safeParams.query }, 'Mini COT gallery creation failed - falling back to normal results');
-                    // Fall through to normal results on error
+                    clearTimeout(galleryTimeoutId);
+                    const isTimeout = error?.message?.includes('timed out');
+                    logger.error({ error: error?.message, query: safeParams.query, isTimeout, timeoutMs: GALLERY_TIMEOUT }, isTimeout ? 'Gallery mode timed out - falling back to normal results' : 'Mini COT gallery creation failed - falling back to normal results');
+                    // Fall through to normal results on error or timeout
                 }
             }
             // ============================================================================
@@ -1088,7 +1180,7 @@ export class FindWhatISaid {
                 }, 'Camera roll mode enabled');
                 // Convert results to camera roll format
                 const cameraRollItems = results.map(result => {
-                    // Try to find Claude Response if this is a user message
+                    // Try to find  Response if this is a user message
                     const metadata = result.memory.metadata || {};
                     const claudeResponse = metadata.claudeResponse || metadata.response;
                     return formatAsCameraRollItem({
@@ -1124,7 +1216,7 @@ export class FindWhatISaid {
             // ONLY when NOT in summarize mode - drill-down should be MINIMAL
             // ============================================================================
             // CLEAN OUTPUT - Show conversation pairs:
-            // Claude: <response>
+            // : <response>
             // UP: <user prompt that triggered it>
             // Default mode (summarize=true)
             // User feedback: "content wayyy too trimmed" - increased default
@@ -1242,7 +1334,7 @@ export class FindWhatISaid {
                         // FIX: Check both camelCase 'sessionId' and snake_case 'session_id' in SQL
                         if (sessionId && memoryTimestamp) {
                             if (role === 'assistant') {
-                                // Claude response -> find user prompt BEFORE it
+                                //  response -> find user prompt BEFORE it
                                 pairedQuery = await this.db.query(`
                   SELECT content FROM memories
                   WHERE COALESCE(metadata->>'sessionId', metadata->>'session_id') = $1
@@ -1254,7 +1346,7 @@ export class FindWhatISaid {
                 `, [sessionId, memoryTimestamp]);
                             }
                             else {
-                                // User prompt -> find Claude response AFTER it (skip tool calls!)
+                                // User prompt -> find  response AFTER it (skip tool calls!)
                                 pairedQuery = await this.db.query(`
                   SELECT content FROM memories
                   WHERE COALESCE(metadata->>'sessionId', metadata->>'session_id') = $1
@@ -1277,7 +1369,7 @@ export class FindWhatISaid {
                                 // User prompt → next assistant response in session
                                 // Assistant response → previous user prompt in session
                                 if (role === 'user') {
-                                    // Find NEXT assistant message in this session (Claude's response to this prompt)
+                                    // Find NEXT assistant message in this session ('s response to this prompt)
                                     pairedQuery = await this.db.query(`
                     SELECT content FROM memories
                     WHERE COALESCE(metadata->>'sessionId', metadata->>'session_id') = $1
@@ -1289,7 +1381,7 @@ export class FindWhatISaid {
                   `, [sessionId, memoryTimestamp]);
                                 }
                                 else {
-                                    // Find PREVIOUS user message in this session (the prompt Claude responded to)
+                                    // Find PREVIOUS user message in this session (the prompt  responded to)
                                     pairedQuery = await this.db.query(`
                     SELECT content FROM memories
                     WHERE COALESCE(metadata->>'sessionId', metadata->>'session_id') = $1
@@ -2166,7 +2258,7 @@ export class FindWhatISaid {
                 content: meaningfulContent,
                 // Include semantic hint for understanding
                 memoryType: row.memory_type,
-                // Tags help Claude understand context
+                // Tags help  understand context
                 tags: row.tags.slice(0, 5),
                 // Metadata: PRESERVE original (sessionId, timestamp, role) + add drill hints
                 metadata: {
@@ -2256,7 +2348,7 @@ export class FindWhatISaid {
     }
     /**
      * Generate context enrichment summary
-     * This is the KEY output that tells Claude what to explore next
+     * This is the KEY output that tells  what to explore next
      * Uses Traditional Chinese for token efficiency
      */
     generateContextEnrichment(query, results, aggregatedPaths, drilldown) {
@@ -2321,7 +2413,7 @@ export class FindWhatISaid {
     }
     /**
      * Generate context for empty results
-     * Guides Claude on what to do when no memories match
+     * Guides  on what to do when no memories match
      */
     generateEmptyResultContext(query, drilldown) {
         return `<specmem-context query="${query}">
@@ -2337,7 +2429,7 @@ export class FindWhatISaid {
     }
     /**
      * Generate research spawn instructions
-     * These instructions tell Claude how to spawn a research team member
+     * These instructions tell  how to spawn a research team member
      * when local memory is insufficient
      */
     generateResearchSpawnInstructions(query, aggregatedPaths) {
@@ -2428,7 +2520,7 @@ export class FindWhatISaid {
     }
     /**
      * Extract meaningful content, skipping metadata-looking lines
-     * Returns actual content Claude can understand and drill down on
+     * Returns actual content  can understand and drill down on
      */
     extractMeaningfulContent(content, maxLen) {
         const lines = content.split('\n');
@@ -2482,7 +2574,7 @@ export class FindWhatISaid {
     }
     /**
      * Create a semantic hint in Traditional Chinese for token efficiency
-     * This gives Claude a quick understanding of what the memory is about
+     * This gives  a quick understanding of what the memory is about
      */
     createSemanticHint(row, content) {
         const parts = [];

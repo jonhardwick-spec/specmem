@@ -1,21 +1,21 @@
 /**
- * promptExecutor.ts - Real Claude API Prompt Executor
+ * promptExecutor.ts - Real  API Prompt Executor
  *
- * Executes prompts via direct Anthropic Claude API calls.
- * Supports multiple Claude models (3.5 Sonnet, 4.0, Opus) with UNLIMITED tokens.
+ * Executes prompts via direct   API calls.
+ * Supports multiple  models (3.5 Sonnet, 4.0, Opus) with UNLIMITED tokens.
  *
- * Phase 4 Implementation - Direct Claude API Integration
+ * Phase 4 Implementation - Direct  API Integration
  *
- * TEAM_MEMBER 3 FIX: Real Claude API integration with model switching and NO TOKEN LIMITS
+ * TEAM_MEMBER 3 FIX: Real  API integration with model switching and NO TOKEN LIMITS
  */
 import { logger } from '../utils/logger.js';
 import Anthropic from '@anthropic-ai/sdk';
 export const MODEL_MAP = {
-    // Claude 3.5 Sonnet - Default balanced model
+    //  3.5 Sonnet - Default balanced model
     'claude-3-5-sonnet': 'claude-3-5-sonnet-20241022',
     'sonnet-3.5': 'claude-3-5-sonnet-20241022',
     'claude-3-5-sonnet-20241022': 'claude-3-5-sonnet-20241022',
-    // Claude 4 Sonnet - Latest and greatest
+    //  4 Sonnet - Latest and greatest
     'claude-4': 'claude-sonnet-4-20250514',
     'claude-4-sonnet': 'claude-sonnet-4-20250514',
     'claude-sonnet-4-20250514': 'claude-sonnet-4-20250514',
@@ -32,25 +32,25 @@ export const MODEL_MAP = {
     'claude-3-haiku-20240307': 'claude-3-5-haiku-20241022',
 };
 // ============================================================================
-// Claude API Client Singleton - REAL API calls, no more simulation!
+//  API Client Singleton - REAL API calls, no more simulation!
 // ============================================================================
 let claudeClientInstance = null;
 /**
- * Real Claude API Client
- * TEAM_MEMBER 3 FIX: Actually calls Claude API instead of simulating responses
+ * Real  API Client
+ * TEAM_MEMBER 3 FIX: Actually calls  API instead of simulating responses
  */
-class ClaudeAPIClient {
+class APIClient {
     anthropic = null;
     isConnected = false;
     constructor() {
         const apiKey = process.env.ANTHROPIC_API_KEY;
         if (apiKey) {
-            this.anthropic = new Anthropic({ apiKey });
+            this.anthropic = new ({ apiKey });
             this.isConnected = true;
-            logger.info('Claude API Client initialized - REAL API calls enabled!');
+            logger.info(' API Client initialized - REAL API calls enabled!');
         }
         else {
-            logger.warn('ANTHROPIC_API_KEY not set - Claude API calls will fail. Set the env var!');
+            logger.warn('ANTHROPIC_API_KEY not set -  API calls will fail. Set the env var!');
             this.isConnected = false;
         }
     }
@@ -63,7 +63,7 @@ class ClaudeAPIClient {
         return MODEL_MAP[modelName] || MODEL_MAP['claude-3-5-sonnet'];
     }
     /**
-     * Send a real request to Claude API - NO TOKEN LIMITS!
+     * Send a real request to  API - NO TOKEN LIMITS!
      */
     async request(method, params) {
         if (method !== 'sampling/createMessage') {
@@ -77,12 +77,12 @@ class ClaudeAPIClient {
             model,
             messageCount: params.messages.length,
             maxTokens: params.maxTokens || 'UNLIMITED'
-        }, 'Sending REAL request to Claude API');
+        }, 'Sending REAL request to  API');
         if (!this.anthropic) {
-            throw new Error('Claude API client not initialized. Set ANTHROPIC_API_KEY environment variable.');
+            throw new Error(' API client not initialized. Set ANTHROPIC_API_KEY environment variable.');
         }
         try {
-            // Build messages for Claude API
+            // Build messages for  API
             const messages = params.messages.map(msg => ({
                 role: msg.role,
                 content: msg.content.text
@@ -115,7 +115,7 @@ class ClaudeAPIClient {
                 outputTokens: response.usage?.output_tokens,
                 stopReason: response.stop_reason,
                 thinkingBlocks: thinkingBlocks.length
-            }, 'Claude API response received');
+            }, ' API response received');
             return {
                 model: response.model,
                 stopReason: response.stop_reason === 'end_turn' ? 'end_turn' : response.stop_reason,
@@ -132,7 +132,7 @@ class ClaudeAPIClient {
             };
         }
         catch (error) {
-            logger.error({ error: error.message }, 'Claude API request failed');
+            logger.error({ error: error.message }, ' API request failed');
             throw error;
         }
     }
@@ -148,15 +148,15 @@ class ClaudeAPIClient {
     disconnect() {
         this.isConnected = false;
         this.anthropic = null;
-        logger.info('Claude API Client disconnected');
+        logger.info(' API Client disconnected');
     }
 }
 /**
- * Get or create the Claude API client
+ * Get or create the  API client
  */
 export function getMCPClient() {
     if (!claudeClientInstance) {
-        claudeClientInstance = new ClaudeAPIClient();
+        claudeClientInstance = new APIClient();
     }
     return claudeClientInstance;
 }
@@ -164,18 +164,18 @@ export function getMCPClient() {
 // Main Execute Function
 // ============================================================================
 /**
- * Execute a prompt via Claude API
- * TEAM_MEMBER 3 FIX: Real Claude API calls with model selection and NO TOKEN LIMITS!
+ * Execute a prompt via  API
+ * TEAM_MEMBER 3 FIX: Real  API calls with model selection and NO TOKEN LIMITS!
  *
  * @param params - The prompt parameters including content and configuration
- * @returns The response from Claude API
+ * @returns The response from  API
  */
 export async function executePrompt(params) {
     const startTime = Date.now();
     try {
         const client = getMCPClient();
         if (!client.isReady()) {
-            throw new Error('Claude API client not initialized. Set ANTHROPIC_API_KEY environment variable.');
+            throw new Error(' API client not initialized. Set ANTHROPIC_API_KEY environment variable.');
         }
         // Build the sampling request
         const messages = [];
@@ -218,7 +218,7 @@ export async function executePrompt(params) {
         if (params.config.systemPrompt) {
             samplingRequest.systemPrompt = params.config.systemPrompt;
         }
-        // Execute the request - REAL Claude API call!
+        // Execute the request - REAL  API call!
         const response = await client.request('sampling/createMessage', samplingRequest);
         const duration = Date.now() - startTime;
         // Use real token counts from API response
@@ -231,7 +231,7 @@ export async function executePrompt(params) {
             stopReason: response.stopReason,
             responseLength: response.content.text.length,
             tokensUsed
-        }, 'Claude API request completed successfully');
+        }, ' API request completed successfully');
         return {
             content: response.content.text,
             model: response.model,
@@ -241,7 +241,7 @@ export async function executePrompt(params) {
     }
     catch (error) {
         const duration = Date.now() - startTime;
-        logger.error({ error, duration }, 'Claude API request failed');
+        logger.error({ error, duration }, ' API request failed');
         throw error;
     }
 }
@@ -271,9 +271,9 @@ export async function buildContext(contextParams) {
     return context;
 }
 /**
- * liveShitBroadcaster - Streams Claude responses in REAL TIME!
+ * liveShitBroadcaster - Streams  responses in REAL TIME!
  *
- * Uses the Anthropic SDK's messages.stream() method to get:
+ * Uses the  SDK's messages.stream() method to get:
  * - Thinking blocks as they're generated (extended thinking)
  * - Response text chunks as they stream in
  * - Final statistics when done
@@ -291,7 +291,7 @@ export async function liveShitBroadcaster(params) {
     try {
         const client = getMCPClient();
         if (!client.isReady()) {
-            throw new Error('Claude API client not initialized. Set ANTHROPIC_API_KEY environment variable.');
+            throw new Error(' API client not initialized. Set ANTHROPIC_API_KEY environment variable.');
         }
         // Build messages array
         const messages = [];
@@ -312,17 +312,17 @@ export async function liveShitBroadcaster(params) {
         // Resolve model
         const modelName = params.config.model || 'claude-3-5-sonnet';
         const resolvedModel = MODEL_MAP[modelName] || MODEL_MAP['claude-3-5-sonnet'];
-        // Get the raw Anthropic client from our wrapper
-        const anthropicClient = getAnthropicClient();
+        // Get the raw  client from our wrapper
+        const anthropicClient = getClient();
         if (!anthropicClient) {
-            throw new Error('Anthropic client not available. Check ANTHROPIC_API_KEY.');
+            throw new Error(' client not available. Check ANTHROPIC_API_KEY.');
         }
         logger.info({
             model: resolvedModel,
             messageCount: messages.length,
             maxTokens: params.config.maxTokens || 128000,
             enableThinking: true
-        }, 'Starting LIVE STREAM to Claude API');
+        }, 'Starting LIVE STREAM to  API');
         // Check if this model supports extended thinking
         const supportsThinking = resolvedModel.includes('opus') ||
             resolvedModel.includes('sonnet-4') ||
@@ -431,21 +431,21 @@ export async function liveShitBroadcaster(params) {
     }
 }
 /**
- * Get the raw Anthropic client for streaming
- * This is needed because messages.stream() is on the Anthropic class directly
+ * Get the raw  client for streaming
+ * This is needed because messages.stream() is on the  class directly
  */
-export function getAnthropicClient() {
+export function getClient() {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
         return null;
     }
-    return new Anthropic({ apiKey });
+    return new ({ apiKey });
 }
 /**
- * catchClaudesThoughts - Helper to extract thinking from a full response
+ * catchsThoughts - Helper to extract thinking from a full response
  * Useful for non-streaming responses that include thinking blocks
  */
-export function catchClaudesThoughts(content) {
+export function catchsThoughts(content) {
     const thinking = [];
     let text = '';
     for (const block of content) {
@@ -463,7 +463,7 @@ export default {
     getMCPClient,
     buildContext,
     liveShitBroadcaster,
-    getAnthropicClient,
-    catchClaudesThoughts
+    getClient,
+    catchsThoughts
 };
 //# sourceMappingURL=promptExecutor.js.map

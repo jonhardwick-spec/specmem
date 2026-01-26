@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="50%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#00bfff"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="380" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="380" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">74+ MCP Tools</text>
+  <text x="400" y="54" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">Every tool works as a slash command too</text>
+
+  <!-- Card 1: Memory Ops -->
+  <g transform="translate(17, 70)">
+    <rect width="246" height="140" rx="10" fill="url(#cardGrad)" stroke="#00bfff" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#00bfff"/>
+    <text x="16" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#00bfff">Memory Operations</text>
+    <text font-family="'SF Mono', monospace" font-size="10" fill="#8b949e">
+      <tspan x="16" y="48">find_memory</tspan>
+      <tspan x="16" dy="14">save_memory</tspan>
+      <tspan x="16" dy="14">get_memory</tspan>
+      <tspan x="16" dy="14">drill_down</tspan>
+      <tspan x="16" dy="14">smush_memories_together</tspan>
+      <tspan x="16" dy="14">link_the_vibes</tspan>
+    </text>
+  </g>
+
+  <!-- Card 2: Code Search -->
+  <g transform="translate(277, 70)">
+    <rect width="246" height="140" rx="10" fill="url(#cardGrad)" stroke="#a855f7" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#a855f7"/>
+    <text x="16" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#a855f7">Code Search</text>
+    <text font-family="'SF Mono', monospace" font-size="10" fill="#8b949e">
+      <tspan x="16" y="48">find_code_pointers</tspan>
+      <tspan x="16" dy="14">check_sync</tspan>
+      <tspan x="16" dy="14">start_watching</tspan>
+      <tspan x="16" dy="14">stop_watching</tspan>
+      <tspan x="16" dy="14">force_resync</tspan>
+      <tspan x="16" dy="14">spatial_search</tspan>
+    </text>
+  </g>
+
+  <!-- Card 3: Team Coordination -->
+  <g transform="translate(537, 70)">
+    <rect width="246" height="140" rx="10" fill="url(#cardGrad)" stroke="#22c55e" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#22c55e"/>
+    <text x="16" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#22c55e">Team Coordination</text>
+    <text font-family="'SF Mono', monospace" font-size="10" fill="#8b949e">
+      <tspan x="16" y="48">send_team_message</tspan>
+      <tspan x="16" dy="14">read_team_messages</tspan>
+      <tspan x="16" dy="14">claim_task / release_task</tspan>
+      <tspan x="16" dy="14">request_help</tspan>
+      <tspan x="16" dy="14">deploy_team_member</tspan>
+      <tspan x="16" dy="14">broadcast_to_team</tspan>
+    </text>
+  </g>
+
+  <!-- Card 4: Session -->
+  <g transform="translate(17, 225)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#f59e0b"/>
+    <text x="16" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#fbbf24">Session Management</text>
+    <text font-family="'SF Mono', monospace" font-size="10" fill="#8b949e">
+      <tspan x="16" y="48">extract_claude_sessions</tspan>
+      <tspan x="16" dy="14">get_session_watcher_status</tspan>
+      <tspan x="16" dy="14">smart_recall</tspan>
+      <tspan x="16" dy="14">smart_search</tspan>
+      <tspan x="16" dy="14">create_reasoning_chain</tspan>
+    </text>
+  </g>
+
+  <!-- Card 5: Memory Management -->
+  <g transform="translate(277, 225)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#ef4444" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#ef4444"/>
+    <text x="16" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f87171">Memory Management</text>
+    <text font-family="'SF Mono', monospace" font-size="10" fill="#8b949e">
+      <tspan x="16" y="48">memory_health_check</tspan>
+      <tspan x="16" dy="14">export_project_memories</tspan>
+      <tspan x="16" dy="14">import_project_memories</tspan>
+      <tspan x="16" dy="14">delete_memory</tspan>
+      <tspan x="16" dy="14">compare_instance_memory</tspan>
+    </text>
+  </g>
+
+  <!-- Card 6: System -->
+  <g transform="translate(537, 225)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#6e7681" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#6e7681"/>
+    <text x="16" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#8b949e">System</text>
+    <text font-family="'SF Mono', monospace" font-size="10" fill="#8b949e">
+      <tspan x="16" y="48">show_me_the_stats</tspan>
+      <tspan x="16" dy="14">self_message</tspan>
+      <tspan x="16" dy="14">code_memory_link</tspan>
+      <tspan x="16" dy="14">find_memory_gallery</tspan>
+      <tspan x="16" dy="14">get_memory_full</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom note -->
+  <text x="400" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#484f58">+ dozens more. Run /specmem-stats to see everything that's loaded.</text>
+</svg>

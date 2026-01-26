@@ -1,7 +1,7 @@
 /**
- * liveSessionStream.ts - LIVE Claude Code Session Streaming API
+ * liveSessionStream.ts - LIVE  Code Session Streaming API
  *
- * Team Member 2's MASTERPIECE - Real-time streaming of Claude Code sessions!
+ * Team Member 2's MASTERPIECE - Real-time streaming of  Code sessions!
  *
  * This watches the history.jsonl file for changes and streams new entries
  * via SSE (Server-Sent Events) to the Console Live Viewer.

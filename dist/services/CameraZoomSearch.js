@@ -17,12 +17,12 @@
  * Response Format:
  * ```
  * content: "Here's what I said from last week"
- * CR (Claude Response): "Well that's interesting because..."
+ * CR ( Response): "Well that's interesting because..."
  * drilldownID: 123
  * similarity: 0.87
  * ```
  *
- * Then Claude can:
+ * Then  can:
  * - drill_down(123) - zoom in for more detail on that memory
  * - get_memory(123) - get full memory content
  * - Each drill-down may reveal MORE drilldown IDs for deeper exploration
@@ -32,7 +32,7 @@ import { smartCompress } from '../utils/tokenCompressor.js';
 /**
  * DrilldownRegistry - Maps simple numeric IDs to memory UUIDs
  *
- * This allows Claude to use simple drill_down(123) calls instead of
+ * This allows  to use simple drill_down(123) calls instead of
  * drill_down("550e8400-e29b-41d4-a716-446655440000")
  */
 class DrilldownRegistry {
@@ -40,13 +40,63 @@ class DrilldownRegistry {
     registry = new Map();
     reverseRegistry = new Map();
     nextID = 1;
-    maxEntries = 10000;
-    constructor() { }
+    maxEntries = parseInt(process.env['SPECMEM_DRILLDOWN_MAX_SIZE'] || '10000');
+    ttlMs = parseInt(process.env['SPECMEM_DRILLDOWN_TTL_MS'] || '1800000'); // 30 min default
+    cleanupIntervalMs = parseInt(process.env['SPECMEM_DRILLDOWN_CLEANUP_INTERVAL_MS'] || '300000'); // 5 min default
+    _cleanupTimer = null;
+    constructor() {
+        // Start periodic TTL cleanup
+        this._startPeriodicCleanup();
+    }
     static getInstance() {
         if (!DrilldownRegistry.instance) {
             DrilldownRegistry.instance = new DrilldownRegistry();
         }
         return DrilldownRegistry.instance;
+    }
+    /**
+     * Start periodic cleanup timer for TTL-expired entries
+     */
+    _startPeriodicCleanup() {
+        if (this._cleanupTimer) {
+            clearInterval(this._cleanupTimer);
+        }
+        this._cleanupTimer = setInterval(() => {
+            this._expireTTLEntries();
+        }, this.cleanupIntervalMs);
+        // Allow the process to exit even if the timer is running
+        if (this._cleanupTimer && typeof this._cleanupTimer.unref === 'function') {
+            this._cleanupTimer.unref();
+        }
+        logger.debug({ cleanupIntervalMs: this.cleanupIntervalMs, ttlMs: this.ttlMs }, 'DrilldownRegistry periodic TTL cleanup started');
+    }
+    /**
+     * Remove entries that have exceeded their TTL
+     */
+    _expireTTLEntries() {
+        const now = Date.now();
+        let expiredCount = 0;
+        for (const [id, entry] of this.registry.entries()) {
+            const lastTouched = entry.lastAccessed?.getTime() || entry.createdAt.getTime();
+            if ((now - lastTouched) > this.ttlMs) {
+                this.registry.delete(id);
+                this.reverseRegistry.delete(entry.memoryID);
+                expiredCount++;
+            }
+        }
+        if (expiredCount > 0) {
+            logger.info({ expiredCount, remaining: this.registry.size, ttlMs: this.ttlMs }, 'DrilldownRegistry TTL expiration: removed stale entries');
+        }
+    }
+    /**
+     * Stop the periodic cleanup timer (for shutdown)
+     */
+    shutdown() {
+        if (this._cleanupTimer) {
+            clearInterval(this._cleanupTimer);
+            this._cleanupTimer = null;
+            logger.debug('DrilldownRegistry cleanup timer cleared on shutdown');
+        }
     }
     /**
      * Register a memory and get its drilldown ID
@@ -58,6 +108,7 @@ class DrilldownRegistry {
         if (existing !== undefined) {
             const entry = this.registry.get(existing);
             if (entry) {
+                // Refresh TTL on access
                 entry.lastAccessed = new Date();
                 entry.accessCount++;
             }
@@ -70,25 +121,50 @@ class DrilldownRegistry {
             memoryID,
             type,
             createdAt: new Date(),
+            lastAccessed: new Date(),
             accessCount: 1,
             ...context
         };
         this.registry.set(drilldownID, entry);
         this.reverseRegistry.set(memoryID, drilldownID);
-        // Cleanup old entries if needed
+        // Cleanup old entries if needed (LRU eviction when over max size)
         this.cleanup();
         logger.debug({ drilldownID, memoryID, type }, 'Registered drilldown ID');
         return drilldownID;
     }
     /**
-     * Get memory ID from drilldown ID
+     * Get memory ID from drilldown ID (numeric or UUID short code)
      */
     resolve(drilldownID) {
-        const entry = this.registry.get(drilldownID);
-        if (entry) {
-            entry.lastAccessed = new Date();
-            entry.accessCount++;
-            return entry;
+        // Handle numeric IDs
+        if (typeof drilldownID === 'number') {
+            const entry = this.registry.get(drilldownID);
+            if (entry) {
+                // Refresh TTL on access (touch)
+                entry.lastAccessed = new Date();
+                entry.accessCount++;
+                return entry;
+            }
+            return null;
+        }
+        // Handle string IDs (UUID short code like "a9efbf91")
+        if (typeof drilldownID === 'string') {
+            // Try parsing as number first
+            const numID = parseInt(drilldownID, 10);
+            if (!isNaN(numID)) {
+                return this.resolve(numID);
+            }
+            // Search by UUID prefix
+            const shortCode = drilldownID.toLowerCase().replace(/-/g, '');
+            for (const [id, entry] of this.registry.entries()) {
+                const memID = entry.memoryID.toLowerCase().replace(/-/g, '');
+                if (memID.startsWith(shortCode) || memID.includes(shortCode)) {
+                    // Refresh TTL on access (touch)
+                    entry.lastAccessed = new Date();
+                    entry.accessCount++;
+                    return entry;
+                }
+            }
         }
         return null;
     }
@@ -110,7 +186,7 @@ class DrilldownRegistry {
         return result;
     }
     /**
-     * Cleanup old entries when registry is full
+     * Cleanup old entries when registry is full (LRU eviction)
      */
     cleanup() {
         if (this.registry.size <= this.maxEntries)
@@ -129,7 +205,7 @@ class DrilldownRegistry {
             this.registry.delete(id);
             this.reverseRegistry.delete(entry.memoryID);
         }
-        logger.info({ removed: toRemove, remaining: this.registry.size }, 'Cleaned up drilldown registry');
+        logger.info({ removed: toRemove, remaining: this.registry.size }, 'Cleaned up drilldown registry (LRU eviction)');
     }
     /**
      * Get registry stats
@@ -139,6 +215,9 @@ class DrilldownRegistry {
         const dates = entries.map(e => e.createdAt.getTime());
         return {
             totalEntries: this.registry.size,
+            maxEntries: this.maxEntries,
+            ttlMs: this.ttlMs,
+            cleanupIntervalMs: this.cleanupIntervalMs,
             oldestEntry: dates.length > 0 ? new Date(Math.min(...dates)) : undefined,
             newestEntry: dates.length > 0 ? new Date(Math.max(...dates)) : undefined
         };
@@ -254,7 +333,7 @@ export function formatAsCameraRollItem(result, zoomConfig, context) {
         const compressed = smartCompress(content, { threshold: 0.85 });
         content = compressed.result;
     }
-    // Format Claude Response if included
+    // Format  Response if included
     let CR;
     if (zoomConfig.includeContext && context?.claudeResponse) {
         CR = context.claudeResponse;
@@ -300,16 +379,25 @@ export function formatAsCameraRollResponse(results, query, zoomLevel, searchType
     for (let i = 0; i < results.length; i++) {
         const item = results[i];
         const simPercent = Math.round(item.similarity * 100);
-        const roleTag = item.role === 'user' ? '[USER]' : item.role === 'assistant' ? '[CLAUDE]' : '';
+        const roleTag = item.role === 'user' ? '[USER]' : item.role === 'assistant' ? '[CLAUDE]' : item.role === 'code' ? '[CODE]' : '';
         // Main line: [N] XX% #ID content
         let line = `[${i + 1}] ${simPercent}% #${item.drilldownID}`;
         if (roleTag)
             line += ` ${roleTag}`;
         line += ` ${item.content}`;
         lines.push(line);
-        // If there's a Claude Response, add it on the next line
+        // If there's a  Response, add it on the next line
         if (item.CR) {
             lines.push(`    [CR] ${item.CR}`);
+        }
+        // TRACEBACKS: Show callers/callees for code items
+        if (item.callers && item.callers.length > 0) {
+            const callerNames = item.callers.slice(0, 5).map(c => c.split('/').pop() || c).join(', ');
+            lines.push(`    ← Called by: ${callerNames}${item.callers.length > 5 ? ` (+${item.callers.length - 5} more)` : ''}`);
+        }
+        if (item.callees && item.callees.length > 0) {
+            const calleeNames = item.callees.slice(0, 5).map(c => c.split('/').pop() || c).join(', ');
+            lines.push(`    → Calls: ${calleeNames}${item.callees.length > 5 ? ` (+${item.callees.length - 5} more)` : ''}`);
         }
     }
     // Add hint for drill-down
@@ -336,11 +424,23 @@ options) {
     const includeContext = options?.includeConversationContext ?? true;
     const relatedLimit = options?.relatedLimit ?? 5;
     const codeRefLimit = options?.codeRefLimit ?? 3;
+    // ZOOM LEVELS FOR CODE: 0=signature, 50=truncated, 100=full
+    const zoom = options?.zoom ?? 50;
+    // Calculate max content based on zoom (0-100 maps to ~200-5000 chars)
+    const getMaxContentForZoom = (z) => {
+        if (z <= 10) return 200;    // Signature only
+        if (z <= 30) return 500;    // Very brief
+        if (z <= 50) return 1500;   // Truncated (default)
+        if (z <= 70) return 3000;   // More detail
+        if (z <= 90) return 5000;   // Most content
+        return 0;                    // 100 = no limit
+    };
+    const maxContent = getMaxContentForZoom(zoom);
     try {
         // HANDLE CODE TYPE DRILLDOWNS
         // memoryID format from find_code_pointers: "file_path:name" or just "file_path"
         if (entry.type === 'code') {
-            logger.debug({ drilldownID, memoryID }, '[Drilldown] Code type - parsing file path');
+            logger.debug({ drilldownID, memoryID, zoom, maxContent }, '[Drilldown] Code type - parsing file path');
             // Parse memoryID - format is "file_path:functionName" or just "file_path"
             const colonIdx = memoryID.lastIndexOf(':');
             let filePath;
@@ -356,6 +456,21 @@ options) {
             else {
                 filePath = memoryID;
             }
+            // Helper to truncate content based on zoom
+            const truncateContent = (content, max) => {
+                if (!content) return '(content not available)';
+                if (max === 0) return content; // No limit at zoom 100
+                if (content.length <= max) return content;
+                // Smart truncation: try to break at line boundaries
+                const lines = content.split('\n');
+                let result = '';
+                for (const line of lines) {
+                    if (result.length + line.length + 1 > max) break;
+                    result += (result ? '\n' : '') + line;
+                }
+                const remaining = content.length - result.length;
+                return result + `\n\n... [${remaining} more chars - use zoom:100 for full content]`;
+            };
             // First try code_definitions if we have a definition name
             if (defName) {
                 const defResult = await db.query(`
@@ -367,14 +482,24 @@ options) {
         `, [filePath, defName]);
                 if (defResult.rows.length > 0) {
                     const code = defResult.rows[0];
+                    // At zoom 0-10: just show signature
+                    // At zoom 50: show truncated content
+                    // At zoom 100: show full content
+                    let bodyContent;
+                    if (zoom <= 10) {
+                        bodyContent = code.signature || '(no signature)';
+                    } else {
+                        bodyContent = truncateContent(code.content, maxContent);
+                    }
                     const codeContent = [
                         `[${code.definition_type?.toUpperCase() || 'CODE'}] ${code.name}`,
                         `File: ${code.file_path}:${code.start_line || 1}-${code.end_line || '?'}`,
                         `Language: ${code.language || 'unknown'}${code.is_exported ? ' (exported)' : ''}`,
+                        `Zoom: ${zoom}%${zoom < 100 ? ' (use zoom:100 for full)' : ''}`,
                         '',
                         code.signature || '',
                         '',
-                        code.content || ''
+                        bodyContent
                     ].filter(Boolean).join('\n');
                     return {
                         fullContent: codeContent,
@@ -384,7 +509,8 @@ options) {
                         conversationContext: undefined,
                         originalTimestamp: new Date().toISOString(),
                         parentDrilldownID: undefined,
-                        childDrilldownIDs: []
+                        childDrilldownIDs: [],
+                        zoom
                     };
                 }
             }
@@ -400,12 +526,15 @@ options) {
                 return null;
             }
             const file = fileResult.rows[0];
+            // Apply zoom-based truncation
+            const fileContent = truncateContent(file.content, maxContent);
             const codeContent = [
                 `[FILE] ${file.file_name}`,
                 `Path: ${file.file_path}`,
                 `Language: ${file.language_id || 'unknown'} | ${file.line_count || '?'} lines`,
+                `Zoom: ${zoom}%${zoom < 100 ? ' (use zoom:100 for full)' : ''}`,
                 '',
-                file.content || '(content not available)'
+                fileContent
             ].join('\n');
             return {
                 fullContent: codeContent,
@@ -415,7 +544,8 @@ options) {
                 conversationContext: undefined,
                 originalTimestamp: new Date().toISOString(),
                 parentDrilldownID: undefined,
-                childDrilldownIDs: []
+                childDrilldownIDs: [],
+                zoom
             };
         }
         // MEMORY TYPE - Original logic
@@ -429,7 +559,7 @@ options) {
             return null;
         }
         const memory = memoryResult.rows[0];
-        // CRITICAL: Get the PAIRED message (user prompt for Claude response, or vice versa)
+        // CRITICAL: Get the PAIRED message (user prompt for  response, or vice versa)
         // This is the most important context for any drill-down!
         let pairedMessage;
         const memoryRole = memory.metadata?.role ||
@@ -439,7 +569,7 @@ options) {
         const memoryTimestamp = memory.metadata?.timestamp || memory.created_at;
         if (sessionId && memoryRole) {
             const pairedRole = memoryRole === 'assistant' ? 'user' : 'assistant';
-            const timeDirection = memoryRole === 'assistant' ? '<' : '>'; // User prompt comes BEFORE Claude response
+            const timeDirection = memoryRole === 'assistant' ? '<' : '>'; // User prompt comes BEFORE  response
             const sortOrder = memoryRole === 'assistant' ? 'DESC' : 'ASC';
             try {
                 const pairedResult = await db.query(`
@@ -554,7 +684,7 @@ options) {
         catch {
             // codebase_pointers table may not exist
         }
-        // Extract Claude Response from content if available
+        // Extract  Response from content if available
         let fullContent = memory.content;
         let fullCR;
         // Check if content has assistant response embedded

@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="50%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#22c55e"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#00bfff"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#22c55e" flood-opacity="0.4"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="480" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="480" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">Real-World Performance</text>
+  <text x="400" y="56" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">We don't just talk about it. We indexed our own AEGIS AI codebase with it.</text>
+
+  <!-- Big stat banner -->
+  <rect x="40" y="72" width="720" height="80" rx="12" fill="url(#cardGrad)" stroke="#22c55e" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="140" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="36" font-weight="800" fill="#22c55e">30,000</text>
+  <text x="140" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#6e7681">files indexed</text>
+  <text x="400" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="36" font-weight="800" fill="#00bfff">GBs</text>
+  <text x="400" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#6e7681">of source code</text>
+  <text x="660" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="36" font-weight="800" fill="#a855f7">&lt; 3 min</text>
+  <text x="660" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#6e7681">full index time</text>
+
+  <!-- Why local beats cloud -->
+  <text x="400" y="182" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#e6edf3">Why Local Beats Cloud Every Time</text>
+
+  <!-- Speed comparison bars -->
+  <g transform="translate(40, 200)">
+    <!-- SpecMem bar -->
+    <text x="0" y="14" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#22c55e">SpecMem</text>
+    <rect x="100" y="2" width="620" height="18" rx="4" fill="#1a1f26" stroke="#30363d" stroke-width="0.5"/>
+    <rect x="100" y="2" width="80" height="18" rx="4" fill="url(#barGrad)"/>
+    <text x="192" y="15" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#4ade80">~3 min (local)</text>
+
+    <!-- Cloud competitors bar -->
+    <text x="0" y="44" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#ef4444">Cloud tools</text>
+    <rect x="100" y="32" width="620" height="18" rx="4" fill="#1a1f26" stroke="#30363d" stroke-width="0.5"/>
+    <rect x="100" y="32" width="540" height="18" rx="4" fill="#ef4444" fill-opacity="0.6"/>
+    <text x="648" y="45" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#f87171">rate limited + costs</text>
+
+    <!-- Cursor bar -->
+    <text x="0" y="74" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#f59e0b">Cursor</text>
+    <rect x="100" y="62" width="620" height="18" rx="4" fill="#1a1f26" stroke="#30363d" stroke-width="0.5"/>
+    <rect x="100" y="62" width="0" height="18" rx="4" fill="#f59e0b"/>
+    <text x="112" y="75" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#fbbf24">doesn't index your codebase at all</text>
+  </g>
+
+  <!-- Three advantage cards -->
+  <g transform="translate(17, 300)">
+    <rect width="246" height="130" rx="10" fill="url(#cardGrad)" stroke="#22c55e" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#22c55e"/>
+    <text x="123" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#4ade80">No Rate Limits</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">Cloud APIs throttle you after a</tspan>
+      <tspan x="16" dy="15">few hundred requests. Our local</tspan>
+      <tspan x="16" dy="15">Frankenstein server doesn't care.</tspan>
+      <tspan x="16" dy="15">Index 30k files? No sweat. Go</tspan>
+      <tspan x="16" dy="15">again if you want.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(277, 300)">
+    <rect width="246" height="130" rx="10" fill="url(#cardGrad)" stroke="#00bfff" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#00bfff"/>
+    <text x="123" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#00bfff">True Memory</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">Cloud tools give Claude a summary.</tspan>
+      <tspan x="16" dy="15">We give it the actual semantic</tspan>
+      <tspan x="16" dy="15">graph of your codebase. Every</tspan>
+      <tspan x="16" dy="15">function, every import, every</tspan>
+      <tspan x="16" dy="15">dependency. That's real memory.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(537, 300)">
+    <rect width="246" height="130" rx="10" fill="url(#cardGrad)" stroke="#a855f7" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#a855f7"/>
+    <text x="123" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#a855f7">Zero Leakage</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">Every embedding, every search,</tspan>
+      <tspan x="16" dy="15">every query stays on your box.</tspan>
+      <tspan x="16" dy="15">Cloud tools ship your code to</tspan>
+      <tspan x="16" dy="15">someone else's database. Ours</tspan>
+      <tspan x="16" dy="15">stays in your PostgreSQL.</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom line -->
+  <text x="400" y="465" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#484f58">Tested on AEGIS AI: 30,000+ files, multiple languages (C++, Python, Rust, JS), gigabytes of source. Under 3 minutes.</text>
+</svg>

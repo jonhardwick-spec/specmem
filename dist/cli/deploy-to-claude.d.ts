@@ -1,7 +1,7 @@
 /**
- * SpecMem Auto-Deploy to Claude
+ * SpecMem Auto-Deploy to 
  *
- * Automatically deploys SpecMem hooks and slash commands to Claude's
+ * Automatically deploys SpecMem hooks and slash commands to 's
  * configuration directories on startup.
  *
  * Source directories (in SpecMem):
@@ -14,7 +14,7 @@
  *   - Executable permissions for hooks
  *   - Backup of existing files
  *
- * This ensures SpecMem's Claude integration is always up-to-date
+ * This ensures SpecMem's  integration is always up-to-date
  * without manual file copying.
  */
 interface VersionManifest {
@@ -46,7 +46,7 @@ export interface DeployResult {
     errors: string[];
     version: string;
 }
-export declare function deployToClaude(): Promise<DeployResult>;
+export declare function deployTo(): Promise<DeployResult>;
 /**
  * Quick deploy function for use during MCP startup
  * Runs silently unless there are errors

@@ -4,7 +4,7 @@
  * Phase 3: Team Member Deployment System - MCP Sampling Implementation
  *
  * Implements the MCP sampling/createMessage handler for requesting
- * LLM completions from clients (Claude Code, etc.)
+ * LLM completions from clients ( Code, etc.)
  *
  * Reference: https://modelcontextprotocol.io/specification/2025-06-18/client/sampling
  */

@@ -11,7 +11,7 @@
  *   2. Hook generates embedding for prompt (via sandboxed container)
  *   3. Hook searches SpecMem for semantically similar memories
  *   4. Context is injected into the prompt
- *   5. Claude sees enriched prompt with related context
+ *   5.  sees enriched prompt with related context
  *
  * This hook uses:
  *   - Sandboxed embedding container (all-MiniLM-L6-v2, 384 dims)
@@ -53,7 +53,7 @@ export declare function searchRelatedMemories(prompt: string, config?: Partial<C
  */
 export declare function formatContextInjection(memories: MemoryResult[], config?: Partial<ContextHookConfig>): string;
 /**
- * Main hook handler - call this from Claude Code hooks
+ * Main hook handler - call this from  Code hooks
  */
 export declare function contextInjectionHook(prompt: string, config?: Partial<ContextHookConfig>): Promise<string>;
 export { DEFAULT_CONFIG };

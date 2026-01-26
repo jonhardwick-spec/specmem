@@ -3,20 +3,20 @@
  * SMART CONTEXT INJECTION HOOK v3
  * ================================
  *
- * When Claude searches (Grep/Glob), this hook:
+ * When  searches (Grep/Glob), this hook:
  *   1. Extracts the search query
  *   2. Runs find_code_pointers (semantic code search)
  *   3. Gets FULL content + tracebacks (drill-down style)
  *   4. Chinese compresses the output
- *   5. Injects relevant code BEFORE Claude's search runs
+ *   5. Injects relevant code BEFORE 's search runs
  *
  * For Read operations:
  *   - Searches memories related to the file being read
  *   - Returns relevant context about that file
  *
  * Flow:
- *   Claude calls Search() → Hook intercepts → find_code_pointers
- *   → drill down (get full content) → compress → inject to Claude
+ *    calls Search() → Hook intercepts → find_code_pointers
+ *   → drill down (get full content) → compress → inject to 
  */
 
 const fs = require('fs');
@@ -351,7 +351,7 @@ async function searchMemories(query) {
 
 /**
  * Format code pointers output - HUMAN READABLE bracket notation
- * Uses pipe separators for flat output that doesn't break Claude's formatting
+ * Uses pipe separators for flat output that doesn't break 's formatting
  */
 function formatCodePointers(results, query) {
   if (!results.length) return '';
@@ -379,7 +379,7 @@ function formatCodePointers(results, query) {
 
 /**
  * Format memories output - HUMAN READABLE bracket notation
- * Uses pipe separators for flat output that doesn't break Claude's formatting
+ * Uses pipe separators for flat output that doesn't break 's formatting
  */
 function formatMemories(results, query) {
   const validResults = results.filter(r => r.content && r.content.trim() && r.content !== 'undefined');
@@ -390,8 +390,8 @@ function formatMemories(results, query) {
 
   validResults.forEach((r, i) => {
     const isUser = r.content.startsWith('[USER]') || r.content.includes('用戶]');
-    const isClaude = r.content.startsWith('[CLAUDE]') || r.content.includes('助手]');
-    const roleTag = isUser ? '[U]' : isClaude ? '[C]' : '';
+    const is = r.content.startsWith('[CLAUDE]') || r.content.includes('助手]');
+    const roleTag = isUser ? '[U]' : is ? '[C]' : '';
 
     let cleanContent = r.content
       .replace(/^\[USER\]\s*/i, '')
@@ -428,7 +428,7 @@ function extractQuery(toolName, toolInput, userPrompt) {
       .replace(/\//g, ' ')
       .trim();
   } else if (toolName === 'Grep') {
-    // Use grep pattern directly - this is what Claude is searching for
+    // Use grep pattern directly - this is what  is searching for
     query = toolInput.pattern || '';
   } else if (toolName === 'Read') {
     // Use file path and extract meaningful names
@@ -527,7 +527,7 @@ async function main() {
       console.log(compressed);
     }
   } catch (e) {
-    // Silent fail - don't break Claude's search
+    // Silent fail - don't break 's search
   }
 
   // Clean up pool before exit

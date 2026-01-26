@@ -1,5 +1,5 @@
 /**
- * sessionIntegration.ts - Integrates Claude session watcher with SpecMem server
+ * sessionIntegration.ts - Integrates  session watcher with SpecMem server
  *
  * yo fr fr this is the glue that connects the session watcher to the MCP server
  * handles initialization, lifecycle, and tool registration
@@ -13,7 +13,7 @@ import { logger } from '../utils/logger.js';
 import { getConfig, getProjectPath } from '../config.js';
 import { createSessionWatcher } from './sessionWatcher.js';
 import { getDatabase } from '../database.js';
-import { ExtractClaudeSessions } from '../tools/goofy/extractClaudeSessions.js';
+import { ExtractSessions } from '../tools/goofy/extractClaudeSessions.js';
 import { GetSessionWatcherStatus } from '../tools/goofy/getSessionWatcherStatus.js';
 // Per-project session watcher Map - prevents cross-project pollution
 const sessionWatcherByProject = new Map();
@@ -27,7 +27,7 @@ function isSessionWatcherEnabled() {
     return envVal !== 'false' && envVal !== '0';
 }
 /**
- * initializeSessionWatcher - initializes and starts the Claude session watcher
+ * initializeSessionWatcher - initializes and starts the  session watcher
  *
  * nah bruh this starts the auto-extraction magic
  */
@@ -42,10 +42,10 @@ export async function initializeSessionWatcher(embeddingProvider) {
     }, 'Session watcher initialization check');
     // Use ENV as source of truth - config might be stale
     if (!envEnabled) {
-        logger.info('Claude session watcher disabled (SPECMEM_SESSION_WATCHER_ENABLED=false)');
+        logger.info(' session watcher disabled (SPECMEM_SESSION_WATCHER_ENABLED=false)');
         return null;
     }
-    logger.info('initializing Claude session watcher');
+    logger.info('initializing  session watcher');
     try {
         const db = getDatabase();
         // Get config options with sensible defaults (config.sessionWatcher might be undefined)
@@ -70,11 +70,11 @@ export async function initializeSessionWatcher(embeddingProvider) {
             importance,
             tags: additionalTags,
             projectPath
-        }, 'Claude session watcher initialized successfully');
+        }, ' session watcher initialized successfully');
         return watcher;
     }
     catch (error) {
-        logger.error({ error }, 'failed to initialize Claude session watcher');
+        logger.error({ error }, 'failed to initialize  session watcher');
         return null;
     }
 }
@@ -90,11 +90,11 @@ export async function shutdownSessionWatcher(projectPath) {
     if (!watcher) {
         return;
     }
-    logger.info({ projectPath: targetProject }, 'shutting down Claude session watcher');
+    logger.info({ projectPath: targetProject }, 'shutting down  session watcher');
     try {
         await watcher.stopWatching();
         sessionWatcherByProject.delete(targetProject);
-        logger.info({ projectPath: targetProject }, 'Claude session watcher shutdown complete');
+        logger.info({ projectPath: targetProject }, ' session watcher shutdown complete');
     }
     catch (error) {
         logger.error({ error, projectPath: targetProject }, 'error shutting down session watcher');
@@ -133,7 +133,7 @@ export function getSessionWatcher(projectPath) {
 export function createSessionExtractionTools(embeddingProvider) {
     const db = getDatabase();
     // create extraction tool
-    const extractTool = new ExtractClaudeSessions(embeddingProvider, db);
+    const extractTool = new ExtractSessions(embeddingProvider, db);
     // create status tool
     const statusTool = new GetSessionWatcherStatus();
     // inject watcher instance if available for current project

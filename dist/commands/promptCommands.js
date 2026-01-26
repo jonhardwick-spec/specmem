@@ -1,5 +1,5 @@
 /**
- * PromptCommands - prompt library management for Claude
+ * PromptCommands - prompt library management for 
  *
  * save and reuse prompts fr fr
  * - /prompt save <name> - save current prompt
@@ -174,8 +174,8 @@ export class PromptCommands {
           category VARCHAR(100) DEFAULT 'general',
           tags TEXT[] DEFAULT '{}',
           variables TEXT[] DEFAULT '{}',
-          -- NOTE: Dimension is auto-detected from memories table, unbounded initially
-          embedding vector,
+          -- Dimension must be specified for ivfflat index
+          embedding vector(384),
           usage_count INTEGER DEFAULT 0,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

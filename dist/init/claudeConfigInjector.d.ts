@@ -2,8 +2,8 @@
  * CLAUDE CONFIG INJECTOR - ENHANCED AUTO-CONFIGURATION
  * =====================================================
  *
- * Auto-injects SpecMem configuration into Claude Code on startup.
- * This is the CENTRAL entry point for all Claude configuration.
+ * Auto-injects SpecMem configuration into  Code on startup.
+ * This is the CENTRAL entry point for all  configuration.
  *
  * Features:
  * - Auto-detects if SpecMem MCP server is configured for current project
@@ -12,7 +12,7 @@
  * - Deploys slash commands to ~/.claude/commands/
  * - Sets required permissions in ~/.claude/settings.json
  * - Sets SPECMEM_PROJECT_PATH for project isolation
- * - Hot-patches running Claude instances via SIGHUP
+ * - Hot-patches running  instances via SIGHUP
  * - Fully idempotent - safe to run multiple times
  *
  * Config Hierarchy:
@@ -43,22 +43,22 @@ export interface InjectionResult {
  */
 export declare function isSpecmemMcpConfigured(projectPath?: string): boolean;
 /**
- * Hot-patch running Claude instances by sending SIGHUP
+ * Hot-patch running  instances by sending SIGHUP
  * This causes them to reload their configuration without restart
  *
  * SAFETY NOTE: This function is intentionally DISABLED by default because it
- * sends signals to ALL Claude processes on the machine, which could affect
- * Claude instances from OTHER projects. This is dangerous in multi-project
+ * sends signals to ALL  processes on the machine, which could affect
+ *  instances from OTHER projects. This is dangerous in multi-project
  * environments.
  *
  * To enable, set SPECMEM_ENABLE_CLAUDE_HOT_PATCH=true in environment.
  *
  * Even when enabled, we:
  * 1. Skip our own process
- * 2. Skip our parent process (the Claude that spawned us)
+ * 2. Skip our parent process (the  that spawned us)
  * 3. Log warnings about the cross-project nature of this operation
  */
-declare function hotPatchRunningClaude(): number;
+declare function hotPatchRunning(): number;
 /**
  * Main injection function - call this on SpecMem startup
  *
@@ -69,7 +69,7 @@ declare function hotPatchRunningClaude(): number;
  * 4. Configures hooks and permissions in ~/.claude/settings.json
  * 4.5. Deploys commands to {PROJECT}/.claude/commands/ (PER-PROJECT)
  * 4.6. Configures {PROJECT}/.claude/settings.local.json (PER-PROJECT)
- * 5. Hot-patches running Claude instances (disabled by default)
+ * 5. Hot-patches running  instances (disabled by default)
  *
  * Deploy Targets:
  * - GLOBAL: ~/.claude/commands/ - available to all projects
@@ -79,9 +79,9 @@ declare function hotPatchRunningClaude(): number;
  *
  * Fully idempotent - safe to call on every startup
  */
-export declare function injectClaudeConfig(projectPath?: string): Promise<InjectionResult>;
+export declare function injectConfig(projectPath?: string): Promise<InjectionResult>;
 /**
- * Check if SpecMem is fully configured in Claude
+ * Check if SpecMem is fully configured in 
  */
 export declare function isConfigInjected(): boolean;
 /**
@@ -95,11 +95,11 @@ export declare function getInstallationStatus(): {
     fullyConfigured: boolean;
 };
 declare const _default: {
-    injectClaudeConfig: typeof injectClaudeConfig;
+    injectConfig: typeof injectConfig;
     isConfigInjected: typeof isConfigInjected;
     isSpecmemMcpConfigured: typeof isSpecmemMcpConfigured;
     getInstallationStatus: typeof getInstallationStatus;
-    hotPatchRunningClaude: typeof hotPatchRunningClaude;
+    hotPatchRunning: typeof hotPatchRunning;
 };
 export default _default;
 export declare const paths: {

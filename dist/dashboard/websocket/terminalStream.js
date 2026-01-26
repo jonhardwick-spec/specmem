@@ -1,7 +1,7 @@
 /**
  * terminalStream.ts - WebSocket Server for Terminal Output Streaming
  *
- * Watches the Claude Code output log file and broadcasts changes
+ * Watches the  Code output log file and broadcasts changes
  * to connected WebSocket clients in real-time.
  *
  * Phase 5 Implementation - Live Terminal Output Streaming

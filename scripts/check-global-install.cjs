@@ -3,7 +3,7 @@
  * GLOBAL INSTALL ENFORCER
  *
  * SpecMem MUST be installed globally (-g) because:
- * 1. It registers as an MCP server in Claude Code
+ * 1. It registers as an MCP server in  Code
  * 2. It installs system-wide hooks in ~/.claude/
  * 3. It provides global CLI commands (specmem, specmem-init, etc.)
  * 4. Local installs would break path resolution and hook registration

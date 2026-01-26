@@ -15,7 +15,7 @@ const HistoryQuerySchema = z.object({
     filter: z.enum(['all', 'user', 'assistant', 'system', 'tool_use', 'tool_result']).optional(),
     search: z.string().max(500).optional()
 });
-export function createClaudeHistoryRouter(requireAuth) {
+export function createHistoryRouter(requireAuth) {
     const router = Router();
     router.get('/history', requireAuth, async (req, res) => {
         try {
@@ -38,7 +38,7 @@ export function createClaudeHistoryRouter(requireAuth) {
                     entries: [],
                     total: 0,
                     historyPath: CLAUDE_HISTORY_PATH,
-                    message: 'History file not found - Claude Code may not have been used yet'
+                    message: 'History file not found -  Code may not have been used yet'
                 });
                 return;
             }
@@ -315,5 +315,5 @@ function truncateContent(content, maxLength) {
         return content;
     return content.substring(0, maxLength) + '... [truncated]';
 }
-export default createClaudeHistoryRouter;
+export default createHistoryRouter;
 //# sourceMappingURL=claudeHistory.js.map

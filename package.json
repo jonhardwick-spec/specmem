@@ -1,8 +1,8 @@
 {
   "name": "specmem-hardwicksoftware",
-  "version": "3.5.2",
+  "version": "3.7.21",
   "type": "module",
-  "description": "SpecMem - Speculative Memory for Claude Code. Auto-configures hooks, docker, embeddings. https://justcalljon.pro",
+  "description": "Your Claude Code sessions don't have to start from scratch anymore — SpecMem gives your AI real memory. It won't forget your conversations, your code, or your architecture decisions between sessions. That's the whole point. Semantic code indexing that actually works: TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, C, C++, HTML and more. It doesn't just track functions — it gets classes, methods, fields, constants, enums, macros, imports, structs, the whole codebase graph. There's chat memory too, powered by pgvector embeddings. You've also got token compression, team coordination, multi-agent comms, and file watching built in. 74+ MCP tools. Runs on PostgreSQL + Docker. It's kind of a big deal. justcalljon.pro",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -35,7 +35,9 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "memory",
+    "persistent-memory",
     "semantic-search",
     "pgvector",
     "ai",
@@ -43,8 +45,33 @@
     "claude-code",
     "anthropic",
     "embeddings",
+    "local-embeddings",
     "context",
-    "hooks"
+    "hooks",
+    "code-indexing",
+    "codebase-analysis",
+    "multi-agent",
+    "swarm",
+    "agent-teams",
+    "team-coordination",
+    "self-hosted",
+    "developer-tools",
+    "typescript",
+    "javascript",
+    "python",
+    "java",
+    "kotlin",
+    "cpp",
+    "rust",
+    "golang",
+    "html",
+    "multi-language",
+    "linux",
+    "nodejs",
+    "postgres",
+    "session-memory",
+    "code-search",
+    "cli"
   ],
   "author": {
     "name": "Jonathan Hardwick",
@@ -54,7 +81,7 @@
   "homepage": "https://justcalljon.pro/specmem",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hardwicksoftware/specmem.git"
+    "url": "https://github.com/jonhardwick-spec/specmem.git"
   },
   "bugs": {
     "url": "https://github.com/hardwicksoftware/specmem/issues"
@@ -64,7 +91,6 @@
     "url": "https://justcalljon.pro/support"
   },
   "license": "SEE LICENSE.md",
-  "private": true,
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.1",
     "@huggingface/transformers": "^3.8.1",
@@ -74,9 +100,9 @@
     "cc-cedict": "^1.1.1",
     "chinese-s2t": "^1.0.0",
     "chokidar": "^5.0.0",
-    "claudescreenfix-hardwicksoftware": "^2.0.0",
+    "claudescreenfix-hardwicksoftware": "^2.1.0",
     "debounce": "^3.0.0",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "en-inflectors": "^1.0.12",
     "express": "^4.22.0",
     "express-rate-limit": "^8.2.1",
@@ -129,6 +155,7 @@
     "embedding-sandbox/",
     "legal/",
     "bootstrap.cjs",
+    "mcp-proxy.cjs",
     "specmem-health.cjs",
     "specmem.env",
     "LICENSE.md",

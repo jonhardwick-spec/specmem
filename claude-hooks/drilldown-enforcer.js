@@ -5,11 +5,11 @@
  *
  * Enforces the drilldown workflow after SpecMem searches.
  *
- * Problem: Claude uses find_memory/find_code_pointers, gets results with _drill
+ * Problem:  uses find_memory/find_code_pointers, gets results with _drill
  * instructions, then ignores them and uses Read/Glob/Grep directly.
  *
  * Solution: This hook tracks when SpecMem searches return results and reminds
- * Claude to drill down before using other search tools.
+ *  to drill down before using other search tools.
  *
  * State is persisted to $SPECMEM_RUN_DIR/specmem-drilldown-state.json
  * (defaults to ./run/specmem-drilldown-state.json if env not set)
@@ -22,7 +22,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// Helper to expand ${cwd} in env vars (Claude Code doesn't expand them!)
+// Helper to expand ${cwd} in env vars ( Code doesn't expand them!)
 function expandCwd(val) {
   if (!val) return val;
   return val.replace(/\$\{cwd\}/g, process.cwd()).replace(/\$cwd/g, process.cwd());

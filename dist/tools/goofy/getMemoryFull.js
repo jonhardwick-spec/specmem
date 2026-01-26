@@ -8,7 +8,7 @@
  * - Related memories for further drill-down
  */
 import { MemoryDrilldown } from '../../services/MemoryDrilldown.js';
-import { compactXmlResponse, stripNewlines } from '../../utils/compactXmlResponse.js';
+import { formatHumanReadable } from '../../utils/humanReadableOutput.js';
 export class GetMemoryFull {
     db;
     name = 'getMemoryFull';
@@ -46,23 +46,13 @@ Example: getMemoryFull({ id: "mem_12345" })`;
     async execute(params) {
         const { id } = params;
         const full = await this.drilldown.getMemory(id);
-        // Format as compact XML with content on single lines
-        // Strip newlines from content fields to ensure single-line output
-        const compactFull = {
-            id: full.id,
-            content: stripNewlines(full.content || ''),
-            keywords: full.keywords,
-            created_at: full.created_at,
-            code_pointers: full.code_pointers,
-            live_code: full.live_code,
-            conversation: full.conversation,
-            related: full.related_memories?.map((r) => ({
-                id: r.id,
-                preview: stripNewlines((r.content || '').substring(0, 60))
-            }))
-        };
-        // Apply compact XML formatter for token efficiency
-        return compactXmlResponse(compactFull, 'memory');
+        // Format as human readable
+        return formatHumanReadable('get_memory_full', [full], {
+            compress: true,
+            maxContentLength: 0,  // Full content
+            showSimilarity: false,
+            fullIds: true
+        });
     }
 }
 //# sourceMappingURL=getMemoryFull.js.map

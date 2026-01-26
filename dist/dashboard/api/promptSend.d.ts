@@ -1,7 +1,7 @@
 /**
  * promptSend.ts - Direct Prompting API for SpecMem Dashboard
  *
- * Provides endpoints for sending prompts to Claude via MCP sampling,
+ * Provides endpoints for sending prompts to  via MCP sampling,
  * with support for context injection (memories, files, codebase).
  *
  * Phase 4 Implementation - Direct Prompting Interface

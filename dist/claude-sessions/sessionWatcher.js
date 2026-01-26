@@ -1,5 +1,5 @@
 /**
- * sessionWatcher.ts - Watches Claude Code session files for new entries
+ * sessionWatcher.ts - Watches  Code session files for new entries
  *
  * Features:
  * - Watches ~/.claude/history.jsonl and project session files
@@ -26,7 +26,7 @@ import { join } from 'path';
 import * as os from 'os';
 import { logger, serializeError } from '../utils/logger.js';
 import debounce from 'debounce';
-import { ClaudeSessionParser } from './sessionParser.js';
+import { SessionParser } from './sessionParser.js';
 import { qoms } from '../utils/qoms.js';
 import { runStartupExtraction as extractContextRestorations } from './contextRestorationParser.js';
 import { getProjectPathForInsert, getCurrentProjectPath } from '../services/ProjectContext.js';
@@ -42,7 +42,7 @@ import { getProjectPathForInsert, getCurrentProjectPath } from '../services/Proj
 function isSessionFromCurrentProject(session) {
     const currentProject = getCurrentProjectPath();
     // session.project comes from cwd/project field in the session file
-    // it's the directory where Claude Code was running when the session was created
+    // it's the directory where  Code was running when the session was created
     const sessionProject = session.project;
     // Skip sessions without project info (shouldn't happen but be safe)
     if (!sessionProject || sessionProject === 'unknown') {
@@ -71,15 +71,15 @@ function isSessionFromCurrentProject(session) {
     return false;
 }
 /**
- * ClaudeSessionWatcher - watches and auto-extracts Claude sessions
+ * SessionWatcher - watches and auto-extracts  sessions
  *
- * nah bruh this is THE watcher for Claude sessions
- * auto-updates specmem whenever you chat with Claude
+ * nah bruh this is THE watcher for  sessions
+ * auto-updates specmem whenever you chat with 
  *
  * PROJECT-SCOPED: Only processes sessions belonging to the current project!
  * Sessions from other projects are filtered out to prevent cross-project pollution.
  */
-export class ClaudeSessionWatcher {
+export class SessionWatcher {
     config;
     watcher = null;
     parser;
@@ -125,7 +125,7 @@ export class ClaudeSessionWatcher {
         // FIX Task #13: Initialize parser with project filter for early filtering
         // This prevents wasteful parsing of sessions from other projects
         const currentProject = getCurrentProjectPath();
-        this.parser = new ClaudeSessionParser(claudeDir, currentProject);
+        this.parser = new SessionParser(claudeDir, currentProject);
         logger.debug({ projectFilter: currentProject }, 'Task #13: session parser initialized with project filter');
         if (this.config.autoStart) {
             this.startWatching().catch(error => {
@@ -134,7 +134,7 @@ export class ClaudeSessionWatcher {
         }
     }
     /**
-     * startWatching - starts watching Claude history and project session files
+     * startWatching - starts watching  history and project session files
      *
      * Watches:
      * - ~/.claude/history.jsonl (user prompts)
@@ -147,7 +147,7 @@ export class ClaudeSessionWatcher {
         }
         const historyPath = join(this.config.claudeDir, 'history.jsonl');
         const projectsPath = join(this.config.claudeDir, 'projects');
-        logger.info({ historyPath, projectsPath }, 'starting Claude session watcher');
+        logger.info({ historyPath, projectsPath }, 'starting  session watcher');
         try {
             // get last processed timestamp from database
             this.stats.lastCheckTimestamp = await this.parser.getLastProcessedTimestamp(this.db);
@@ -282,7 +282,7 @@ export class ClaudeSessionWatcher {
                 this.signalHandlersBound = true;
                 logger.debug('[MED-45] Signal handlers registered for session watcher cleanup');
             }
-            logger.info({ watchPatterns, heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS }, 'Claude session watcher started successfully with heartbeat');
+            logger.info({ watchPatterns, heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS }, ' session watcher started successfully with heartbeat');
         }
         catch (error) {
             logger.error({ error }, 'failed to start session watcher');
@@ -297,7 +297,7 @@ export class ClaudeSessionWatcher {
             logger.warn('session watcher not running');
             return;
         }
-        logger.info('stopping Claude session watcher');
+        logger.info('stopping  session watcher');
         // Clear heartbeat interval
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
@@ -489,7 +489,7 @@ export class ClaudeSessionWatcher {
             }, 'TRIPLE-FIX: Skipping extractNewSessions - within startup grace period');
             return;
         }
-        logger.info('extracting new Claude sessions');
+        logger.info('extracting new  sessions');
         try {
             // parse new entries since last check
             const allNewSessions = await this.parser.parseNewEntries(this.stats.lastCheckTimestamp);
@@ -717,6 +717,6 @@ export class ClaudeSessionWatcher {
  * Helper function to create watcher with default config
  */
 export function createSessionWatcher(embeddingProvider, db, config) {
-    return new ClaudeSessionWatcher(embeddingProvider, db, config);
+    return new SessionWatcher(embeddingProvider, db, config);
 }
 //# sourceMappingURL=sessionWatcher.js.map

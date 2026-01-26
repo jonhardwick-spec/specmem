@@ -1,7 +1,7 @@
 /**
  * MEMORY DRILLDOWN SYSTEM - Camera Roll Edition
  *
- * Architecture for Claude's memory access:
+ * Architecture for 's memory access:
  *   1. find_memory(query, { cameraRollMode: true }) → Returns camera roll with drilldownIDs
  *   2. drill_down(drilldownID) → Zoom in for more detail on that memory
  *   3. get_memory(drilldownID) → Get full memory content
@@ -15,12 +15,12 @@
  * Response Format:
  * ```
  * content: "Here's what I said from last week"
- * CR (Claude Response): "Well that's interesting because..."
+ * CR ( Response): "Well that's interesting because..."
  * drilldownID: 123
  * similarity: 0.87
  * ```
  *
- * Then Claude can:
+ * Then  can:
  *   - drill_down(123) - zoom in for more detail on that memory
  *   - get_memory(123) - get full memory content
  *   - Each drill-down may reveal MORE drilldown IDs for deeper exploration
@@ -80,12 +80,12 @@ export declare class MemoryDrilldown {
     private getEmbeddingDimension;
     /**
      * FIND MEMORY - Returns gallery of drill-down-able snippets
-     * This is what Claude sees first when searching memories
+     * This is what  sees first when searching memories
      */
     findMemory(query: string, limit?: number): Promise<MemorySnippet[]>;
     /**
      * GET MEMORY - Full drill-down with code + conversation
-     * This is what Claude gets when they drill down on a memory
+     * This is what  gets when they drill down on a memory
      */
     getMemory(id: string): Promise<FullMemory>;
     /**
@@ -174,10 +174,10 @@ export declare class MemoryDrilldown {
      * Used when upgrading existing results to camera roll format.
      *
      * @param snippet - The memory snippet to convert
-     * @param includeClaudeResponse - Whether to include CR field
+     * @param includeResponse - Whether to include CR field
      * @returns CameraRollItem with drilldownID
      */
-    toCameraRollItem(snippet: MemorySnippet, includeClaudeResponse?: boolean): CameraRollItem;
+    toCameraRollItem(snippet: MemorySnippet, includeResponse?: boolean): CameraRollItem;
 }
 export {};
 /**
@@ -187,7 +187,7 @@ export {};
  * const drilldown = new MemoryDrilldown(db);
  * const gallery = await drilldown.findMemory("authentication system");
  *
- * // Claude sees:
+ * //  sees:
  * [
  *   {
  *     id: "mem_123",
@@ -200,10 +200,10 @@ export {};
  *   ...
  * ]
  *
- * // Step 2: Claude drills down
+ * // Step 2:  drills down
  * const full = await drilldown.getMemory("mem_123");
  *
- * // Claude now gets:
+ * //  now gets:
  * {
  *   content: "Full memory content...",
  *   code_pointers: [

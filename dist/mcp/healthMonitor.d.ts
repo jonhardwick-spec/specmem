@@ -124,7 +124,7 @@ export declare class HealthMonitor extends EventEmitter {
      *
      * DYNAMIC PATH RESOLUTION (in priority order):
      * 1. Environment variable: SPECMEM_EMBEDDING_SOCKET (explicit configuration)
-     * 2. Claude home: ~/.claude/run (standard Claude Code location, uses os.homedir())
+     * 2.  home: ~/.claude/run (standard  Code location, uses os.homedir())
      * 3. SpecMem run dir: /specmem/run (container mount)
      * 4. Project-specific instances paths
      * 5. Legacy fallback paths

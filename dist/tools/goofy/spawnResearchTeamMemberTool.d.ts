@@ -2,12 +2,12 @@
  * SPAWN RESEARCH TEAM_MEMBER TOOL
  *
  * MCP Tool wrapper for spawnResearchTeamMember functionality.
- * Spawns Claude subprocess to research topics on the web and save to SpecMem.
+ * Spawns  subprocess to research topics on the web and save to SpecMem.
  *
  * Why this exists:
  * - Local embedding model is just a dumb vector generator
  * - Can't actually understand or research things
- * - This spawns Claude to do real web research
+ * - This spawns  to do real web research
  * - Results saved back to SpecMem for future retrieval
  */
 import { MCPTool } from '../../mcp/toolRegistry.js';
@@ -28,10 +28,10 @@ interface SpawnResearchOutput {
     error?: string;
 }
 /**
- * SpawnResearchTeamMemberTool - spawns Claude to research topics fr fr
+ * SpawnResearchTeamMemberTool - spawns  to research topics fr fr
  *
  * When SpecMem needs more context than the local AI can provide,
- * this tool spawns a Claude subprocess to do real web research
+ * this tool spawns a  subprocess to do real web research
  */
 export declare class SpawnResearchTeamMemberTool implements MCPTool<SpawnResearchInput, SpawnResearchOutput> {
     name: string;

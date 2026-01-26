@@ -1,5 +1,5 @@
 /**
- * Commands Module - slash command system for Claude
+ * Commands Module - slash command system for 
  *
  * yo this is the central export for all command functionality
  * bringing that doobidoo-style command system to specmem
@@ -13,7 +13,7 @@
  * - /team member - deploy, list, help
  * - /help - show all commands
  */
-export { ClaudeCommandHandler, createCommandHandler, CommandResult, ParsedCommand, CommandCategory, CommandAction } from './commandHandler.js';
+export { CommandHandler, createCommandHandler, CommandResult, ParsedCommand, CommandCategory, CommandAction } from './commandHandler.js';
 export { MemoryCommands } from './memoryCommands.js';
 export { CodebaseCommands } from './codebaseCommands.js';
 export { ContextCommands } from './contextCommands.js';

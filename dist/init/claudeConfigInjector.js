@@ -2,8 +2,8 @@
  * CLAUDE CONFIG INJECTOR - ENHANCED AUTO-CONFIGURATION
  * =====================================================
  *
- * Auto-injects SpecMem configuration into Claude Code on startup.
- * This is the CENTRAL entry point for all Claude configuration.
+ * Auto-injects SpecMem configuration into  Code on startup.
+ * This is the CENTRAL entry point for all  configuration.
  *
  * Features:
  * - Auto-detects if SpecMem MCP server is configured for current project
@@ -12,7 +12,7 @@
  * - Deploys slash commands to ~/.claude/commands/
  * - Sets required permissions in ~/.claude/settings.json
  * - Sets SPECMEM_PROJECT_PATH for project isolation
- * - Hot-patches running Claude instances via SIGHUP
+ * - Hot-patches running  instances via SIGHUP
  * - Fully idempotent - safe to run multiple times
  *
  * Config Hierarchy:
@@ -39,29 +39,77 @@ const CONFIG_PATH = path.join(CLAUDE_CONFIG_DIR, 'config.json');
 const SETTINGS_PATH = path.join(CLAUDE_CONFIG_DIR, 'settings.json');
 const HOOKS_DIR = path.join(CLAUDE_CONFIG_DIR, 'hooks');
 const COMMANDS_DIR = path.join(CLAUDE_CONFIG_DIR, 'commands');
-// Claude stores per-project MCP configs in ~/.claude.json under "projects" key
+//  stores per-project MCP configs in ~/.claude.json under "projects" key
 const CLAUDE_JSON_PATH = path.join(HOME_DIR, '.claude.json');
-// SpecMem directory detection - works from both src/ and dist/
+// SpecMem directory detection - dynamically resolves from how specmem was launched
+// Handles bootstrap.cjs AND bootstrap.js, works with ANY install location
+function hasBootstrap(dir) {
+    return fs.existsSync(path.join(dir, 'bootstrap.cjs')) ||
+           fs.existsSync(path.join(dir, 'bootstrap.js'));
+}
 function getSpecmemRoot() {
-    // Check environment variable first
-    if (process.env.SPECMEM_ROOT) {
+    // 1. Check environment variable (explicit override)
+    if (process.env.SPECMEM_ROOT && hasBootstrap(process.env.SPECMEM_ROOT)) {
         return process.env.SPECMEM_ROOT;
     }
-    // Try to detect from current file location
-    // When compiled: dist/init/claudeConfigInjector.js -> need to go up 2 levels
-    // When in src: src/init/claudeConfigInjector.ts -> need to go up 2 levels
-    const currentDir = __dirname;
-    const possibleRoot = path.resolve(currentDir, '..', '..');
-    // Verify by checking for bootstrap.js
-    const bootstrapPath = path.join(possibleRoot, 'bootstrap.js');
-    if (fs.existsSync(bootstrapPath)) {
-        return possibleRoot;
+    // 2. Detect from current file location (__dirname is most reliable)
+    // dist/init/claudeConfigInjector.js -> go up 2 levels to package root
+    const fromThisFile = path.resolve(__dirname, '..', '..');
+    if (hasBootstrap(fromThisFile)) {
+        return fromThisFile;
     }
-    // Fallback to cwd
-    return process.cwd();
+    // 3. Detect from process.argv - what script launched us
+    // e.g. node /usr/local/lib/.../bootstrap.cjs or /usr/lib/.../bin/specmem-cli.cjs
+    for (const arg of process.argv) {
+        if (typeof arg === 'string' && arg.includes('specmem')) {
+            // Resolve symlinks to get real path
+            try {
+                const realArg = fs.realpathSync(arg);
+                // Walk up from the script to find package root
+                let candidate = path.dirname(realArg);
+                for (let i = 0; i < 4; i++) {
+                    if (hasBootstrap(candidate)) return candidate;
+                    if (fs.existsSync(path.join(candidate, 'package.json'))) {
+                        try {
+                            const pkg = JSON.parse(fs.readFileSync(path.join(candidate, 'package.json'), 'utf-8'));
+                            if (pkg.name === 'specmem-hardwicksoftware') return candidate;
+                        } catch { /* ignore */ }
+                    }
+                    candidate = path.dirname(candidate);
+                }
+            } catch { /* ignore resolve errors */ }
+        }
+    }
+    // 4. Try resolving the `specmem` command via PATH (execSync imported at top)
+    try {
+        const whichResult = execSync('which specmem 2>/dev/null', { encoding: 'utf-8' }).trim();
+        if (whichResult) {
+            const realBin = fs.realpathSync(whichResult);
+            // specmem binary is at <root>/bin/specmem-cli.cjs -> go up 2 levels
+            const candidate = path.resolve(path.dirname(realBin), '..');
+            if (hasBootstrap(candidate)) return candidate;
+        }
+    } catch { /* which not available or specmem not in PATH */ }
+    // 5. Fallback to cwd (dev mode - running from source)
+    if (hasBootstrap(process.cwd())) {
+        return process.cwd();
+    }
+    // 6. Last resort - return __dirname-based path even without bootstrap
+    return fromThisFile;
+}
+// Find the MCP entry point — prefer proxy for resilient connections
+function findBootstrapPath(root) {
+    // Proxy wraps bootstrap.cjs with auto-reconnect on crash
+    const proxy = path.join(root, 'mcp-proxy.cjs');
+    if (fs.existsSync(proxy)) return proxy;
+    for (const name of ['bootstrap.cjs', 'bootstrap.js']) {
+        const p = path.join(root, name);
+        if (fs.existsSync(p)) return p;
+    }
+    return path.join(root, 'bootstrap.cjs'); // default
 }
 const SPECMEM_ROOT = getSpecmemRoot();
-const BOOTSTRAP_PATH = path.join(SPECMEM_ROOT, 'bootstrap.js');
+const BOOTSTRAP_PATH = findBootstrapPath(SPECMEM_ROOT);
 const SOURCE_HOOKS_DIR = path.join(SPECMEM_ROOT, 'claude-hooks');
 const SOURCE_COMMANDS_DIR = path.join(SPECMEM_ROOT, 'commands');
 // ============================================================================
@@ -72,10 +120,10 @@ const SOURCE_COMMANDS_DIR = path.join(SPECMEM_ROOT, 'commands');
 const HOOK_ENV = {
     SPECMEM_HOME: path.join(HOME_DIR, '.specmem'), // Dynamic path using os.homedir()
     SPECMEM_PKG: SPECMEM_ROOT, // Use detected package root
-    // Per-project socket paths - ${cwd} is expanded at runtime by Claude Code
+    // Per-project socket paths - ${PWD} is expanded at MCP server startup
     SPECMEM_RUN_DIR: '${cwd}/specmem/sockets',
     SPECMEM_EMBEDDING_SOCKET: '${cwd}/specmem/sockets/embeddings.sock',
-    SPECMEM_PROJECT_PATH: '${cwd}', // Dynamically set by Claude Code
+    SPECMEM_PROJECT_PATH: '${PWD}', // Dynamically set by  Code
     SPECMEM_SEARCH_LIMIT: '5',
     SPECMEM_THRESHOLD: '0.30',
     SPECMEM_MAX_CONTENT: '200'
@@ -155,7 +203,7 @@ export function isSpecmemMcpConfigured(projectPath) {
         return false;
     }
     const specmem = config.mcpServers.specmem;
-    // Check if it points to a valid bootstrap.js
+    // Check if it points to a valid bootstrap file (cjs or js)
     if (!specmem.args || specmem.args.length < 2) {
         return false;
     }
@@ -167,8 +215,8 @@ export function isSpecmemMcpConfigured(projectPath) {
     // If projectPath specified, check if env has correct project path
     if (projectPath) {
         const configuredPath = specmem.env?.SPECMEM_PROJECT_PATH;
-        // ${PWD} is expanded at runtime by Claude Code, so it's valid
-        if (configuredPath && configuredPath !== '${PWD}' && configuredPath !== projectPath) {
+        // ${PWD} and ${cwd} are expanded at runtime by Claude Code, so they're valid
+        if (configuredPath && configuredPath !== '${PWD}' && configuredPath !== '${PWD}' && configuredPath !== projectPath) {
             return false;
         }
     }
@@ -179,11 +227,11 @@ export function isSpecmemMcpConfigured(projectPath) {
  * Returns true if changes were made
  */
 function configureMcpServer() {
-    // Verify bootstrap.js exists
+    // Verify bootstrap file exists (cjs or js)
     if (!fs.existsSync(BOOTSTRAP_PATH)) {
         return {
             configured: false,
-            error: `bootstrap.js not found at ${BOOTSTRAP_PATH}`
+            error: `bootstrap not found at ${BOOTSTRAP_PATH}`
         };
     }
     const config = safeReadJson(CONFIG_PATH, {});
@@ -191,17 +239,16 @@ function configureMcpServer() {
         config.mcpServers = {};
     }
     // Build the SpecMem MCP server config
-    // CRITICAL: ${cwd} is expanded by Claude Code at runtime to current working directory
-    // NOTE: ${PWD} resolves at MCP server startup, ${cwd} resolves per-invocation
+    // CRITICAL: ${PWD} is expanded at MCP server startup to current working directory
     const specmemConfig = {
         command: 'node',
-        args: ['--max-old-space-size=250', BOOTSTRAP_PATH],
+        args: [BOOTSTRAP_PATH],
         env: {
-            // Core paths - ${cwd} gives us project isolation (dynamic per-directory)
+            // Core paths - ${PWD} gives us project isolation (dynamic per-directory)
             HOME: HOME_DIR,
-            SPECMEM_PROJECT_PATH: '${cwd}',
-            SPECMEM_WATCHER_ROOT_PATH: '${cwd}',
-            SPECMEM_CODEBASE_PATH: '${cwd}',
+            SPECMEM_PROJECT_PATH: '${PWD}',
+            SPECMEM_WATCHER_ROOT_PATH: '${PWD}',
+            SPECMEM_CODEBASE_PATH: '${PWD}',
             // Database (use environment values or defaults)
             SPECMEM_DB_HOST: process.env.SPECMEM_DB_HOST || 'localhost',
             SPECMEM_DB_PORT: process.env.SPECMEM_DB_PORT || '5432',
@@ -235,7 +282,7 @@ function configureMcpServer() {
 /**
  * Fix outdated specmem MCP configs in ~/.claude.json
  *
- * Claude stores per-project MCP configs in ~/.claude.json under "projects" key.
+ *  stores per-project MCP configs in ~/.claude.json under "projects" key.
  * Old specmem installations may have left stale paths that point to non-existent
  * locations. This function scans all project entries and fixes specmem configs
  * to point to the current BOOTSTRAP_PATH.
@@ -265,8 +312,9 @@ function fixProjectMcpConfigs() {
     // Scan all project entries
     for (const [projectPath, projectConfig] of Object.entries(claudeJson.projects)) {
         const config = projectConfig;
-        // Check if this project has a specmem MCP server config
-        if (config?.mcpServers?.specmem) {
+        if (!config) continue;
+        // Case 1: Project has specmem MCP config but with outdated path
+        if (config.mcpServers?.specmem) {
             const specmem = config.mcpServers.specmem;
             const args = specmem.args || [];
             // Check if the args contain an outdated specmem path
@@ -275,27 +323,48 @@ function fixProjectMcpConfigs() {
                 if (typeof arg === 'string' &&
                     arg.includes('specmem') &&
                     arg !== BOOTSTRAP_PATH &&
-                    (arg.endsWith('index.js') || arg.endsWith('bootstrap.js'))) {
+                    (arg.endsWith('index.js') || arg.endsWith('bootstrap.js') || arg.endsWith('bootstrap.cjs'))) {
                     needsUpdate = true;
                     return BOOTSTRAP_PATH;
                 }
                 return arg;
             });
             if (needsUpdate) {
-                // Update the args
                 specmem.args = updatedArgs;
-                // Ensure SPECMEM_PROJECT_PATH is set to actual project path
-                // CRITICAL: ${PWD} doesn't get expanded by Claude Code, use literal path
                 if (!specmem.env) {
                     specmem.env = {};
                 }
-                if (!specmem.env.SPECMEM_PROJECT_PATH || specmem.env.SPECMEM_PROJECT_PATH === '${PWD}' || specmem.env.SPECMEM_PROJECT_PATH === '${cwd}') {
-                    specmem.env.SPECMEM_PROJECT_PATH = projectPath; // Use the actual project path key
+                if (!specmem.env.SPECMEM_PROJECT_PATH || specmem.env.SPECMEM_PROJECT_PATH === '${PWD}' || specmem.env.SPECMEM_PROJECT_PATH === '${PWD}') {
+                    specmem.env.SPECMEM_PROJECT_PATH = projectPath;
                 }
                 logger.info({ projectPath, oldArgs: args, newArgs: updatedArgs }, '[ConfigInjector] Fixed outdated specmem path in project config');
                 fixed++;
                 modified = true;
             }
+        }
+        // Case 2: Project has mcpServers but NO specmem entry (empty {} or missing key)
+        // This empty override hides the global config.json MCP server, so we inject it
+        else if (config.mcpServers && !config.mcpServers.specmem) {
+            // Don't clobber other MCP servers - only add specmem
+            config.mcpServers.specmem = {
+                command: 'node',
+                args: [BOOTSTRAP_PATH],
+                env: {
+                    HOME: HOME_DIR,
+                    SPECMEM_PROJECT_PATH: '${PWD}',
+                    SPECMEM_WATCHER_ROOT_PATH: '${PWD}',
+                    SPECMEM_CODEBASE_PATH: '${PWD}',
+                    SPECMEM_DB_HOST: process.env.SPECMEM_DB_HOST || 'localhost',
+                    SPECMEM_DB_PORT: process.env.SPECMEM_DB_PORT || '5432',
+                    SPECMEM_SESSION_WATCHER_ENABLED: 'true',
+                    SPECMEM_WATCHER_ENABLED: 'true',
+                    SPECMEM_DASHBOARD_ENABLED: 'true',
+                    SPECMEM_DASHBOARD_PORT: process.env.SPECMEM_DASHBOARD_PORT || '8595',
+                }
+            };
+            logger.info({ projectPath }, '[ConfigInjector] Injected specmem MCP server into project with empty mcpServers');
+            fixed++;
+            modified = true;
         }
     }
     // Write back if modified
@@ -514,11 +583,11 @@ function configureProjectSettings(projectPath) {
         return { updated: false, error: 'No project path provided' };
     }
     const projectSettingsPath = path.join(projectPath, '.claude', 'settings.local.json');
-    const projectClaudeDir = path.join(projectPath, '.claude');
+    const projectDir = path.join(projectPath, '.claude');
     // Ensure .claude directory exists
-    if (!fs.existsSync(projectClaudeDir)) {
+    if (!fs.existsSync(projectDir)) {
         try {
-            fs.mkdirSync(projectClaudeDir, { recursive: true, mode: 0o755 });
+            fs.mkdirSync(projectDir, { recursive: true, mode: 0o755 });
         }
         catch (err) {
             return { updated: false, error: `Could not create .claude dir: ${err}` };
@@ -568,7 +637,7 @@ function configureProjectSettings(projectPath) {
 // ============================================================================
 /**
  * Configure hooks and permissions in settings.json
- * Hook format rules from Claude Code source:
+ * Hook format rules from  Code source:
  * - UserPromptSubmit, SessionStart, Stop: NO matcher field
  * - PreToolUse, PostToolUse: matcher is a STRING pattern ("*", "Bash", etc.)
  */
@@ -708,7 +777,7 @@ function getRequiredHooks() {
                 }] : [])
         ].filter(h => h.hooks?.length > 0),
         // =========================================================================
-        // SessionStart - fires when Claude Code session starts
+        // SessionStart - fires when  Code session starts
         // =========================================================================
         SessionStart: [
             ...(fs.existsSync(HOOKS.sessionStart) ? [{
@@ -769,7 +838,7 @@ function getRequiredHooks() {
                 }] : [])
         ].filter(h => h.hooks?.length > 0),
         // =========================================================================
-        // Stop - fires when Claude Code session ends
+        // Stop - fires when  Code session ends
         // =========================================================================
         Stop: [
             ...(fs.existsSync(HOOKS.drilldown) ? [{
@@ -861,38 +930,38 @@ function configureSettings() {
     return { updated: false, permissionsAdded: [], hooksAdded: [], error: 'Failed to write settings.json' };
 }
 // ============================================================================
-// Hot-Patching Running Claude Instances
+// Hot-Patching Running  Instances
 // ============================================================================
 /**
- * Hot-patch running Claude instances by sending SIGHUP
+ * Hot-patch running  instances by sending SIGHUP
  * This causes them to reload their configuration without restart
  *
  * SAFETY NOTE: This function is intentionally DISABLED by default because it
- * sends signals to ALL Claude processes on the machine, which could affect
- * Claude instances from OTHER projects. This is dangerous in multi-project
+ * sends signals to ALL  processes on the machine, which could affect
+ *  instances from OTHER projects. This is dangerous in multi-project
  * environments.
  *
  * To enable, set SPECMEM_ENABLE_CLAUDE_HOT_PATCH=true in environment.
  *
  * Even when enabled, we:
  * 1. Skip our own process
- * 2. Skip our parent process (the Claude that spawned us)
+ * 2. Skip our parent process (the  that spawned us)
  * 3. Log warnings about the cross-project nature of this operation
  */
-function hotPatchRunningClaude() {
+function hotPatchRunning() {
     // SAFETY: Disabled by default - opt-in only
     if (process.env['SPECMEM_ENABLE_CLAUDE_HOT_PATCH'] !== 'true') {
         logger.debug('[ConfigInjector] Hot-patching disabled (SPECMEM_ENABLE_CLAUDE_HOT_PATCH != true)');
         return 0;
     }
     let patchedCount = 0;
-    // Get our parent PID - this is the Claude that spawned us as MCP server
+    // Get our parent PID - this is the  that spawned us as MCP server
     // We must NOT signal our parent or we'll kill ourselves!
     const parentPid = process.ppid;
-    // SAFETY WARNING: We're about to signal ALL Claude processes
-    logger.warn('[ConfigInjector] Hot-patching enabled - this may affect Claude instances from OTHER projects!');
+    // SAFETY WARNING: We're about to signal ALL  processes
+    logger.warn('[ConfigInjector] Hot-patching enabled - this may affect  instances from OTHER projects!');
     try {
-        // Find all running Claude processes
+        // Find all running  processes
         const output = execSync('pgrep -f "claude" 2>/dev/null || true', { encoding: 'utf-8' });
         const pids = output.trim().split('\n').filter(Boolean);
         for (const pid of pids) {
@@ -901,25 +970,25 @@ function hotPatchRunningClaude() {
                 // Don't signal ourselves
                 if (pidNum === process.pid)
                     continue;
-                // Don't signal our parent (the Claude that spawned us)!
+                // Don't signal our parent (the  that spawned us)!
                 if (pidNum === parentPid) {
-                    logger.debug({ pid: pidNum }, '[ConfigInjector] Skipping parent Claude process');
+                    logger.debug({ pid: pidNum }, '[ConfigInjector] Skipping parent  process');
                     continue;
                 }
                 process.kill(pidNum, 'SIGHUP');
                 patchedCount++;
-                logger.info({ pid: pidNum }, '[ConfigInjector] Sent SIGHUP to Claude');
+                logger.info({ pid: pidNum }, '[ConfigInjector] Sent SIGHUP to ');
             }
             catch {
                 // Process might have exited, ignore
             }
         }
         if (patchedCount > 0) {
-            logger.info({ count: patchedCount, skippedParent: parentPid }, '[ConfigInjector] Hot-patched running Claude instances');
+            logger.info({ count: patchedCount, skippedParent: parentPid }, '[ConfigInjector] Hot-patched running  instances');
         }
     }
     catch {
-        logger.debug('[ConfigInjector] No running Claude processes found');
+        logger.debug('[ConfigInjector] No running  processes found');
     }
     return patchedCount;
 }
@@ -936,7 +1005,7 @@ function hotPatchRunningClaude() {
  * 4. Configures hooks and permissions in ~/.claude/settings.json
  * 4.5. Deploys commands to {PROJECT}/.claude/commands/ (PER-PROJECT)
  * 4.6. Configures {PROJECT}/.claude/settings.local.json (PER-PROJECT)
- * 5. Hot-patches running Claude instances (disabled by default)
+ * 5. Hot-patches running  instances (disabled by default)
  *
  * Deploy Targets:
  * - GLOBAL: ~/.claude/commands/ - available to all projects
@@ -946,8 +1015,8 @@ function hotPatchRunningClaude() {
  *
  * Fully idempotent - safe to call on every startup
  */
-export async function injectClaudeConfig(projectPath) {
-    logger.info({ projectPath: projectPath || 'auto' }, '[ConfigInjector] Starting Claude config injection...');
+export async function injectConfig(projectPath) {
+    logger.info({ projectPath: projectPath || 'auto' }, '[ConfigInjector] Starting  config injection...');
     const result = {
         success: true,
         mcpServerConfigured: false,
@@ -1034,11 +1103,11 @@ export async function injectClaudeConfig(projectPath) {
                 result.errors.push(projectSettingsResult.error);
             }
         }
-        // Step 5: Hot-patch running Claude instances
-        // DISABLED: Cannot safely signal parent Claude from MCP child process
-        // - SIGHUP kills Claude Code
-        // - Other Claude instances have different project contexts
-        // Config changes take effect on next Claude restart
+        // Step 5: Hot-patch running  instances
+        // DISABLED: Cannot safely signal parent  from MCP child process
+        // - SIGHUP kills  Code
+        // - Other  instances have different project contexts
+        // Config changes take effect on next  restart
         result.instancesPatched = 0;
         // Determine if already fully configured
         result.alreadyConfigured =
@@ -1076,7 +1145,7 @@ export async function injectClaudeConfig(projectPath) {
 // Quick Check Functions
 // ============================================================================
 /**
- * Check if SpecMem is fully configured in Claude
+ * Check if SpecMem is fully configured in 
  */
 export function isConfigInjected() {
     // Check config.json has specmem MCP server
@@ -1133,11 +1202,11 @@ export function getInstallationStatus() {
 // Exports
 // ============================================================================
 export default {
-    injectClaudeConfig,
+    injectConfig,
     isConfigInjected,
     isSpecmemMcpConfigured,
     getInstallationStatus,
-    hotPatchRunningClaude
+    hotPatchRunning
 };
 // Export paths for testing and other modules
 export const paths = {

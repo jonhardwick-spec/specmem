@@ -7,7 +7,7 @@
  * Features:
  * - Login system with password protection
  * - Memory management (view/search/delete)
- * - Session management (Claude sessions)
+ * - Session management ( sessions)
  * - Codebase browser
  * - Skills manager
  * - Team member coordination viewer
@@ -45,14 +45,14 @@ import { createMemoryRecallRouter } from './api/memoryRecall.js';
 import { createTeamMemberHistoryRouter } from './api/teamMemberHistory.js';
 import { createTeamMemberDeployRouter } from './api/teamMemberDeploy.js';
 import { initializeTeamMemberStream, shutdownTeamMemberStream } from './websocket/teamMemberStream.js';
-// Phase 4-6 imports for Direct Prompting, Terminal Streaming, and Claude Control
+// Phase 4-6 imports for Direct Prompting, Terminal Streaming, and  Control
 import { createPromptSendRouter } from './api/promptSend.js';
 import { createTerminalRouter } from './api/terminal.js';
-import { createClaudeControlRouter } from './api/claudeControl.js';
+import { createControlRouter } from './api/claudeControl.js';
 import { createSpecmemToolsRouter } from './api/specmemTools.js';
 import { createTerminalInjectRouter } from './api/terminalInject.js';
 import { createTerminalStreamRouter, handleTerminalWebSocket } from './api/terminalStream.js';
-// Live Session Streaming - Team Member 2's LIVE Claude Code session viewer!
+// Live Session Streaming - Team Member 2's LIVE  Code session viewer!
 import { createLiveSessionRouter } from './api/liveSessionStream.js';
 // Task team member logging
 import { createTaskTeamMembersRouter } from './api/taskTeamMembers.js';
@@ -1771,14 +1771,14 @@ export class DashboardWebServer {
         // Phase 5: Terminal Output API
         const terminalRouter = createTerminalRouter(this.requireAuth.bind(this));
         this.app.use('/api/terminal', terminalRouter);
-        // Terminal Injection API - Direct prompt injection into Claude Code terminal!
+        // Terminal Injection API - Direct prompt injection into  Code terminal!
         const terminalInjectRouter = createTerminalInjectRouter(this.requireAuth.bind(this));
         this.app.use('/api/terminal-inject', terminalInjectRouter);
         // Terminal Streaming API - PTY streaming with full ANSI support!
         const terminalStreamRouter = createTerminalStreamRouter(this.requireAuth.bind(this));
         this.app.use('/api/terminal-stream', terminalStreamRouter);
-        // Phase 6: Claude Control API
-        const claudeControlRouter = createClaudeControlRouter(this.db, this.requireAuth.bind(this), this.broadcastUpdate.bind(this));
+        // Phase 6:  Control API
+        const claudeControlRouter = createControlRouter(this.db, this.requireAuth.bind(this), this.broadcastUpdate.bind(this));
         this.app.use('/api/claude', claudeControlRouter);
         // Specmem Tools API - Expose MCP tools to team members via HTTP
         // Pass embedding provider GETTER so HTTP endpoints use REAL MCP tool semantic search!
@@ -1828,10 +1828,10 @@ export class DashboardWebServer {
             next();
         });
         this.app.use('/api/specmem', specmemToolsRouter);
-        // Task Team Members API - Track Claude Code Task tool deployments
+        // Task Team Members API - Track  Code Task tool deployments
         const taskTeamMembersRouter = createTaskTeamMembersRouter();
         this.app.use('/api/task-team-members', taskTeamMembersRouter);
-        // LIVE Session Streaming API - Team Member 2's real-time Claude Code viewer!
+        // LIVE Session Streaming API - Team Member 2's real-time  Code viewer!
         const liveSessionRouter = createLiveSessionRouter(this.requireAuth.bind(this));
         this.app.use('/api/live', liveSessionRouter);
         // File Manager API - FTP-style file browser for codebase management
@@ -2966,7 +2966,7 @@ export class DashboardWebServer {
         return { deleted: deletedCount };
     }
     /**
-     * Get Claude sessions with detailed information
+     * Get  sessions with detailed information
      */
     async getSessions() {
         if (!this.db) {
@@ -3697,7 +3697,7 @@ export class DashboardWebServer {
             // Initialize Task team member logger
             if (this.db) {
                 initializeTaskTeamMemberLogger(this.db);
-                logger.info('Task team member logger initialized - Claude Code team members will be tracked');
+                logger.info('Task team member logger initialized -  Code team members will be tracked');
             }
             if (this.db) {
                 this.teamMemberHistoryManager.setDatabase(this.db.pool);

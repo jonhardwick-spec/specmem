@@ -17,7 +17,7 @@ export { StartWatchingTheFiles } from './startWatchingTheFiles.js';
 export { StopWatchingTheFiles } from './stopWatchingTheFiles.js';
 export { CheckSyncStatus } from './checkSyncStatus.js';
 export { ForceResync } from './forceResync.js';
-export { ExtractClaudeSessions } from './extractClaudeSessions.js';
+export { ExtractSessions } from './extractClaudeSessions.js';
 export { GetSessionWatcherStatus } from './getSessionWatcherStatus.js';
 export { ExtractContextRestorations } from './extractContextRestorations.js';
 export { SayToTeamMember } from './sayToTeamMember.js';

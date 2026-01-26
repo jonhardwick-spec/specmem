@@ -2,7 +2,7 @@
  * deployTeamMember - The Task tool but actually works with MCP
  *
  * Spawns team members in screen sessions with full SpecMem MCP access.
- * This is basically skidding Claude Code's Task tool but making it not suck.
+ * This is basically skidding  Code's Task tool but making it not suck.
  */
 import { MCPTool } from '../../mcp/toolRegistry.js';
 interface DeployTeamMemberInput {

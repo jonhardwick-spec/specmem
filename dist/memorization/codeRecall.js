@@ -117,9 +117,9 @@ export class CodeRecall {
         }
     }
     /**
-     * allTheCodeIWrote - list all code Claude wrote
+     * allTheCodeIWrote - list all code  wrote
      *
-     * skids cant find this code but Claude can lmao
+     * skids cant find this code but  can lmao
      */
     async allTheCodeIWrote(options = {}) {
         this.stats.recalls++;
@@ -165,7 +165,7 @@ export class CodeRecall {
     /**
      * whyDidIWriteThis - get the context for why code was written
      *
-     * fr fr helps Claude understand its own decisions
+     * fr fr helps  understand its own decisions
      */
     async whyDidIWriteThis(codeId) {
         const client = await this.pool.connect();
@@ -219,7 +219,7 @@ export class CodeRecall {
     /**
      * getCodeHistory - get full version history for a file
      *
-     * see how Claude's code evolved over time
+     * see how 's code evolved over time
      */
     async getCodeHistory(filePath) {
         const client = await this.pool.connect();
@@ -308,7 +308,7 @@ export class CodeRecall {
     /**
      * findRelatedCode - find code related to a specific entry
      *
-     * what else did Claude write around the same time?
+     * what else did  write around the same time?
      */
     async findRelatedCode(codeId, options = {}) {
         const client = await this.pool.connect();
@@ -365,7 +365,7 @@ export class CodeRecall {
         }
     }
     /**
-     * getCodeStats - get statistics about Claude's code
+     * getCodeStats - get statistics about 's code
      */
     async getCodeStats() {
         const client = await this.pool.connect();

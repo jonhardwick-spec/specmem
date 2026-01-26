@@ -407,7 +407,7 @@ export function addProjectFilter(ctx, columnName = 'project_path') {
  * Get the project_path value for INSERT operations
  *
  * Uses dynamic project detection via marker file:
- * 1. Hooks receive cwd from Claude Code and write to /tmp/specmem-current-project.txt
+ * 1. Hooks receive cwd from  Code and write to /tmp/specmem-current-project.txt
  * 2. MCP server reads from marker file to know the CURRENT project
  * 3. This allows TRUE multi-project support without MCP server restart
  *

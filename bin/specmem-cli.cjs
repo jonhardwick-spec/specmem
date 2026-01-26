@@ -201,18 +201,29 @@ function modelsReady() {
   return false;
 }
 
+// Get version from package.json
+const SPECMEM_VERSION = require(path.join(SPECMEM_PKG, 'package.json')).version;
+
 // Main command router
 switch (command) {
   case 'init':
-    // Forward to the fancy specmem-init script
-    runFancyInit();
+    // Check for updates first, then run init
+    runWithUpdateCheck(() => runFancyInit());
     break;
   case 'setup':
-    runFirstRunSetup();
+    // Check for updates first, then run setup
+    runWithUpdateCheck(() => runFirstRunSetup());
+    break;
+  case 'update':
+    runUpdate();
     break;
   case 'cleanup':
     // Forward to specmem-cleanup
     runCleanup();
+    break;
+  case 'dashboard':
+  case 'dash':
+    launchDashboard();
     break;
   case 'start':
     startServices();
@@ -223,11 +234,61 @@ switch (command) {
   case 'doctor':
     runDoctor();
     break;
+  case '--version':
+  case '-v':
+  case 'version':
+    showVersion();
+    break;
   case 'help':
   case '--help':
   case '-h':
   default:
     showHelp();
+}
+
+// Launch dashboard (specmem-console)
+function launchDashboard() {
+  const consoleScript = path.join(SPECMEM_PKG, 'bin', 'specmem-console.cjs');
+  if (!fs.existsSync(consoleScript)) {
+    console.log(`${RED}Dashboard not found: ${consoleScript}${RESET}`);
+    process.exit(1);
+  }
+  const projectPath = process.cwd();
+  const child = spawn('node', [consoleScript, projectPath], {
+    stdio: 'inherit',
+    cwd: projectPath,
+    env: { ...process.env, SPECMEM_PROJECT_PATH: projectPath }
+  });
+  child.on('close', (code) => {
+    process.exit(code || 0);
+  });
+}
+
+// Show version
+function showVersion() {
+  console.log(`${CYAN}SpecMem${RESET} v${SPECMEM_VERSION}`);
+  console.log(`${DIM}Hardwick Software Services - https://justcalljon.pro${RESET}`);
+}
+
+// Run update check
+async function runUpdate() {
+  const updater = require(path.join(SPECMEM_PKG, 'scripts', 'auto-updater.cjs'));
+  await updater.checkForUpdates();
+}
+
+// Run command with update check first
+async function runWithUpdateCheck(callback) {
+  try {
+    const updater = require(path.join(SPECMEM_PKG, 'scripts', 'auto-updater.cjs'));
+    const updated = await updater.checkForUpdates();
+    if (updated) {
+      // User updated, they need to re-run the command
+      process.exit(0);
+    }
+  } catch (e) {
+    // Updater failed, continue anyway
+  }
+  callback();
 }
 
 // Run first-run model setup
@@ -265,10 +326,10 @@ function runFancyInit() {
 
   // Pass through any args (like --console)
   const args = process.argv.slice(3); // Skip node, script, 'init'
-  const child = spawn('node', [initScript, ...args], {
+  const child = spawn('node', [initScript, '--no-screen-check', ...args], {
     stdio: 'inherit',
     cwd: process.cwd(),
-    env: { ...process.env }
+    env: { ...process.env, SPECMEM_CLI_PARENT: '1' }
   });
 
   child.on('close', (code) => {
@@ -410,7 +471,7 @@ function initProject() {
   }
 
   // 5. REMOVE SPECMEM ENTRIES FROM CLAUDE PROJECT CONFIG
-  console.log(`${CYAN}→${RESET} Cleaning Claude project config...`);
+  console.log(`${CYAN}→${RESET} Cleaning  project config...`);
   try {
     const claudeProjectDir = path.join(os.homedir(), '.claude', 'projects');
     if (fs.existsSync(claudeProjectDir)) {
@@ -421,9 +482,9 @@ function initProject() {
         fs.unlinkSync(configPath);
       }
     }
-    console.log(`${GREEN}✓${RESET} Claude config cleaned`);
+    console.log(`${GREEN}✓${RESET}  config cleaned`);
   } catch {
-    console.log(`${DIM}  No Claude config to clean${RESET}`);
+    console.log(`${DIM}  No  config to clean${RESET}`);
   }
 
   console.log(`\n${GREEN}${BOLD}✓ Cleanup complete!${RESET}\n`);
@@ -472,9 +533,9 @@ function initProject() {
     const claudeSettings = path.join(claudeDir, 'settings.json');
 
     if (fs.existsSync(claudeSettings)) {
-      console.log(`${GREEN}✓${RESET} Claude Code detected - configure hooks manually`);
+      console.log(`${GREEN}✓${RESET}  Code detected - configure hooks manually`);
     } else {
-      console.log(`${YELLOW}⚠${RESET} Claude Code not found`);
+      console.log(`${YELLOW}⚠${RESET}  Code not found`);
       console.log(`${DIM}  Install: npm install -g @anthropic-ai/claude-code${RESET}`);
     }
   }
@@ -483,13 +544,13 @@ function initProject() {
 ${GREEN}${BOLD}✓ Project initialized!${RESET}
 
 ${CYAN}What's configured:${RESET}
-  • ${BOLD}MCP Server${RESET} - specmem auto-starts with Claude Code
+  • ${BOLD}MCP Server${RESET} - specmem auto-starts with  Code
   • ${BOLD}Hooks${RESET} - Context injection before prompts
   • ${BOLD}Commands${RESET} - /specmem-* slash commands available
 `);
 
-  // Launch Claude in screen session
-  console.log(`${CYAN}${BOLD}═══ Launching Claude Code ═══${RESET}\n`);
+  // Launch  in screen session
+  console.log(`${CYAN}${BOLD}═══ Launching  Code ═══${RESET}\n`);
 
   try {
     // Check if screen is available
@@ -500,9 +561,9 @@ ${CYAN}What's configured:${RESET}
       try {
         execSync('apt-get install -y screen 2>/dev/null || sudo apt-get install -y screen 2>/dev/null', { stdio: 'pipe', timeout: 60000 });
       } catch {
-        console.log(`${YELLOW}⚠${RESET} Could not install screen, launching Claude directly...`);
+        console.log(`${YELLOW}⚠${RESET} Could not install screen, launching  directly...`);
         console.log(`${DIM}Run: claude${RESET}\n`);
-        // Launch Claude directly without screen
+        // Launch  directly without screen
         const child = spawn('claude', [], {
           cwd: projectDir,
           stdio: 'inherit',
@@ -528,8 +589,8 @@ ${CYAN}What's configured:${RESET}
     // Give screen time to clean up
     execSync('sleep 0.5', { stdio: 'pipe' });
 
-    // Launch Claude in a new screen session AND auto-attach
-    console.log(`${GREEN}${BOLD}✓ Launching Claude Code...${RESET}\n`);
+    // Launch  in a new screen session AND auto-attach
+    console.log(`${GREEN}${BOLD}✓ Launching  Code...${RESET}\n`);
     console.log(`${DIM}───────────────────────────────────────────────${RESET}`);
 
     // Use -S to create named session, no -d so it attaches immediately
@@ -539,10 +600,10 @@ ${CYAN}What's configured:${RESET}
       env: { ...process.env, SPECMEM_PROJECT_PATH: projectDir }
     });
 
-    // User has detached or Claude exited
+    // User has detached or  exited
     console.log(`\n${DIM}───────────────────────────────────────────────${RESET}`);
 
-    // Check if session still exists (user detached vs Claude exited)
+    // Check if session still exists (user detached vs  exited)
     try {
       execSync(`screen -list | grep "${screenName}"`, { stdio: 'pipe' });
       console.log(`${GREEN}✓${RESET} Session '${screenName}' still running in background`);
@@ -552,7 +613,7 @@ ${CYAN}What's configured:${RESET}
     }
 
   } catch (err) {
-    console.log(`${YELLOW}⚠${RESET} Could not launch Claude automatically: ${err.message}`);
+    console.log(`${YELLOW}⚠${RESET} Could not launch  automatically: ${err.message}`);
     console.log(`${DIM}Run manually: claude${RESET}`);
   }
 }
@@ -561,10 +622,10 @@ ${CYAN}What's configured:${RESET}
 function startServices() {
   showBanner();
 
-  console.log(`${GREEN}${BOLD}SpecMem services auto-start with Claude!${RESET}\n`);
+  console.log(`${GREEN}${BOLD}SpecMem services auto-start with !${RESET}\n`);
   console.log(`Once your project is initialized, just run:\n`);
   console.log(`  ${DIM}$${RESET} claude\n`);
-  console.log(`SpecMem's MCP server starts automatically when Claude opens.\n`);
+  console.log(`SpecMem's MCP server starts automatically when  opens.\n`);
 
   // Check if project is initialized
   const settingsPath = path.join(process.cwd(), '.claude', 'settings.local.json');
@@ -683,12 +744,12 @@ function runDoctor() {
     console.log(`${YELLOW}⚠${RESET} Embedding models not optimized - run 'specmem setup'`);
   }
 
-  // Check Claude Code
+  // Check  Code
   const claudeDir = path.join(os.homedir(), '.claude');
   if (fs.existsSync(claudeDir)) {
-    console.log(`${GREEN}✓${RESET} Claude Code detected`);
+    console.log(`${GREEN}✓${RESET}  Code detected`);
   } else {
-    console.log(`${YELLOW}⚠${RESET} Claude Code not installed`);
+    console.log(`${YELLOW}⚠${RESET}  Code not installed`);
   }
 
   // Summary
@@ -710,22 +771,23 @@ ${BOLD}Commands:${RESET}
   ${CYAN}setup${RESET}     First-run setup (download + optimize embedding models)
   ${CYAN}init${RESET}      Initialize SpecMem for current project
   ${CYAN}status${RESET}    Check SpecMem status and model info
+  ${CYAN}dashboard${RESET}  Launch the AEGIS dashboard (alias: dash)
   ${CYAN}doctor${RESET}    Check system requirements
 
 ${BOLD}Quick Start:${RESET}
   ${DIM}$${RESET} specmem setup    ${DIM}# First time only - optimizes models${RESET}
   ${DIM}$${RESET} cd your-project
   ${DIM}$${RESET} specmem init     ${DIM}# Initialize project${RESET}
-  ${DIM}$${RESET} claude           ${DIM}# Services auto-start with Claude!${RESET}
+  ${DIM}$${RESET} claude           ${DIM}# Services auto-start with !${RESET}
 
 ${BOLD}What It Does:${RESET}
-  SpecMem provides semantic memory for Claude Code sessions.
+  SpecMem provides semantic memory for  Code sessions.
   It remembers what you've discussed, code you've written,
-  and provides context to make Claude smarter over time.
+  and provides context to make  smarter over time.
 
 ${BOLD}Auto-Start:${RESET}
   Once initialized, SpecMem services start automatically when
-  you open Claude in the project. No manual start needed!
+  you open  in the project. No manual start needed!
 
 ${DIM}https://justcalljon.pro${RESET}
 `);

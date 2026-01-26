@@ -27,7 +27,7 @@ declare const SmartSearchInput: z.ZodObject<{
 }>;
 type SmartSearchParams = z.infer<typeof SmartSearchInput>;
 /**
- * SmartSearch - helps Claude present search mode options to users
+ * SmartSearch - helps  present search mode options to users
  */
 export declare class SmartSearch implements MCPTool<SmartSearchParams, string> {
     name: string;

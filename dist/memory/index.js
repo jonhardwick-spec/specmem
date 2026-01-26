@@ -7,7 +7,7 @@
  * 2. QuadrantSearchSystem - Spatial/semantic partitioning for fast search
  * 3. Migration utilities - Database schema for evolution features
  *
- * The goal is to make Claude's memory more natural and intelligent,
+ * The goal is to make 's memory more natural and intelligent,
  * supporting human-like patterns of:
  * - Forgetting (Ebbinghaus curves)
  * - Association (spreading activation)

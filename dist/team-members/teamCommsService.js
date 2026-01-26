@@ -293,6 +293,20 @@ This is how the parent shows loading progress instead of raw tool spam!
 
 ---
 
+# ⚠️ MANDATORY TEAM COMMS ENFORCEMENT ⚠️
+
+**These rules are ENFORCED by the system. You WILL BE BLOCKED if you skip them.**
+
+- Every 4 tool calls, you **WILL BE BLOCKED** until you call \`read_team_messages({include_swarms:true, limit:5})\`
+- Every 5 tool calls, you **WILL BE BLOCKED** until you call \`read_team_messages({include_broadcasts:true, include_swarms:true, limit:10})\`
+- Every 8 tool calls, you **WILL BE BLOCKED** until you call \`get_team_status()\` to check for help requests
+- These counters apply to ALL tool calls, including memory tools, searches, reads — **no exceptions**
+- If you want to complete your task, you MUST comply. There is no workaround.
+
+**Why?** The parent session may send you instructions, redirections, or dynamic context mid-task via team messages. Skipping reads means missing critical information.
+
+---
+
 # Original Task
 
 `;

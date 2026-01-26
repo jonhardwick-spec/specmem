@@ -6,7 +6,7 @@
  *
  * Why Traditional Chinese?
  * - CJK characters encode more semantic info per token
- * - Claude understands Chinese natively
+ * -  understands Chinese natively
  * - ~40-60% token reduction for English text
  *
  * ROUND-TRIP VERIFICATION ALGORITHM:

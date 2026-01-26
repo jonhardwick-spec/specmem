@@ -5,7 +5,7 @@
  *
  * PreToolUse hook that INTERCEPTS Task tool calls and:
  *   1. BLOCKS automatic deployment
- *   2. Injects instructions for Claude to ask user for preferences
+ *   2. Injects instructions for  to ask user for preferences
  *   3. User chooses agent type, model, settings PER DEPLOYMENT
  *
  * This gives users FULL CONTROL over every agent that gets deployed!
@@ -52,7 +52,7 @@ function loadConfig() {
 }
 
 /**
- * Build the chooser context that instructs Claude to ask the user
+ * Build the chooser context that instructs  to ask the user
  */
 function buildChooserContext(description, currentType, currentModel, config) {
   const agentTypes = [
@@ -154,7 +154,7 @@ async function main() {
     // Build the chooser context
     const chooserContext = buildChooserContext(description, agentType, model, config);
 
-    // BLOCK the deployment and inject instructions for Claude to ask user
+    // BLOCK the deployment and inject instructions for  to ask user
     console.log(JSON.stringify({
       continue: false,  // Block the tool call
       stopReason: `Agent deployment requires user confirmation. Use AskUserQuestion to let user choose settings.`,

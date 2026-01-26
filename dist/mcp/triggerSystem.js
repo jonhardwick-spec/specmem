@@ -1,10 +1,10 @@
 /**
- * triggerSystem.ts - Claude Trigger System for MCP Sampling
+ * triggerSystem.ts -  Trigger System for MCP Sampling
  *
- * Manages trigger actions that request Claude to perform tasks via MCP sampling.
+ * Manages trigger actions that request  to perform tasks via MCP sampling.
  * Includes support for immediate triggers, scheduled triggers, and confirmation flow.
  *
- * Phase 6 Implementation - MCP -> Claude Control Flow
+ * Phase 6 Implementation - MCP ->  Control Flow
  */
 import { logger } from '../utils/logger.js';
 import { executePrompt } from './promptExecutor.js';
@@ -59,19 +59,19 @@ Include:
         promptPrefix: 'Summarize the following session:\n\n'
     },
     'custom': {
-        systemPrompt: `You are Claude, an AI assistant. Help with the following request.`,
+        systemPrompt: `You are , an AI assistant. Help with the following request.`,
         promptPrefix: ''
     }
 };
 // ============================================================================
-// Claude Trigger System
+//  Trigger System
 // ============================================================================
-export class ClaudeTriggerSystem {
+export class TriggerSystem {
     scheduledJobs = new Map();
     triggerLog = [];
     maxLogSize = 100;
     constructor() {
-        logger.info('Claude Trigger System initialized');
+        logger.info(' Trigger System initialized');
     }
     /**
      * Execute a trigger action via MCP sampling
@@ -330,7 +330,7 @@ export class ClaudeTriggerSystem {
         for (const [id] of Array.from(this.scheduledJobs)) {
             this.cancelScheduledAction(id);
         }
-        logger.info('Claude Trigger System shut down');
+        logger.info(' Trigger System shut down');
     }
 }
 // ============================================================================
@@ -338,26 +338,26 @@ export class ClaudeTriggerSystem {
 // ============================================================================
 let triggerSystemInstance = null;
 /**
- * Get or create the Claude trigger system
+ * Get or create the  trigger system
  */
-export function getClaudeTriggerSystem() {
+export function getTriggerSystem() {
     if (!triggerSystemInstance) {
-        triggerSystemInstance = new ClaudeTriggerSystem();
+        triggerSystemInstance = new TriggerSystem();
     }
     return triggerSystemInstance;
 }
 /**
  * Reset the trigger system (for testing)
  */
-export function resetClaudeTriggerSystem() {
+export function resetTriggerSystem() {
     if (triggerSystemInstance) {
         triggerSystemInstance.shutdown();
         triggerSystemInstance = null;
     }
 }
 export default {
-    ClaudeTriggerSystem,
-    getClaudeTriggerSystem,
-    resetClaudeTriggerSystem
+    TriggerSystem,
+    getTriggerSystem,
+    resetTriggerSystem
 };
 //# sourceMappingURL=triggerSystem.js.map

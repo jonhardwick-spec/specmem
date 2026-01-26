@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#00bfff"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="480" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="480" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">What's New in v3.7</text>
+
+  <!-- Card 1: New Languages -->
+  <g transform="translate(17, 55)">
+    <rect width="375" height="120" rx="10" fill="url(#cardGrad)" stroke="#22c55e" stroke-width="1"/>
+    <rect width="375" height="3" rx="1.5" fill="#22c55e"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#4ade80">New Language Extractors</text>
+
+    <!-- Language pills -->
+    <rect x="16" y="42" width="45" height="18" rx="4" fill="#3776AB" fill-opacity="0.2" stroke="#3776AB" stroke-width="0.5"/>
+    <text x="38" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#3776AB">Java</text>
+
+    <rect x="68" y="42" width="50" height="18" rx="4" fill="#B07219" fill-opacity="0.2" stroke="#B07219" stroke-width="0.5"/>
+    <text x="93" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#B07219">Kotlin</text>
+
+    <rect x="125" y="42" width="30" height="18" rx="4" fill="#00599C" fill-opacity="0.2" stroke="#00599C" stroke-width="0.5"/>
+    <text x="140" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#00599C">C</text>
+
+    <rect x="162" y="42" width="38" height="18" rx="4" fill="#00599C" fill-opacity="0.2" stroke="#f34b7d" stroke-width="0.5"/>
+    <text x="181" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#f34b7d">C++</text>
+
+    <rect x="207" y="42" width="45" height="18" rx="4" fill="#E34C26" fill-opacity="0.2" stroke="#E34C26" stroke-width="0.5"/>
+    <text x="229" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#E34C26">HTML</text>
+
+    <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
+      <tspan x="16" y="80">Full extractors, not generic matchers. Constructors,</tspan>
+      <tspan x="16" dy="14">destructors, operator overloads, macros, annotations,</tspan>
+      <tspan x="16" dy="14">records, data classes, web components. The works.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 2: Embedding Fix -->
+  <g transform="translate(408, 55)">
+    <rect width="375" height="120" rx="10" fill="url(#cardGrad)" stroke="#00bfff" stroke-width="1"/>
+    <rect width="375" height="3" rx="1.5" fill="#00bfff"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#00bfff">Embedding Server Stability</text>
+
+    <rect x="16" y="42" width="60" height="18" rx="4" fill="#22c55e" fill-opacity="0.15"/>
+    <text x="46" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#22c55e">FIXED</text>
+
+    <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
+      <tspan x="16" y="80">MCP proxy timeout handling got a full overhaul.</tspan>
+      <tspan x="16" dy="14">Stale socket connections, SIGTERM handling, and</tspan>
+      <tspan x="16" dy="14">reconnection logic all fixed. No more "embedding</tspan>
+    </text>
+  </g>
+
+  <!-- Card 3: Native Swarm Support -->
+  <g transform="translate(17, 190)">
+    <rect width="766" height="120" rx="10" fill="url(#cardGrad)" stroke="#a855f7" stroke-width="1"/>
+    <rect width="766" height="3" rx="1.5" fill="#a855f7"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#c084fc">Native Swarm Support</text>
+
+    <rect x="16" y="42" width="90" height="18" rx="4" fill="#a855f7" fill-opacity="0.15"/>
+    <text x="61" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#c084fc">AGENT TEAMS</text>
+
+    <rect x="114" y="42" width="110" height="18" rx="4" fill="#22c55e" fill-opacity="0.15"/>
+    <text x="169" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#22c55e">UNLIMITED SWARMS</text>
+
+    <rect x="232" y="42" width="100" height="18" rx="4" fill="#00bfff" fill-opacity="0.15"/>
+    <text x="282" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#00bfff">AUTO-DEPLOY</text>
+
+    <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
+      <tspan x="16" y="80">Claude Code agent teams integration. Dynamic swarm channels,</tspan>
+      <tspan x="16" dy="14">auto-created on first message. Agents coordinate via MCP team comms</tspan>
+      <tspan x="16" dy="14">with token-compressed Chinese inter-agent messaging. specmem init auto-enables.</tspan>
+    </text>
+  </g>
+
+  <!-- Coming Soon -->
+  <g transform="translate(17, 330)">
+    <rect width="766" height="130" rx="10" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="1"/>
+    <rect width="766" height="3" rx="1.5" fill="#f59e0b"/>
+    <text x="383" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#fbbf24">Coming Soon</text>
+
+    <!-- OCR -->
+    <rect x="16" y="42" width="360" height="70" rx="8" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <!-- PDF icon -->
+    <text x="30" y="64" font-family="system-ui, sans-serif" font-size="16">📄</text>
+    <text x="52" y="62" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#f59e0b">OCR for PDFs</text>
+    <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
+      <tspan x="30" y="80">Index PDF docs in your project. Tech specs, API docs,</tspan>
+      <tspan x="30" dy="13">architecture diagrams. All searchable by meaning.</tspan>
+    </text>
+
+    <!-- YOLO -->
+    <rect x="390" y="42" width="360" height="70" rx="8" fill="#1a1f26" stroke="#30363d" stroke-width="1"/>
+    <!-- Camera icon -->
+    <text x="404" y="64" font-family="system-ui, sans-serif" font-size="16">📷</text>
+    <text x="426" y="62" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#f59e0b">YOLO Image Analysis</text>
+    <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
+      <tspan x="404" y="80">Understand PNGs, screenshots, diagrams upon reading.</tspan>
+      <tspan x="404" dy="13">UI mockups and flowcharts indexed and searchable.</tspan>
+    </text>
+  </g>
+</svg>

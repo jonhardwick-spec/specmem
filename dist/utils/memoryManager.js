@@ -532,7 +532,7 @@ export class MemoryManager {
             rssMB: Math.round(stats.rss / 1024 / 1024)
         };
         logger.warn(warningData, 'MEMORY WARNING: Instance exceeding threshold');
-        // Also emit to stderr for visibility in Claude Code CLI
+        // Also emit to stderr for visibility in  Code CLI
         process.stderr.write(`\n[SpecMem] MEMORY WARNING: Instance ${warningData.instanceId} at ${warningData.usagePercent} usage (${warningData.heapUsedMB}MB / ${warningData.maxHeapMB}MB)\n`);
     }
     /**

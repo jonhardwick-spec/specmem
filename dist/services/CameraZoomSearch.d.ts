@@ -17,12 +17,12 @@
  * Response Format:
  * ```
  * content: "Here's what I said from last week"
- * CR (Claude Response): "Well that's interesting because..."
+ * CR ( Response): "Well that's interesting because..."
  * drilldownID: 123
  * similarity: 0.87
  * ```
  *
- * Then Claude can:
+ * Then  can:
  * - drill_down(123) - zoom in for more detail on that memory
  * - get_memory(123) - get full memory content
  * - Each drill-down may reveal MORE drilldown IDs for deeper exploration
@@ -102,7 +102,7 @@ interface DrilldownEntry {
 /**
  * DrilldownRegistry - Maps simple numeric IDs to memory UUIDs
  *
- * This allows Claude to use simple drill_down(123) calls instead of
+ * This allows  to use simple drill_down(123) calls instead of
  * drill_down("550e8400-e29b-41d4-a716-446655440000")
  */
 declare class DrilldownRegistry {

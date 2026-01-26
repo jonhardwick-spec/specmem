@@ -113,9 +113,9 @@ export declare function createFullToolRegistry(db: DatabaseManager, pool: Connec
  * - goofy memory tools
  * - codebase ingestion
  * - package tracking
- * - AUTO-MEMORIZATION (Claude remembers what it writes!)
+ * - AUTO-MEMORIZATION ( remembers what it writes!)
  *
- * fr fr Claude never needs massive explores again
+ * fr fr  never needs massive explores again
  */
 export declare function createUltimateToolRegistry(db: DatabaseManager, pool: ConnectionPoolGoBrrr, embeddingProvider: EmbeddingProvider, memorizationConfig?: Partial<MemorizationConfig>): ToolRegistry;
 export { _EMBEDDING_CACHE, getCachedEmbedding, setCachedEmbedding };

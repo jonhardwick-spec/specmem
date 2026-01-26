@@ -44,11 +44,11 @@ export interface TrackerConfig {
     neverTrackPatterns?: string[];
 }
 /**
- * ClaudeCodeTracker - THE WATCHER that tracks code activity
+ * CodeTracker - THE WATCHER that tracks code activity
  *
  * fr fr never forgets what was written because this tracker catches EVERYTHING
  */
-export declare class ClaudeCodeTracker {
+export declare class CodeTracker {
     private memorizer;
     private config;
     private currentSession;
@@ -77,7 +77,7 @@ export declare class ClaudeCodeTracker {
     /**
      * setPurposeForNextEdits - manually set the purpose for upcoming edits
      *
-     * Claude can call this to set context for what it's about to write
+     *  can call this to set context for what it's about to write
      */
     setPurposeForNextEdits(filePaths: string[], purpose: string, context?: {
         relatedFiles?: string[];
@@ -142,6 +142,6 @@ export declare class ClaudeCodeTracker {
      */
     cleanup(): void;
 }
-export declare function getClaudeCodeTracker(memorizer?: CodeMemorizer, config?: TrackerConfig): ClaudeCodeTracker;
-export declare function resetClaudeCodeTracker(): void;
+export declare function getCodeTracker(memorizer?: CodeMemorizer, config?: TrackerConfig): CodeTracker;
+export declare function resetCodeTracker(): void;
 //# sourceMappingURL=claudeCodeTracker.d.ts.map

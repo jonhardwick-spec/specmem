@@ -4,7 +4,7 @@
  * Converts MCP tool results to hook-style format for easy reading.
  * Format: [SPECMEM-<TOOL>]...[/SPECMEM-<TOOL>] tags with grey text.
  *
- * This matches the format used by Claude Code hooks for consistency.
+ * This matches the format used by  Code hooks for consistency.
  * When humanReadable=true, tools output this instead of compactXmlResponse.
  *
  * SMART COMPRESSION (v1.0.44+):

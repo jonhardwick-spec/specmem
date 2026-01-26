@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Capture Anthropic ToS Screenshots for Legal Documentation
+ * Capture  ToS Screenshots for Legal Documentation
  * Part of SpecMem's copyright protection - timestamp evidence
  */
 

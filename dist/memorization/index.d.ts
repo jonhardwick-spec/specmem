@@ -12,17 +12,17 @@
  *
  * fr fr never forgets what was written now
  */
-export { CodeMemorizer, RememberCodeParams, RememberCodeResult, StoredCodeEntry, ClaudeOperationType, getCodeMemorizer, resetCodeMemorizer } from './codeMemorizer.js';
-export { ClaudeCodeTracker, SessionActivity, EditContext, TrackerConfig, getClaudeCodeTracker, resetClaudeCodeTracker } from './claudeCodeTracker.js';
+export { CodeMemorizer, RememberCodeParams, RememberCodeResult, StoredCodeEntry, OperationType, getCodeMemorizer, resetCodeMemorizer } from './codeMemorizer.js';
+export { CodeTracker, SessionActivity, EditContext, TrackerConfig, getCodeTracker, resetCodeTracker } from './claudeCodeTracker.js';
 export { CodeRecall, CodeSearchOptions, CodeSearchResult, CodeTimelineEntry, getCodeRecall, resetCodeRecall } from './codeRecall.js';
 export { RememberWhatIWroteTool, WhatDidIWriteForTool, AllMyCodeTool, CodeHistoryTool, WhyDidIWriteThisTool, SetCodingPurposeTool, CodeStatsTool, createMemorizationTools } from './memorizationTools.js';
-export { claudeCodeHistoryMigration, runClaudeCodeMigration, isClaudeCodeMigrationApplied } from './claudeCodeMigration.js';
+export { claudeCodeHistoryMigration, runCodeMigration, isCodeMigrationApplied } from './claudeCodeMigration.js';
 export { WatcherMemorizationBridge, WatcherMemorizationConfig, setupWatcherMemorization, getWatcherMemorizationBridge, setWatcherMemorizationBridge, resetWatcherMemorizationBridge } from './watcherIntegration.js';
 import pg from 'pg';
 import { EmbeddingProvider } from '../tools/index.js';
 import { CodeMemorizer } from './codeMemorizer.js';
 import { CodeRecall } from './codeRecall.js';
-import { ClaudeCodeTracker, TrackerConfig } from './claudeCodeTracker.js';
+import { CodeTracker, TrackerConfig } from './claudeCodeTracker.js';
 import { MCPTool } from '../mcp/toolRegistry.js';
 /**
  * Configuration for the memorization system
@@ -38,7 +38,7 @@ export interface MemorizationConfig {
 export interface MemorizationSystem {
     memorizer: CodeMemorizer;
     recall: CodeRecall;
-    tracker: ClaudeCodeTracker;
+    tracker: CodeTracker;
     tools: MCPTool[];
 }
 /**

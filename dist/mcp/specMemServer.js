@@ -14,7 +14,7 @@
 // Uses project-isolated path: /tmp/specmem-${PROJECT_HASH}/mcp-startup.log
 // ============================================================================
 import { existsSync, mkdirSync } from 'fs';
-import { appendFile } from 'fs/promises';
+import { appendFile, writeFile } from 'fs/promises';
 import * as path from 'path';
 // DEBUG LOGGING - only enabled when SPECMEM_DEBUG=1
 const __debugLog = process.env['SPECMEM_DEBUG'] === '1'
@@ -36,7 +36,13 @@ try {
     }
 }
 catch (mkdirErr) {
-    // Log at debug level - directory creation can fail if race condition or permissions
+    if (mkdirErr.code === 'EACCES' || mkdirErr.code === 'EPERM') {
+        console.error('\x1b[31m\x1b[1m  Hey, I need sudo! SpecMem can\'t create directories without proper permissions.\x1b[0m');
+        console.error(`\x1b[31m  Failed path: ${__projectTmpDir}\x1b[0m`);
+        console.error('\x1b[31m  Run with: sudo npx specmem-hardwicksoftware\x1b[0m');
+        process.exit(1);
+    }
+    // Log at debug level - directory creation can fail if race condition
     if (process.env.SPECMEM_DEBUG === 'true') {
         console.error(`[DEBUG] Failed to create tmp dir: ${mkdirErr}`);
     }
@@ -159,7 +165,7 @@ export class SpecMemServer {
         }, {
             capabilities: {
                 // CRITICAL FIX: Explicitly declare tool capabilities with listChanged
-                // This tells Claude that our tool list can change dynamically and
+                // This tells  that our tool list can change dynamically and
                 // it should respect sendToolListChanged() notifications
                 tools: {
                     listChanged: true // Signal we support dynamic tool list updates
@@ -171,7 +177,7 @@ export class SpecMemServer {
                 prompts: {
                     listChanged: true // Signal we support dynamic prompt list updates
                 },
-                // logging enabled so we can announce ourselves to Claude fr fr
+                // logging enabled so we can announce ourselves to  fr fr
                 logging: {}
             }
         });
@@ -180,22 +186,22 @@ export class SpecMemServer {
         // NOTE: The MCP SDK supports async oninitialized callbacks, so we use async/await
         this.server.oninitialized = async () => {
             const timestamp = new Date().toISOString();
-            // Enable progress reporter to use MCP sendLoggingMessage (visible in Claude Code!)
+            // Enable progress reporter to use MCP sendLoggingMessage (visible in  Code!)
             setProgressMcpServer(this.server);
             // DEBUG: Log to startup file for reliable debugging
             startupLog('oninitialized callback fired - MCP handshake complete');
             // DEBUG: Log with high visibility that the initialized notification was received
-            logger.info({ timestamp, event: 'HANDSHAKE_INITIALIZED' }, '[MCP DEBUG] Received initialized notification from Claude - handshake complete');
+            logger.info({ timestamp, event: 'HANDSHAKE_INITIALIZED' }, '[MCP DEBUG] Received initialized notification from  - handshake complete');
             // Write readiness signal to stderr for any process monitors
-            // This is critical for debugging - it shows up in Claude Code's stderr logs
+            // This is critical for debugging - it shows up in  Code's stderr logs
             process.stderr.write(`[SPECMEM DEBUG ${timestamp}] oninitialized callback fired - MCP handshake complete\n`);
             // Record activity on the resilient transport (if initialized)
             if (this.resilientTransport) {
                 this.resilientTransport.recordActivity();
             }
-            // CRITICAL FIX: Notify Claude that tools list is ready
-            // This triggers Claude to re-fetch the tools list via ListToolsRequest
-            // Without this, Claude may cache an empty tool list from early handshake
+            // CRITICAL FIX: Notify  that tools list is ready
+            // This triggers  to re-fetch the tools list via ListToolsRequest
+            // Without this,  may cache an empty tool list from early handshake
             startupLog('About to call notifyToolListReady() to trigger tools/list refresh');
             logger.info({ timestamp, event: 'HANDSHAKE_NOTIFY_TOOLS' }, '[MCP DEBUG] About to call notifyToolListReady() to trigger tools/list refresh');
             // IMPORTANT: Await the notification to ensure it's sent before continuing
@@ -211,9 +217,9 @@ export class SpecMemServer {
                 logger.error({ timestamp, event: 'HANDSHAKE_NOTIFY_ERROR', error: error.message }, '[MCP DEBUG] Failed to notify tool list - tools may not be available');
                 process.stderr.write(`[SPECMEM ERROR ${timestamp}] Tool notification failed: ${error.message}\n`);
             }
-            // Send the startup announcement to Claude
-            startupLog('Calling announceToClaudeOnStartup()');
-            this.announceToClaudeOnStartup();
+            // Send the startup announcement to 
+            startupLog('Calling announceToOnStartup()');
+            this.announceToOnStartup();
         };
         // get that db connection no cap
         this.db = getDatabase(config.database);
@@ -233,10 +239,10 @@ export class SpecMemServer {
         this.server.setRequestHandler(ListToolsRequestSchema, async () => {
             const timestamp = new Date().toISOString();
             const requestId = `tools_list_${Date.now()}`;
-            // DEBUG: Log to startup file - this is the CRITICAL request Claude makes to get tools
-            startupLog(`tools/list request received from Claude (id: ${requestId})`);
+            // DEBUG: Log to startup file - this is the CRITICAL request  makes to get tools
+            startupLog(`tools/list request received from  (id: ${requestId})`);
             // DEBUG: Log that we received a tools/list request
-            logger.info({ timestamp, requestId, event: 'TOOLS_LIST_REQUEST' }, '[MCP DEBUG] Received tools/list request from Claude');
+            logger.info({ timestamp, requestId, event: 'TOOLS_LIST_REQUEST' }, '[MCP DEBUG] Received tools/list request from ');
             process.stderr.write(`[SPECMEM DEBUG ${timestamp}] tools/list request received (id: ${requestId})\n`);
             _SERVER_CACHE.hitCount++;
             _SERVER_CACHE.lastAccessTime = Date.now();
@@ -257,7 +263,7 @@ export class SpecMemServer {
             ];
             // DEBUG: Log the response we're about to send
             const toolNames = allTools.map(t => t.name);
-            startupLog(`tools/list response: ${allTools.length} tools being returned to Claude`);
+            startupLog(`tools/list response: ${allTools.length} tools being returned to `);
             logger.info({
                 timestamp,
                 requestId,
@@ -267,7 +273,7 @@ export class SpecMemServer {
                 cacheHitCount: _SERVER_CACHE.hitCount,
                 toolNames: toolNames.slice(0, 10), // First 10 tool names for debugging
                 totalTools: toolNames.length
-            }, `[MCP DEBUG] Returning ${allTools.length} tools to Claude`);
+            }, `[MCP DEBUG] Returning ${allTools.length} tools to `);
             process.stderr.write(`[SPECMEM DEBUG ${timestamp}] tools/list response: ${allTools.length} tools (first 5: ${toolNames.slice(0, 5).join(', ')})\n`);
             return { tools: allTools };
         });
@@ -438,6 +444,14 @@ export class SpecMemServer {
                 const hrTime = new Date().toISOString().split('T')[1]?.slice(0, 8) || '??:??:??';
                 const hrLine = `[${hrTime}] ${name} (${duration}ms) args=${argsPreview.slice(0, 80)} result=${resultPreview}\n`;
                 appendFile(hrLogPath, hrLine).catch(() => { });
+                // Update statusbar state for claudefix integration
+                const statusbarPath = path.join(serverProjectPath || process.cwd(), 'specmem', 'sockets', 'statusbar-state.json');
+                const statusState = {
+                    lastToolCall: { tool: name, duration, time: hrTime },
+                    mcpConnected: true,
+                    lastUpdate: Date.now()
+                };
+                writeFile(statusbarPath, JSON.stringify(statusState)).catch(() => { });
                 // log slow operations so we know whats up
                 if (duration > 100) {
                     __debugLog('[MCP DEBUG]', Date.now(), 'TOOL_SLOW_WARNING', { callId, toolName: name, durationMs: duration, threshold: 100 });
@@ -702,6 +716,13 @@ export class SpecMemServer {
             const timestamp = new Date().toISOString();
             const errorMsg = reason instanceof Error ? reason.message : String(reason);
             const errorStack = reason instanceof Error ? reason.stack : undefined;
+            // CHOKIDAR FIX: Known bug in chokidar when files are deleted while being watched
+            // These errors are non-fatal - the watcher continues to work
+            // Error: "Cannot read properties of undefined (reading 'close')"
+            if (errorStack && errorStack.includes('chokidar') && errorMsg.includes('close')) {
+                logger.debug({ error: errorMsg }, '[MCP] Chokidar file close error (non-fatal, file was deleted)');
+                return; // Don't log as error or update lastError
+            }
             logger.error({
                 timestamp,
                 event: 'UNHANDLED_REJECTION',
@@ -716,10 +737,10 @@ export class SpecMemServer {
         // Catches synchronous exceptions that weren't caught by try-catch
         process.on('uncaughtException', (error, origin) => {
             const timestamp = new Date().toISOString();
-            // EPIPE errors occur when Claude disconnects - this is normal, don't crash
+            // EPIPE errors occur when  disconnects - this is normal, don't crash
             // Just log and continue, the transport will handle reconnection
             if (error.code === 'EPIPE') {
-                logger.debug({ error: error.message }, '[MCP] EPIPE - Claude disconnected, ignoring');
+                logger.debug({ error: error.message }, '[MCP] EPIPE -  disconnected, ignoring');
                 return; // Don't crash on EPIPE
             }
             logger.error({
@@ -793,7 +814,7 @@ export class SpecMemServer {
             }
         }
         // DRILL-DOWN INSTRUCTION: Add prominent instruction for find_memory results with truncated content
-        // This helps Claude know how to get full content of any memory
+        // This helps  know how to get full content of any memory
         if (Array.isArray(result) && result.length > 0) {
             // Check if this looks like search results with truncated memories
             const hasTruncated = result.some((r) => r?.memory?.metadata?._truncated ||
@@ -809,10 +830,12 @@ export class SpecMemServer {
                 };
             }
         }
-        // Check if result is humanReadable format (starts with [SPECMEM-)
+        // Check if result is humanReadable format (starts with [SPECMEM-, [CAMERA-ROLL], etc)
         // Use smart compression that preserves structure but compresses content
         const resultStr = typeof result === 'string' ? result : '';
-        const isHumanReadable = resultStr.includes('[SPECMEM-') || resultStr.includes('\x1b[90m[SPECMEM-');
+        const isHumanReadable = resultStr.includes('[SPECMEM-') ||
+            resultStr.includes('[CAMERA-ROLL]') ||
+            resultStr.includes('\x1b[90m[SPECMEM-');
         if (isHumanReadable) {
             // Smart compress: preserve tags and structure, only compress content
             const smartCompressed = compressHumanReadableFormat(resultStr);
@@ -911,18 +934,18 @@ export class SpecMemServer {
         const startTimestamp = new Date().toISOString();
         startupLog('start() method called - beginning MCP transport connection');
         // === CRITICAL FIX: Connect MCP transport FIRST! ===
-        // Claude Code has a connection timeout - if we don't establish the
-        // stdio connection quickly, Claude shows "Failed to connect to MCP server"
+        //  Code has a connection timeout - if we don't establish the
+        // stdio connection quickly,  shows "Failed to connect to MCP server"
         //
         // Previous bug: Database init happened BEFORE transport connection,
-        // causing Claude to timeout if DB took too long.
+        // causing  to timeout if DB took too long.
         //
         // New approach: Connect transport immediately (fast), then initialize
         // database in the background. Tools will wait for DB if needed.
         logger.info({ timestamp: startTimestamp, event: 'SERVER_START' }, '[MCP DEBUG] Starting MCP server - connecting transport FIRST for fast connection...');
         process.stderr.write(`[SPECMEM DEBUG ${startTimestamp}] Server starting - connecting transport...\n`);
         // Step 1: Connect stdio transport IMMEDIATELY with proper error handling
-        // The transport connection must succeed for Claude to see us at all
+        // The transport connection must succeed for  to see us at all
         startupLog('Creating StdioServerTransport...');
         const transport = new StdioServerTransport();
         startupLog('StdioServerTransport created');
@@ -954,13 +977,13 @@ export class SpecMemServer {
             }
             const connectDuration = Date.now() - connectStart;
             const connectedTimestamp = new Date().toISOString();
-            startupLog(`MCP TRANSPORT CONNECTED in ${connectDuration}ms - Claude can now communicate!`);
+            startupLog(`MCP TRANSPORT CONNECTED in ${connectDuration}ms -  can now communicate!`);
             logger.info({
                 timestamp: connectedTimestamp,
                 event: 'TRANSPORT_CONNECTED',
                 elapsedMs: Date.now() - new Date(startTimestamp).getTime()
-            }, '[MCP DEBUG] MCP transport connected - waiting for initialize request from Claude');
-            process.stderr.write(`[SPECMEM DEBUG ${connectedTimestamp}] Transport connected - waiting for Claude handshake\n`);
+            }, '[MCP DEBUG] MCP transport connected - waiting for initialize request from ');
+            process.stderr.write(`[SPECMEM DEBUG ${connectedTimestamp}] Transport connected - waiting for  handshake\n`);
         }
         catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error);
@@ -970,7 +993,7 @@ export class SpecMemServer {
                 timestamp: errorTimestamp,
                 event: 'TRANSPORT_FAILED',
                 error: errorMsg
-            }, '[MCP DEBUG] CRITICAL: Failed to connect MCP transport - Claude will not see this server');
+            }, '[MCP DEBUG] CRITICAL: Failed to connect MCP transport -  will not see this server');
             // Log to stderr explicitly since this is a critical startup failure
             process.stderr.write(`[SPECMEM FATAL ${errorTimestamp}] Transport connection failed: ${errorMsg}\n`);
             // Re-throw to let caller handle the failure
@@ -984,27 +1007,25 @@ export class SpecMemServer {
         this.resilientTransport.startMonitoring();
         logger.info('Resilient transport monitoring active - connection health tracked');
         startupLog('Resilient transport monitoring active');
-        // Step 3: Initialize database (can be deferred, tools will wait if needed)
+        // Step 3: Initialize embedding server manager EARLY (before slow DB init)
+        // This ensures heartbeats start ASAP to prevent KYS watchdog from killing embedding
+        // The embedding server has a 60-second grace period, but we want heartbeats ASAP
+        startupLog('Initializing embedding server manager (EARLY - before DB)...');
+        await this.initializeEmbeddingServerManager();
+        startupLog('Embedding server manager initialized - heartbeats active');
+        // Step 4: Initialize database (can be deferred, tools will wait if needed)
         // This runs async but we track it so tools can wait for it
         startupLog('Starting deferred database initialization...');
         this.deferredInitPromise = this.initializeDatabaseDeferred();
         // For backward compat, await the init here
-        // But the MCP connection is already established, so Claude won't timeout
+        // But the MCP connection is already established, so  won't timeout
         await this.deferredInitPromise;
-        startupLog('Deferred database initialization complete - start() finished');
-        // Step 4: Initialize centralized health monitoring
+        startupLog('Deferred database initialization complete');
+        // Step 5: Initialize centralized health monitoring
         // This monitors transport, database, and embedding socket health
         startupLog('Initializing health monitor...');
         this.initializeHealthMonitor();
         startupLog('Health monitor initialized');
-        // Step 5: Initialize embedding server manager
-        // This ensures the embedding server is ALWAYS available when Claude needs it
-        // - Kills stale embedding processes from previous runs
-        // - Starts fresh embedding server
-        // - Monitors health and auto-restarts if it dies
-        startupLog('Initializing embedding server manager...');
-        await this.initializeEmbeddingServerManager();
-        startupLog('Embedding server manager initialized');
         // Step 6: Initialize Mini COT server manager (optional - for semantic gallery curation)
         startupLog('Initializing Mini COT server manager...');
         await this.initializeMiniCOTServerManager();
@@ -1036,7 +1057,7 @@ export class SpecMemServer {
     }
     /**
      * Initialize the embedding server lifecycle manager
-     * This ensures the embedding server is ALWAYS available when Claude needs it
+     * This ensures the embedding server is ALWAYS available when  needs it
      *
      * Features:
      * 1. On MCP server start: Check for stale processes, kill them, start fresh
@@ -1090,7 +1111,7 @@ export class SpecMemServer {
         });
         this.embeddingServerManager.on('unhealthy', ({ failures }) => {
             logger.warn({ failures }, '[EmbeddingServerManager] Embedding server unhealthy');
-            // Send notification to Claude
+            // Send notification to 
             this.sendEmbeddingServerNotification('unhealthy', failures);
         });
         this.embeddingServerManager.on('restarting', ({ attempt }) => {
@@ -1103,7 +1124,7 @@ export class SpecMemServer {
         });
     }
     /**
-     * Send embedding server notification to Claude via MCP logging
+     * Send embedding server notification to  via MCP logging
      */
     async sendEmbeddingServerNotification(event, value) {
         try {
@@ -1174,7 +1195,7 @@ export class SpecMemServer {
         });
     }
     /**
-     * Send Mini COT server status notification to Claude
+     * Send Mini COT server status notification to 
      */
     async sendMiniCOTServerNotification(event, value = 0) {
         try {
@@ -1223,7 +1244,7 @@ export class SpecMemServer {
                 errorCount: result.errorCount,
                 lastError: result.lastError
             }, `[HealthMonitor] ${component} health degraded`);
-            // Send notification to Claude if transport is still healthy
+            // Send notification to  if transport is still healthy
             this.sendHealthMonitorNotification('degraded', component, result);
         });
         // Handle component unhealthy
@@ -1233,7 +1254,7 @@ export class SpecMemServer {
                 errorCount: result.errorCount,
                 lastError: result.lastError
             }, `[HealthMonitor] ${component} is unhealthy`);
-            // Send notification to Claude
+            // Send notification to 
             this.sendHealthMonitorNotification('unhealthy', component, result);
         });
         // Handle component recovery
@@ -1241,7 +1262,7 @@ export class SpecMemServer {
             logger.info({
                 component
             }, `[HealthMonitor] ${component} recovered`);
-            // Send notification to Claude
+            // Send notification to 
             this.sendHealthMonitorNotification('recovered', component, result);
         });
         // Handle recovery attempts
@@ -1268,7 +1289,7 @@ export class SpecMemServer {
         });
     }
     /**
-     * Send health monitor notification to Claude via MCP logging
+     * Send health monitor notification to  via MCP logging
      */
     async sendHealthMonitorNotification(event, component, result) {
         try {
@@ -1305,8 +1326,8 @@ export class SpecMemServer {
             logger.warn({
                 lastActivityMs: health.lastActivityMs,
                 errorCount: health.errorCount
-            }, 'Connection degraded - Claude may be idle or disconnecting');
-            // Try to send a health check notification to Claude
+            }, 'Connection degraded -  may be idle or disconnecting');
+            // Try to send a health check notification to 
             this.sendHealthNotification('degraded', health);
         });
         // Handle connection restoration
@@ -1338,7 +1359,7 @@ export class SpecMemServer {
         this.resilientTransport.setKeepaliveCallback(async () => {
             try {
                 // Send a debug-level log message as keepalive ping
-                // This keeps the stdio connection active without spamming Claude's UI
+                // This keeps the stdio connection active without spamming 's UI
                 await this.server.sendLoggingMessage({
                     level: 'debug',
                     logger: 'specmem',
@@ -1352,7 +1373,7 @@ export class SpecMemServer {
             }
         });
         // Set up connection recovery callback - re-sends tool list notifications
-        // This fixes the issue where Claude caches an empty tool list
+        // This fixes the issue where  caches an empty tool list
         this.resilientTransport.setConnectionRecoveryCallback(async () => {
             logger.info('Connection recovered - re-sending tool list notification...');
             await this.notifyToolListReady();
@@ -1361,7 +1382,7 @@ export class SpecMemServer {
         // This is done in the tool call handler
     }
     /**
-     * Send health notification to Claude when connection state changes
+     * Send health notification to  when connection state changes
      */
     async sendHealthNotification(state, health) {
         try {
@@ -1466,7 +1487,7 @@ export class SpecMemServer {
             this.resilientTransport = null;
             logger.debug('Resilient transport shutdown complete');
         }
-        // Step 4: Try to send a goodbye message to Claude
+        // Step 4: Try to send a goodbye message to 
         try {
             await this.server.sendLoggingMessage({
                 level: 'notice',
@@ -1509,23 +1530,23 @@ export class SpecMemServer {
      * Get the tool registry for dynamic tool registration
      *
      * Useful for plugins or extensions that want to add tools at runtime.
-     * After registering new tools, call refreshToolList() to notify Claude.
+     * After registering new tools, call refreshToolList() to notify .
      */
     getToolRegistry() {
         return this.toolRegistry;
     }
     /**
-     * Refresh the tool list and notify Claude of changes
+     * Refresh the tool list and notify  of changes
      *
      * Call this after dynamically registering new tools to make them
-     * immediately available to Claude without requiring an MCP restart.
+     * immediately available to  without requiring an MCP restart.
      *
      * @example
      * ```typescript
      * const server = new SpecMemServer(embeddingProvider);
      * const registry = server.getToolRegistry();
      * registry.register(new MyCustomTool());
-     * await server.refreshToolList(); // Claude now sees the new tool!
+     * await server.refreshToolList(); //  now sees the new tool!
      * ```
      */
     async refreshToolList() {
@@ -1541,7 +1562,7 @@ export class SpecMemServer {
      * What it does:
      * 1. Re-scans skills directory to pick up new/changed skill files
      * 2. Reloads command handlers if they support dynamic reload
-     * 3. Notifies Claude that the tool list has changed (triggers re-fetch)
+     * 3. Notifies  that the tool list has changed (triggers re-fetch)
      *
      * @example
      * ```bash
@@ -1591,9 +1612,9 @@ export class SpecMemServer {
             catch (cmdLoaderError) {
                 logger.debug({ error: cmdLoaderError }, '[HotReload] Command loader reload skipped');
             }
-            // Notify Claude that tool list has changed
+            // Notify  that tool list has changed
             await this.notifyToolListReady();
-            logger.info('[HotReload] Tool list notification sent to Claude');
+            logger.info('[HotReload] Tool list notification sent to ');
         }
         catch (error) {
             logger.error({ error }, '[HotReload] Failed to reload tools');
@@ -1821,18 +1842,18 @@ export class SpecMemServer {
         await this.miniCOTServerManager.stop();
     }
     /**
-     * Notify Claude that the tool list is ready
+     * Notify  that the tool list is ready
      *
      * CRITICAL FOR TOOL AUTO-DISCOVERY:
      * This calls the MCP SDK's sendToolListChanged() method which sends a
-     * notifications/tools/list_changed notification to Claude Code.
+     * notifications/tools/list_changed notification to  Code.
      *
-     * When Claude receives this notification, it will:
+     * When  receives this notification, it will:
      * 1. Invalidate its cached tool list
      * 2. Make a new ListToolsRequest to get the updated list
      * 3. Make all 39+ SpecMem tools available in its tool palette
      *
-     * Without this notification, Claude may cache an empty or stale tool list
+     * Without this notification,  may cache an empty or stale tool list
      * from the initial handshake before all tools are registered.
      *
      * The MCP protocol flow:
@@ -1853,7 +1874,7 @@ export class SpecMemServer {
                 notifyId,
                 event: 'NOTIFY_TOOLS_START',
                 toolCount
-            }, '[MCP DEBUG] Sending tools/list_changed notification to Claude...');
+            }, '[MCP DEBUG] Sending tools/list_changed notification to ...');
             process.stderr.write(`[SPECMEM DEBUG ${timestamp}] Sending tools/list_changed notification (id: ${notifyId}, tools: ${toolCount})\n`);
             // Send the tools/list_changed notification
             // This is the KEY to making tools auto-discoverable!
@@ -1902,19 +1923,19 @@ export class SpecMemServer {
                 event: 'NOTIFY_TOOLS_FAILED',
                 error: error.message,
                 stack: error.stack
-            }, '[MCP DEBUG] FAILED to send tool list change notification - Claude may not see tools!');
+            }, '[MCP DEBUG] FAILED to send tool list change notification -  may not see tools!');
             process.stderr.write(`[SPECMEM DEBUG ${timestamp}] FAILED to send tools/list_changed: ${error.message}\n`);
             // Fallback: Write to stderr for debugging
             process.stderr.write(`[SPECMEM] Tool list ready: ${this.toolRegistry.getToolCount()} tools registered (notification failed)\n`);
         }
     }
     /**
-     * Announce specmem to Claude on startup
+     * Announce specmem to  on startup
      *
-     * yo this is the startup banner that lets Claude know we loaded fr fr
-     * shows all tools, skills, and dashboard URL so Claude knows whats available
+     * yo this is the startup banner that lets  know we loaded fr fr
+     * shows all tools, skills, and dashboard URL so  knows whats available
      */
-    announceToClaudeOnStartup() {
+    announceToOnStartup() {
         try {
             // get all available tools
             const tools = this.toolRegistry.getToolDefinitions();
@@ -1960,7 +1981,7 @@ ${toolsList}
                 .catch((err) => {
                 logger.debug({ error: err }, 'Announcement retry chain failed - non-fatal');
             });
-            logger.info('scheduled startup announcement to Claude');
+            logger.info('scheduled startup announcement to ');
         }
         catch (error) {
             logger.debug({ error }, 'failed to generate startup announcement - continuing anyway');
@@ -1984,7 +2005,7 @@ ${toolsList}
                 logger: 'specmem',
                 data: announcement
             });
-            logger.info({ attempt }, 'successfully sent startup announcement to Claude');
+            logger.info({ attempt }, 'successfully sent startup announcement to ');
         }
         catch (err) {
             const error = err instanceof Error ? err : new Error(String(err));
@@ -2007,7 +2028,7 @@ ${toolsList}
                 logger.warn({
                     attempts: maxRetries,
                     error: error.message
-                }, 'could not send startup announcement after all retries - Claude may not see tools list');
+                }, 'could not send startup announcement after all retries -  may not see tools list');
                 // Alternative: try sending as a notification if logging fails
                 try {
                     // Just log to stderr as fallback

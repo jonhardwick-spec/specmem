@@ -253,7 +253,7 @@ export declare class FindWhatISaid implements MCPTool<SearchMemoryParams, Search
     private aggregateDiscoverablePaths;
     /**
      * Generate context enrichment summary
-     * This is the KEY output that tells Claude what to explore next
+     * This is the KEY output that tells  what to explore next
      * Uses Traditional Chinese for token efficiency
      */
     private generateContextEnrichment;
@@ -263,12 +263,12 @@ export declare class FindWhatISaid implements MCPTool<SearchMemoryParams, Search
     private formatDrilldownAction;
     /**
      * Generate context for empty results
-     * Guides Claude on what to do when no memories match
+     * Guides  on what to do when no memories match
      */
     private generateEmptyResultContext;
     /**
      * Generate research spawn instructions
-     * These instructions tell Claude how to spawn a research team member
+     * These instructions tell  how to spawn a research team member
      * when local memory is insufficient
      */
     private generateResearchSpawnInstructions;
@@ -279,12 +279,12 @@ export declare class FindWhatISaid implements MCPTool<SearchMemoryParams, Search
     private extractMeaningfulPreview;
     /**
      * Extract meaningful content, skipping metadata-looking lines
-     * Returns actual content Claude can understand and drill down on
+     * Returns actual content  can understand and drill down on
      */
     private extractMeaningfulContent;
     /**
      * Create a semantic hint in Traditional Chinese for token efficiency
-     * This gives Claude a quick understanding of what the memory is about
+     * This gives  a quick understanding of what the memory is about
      */
     private createSemanticHint;
     /**

@@ -76,7 +76,7 @@ class SpecMemNavigation {
                 label: 'Hooks',
                 icon: '🪝',
                 href: '/hooks.html',
-                description: 'Manage custom Claude hooks'
+                description: 'Manage custom  hooks'
             }
         ];
     }

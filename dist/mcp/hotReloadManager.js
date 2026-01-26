@@ -203,7 +203,7 @@ export class HotReloadManager {
         await this.syncProjectConfigs();
         // Step 4: Restart Docker containers
         await this.restartDockerContainers();
-        // Step 5: Exit cleanly - Claude will respawn with new code
+        // Step 5: Exit cleanly -  will respawn with new code
         logger.info('[HotReload] Exiting for reload');
         process.exit(0);
     }

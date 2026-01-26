@@ -125,7 +125,7 @@ export async function createProjectSchema(db, schemaName) {
             return false;
         }
         // HIGH-32 FIX: Use format() with %I for safe identifier quoting
-        const formatResult = await db.query(`SELECT format('CREATE SCHEMA IF NOT EXISTS %I', $1) as sql`, [schemaName]);
+        const formatResult = await db.query(`SELECT format('CREATE SCHEMA IF NOT EXISTS %I', $1::text) as sql`, [schemaName]);
         await db.query(formatResult.rows[0].sql);
         logger.info({ schemaName }, 'Created new project schema');
         return true;

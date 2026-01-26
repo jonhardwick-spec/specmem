@@ -5,7 +5,7 @@
  */
 import { z } from 'zod';
 import { logger } from '../../utils/logger.js';
-import { compactXmlResponse } from '../../utils/compactXmlResponse.js';
+import { formatHumanReadableStatus } from '../../utils/humanReadableOutput.js';
 export const CheckSyncStatusInput = z.object({
     detailed: z.boolean().default(false).describe('Include detailed drift information')
 });
@@ -71,19 +71,20 @@ export class CheckSyncStatus {
                 };
             }
             logger.info({ inSync: driftReport.inSync, syncScore: driftReport.syncScore }, 'sync check complete');
-            // Build compact XML response with sync stats as attributes
-            const xmlData = {
-                score: Math.round(driftReport.syncScore * 100),
-                drifted: driftReport.missingFromMcp.length + driftReport.missingFromDisk.length + driftReport.contentMismatch.length,
-                missing: driftReport.missingFromMcp.length,
-                deleted: driftReport.missingFromDisk.length,
-                modified: driftReport.contentMismatch.length,
-                upToDate: driftReport.upToDate,
-                watcherRunning: watcherStatus.isRunning ? 1 : 0,
-                eventsProcessed: watcherStatus.watcher.eventsProcessed,
-                summary: summary
-            };
-            return compactXmlResponse(xmlData, 'sync');
+            // Build human readable response
+            const drifted = driftReport.missingFromMcp.length + driftReport.missingFromDisk.length + driftReport.contentMismatch.length;
+            const message = `Sync Score: ${Math.round(driftReport.syncScore * 100)}%
+${summary}
+
+Stats:
+  Up to date: ${driftReport.upToDate}
+  Drifted: ${drifted}
+  Missing: ${driftReport.missingFromMcp.length}
+  Deleted: ${driftReport.missingFromDisk.length}
+  Modified: ${driftReport.contentMismatch.length}
+  Watcher: ${watcherStatus.isRunning ? 'Running' : 'Stopped'}
+  Events: ${watcherStatus.watcher.eventsProcessed}`;
+            return formatHumanReadableStatus('check_sync', message);
         }
         catch (error) {
             logger.error({ error, params }, 'failed to check sync status');

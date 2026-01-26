@@ -1,0 +1,24 @@
+# Runtime state files
+**/specmem/sockets/
+**/claude-input-state.json
+**/seen-sessions.json
+**/session-start.lock
+**/session-stops.log
+**/embedding-death-reason.txt
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+
+# Dev/build artifacts
+*.tgz
+.git/
+.gitignore
+src/
+tsconfig.json
+ai-detector.js
+SPECMEM-DOGS-*.md
+
+# IDE
+.vscode/
+.idea/

@@ -9,7 +9,7 @@
  * 3. Trigger background indexing/extraction when needed
  * 4. Report progress in server logs
  *
- * Everything is ready when Claude starts, not on-demand!
+ * Everything is ready when  starts, not on-demand!
  */
 import { logger } from '../utils/logger.js';
 import { getDatabase } from '../database.js';
@@ -104,7 +104,7 @@ export async function checkCodebaseIndexStatus(db) {
     }
 }
 /**
- * Check if Claude sessions have been extracted
+ * Check if  sessions have been extracted
  * Returns stats about extracted sessions
  */
 export async function checkSessionExtractionStatus(db) {
@@ -171,7 +171,7 @@ export async function triggerBackgroundIndexing(embeddingProvider, options = {})
         }
         if (!options.silent) {
             logger.info('Starting background codebase indexing...');
-            // Write to stderr for visibility in Claude Code CLI
+            // Write to stderr for visibility in  Code CLI
             process.stderr.write('[SpecMem] Starting background codebase indexing...\n');
         }
         // Import caching provider to wrap embedding provider
@@ -211,7 +211,7 @@ export async function triggerBackgroundIndexing(embeddingProvider, options = {})
 }
 /**
  * Trigger background session extraction
- * Extracts Claude Code sessions asynchronously
+ * Extracts  Code sessions asynchronously
  */
 export async function triggerBackgroundSessionExtraction(embeddingProvider, options = {}) {
     const state = getIndexingState();

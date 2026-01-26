@@ -9,7 +9,7 @@
  */
 import { z } from 'zod';
 import { logger } from '../../utils/logger.js';
-import { compactXmlResponse, stripNewlines } from '../../utils/compactXmlResponse.js';
+import { formatHumanReadableStatus } from '../../utils/humanReadableOutput.js';
 const SmartSearchInput = z.object({
     query: z.string().describe('What you looking for fr'),
     mode: z.enum(['basic', 'gallery', 'ask']).default('ask').describe('"basic" = fast af, "gallery" = Mini COT analysis, "ask" = let me choose'),
@@ -17,7 +17,7 @@ const SmartSearchInput = z.object({
     threshold: z.number().min(0).max(1).default(0.25).describe('Similarity threshold (0-1). Default 0.25 filters garbage.')
 });
 /**
- * SmartSearch - helps Claude present search mode options to users
+ * SmartSearch - helps  present search mode options to users
  */
 export class SmartSearch {
     name = 'smart_search';
@@ -54,49 +54,36 @@ export class SmartSearch {
             query: safeParams.query,
             mode: safeParams.mode
         }, 'Smart search initiated - user choosing their vibe');
-        // If mode is 'ask', return options for Claude to present
+        // If mode is 'ask', return options for  to present
         // Apply compact XML for token efficiency
         if (safeParams.mode === 'ask') {
-            const options = [
-                {
-                    mode: 'basic',
-                    description: stripNewlines('Fast keyword + semantic search. Returns raw memories instantly.'),
-                    speed: 'Instant (~100-500ms)',
-                    bestFor: stripNewlines('Quick lookups, finding specific info, browsing history')
-                },
-                {
-                    mode: 'gallery',
-                    description: stripNewlines('Mini COT Decision Model analyzes each memory with Chain-of-Thought reasoning.'),
-                    speed: 'Slower (~5-15s)',
-                    bestFor: stripNewlines('Deep analysis, understanding complex topics, research synthesis'),
-                    note: 'EXPERIMENTAL - requires Mini COT service running (TinyLlama)'
-                }
-            ];
-            return compactXmlResponse({
-                needsUserChoice: true,
-                query: safeParams.query,
-                options,
-                recommendation: stripNewlines('Use BASIC for quick searches, GALLERY when you need detailed analysis of results')
-            }, 'searchOptions');
+            const message = `Query: "${safeParams.query}"
+
+Choose search mode:
+1. BASIC - Fast semantic search (~100-500ms)
+   Best for: Quick lookups, finding specific info
+
+2. GALLERY - Mini COT analysis (~5-15s)
+   Best for: Deep analysis, research synthesis
+   Note: Experimental - requires TinyLlama
+
+Recommendation: Use BASIC for quick searches, GALLERY for detailed analysis`;
+            return formatHumanReadableStatus('smart_search', message);
         }
         // If mode is specified, return parameters for find_memory
-        // Apply compact XML for token efficiency
         const galleryMode = safeParams.mode === 'gallery';
-        return compactXmlResponse({
-            action: 'call_find_memory',
-            parameters: {
-                query: safeParams.query,
-                galleryMode,
-                limit: safeParams.limit,
-                threshold: safeParams.threshold,
-                summarize: true,
-                maxContentLength: 500
-            },
-            mode: safeParams.mode,
-            message: stripNewlines(galleryMode
-                ? 'Initiating Gallery Mode - Mini COT will analyze results with COT reasoning...'
-                : 'Initiating Basic Search - fast semantic + keyword matching...')
-        }, 'searchAction');
+        const modeMsg = galleryMode
+            ? 'Gallery Mode - Mini COT will analyze with reasoning...'
+            : 'Basic Search - fast semantic + keyword matching...';
+        const message = `Mode: ${safeParams.mode.toUpperCase()}
+${modeMsg}
+
+→ Call find_memory with:
+  query: "${safeParams.query}"
+  galleryMode: ${galleryMode}
+  limit: ${safeParams.limit}
+  threshold: ${safeParams.threshold}`;
+        return formatHumanReadableStatus('smart_search', message);
     }
 }
 //# sourceMappingURL=smartSearch.js.map

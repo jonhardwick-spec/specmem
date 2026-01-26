@@ -2,7 +2,7 @@
  * CommandLoader - Load command .md files as MCP prompts
  *
  * This loads specmem command files from the commands/ directory
- * and registers them as MCP prompts so Claude can use them anywhere
+ * and registers them as MCP prompts so  can use them anywhere
  * the MCP server is deployed.
  *
  * Commands become prompts like:

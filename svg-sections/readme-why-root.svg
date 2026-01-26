@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c2128;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#21262d;stop-opacity:0.85"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#ef4444"/>
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#4ade80"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="520" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="800" height="520" rx="16" ry="16" fill="none" stroke="url(#titleGrad)" stroke-width="1" stroke-opacity="0.25"/>
+
+  <!-- Title area -->
+  <text x="400" y="38" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="700" fill="url(#titleGrad)">Why Root?</text>
+  <text x="400" y="58" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">We're working on removing it. Here's why it's here right now.</text>
+
+  <!-- Row 1: 3 cards -->
+
+  <!-- Card 1: System Hooks -->
+  <g transform="translate(17, 75)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#f59e0b"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#fbbf24">~/.claude/hooks/</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">20+ hooks get installed to your</tspan>
+      <tspan x="16" dy="15">user-level Claude config. That's</tspan>
+      <tspan x="16" dy="15">a system path on most Linux</tspan>
+      <tspan x="16" dy="15">setups. Needs elevated perms.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 2: Docker -->
+  <g transform="translate(277, 75)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#ef4444"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f87171">/var/run/docker.sock</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">PostgreSQL + pgvector runs in</tspan>
+      <tspan x="16" dy="15">Docker. Container creation,</tspan>
+      <tspan x="16" dy="15">volume management, networking.</tspan>
+      <tspan x="16" dy="15">Docker socket needs root access.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 3: Global NPM -->
+  <g transform="translate(537, 75)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#f59e0b"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#fbbf24">/usr/local/lib/node_modules/</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">Global npm install writes to</tspan>
+      <tspan x="16" dy="15">system paths and symlinks</tspan>
+      <tspan x="16" dy="15">binaries to /usr/local/bin/.</tspan>
+      <tspan x="16" dy="15">That's just how npm works.</tspan>
+    </text>
+  </g>
+
+  <!-- Row 2: 3 cards -->
+
+  <!-- Card 4: Screen Sessions -->
+  <g transform="translate(17, 210)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#ef4444"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f87171">screen -dmS specmem-*</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">Embedding server, file watcher,</tspan>
+      <tspan x="16" dy="15">MCP server all run in detached</tspan>
+      <tspan x="16" dy="15">screen sessions. Managing those</tspan>
+      <tspan x="16" dy="15">system-wide needs permissions.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 5: PostgreSQL -->
+  <g transform="translate(277, 210)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#f59e0b"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#fbbf24">CREATE DATABASE specmem</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">First-run creates the database,</tspan>
+      <tspan x="16" dy="15">enables pgvector, runs migrations,</tspan>
+      <tspan x="16" dy="15">sets up per-project schemas.</tspan>
+      <tspan x="16" dy="15">DB config needs elevated access.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 6: File Watching -->
+  <g transform="translate(537, 210)">
+    <rect width="246" height="120" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+    <rect width="246" height="3" rx="1.5" fill="#ef4444"/>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f87171">chokidar.watch('**/*')</text>
+    <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+      <tspan x="16" y="52">Watches thousands of files across</tspan>
+      <tspan x="16" dy="15">your entire codebase. Some dirs</tspan>
+      <tspan x="16" dy="15">have restrictive permissions.</tspan>
+      <tspan x="16" dy="15">Root ensures full access.</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom section: the real talk -->
+  <rect x="17" y="348" width="766" height="80" rx="10" fill="url(#cardGrad)" stroke="#30363d" stroke-width="1"/>
+  <rect x="17" y="348" width="766" height="3" rx="1.5" fill="url(#cyanPurple)"/>
+
+  <text x="400" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#e6edf3">The real talk:</text>
+  <text font-family="system-ui, sans-serif" font-size="11" fill="#8b949e">
+    <tspan x="34" y="395">Root means you own your machine. This isn't software for corporate laptops. If you can't</tspan>
+    <tspan x="34" dy="15">run sudo, you probably don't own the box. Root acts as a natural filter for power users</tspan>
+    <tspan x="34" dy="15">who actually control their systems. Companies wanting managed deployments? Talk to us.</tspan>
+  </text>
+
+  <!-- Bun migration note -->
+  <rect x="17" y="445" width="766" height="58" rx="10" fill="#22c55e" fill-opacity="0.08" stroke="#22c55e" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="400" y="472" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#4ade80">Bun migration is in progress. Root requirement will be dropped entirely.</text>
+  <text x="400" y="492" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#6e7681">When it lands, you'll run SpecMem as a regular user with Docker handled separately.</text>
+</svg>

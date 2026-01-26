@@ -14,7 +14,7 @@
  * Hook Type: PreToolUse (intercepts Task tool calls before execution)
  *
  * Flow:
- *   1. Claude calls Task tool to spawn a team member
+ *   1.  calls Task tool to spawn a team member
  *   2. This hook intercepts the call
  *   3. The prompt is modified to include team framing
  *   4. TeamMember spawns with team context + original task
@@ -66,7 +66,7 @@ export declare function updateTeamConfig(updates: Partial<TeamFramingConfig>): T
  */
 export declare function resetTeamConfig(): TeamFramingConfig;
 /**
- * Claude Code PreToolUse hook input format
+ *  Code PreToolUse hook input format
  */
 export interface PreToolUseInput {
     tool_name: string;
@@ -101,7 +101,7 @@ export interface TeamFramingResult {
  */
 export declare function teamMemberPrepromptHook(toolName: string, toolInput: Record<string, unknown>, config?: Partial<TeamFramingConfig>): Promise<TeamFramingResult>;
 /**
- * CLI entry point for Claude Code PreToolUse hook
+ * CLI entry point for  Code PreToolUse hook
  * Reads JSON from stdin: { "tool_name": "...", "tool_input": {...} }
  * Outputs modified tool input to stdout (as JSON)
  */

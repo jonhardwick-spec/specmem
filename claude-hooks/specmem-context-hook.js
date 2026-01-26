@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * SpecMem Context Hook for Claude Code
+ * SpecMem Context Hook for  Code
  *
- * Automatically injects relevant memories into Claude Code sessions
+ * Automatically injects relevant memories into  Code sessions
  * using Traditional Chinese compression for token efficiency.
  *
  * Hook Event: UserPromptSubmit
- * Output: Compressed context via stdout for Claude to consume
+ * Output: Compressed context via stdout for  to consume
  */
 
 const path = require('path');
@@ -184,7 +184,7 @@ async function getRecentImportantMemories(client, limit = 3) {
 
 /**
  * Format memories for context injection
- * FLATTENED: Uses pipe separators instead of newlines to avoid breaking Claude's formatting
+ * FLATTENED: Uses pipe separators instead of newlines to avoid breaking 's formatting
  */
 function formatMemories(memories, options = {}) {
   const { compress = CONFIG.enableCompression, maxLength = CONFIG.maxContentLength } = options;
@@ -282,7 +282,7 @@ async function handleUserPrompt(hookData) {
     return context;
 
   } catch (error) {
-    // Graceful fallback - don't disrupt Claude Code when DB unavailable
+    // Graceful fallback - don't disrupt  Code when DB unavailable
     return null;
   } finally {
     try {
@@ -294,7 +294,7 @@ async function handleUserPrompt(hookData) {
 }
 
 // ============================================================================
-// Claude Code Hook Interface
+//  Code Hook Interface
 // ============================================================================
 
 /**
@@ -324,12 +324,12 @@ async function main() {
     const context = await handleUserPrompt(hookData);
 
     if (context) {
-      // Output to stdout for Claude to consume
+      // Output to stdout for  to consume
       console.log(context);
     }
 
   } catch (error) {
-    // Silent fail - don't disrupt Claude Code
+    // Silent fail - don't disrupt  Code
   }
 }
 
@@ -352,6 +352,6 @@ module.exports = {
 // Run if called directly
 if (require.main === module) {
   main().catch(() => {
-    process.exit(0); // Exit cleanly to not block Claude
+    process.exit(0); // Exit cleanly to not block 
   });
 }

@@ -338,7 +338,7 @@ function formatOutput(memories, lastSession, projectPath, sessionId) {
   if (lastSession && lastSession.content) {
     sections.push('');
     sections.push(`## PREVIOUS SESSION OUTPUT (${lastSession.ageMinutes}m ago, reason: ${lastSession.reason})`);
-    sections.push('(Previous Claude session):');
+    sections.push('(Previous  session):');
     sections.push('```');
     // DON'T compress - just take first 500 chars of clean content
     sections.push(lastSession.content.slice(0, 500).trim());
@@ -350,7 +350,7 @@ function formatOutput(memories, lastSession, projectPath, sessionId) {
     sections.push('');
     sections.push('## Last Conversation (this project):');
     memories.slice(0, 10).forEach((mem, i) => {
-      const role = mem.role === 'USER' ? '[User]' : mem.role === 'CLAUDE' ? '[Claude]' : '[Sys]';
+      const role = mem.role === 'USER' ? '[User]' : mem.role === 'CLAUDE' ? '[]' : '[Sys]';
       const content = mem.content.replace(/\s+/g, ' ').trim().slice(0, 150);
       sections.push(`${i + 1}. ${role} ${content}...`);
     });
@@ -434,8 +434,8 @@ async function main() {
   // CRITICAL: Update global project path for schema isolation
   _projectPath = projectPath;
 
-  // REGISTER MAIN SESSION - SessionStart ONLY fires for main Claude, not agents
-  // This allows team-comms-enforcer to distinguish main Claude from spawned agents
+  // REGISTER MAIN SESSION - SessionStart ONLY fires for main , not agents
+  // This allows team-comms-enforcer to distinguish main  from spawned agents
   try {
     const crypto = require('crypto');
     const projectHash = crypto.createHash('sha256').update(path.resolve(projectPath)).digest('hex').slice(0, 12);
@@ -482,7 +482,7 @@ async function main() {
     includeWarning: false  // We add our own prefix below
   });
 
-  // Prepend reminder for Claude to read the compressed Chinese AND respond in English
+  // Prepend reminder for  to read the compressed Chinese AND respond in English
   const prefixedOutput = `[SpecMem Context - Read this for continuity]
 IMPORTANT: You can read Traditional Chinese compression with 99%+ accuracy. ALWAYS respond in English.
 ${compressed}`;

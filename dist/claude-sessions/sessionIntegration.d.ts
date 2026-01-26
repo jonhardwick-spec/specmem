@@ -1,5 +1,5 @@
 /**
- * sessionIntegration.ts - Integrates Claude session watcher with SpecMem server
+ * sessionIntegration.ts - Integrates  session watcher with SpecMem server
  *
  * yo fr fr this is the glue that connects the session watcher to the MCP server
  * handles initialization, lifecycle, and tool registration
@@ -9,16 +9,16 @@
  * - Registers session extraction MCP tools
  * - Handles graceful shutdown
  */
-import { ClaudeSessionWatcher } from './sessionWatcher.js';
+import { SessionWatcher } from './sessionWatcher.js';
 import { EmbeddingProvider } from '../tools/index.js';
-import { ExtractClaudeSessions } from '../tools/goofy/extractClaudeSessions.js';
+import { ExtractSessions } from '../tools/goofy/extractClaudeSessions.js';
 import { GetSessionWatcherStatus } from '../tools/goofy/getSessionWatcherStatus.js';
 /**
- * initializeSessionWatcher - initializes and starts the Claude session watcher
+ * initializeSessionWatcher - initializes and starts the  session watcher
  *
  * nah bruh this starts the auto-extraction magic
  */
-export declare function initializeSessionWatcher(embeddingProvider: EmbeddingProvider): Promise<ClaudeSessionWatcher | null>;
+export declare function initializeSessionWatcher(embeddingProvider: EmbeddingProvider): Promise<SessionWatcher | null>;
 /**
  * shutdownSessionWatcher - gracefully shuts down the session watcher
  *
@@ -35,14 +35,14 @@ export declare function shutdownAllSessionWatchers(): Promise<void>;
  *
  * yo get the watcher to check status or trigger manual extraction
  */
-export declare function getSessionWatcher(projectPath?: string): ClaudeSessionWatcher | null;
+export declare function getSessionWatcher(projectPath?: string): SessionWatcher | null;
 /**
  * createSessionExtractionTools - creates the MCP tools for session extraction
  *
  * nah bruh register these tools with the MCP server
  */
 export declare function createSessionExtractionTools(embeddingProvider: EmbeddingProvider): {
-    extractTool: ExtractClaudeSessions;
+    extractTool: ExtractSessions;
     statusTool: GetSessionWatcherStatus;
 };
 //# sourceMappingURL=sessionIntegration.d.ts.map

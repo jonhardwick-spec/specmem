@@ -168,7 +168,7 @@ async function main() {
     const compressed = compressHookOutput(output, {
       threshold: 0.70,
       minLength: 30,
-      includeWarning: true  // Still remind Claude to respond in English
+      includeWarning: true  // Still remind  to respond in English
     });
     console.log(compressed);
   }

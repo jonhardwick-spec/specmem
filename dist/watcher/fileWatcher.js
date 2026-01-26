@@ -44,6 +44,13 @@ export class WatchForChangesNoCap {
     debouncedHandlers = new Map();
     // FIX MED-14 & LOW-15: Track latest event data per key to avoid stale closures
     pendingEventData = new Map();
+    // FIX Issue #13: Track when each debounce entry was created for age-based cleanup
+    debounceEntryTimestamps = new Map();
+    // FIX Issue #13: Configurable limits for debounce map growth
+    debounceMapMaxSize = parseInt(process.env['SPECMEM_DEBOUNCE_MAP_MAX_SIZE'] || '5000');
+    debounceCleanupIntervalMs = parseInt(process.env['SPECMEM_DEBOUNCE_CLEANUP_INTERVAL_MS'] || '300000'); // 5 min
+    debounceMaxAgeMs = parseInt(process.env['SPECMEM_DEBOUNCE_MAX_AGE_MS'] || '60000'); // 60s
+    debounceCleanupTimer = null;
     // stats tracking
     stats = {
         filesWatched: 0,
@@ -130,6 +137,11 @@ export class WatchForChangesNoCap {
                     '**/memory-dumps/**',
                     '**/tmp/**',
                     '**/temp/**',
+                    // SpecMem runtime directories - NEVER watch these
+                    // statusbar-state.json changes every few seconds causing infinite feedback loops
+                    '**/specmem/sockets/**',
+                    '**/specmem/run/**',
+                    '**/.specmem/**',
                     // Test artifacts
                     '**/coverage/**',
                     '**/__pycache__/**',
@@ -185,6 +197,10 @@ export class WatchForChangesNoCap {
             this.setupEventHandlers();
             this.isWatching = true;
             this.restartCount = 0;
+            // FIX Issue #13: Start periodic cleanup of stale debounce entries
+            this.debounceCleanupTimer = setInterval(() => {
+                this.cleanupStaleDebounceEntries();
+            }, this.debounceCleanupIntervalMs);
             logger.info('file watcher started successfully - were LIVE');
         }
         catch (error) {
@@ -205,6 +221,11 @@ export class WatchForChangesNoCap {
             await this.watcher.close();
             this.watcher = null;
         }
+        // FIX Issue #13: Clear debounce cleanup timer
+        if (this.debounceCleanupTimer) {
+            clearInterval(this.debounceCleanupTimer);
+            this.debounceCleanupTimer = null;
+        }
         // FIX MED-13: Cancel all debounced handlers before clearing to prevent memory leaks
         // The debounce library's clear() method cancels pending timer execution
         for (const handler of this.debouncedHandlers.values()) {
@@ -212,6 +233,7 @@ export class WatchForChangesNoCap {
         }
         this.debouncedHandlers.clear();
         this.pendingEventData.clear();
+        this.debounceEntryTimestamps.clear();
         this.isWatching = false;
         logger.info({ stats: this.stats }, 'file watcher stopped - peace out');
     }
@@ -223,25 +245,48 @@ export class WatchForChangesNoCap {
     setupEventHandlers() {
         if (!this.watcher)
             return;
-        // file added
+        // file added - wrap all handlers for safety
         this.watcher.on('add', (path, stats) => {
-            this.handleEvent('add', path, stats);
+            try {
+                this.handleEvent('add', path, stats);
+            } catch (e) {
+                logger.debug({ path, error: e?.message }, 'add event error');
+            }
         });
         // file changed
         this.watcher.on('change', (path, stats) => {
-            this.handleEvent('change', path, stats);
+            try {
+                this.handleEvent('change', path, stats);
+            } catch (e) {
+                logger.debug({ path, error: e?.message }, 'change event error');
+            }
         });
-        // file deleted
+        // file deleted - wrap in try-catch for chokidar's close bug
         this.watcher.on('unlink', (path) => {
-            this.handleEvent('unlink', path);
+            try {
+                this.handleEvent('unlink', path);
+            } catch (e) {
+                // Chokidar bug: "Cannot read properties of undefined (reading 'close')"
+                // File is already deleted, no leak - just log and continue
+                logger.debug({ path, error: e?.message }, 'unlink event error (file already gone)');
+            }
         });
         // directory added
         this.watcher.on('addDir', (path, stats) => {
-            this.handleEvent('addDir', path, stats);
+            try {
+                this.handleEvent('addDir', path, stats);
+            } catch (e) {
+                logger.debug({ path, error: e?.message }, 'addDir event error');
+            }
         });
-        // directory deleted
+        // directory deleted - wrap in try-catch for chokidar's close bug
         this.watcher.on('unlinkDir', (path) => {
-            this.handleEvent('unlinkDir', path);
+            try {
+                this.handleEvent('unlinkDir', path);
+            } catch (e) {
+                // Directory already gone, no leak
+                logger.debug({ path, error: e?.message }, 'unlinkDir event error (dir already gone)');
+            }
         });
         // ready event (initial scan complete)
         this.watcher.on('ready', () => {
@@ -296,7 +341,13 @@ export class WatchForChangesNoCap {
             // already debouncing this file - the handler will use updated pendingEventData
             // FIX MED-14: Don't return early - we've already updated the event data above
             // The debounced function will pick up the latest event when it fires
+            // Update the timestamp for the existing entry
+            this.debounceEntryTimestamps.set(key, Date.now());
             return;
+        }
+        // FIX Issue #13: If debounce map exceeds max size, flush oldest entries immediately
+        if (this.debouncedHandlers.size >= this.debounceMapMaxSize) {
+            this.flushOldestDebounceEntries();
         }
         // create debounced handler that reads latest event data when executing
         const debouncedHandler = debounce(async () => {
@@ -319,15 +370,107 @@ export class WatchForChangesNoCap {
                 logger.error({ error, event: latestEvent }, 'error processing file change');
             }
             finally {
-                // remove from debounce map and pending data
+                // remove from debounce map, pending data, and timestamps
                 this.debouncedHandlers.delete(key);
                 this.pendingEventData.delete(key);
+                this.debounceEntryTimestamps.delete(key);
             }
         }, this.config.debounceMs);
         this.debouncedHandlers.set(key, debouncedHandler);
+        // FIX Issue #13: Track when this debounce entry was created
+        this.debounceEntryTimestamps.set(key, Date.now());
         debouncedHandler();
         if (this.config.verbose) {
             logger.debug({ event }, 'file change detected');
+        }
+    }
+    /**
+     * FIX Issue #13: Flush the oldest debounce entries immediately when map exceeds max size.
+     * Fires the debounced handlers immediately (processes them without waiting for debounce timer).
+     */
+    flushOldestDebounceEntries() {
+        // Sort entries by timestamp (oldest first) and flush 10% of the map
+        const entries = [...this.debounceEntryTimestamps.entries()]
+            .sort((a, b) => a[1] - b[1]);
+        const flushCount = Math.max(1, Math.ceil(entries.length * 0.1));
+        let flushedCount = 0;
+        for (let i = 0; i < flushCount && i < entries.length; i++) {
+            const [key] = entries[i];
+            const handler = this.debouncedHandlers.get(key);
+            if (handler) {
+                // Cancel the debounce timer and fire immediately
+                handler.clear();
+                this.debouncedHandlers.delete(key);
+                this.debounceEntryTimestamps.delete(key);
+                // Fire the handler immediately with the pending event data
+                const latestEvent = this.pendingEventData.get(key);
+                if (latestEvent && this.changeHandler) {
+                    this.pendingEventData.delete(key);
+                    // Fire and forget - don't await, just dispatch
+                    Promise.resolve().then(async () => {
+                        try {
+                            latestEvent.timestamp = new Date();
+                            await this.changeHandler(latestEvent);
+                            this.stats.eventsProcessed++;
+                            this.stats.lastEventTime = new Date();
+                        }
+                        catch (error) {
+                            this.stats.errors++;
+                            logger.error({ error, event: latestEvent }, 'error processing flushed debounce entry');
+                        }
+                    });
+                }
+                else {
+                    this.pendingEventData.delete(key);
+                }
+                flushedCount++;
+            }
+        }
+        if (flushedCount > 0) {
+            logger.warn({ flushedCount, mapSize: this.debouncedHandlers.size, maxSize: this.debounceMapMaxSize }, 'Flushed oldest debounce entries due to map size limit');
+        }
+    }
+    /**
+     * FIX Issue #13: Periodic cleanup of stale debounce entries older than debounceMaxAgeMs.
+     * Prevents unbounded growth when debounce timers keep getting reset.
+     */
+    cleanupStaleDebounceEntries() {
+        const now = Date.now();
+        let cleanedCount = 0;
+        for (const [key, timestamp] of this.debounceEntryTimestamps.entries()) {
+            if (now - timestamp > this.debounceMaxAgeMs) {
+                const handler = this.debouncedHandlers.get(key);
+                if (handler) {
+                    // Cancel the debounce timer and fire immediately
+                    handler.clear();
+                    this.debouncedHandlers.delete(key);
+                    // Fire the handler immediately with the pending event data
+                    const latestEvent = this.pendingEventData.get(key);
+                    if (latestEvent && this.changeHandler) {
+                        this.pendingEventData.delete(key);
+                        Promise.resolve().then(async () => {
+                            try {
+                                latestEvent.timestamp = new Date();
+                                await this.changeHandler(latestEvent);
+                                this.stats.eventsProcessed++;
+                                this.stats.lastEventTime = new Date();
+                            }
+                            catch (error) {
+                                this.stats.errors++;
+                                logger.error({ error, event: latestEvent }, 'error processing stale debounce entry');
+                            }
+                        });
+                    }
+                    else {
+                        this.pendingEventData.delete(key);
+                    }
+                }
+                this.debounceEntryTimestamps.delete(key);
+                cleanedCount++;
+            }
+        }
+        if (cleanedCount > 0) {
+            logger.warn({ cleanedCount, remainingEntries: this.debouncedHandlers.size }, 'Cleaned up stale debounce entries');
         }
     }
     /**

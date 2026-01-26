@@ -3,7 +3,7 @@
  * Agent Chooser Injection Hook
  * ============================
  *
- * SessionStart hook that injects standing instructions telling Claude
+ * SessionStart hook that injects standing instructions telling 
  * to ALWAYS ask the user before deploying agents via the Task tool.
  *
  * This gives users full control over every agent deployment!

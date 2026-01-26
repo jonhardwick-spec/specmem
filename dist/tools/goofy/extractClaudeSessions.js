@@ -1,7 +1,7 @@
 /**
- * extractClaudeSessions.ts - Manual Claude Session Extraction Tool
+ * extractSessions.ts - Manual  Session Extraction Tool
  *
- * yo fr fr manually trigger Claude session extraction
+ * yo fr fr manually trigger  session extraction
  * extracts ALL sessions or just new ones since last check
  *
  * This is the MCP tool that lets you manually extract sessions
@@ -11,21 +11,21 @@ import { z } from 'zod';
 import { logger, serializeError } from '../../utils/logger.js';
 import { createSessionParser } from '../../claude-sessions/sessionParser.js';
 import { getProjectPathForInsert, getCurrentProjectPath } from '../../services/ProjectContext.js';
-const ExtractClaudeSessionsInputSchema = z.object({
+const ExtractSessionsInputSchema = z.object({
     mode: z.enum(['all', 'new']).default('new').describe('Extraction mode: "all" to re-extract everything, "new" for only new entries since last extraction'),
     importance: z.enum(['critical', 'high', 'medium', 'low', 'trivial']).default('medium').describe('Importance level to assign to extracted session memories'),
     additionalTags: z.array(z.string()).optional().describe('Additional tags to add to all extracted session memories'),
     claudeDir: z.string().optional().describe('Custom path to .claude directory (defaults to ~/.claude)')
 });
 /**
- * ExtractClaudeSessions - manually extracts Claude Code sessions
+ * ExtractSessions - manually extracts  Code sessions
  *
  * nah bruh this is the manual extraction tool
  * perfect for when you first set this up or want to refresh
  */
-export class ExtractClaudeSessions {
+export class ExtractSessions {
     name = 'extract-claude-sessions';
-    description = 'Manually extract Claude Code FULL session history into specmem. Extracts BOTH user prompts AND Claude responses from session files. Use "new" mode for incremental updates or "all" to re-extract everything.';
+    description = 'Manually extract  Code FULL session history into specmem. Extracts BOTH user prompts AND  responses from session files. Use "new" mode for incremental updates or "all" to re-extract everything.';
     inputSchema = {
         type: 'object',
         properties: {
@@ -59,7 +59,7 @@ export class ExtractClaudeSessions {
         this.db = db;
     }
     async execute(args) {
-        logger.info({ mode: args.mode }, 'manual Claude session extraction started');
+        logger.info({ mode: args.mode }, 'manual  session extraction started');
         try {
             // FIX Task #13: Create parser WITH project filter for early filtering
             // This prevents parsing sessions from other projects (major performance win)
@@ -234,7 +234,7 @@ export class ExtractClaudeSessions {
                     }
                 }
             }
-            const message = `Extracted ${sessions.length} Claude sessions: ${stored} stored, ${failed} failed (${oversizedSkipped} oversized)`;
+            const message = `Extracted ${sessions.length}  sessions: ${stored} stored, ${failed} failed (${oversizedSkipped} oversized)`;
             logger.info({
                 extracted: sessions.length,
                 stored,
@@ -261,7 +261,7 @@ export class ExtractClaudeSessions {
         }
         catch (error) {
             const serialized = serializeError(error);
-            logger.error({ error: serialized }, 'Claude session extraction failed');
+            logger.error({ error: serialized }, ' session extraction failed');
             return {
                 success: false,
                 extracted: 0,
@@ -274,4 +274,4 @@ export class ExtractClaudeSessions {
         }
     }
 }
-//# sourceMappingURL=extractClaudeSessions.js.map
+//# sourceMappingURL=extractSessions.js.map

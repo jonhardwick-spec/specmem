@@ -1,7 +1,7 @@
 /**
  * terminalStream.ts - WebSocket Terminal Streaming API
  *
- * Provides WebSocket streaming of Claude Code terminal output with full
+ * Provides WebSocket streaming of  Code terminal output with full
  * ANSI support (colors, formatting, cursor positioning, etc.)
  */
 import { Router, Request, Response } from 'express';

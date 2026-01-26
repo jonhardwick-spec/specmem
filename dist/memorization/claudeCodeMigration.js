@@ -1,8 +1,8 @@
 /**
- * claudeCodeMigration.ts - Database migrations for Claude code tracking
+ * claudeCodeMigration.ts - Database migrations for  code tracking
  *
- * yooo this migration lets Claude REMEMBER what it wrote
- * no more massive explores because Claude will KNOW
+ * yooo this migration lets  REMEMBER what it wrote
+ * no more massive explores because  will KNOW
  * what code it created and WHY
  *
  * EMBEDDING DIMENSION NOTE:
@@ -14,20 +14,20 @@ import { logger } from '../utils/logger.js';
 /**
  * Migration to create claude_code_history table
  *
- * fr fr tracking everything Claude writes so it never forgets
+ * fr fr tracking everything  writes so it never forgets
  */
 export const claudeCodeHistoryMigration = {
     version: 15,
     name: 'create_claude_code_history',
     up: `
-    -- yooo Claude about to remember EVERYTHING it writes
+    -- yooo  about to remember EVERYTHING it writes
     -- no more massive explores needed fr
 
-    -- main table for tracking Claude's code
+    -- main table for tracking 's code
     CREATE TABLE IF NOT EXISTS claude_code_history (
       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
-      -- what did Claude write?
+      -- what did  write?
       file_path TEXT NOT NULL,
       file_name VARCHAR(255) NOT NULL,
       code_content TEXT NOT NULL,
@@ -35,7 +35,7 @@ export const claudeCodeHistoryMigration = {
         encode(sha256(code_content::bytea), 'hex')
       ) STORED,
 
-      -- why did Claude write it?
+      -- why did  write it?
       purpose TEXT NOT NULL,
       conversation_context TEXT,
 
@@ -176,8 +176,8 @@ export const claudeCodeHistoryMigration = {
 /**
  * Run the migration using a connection pool
  */
-export async function runClaudeCodeMigration(client) {
-    logger.info('running claude_code_history migration - Claude about to remember EVERYTHING');
+export async function runCodeMigration(client) {
+    logger.info('running claude_code_history migration -  about to remember EVERYTHING');
     const start = Date.now();
     try {
         await client.query(claudeCodeHistoryMigration.up);
@@ -192,7 +192,7 @@ export async function runClaudeCodeMigration(client) {
 /**
  * Check if migration has been applied
  */
-export async function isClaudeCodeMigrationApplied(client) {
+export async function isCodeMigrationApplied(client) {
     try {
         const result = await client.query(`
       SELECT EXISTS (

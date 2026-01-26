@@ -65,7 +65,7 @@ export class TeamMemberCommands {
             };
         }
         const missionPrompt = args.join(' ');
-        // This will be handled by Claude Code when it sees this result
+        // This will be handled by  Code when it sees this result
         // The actual deployment happens via the Task tool
         return {
             success: true,
@@ -86,7 +86,7 @@ export class TeamMemberCommands {
         };
     }
     async handleList() {
-        // This triggers Claude to use getActiveTeamMembers SpecMem tool
+        // This triggers  to use getActiveTeamMembers SpecMem tool
         return {
             success: true,
             message: 'TEAM_MEMBER_LIST_REQUESTED',

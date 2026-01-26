@@ -1,5 +1,5 @@
 /**
- * MemoryCommands - memory-related slash commands for Claude
+ * MemoryCommands - memory-related slash commands for 
  *
  * yo these are the commands for working with memories fr
  * - /memory store <content> - store a memory

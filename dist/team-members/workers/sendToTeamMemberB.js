@@ -42,7 +42,7 @@ COMPLETED TASKS (Steps 1-4 of Implementation Plan):
    - registerWithSpecMem() and sendSpecMemHeartbeat() for discovery
 
 4. AI WORKER (aiWorker.ts)
-   - Extends BaseWorker with Claude API integration
+   - Extends BaseWorker with  API integration
    - Supports opus/sonnet/haiku model variants
    - Streaming responses with token tracking
    - Command handlers: CHAT, EXECUTE_TASK, LISTEN, SAY, GET_TEAM_MEMBERS

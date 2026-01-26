@@ -1,7 +1,7 @@
 /**
- * Native Claude Agent Definitions for SpecMem
+ * Native  Agent Definitions for SpecMem
  *
- * These agent types can be spawned using Claude's native --agent flag.
+ * These agent types can be spawned using 's native --agent flag.
  * Each agent has a description and system prompt that defines its behavior.
  *
  * Usage: claude --agents '${JSON.stringify(SPECMEM_AGENTS)}' --agent bug-hunter

@@ -7,7 +7,7 @@
  * Features:
  * - Login system with password protection
  * - Memory management (view/search/delete)
- * - Session management (Claude sessions)
+ * - Session management ( sessions)
  * - Codebase browser
  * - Skills manager
  * - Team member coordination viewer
@@ -202,7 +202,7 @@ export declare class DashboardWebServer {
      */
     private bulkDeleteMemories;
     /**
-     * Get Claude sessions with detailed information
+     * Get  sessions with detailed information
      */
     private getSessions;
     /**

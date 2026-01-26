@@ -62,7 +62,7 @@ def main():
     # Fork to background so hook returns immediately
     pid = os.fork()
     if pid > 0:
-        # Parent exits fast so Claude continues
+        # Parent exits fast so  continues
         sys.exit(0)
 
     # Child waits for prompt to appear then sends Enter

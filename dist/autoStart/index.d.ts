@@ -2,14 +2,14 @@
  * SpecMem Auto-Start Mechanism
  *
  * Implements project-local SpecMem instances that:
- * 1. Automatically start when Claude Code starts
+ * 1. Automatically start when  Code starts
  * 2. Are isolated per project (using project path hash)
  * 3. Detect existing instances to prevent duplicates
- * 4. Handle graceful shutdown on Claude Code exit
+ * 4. Handle graceful shutdown on  Code exit
  * 5. Auto-restart on crash with backoff
  *
  * Integration Points:
- * - Claude Code spawns SpecMem via MCP server config
+ * -  Code spawns SpecMem via MCP server config
  * - Working directory passed via SPECMEM_PROJECT_PATH env var
  * - PID file stored in project's .specmem/ directory
  * - Socket/lock files for process detection

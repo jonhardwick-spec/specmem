@@ -85,8 +85,8 @@ export class TeamMemberDeployment extends EventEmitter {
             args = config.args || [];
         }
         else if (config.workerType === 'ai' && config.aiConfig) {
-            // REAL FIX: Inject prompt into current Claude session to deploy team member via Task tool!
-            // This triggers the overseer Claude to deploy a background team member
+            // REAL FIX: Inject prompt into current  session to deploy team member via Task tool!
+            // This triggers the overseer  to deploy a background team member
             const model = config.aiConfig.model || 'sonnet';
             const skillsPath = path.join(getSpecmemRoot(), 'skills/teammemberskills');
             let systemPrompt = config.aiConfig.systemPrompt || `You are ${config.name} - a background teamMember.`;
@@ -97,7 +97,7 @@ export class TeamMemberDeployment extends EventEmitter {
             systemPrompt += `\n\nTeam Member ID: ${teamMemberId}`;
             systemPrompt += `\nTeam Member Name: ${config.name}`;
             systemPrompt += '\n\nFirst action: Use the terminal injection API at http://localhost:8595/api/terminal-inject/inject to inject "Hello from team member 1" into the overseer terminal.';
-            // Inject prompt into current Claude session to trigger Task tool deployment
+            // Inject prompt into current  session to trigger Task tool deployment
             const prompt = `Deploy a ${model} background team member named "${config.name}" with the following instructions:\n\n${systemPrompt}\n\nUse the Task tool to deploy this teamMember. The team member should immediately inject "Hello from ${config.name}" into the terminal via the injection API.`;
             // Use terminal injection to trigger team member deployment in current session
             // MED-12 FIX: Use execFileSync with explicit args array instead of shell string

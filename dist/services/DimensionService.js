@@ -41,15 +41,27 @@ const EMBEDDING_TABLES = [
 /**
  * Service for dynamic embedding dimension management.
  * All dimension lookups go through the database - no hardcoded values.
+ *
+ * Issue #15 FIX: Cache TTL is now configurable via SPECMEM_DIMENSION_CACHE_TTL_MS (default 300000 = 5min).
+ * Stale cache entries are kept as fallback on fetch failure but logged as warnings.
+ * Dimension override via SPECMEM_EMBEDDING_DIMENSIONS env var.
+ * invalidateCache() method for embedding service restart coordination.
  */
 export class DimensionService {
     db;
     embeddingProvider = null;
     dimensionCache = new Map();
-    CACHE_TTL_MS = 60000; // 1 minute cache to avoid repeated queries
+    // Issue #15 FIX: Cache TTL is env-var configurable (default 5 minutes)
+    CACHE_TTL_MS = parseInt(process.env['SPECMEM_DIMENSION_CACHE_TTL_MS'] || '300000', 10);
+    // Issue #15 FIX: Track last successful verification timestamp
+    lastVerified = null;
     constructor(db, embeddingProvider) {
         this.db = db;
         this.embeddingProvider = embeddingProvider || null;
+        logger.info({
+            cacheTtlMs: this.CACHE_TTL_MS,
+            dimensionOverride: process.env['SPECMEM_EMBEDDING_DIMENSIONS'] || 'auto-detect'
+        }, 'DimensionService initialized with configurable cache TTL (Issue #15 fix)');
     }
     /**
      * Set the embedding provider (for lazy initialization)
@@ -66,11 +78,22 @@ export class DimensionService {
      * @returns The dimension, or null if table/column doesn't exist
      */
     async getTableDimension(tableName, columnName = 'embedding') {
-        // Check cache first
+        // Issue #15 FIX: Check for dimension override via env var (skip DB entirely)
+        const dimensionOverride = parseInt(process.env['SPECMEM_EMBEDDING_DIMENSIONS'] || '0', 10);
+        if (dimensionOverride > 0) {
+            logger.debug({ dimensionOverride, tableName }, 'Using SPECMEM_EMBEDDING_DIMENSIONS override');
+            return dimensionOverride;
+        }
+        // Check cache first - Issue #15 FIX: Use configurable TTL
         const cacheKey = `${tableName}.${columnName}`;
         const cached = this.dimensionCache.get(cacheKey);
         if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
             return cached.dimension;
+        }
+        // Issue #15 FIX: If cache expired, log it for debugging stale cache issues
+        if (cached) {
+            const ageMs = Date.now() - cached.timestamp;
+            logger.debug({ cacheKey, ageMs, ttl: this.CACHE_TTL_MS }, 'Dimension cache expired, re-fetching from database');
         }
         try {
             const result = await this.db.query(`SELECT atttypmod FROM pg_attribute
@@ -80,14 +103,28 @@ export class DimensionService {
                 return null;
             }
             const dimension = result.rows[0].atttypmod;
-            // Cache the result
+            // Cache the result with timestamp for TTL and lastVerified tracking
             this.dimensionCache.set(cacheKey, { dimension, timestamp: Date.now() });
+            this.lastVerified = Date.now();
             logger.debug({ tableName, columnName, dimension }, 'Retrieved vector dimension from database');
             return dimension;
         }
         catch (error) {
-            // Table might not exist yet
-            logger.debug({ error, tableName, columnName }, 'Failed to get dimension (table may not exist)');
+            // Issue #15 FIX: If fetch fails but we have a stale cached value, use it
+            // and log a warning. This prevents dimension mismatch errors during transient DB issues.
+            if (cached) {
+                logger.warn({
+                    error: error instanceof Error ? error.message : String(error),
+                    tableName,
+                    columnName,
+                    staleDimension: cached.dimension,
+                    staleAgeMs: Date.now() - cached.timestamp
+                }, 'Failed to refresh dimension from DB - using stale cached value. Will retry on next access.');
+                // Do NOT update the timestamp - keep it stale so next access retries
+                return cached.dimension;
+            }
+            // Table might not exist yet and no cache to fall back on
+            logger.debug({ error, tableName, columnName }, 'Failed to get dimension (table may not exist, no cache fallback)');
             return null;
         }
     }
@@ -238,18 +275,30 @@ export class DimensionService {
     }
     /**
      * Get cache statistics for debugging.
+     * Issue #15 FIX: Now includes lastVerified, TTL, and stale entry info.
      */
     getCacheStats() {
         const entries = [];
         const now = Date.now();
+        let staleCount = 0;
         this.dimensionCache.forEach((entry, key) => {
+            const age = now - entry.timestamp;
+            const isStale = age >= this.CACHE_TTL_MS;
+            if (isStale) staleCount++;
             entries.push({
                 key,
-                age: now - entry.timestamp
+                age,
+                isStale,
+                dimension: entry.dimension
             });
         });
         return {
             size: this.dimensionCache.size,
+            staleCount,
+            cacheTtlMs: this.CACHE_TTL_MS,
+            lastVerified: this.lastVerified,
+            lastVerifiedAge: this.lastVerified ? now - this.lastVerified : null,
+            dimensionOverride: parseInt(process.env['SPECMEM_EMBEDDING_DIMENSIONS'] || '0', 10) || null,
             entries
         };
     }
@@ -312,6 +361,24 @@ export class DimensionService {
             }
         });
         keysToDelete.forEach(key => this.dimensionCache.delete(key));
+    }
+    /**
+     * Issue #15 FIX: Invalidate ALL cached dimensions.
+     * Call this when the embedding service restarts or the model changes.
+     * The next dimension request will re-fetch from the database.
+     */
+    invalidateCache() {
+        const cacheSize = this.dimensionCache.size;
+        this.dimensionCache.clear();
+        this.lastVerified = null;
+        logger.info({ clearedEntries: cacheSize }, 'DimensionService cache invalidated (embedding service restart or model change)');
+    }
+    /**
+     * Issue #15 FIX: Get the timestamp of the last successful dimension verification.
+     * Returns null if no verification has occurred since startup/last invalidation.
+     */
+    getLastVerified() {
+        return this.lastVerified;
     }
     /**
      * Validate a query embedding against a table's expected dimension.

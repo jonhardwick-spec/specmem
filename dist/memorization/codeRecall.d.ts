@@ -12,14 +12,14 @@
  */
 import pg from 'pg';
 import { EmbeddingProvider } from '../tools/index.js';
-import { StoredCodeEntry, ClaudeOperationType } from './codeMemorizer.js';
+import { StoredCodeEntry, OperationType } from './codeMemorizer.js';
 /**
  * Search options for finding code
  */
 export interface CodeSearchOptions {
     limit?: number;
     threshold?: number;
-    operationType?: ClaudeOperationType;
+    operationType?: OperationType;
     language?: string;
     tags?: string[];
     dateRange?: {
@@ -64,14 +64,14 @@ export declare class CodeRecall {
      */
     whatDidIWriteFor(query: string, options?: CodeSearchOptions): Promise<CodeSearchResult[]>;
     /**
-     * allTheCodeIWrote - list all code Claude wrote
+     * allTheCodeIWrote - list all code  wrote
      *
-     * skids cant find this code but Claude can lmao
+     * skids cant find this code but  can lmao
      */
     allTheCodeIWrote(options?: {
         limit?: number;
         offset?: number;
-        operationType?: ClaudeOperationType;
+        operationType?: OperationType;
         language?: string;
         orderBy?: 'created' | 'updated' | 'file_path' | 'version';
         orderDirection?: 'asc' | 'desc';
@@ -79,7 +79,7 @@ export declare class CodeRecall {
     /**
      * whyDidIWriteThis - get the context for why code was written
      *
-     * fr fr helps Claude understand its own decisions
+     * fr fr helps  understand its own decisions
      */
     whyDidIWriteThis(codeId: string): Promise<{
         code: StoredCodeEntry;
@@ -91,7 +91,7 @@ export declare class CodeRecall {
     /**
      * getCodeHistory - get full version history for a file
      *
-     * see how Claude's code evolved over time
+     * see how 's code evolved over time
      */
     getCodeHistory(filePath: string): Promise<CodeTimelineEntry[]>;
     /**
@@ -114,19 +114,19 @@ export declare class CodeRecall {
     /**
      * findRelatedCode - find code related to a specific entry
      *
-     * what else did Claude write around the same time?
+     * what else did  write around the same time?
      */
     findRelatedCode(codeId: string, options?: {
         limit?: number;
         windowMinutes?: number;
     }): Promise<StoredCodeEntry[]>;
     /**
-     * getCodeStats - get statistics about Claude's code
+     * getCodeStats - get statistics about 's code
      */
     getCodeStats(): Promise<{
         totalEntries: number;
         uniqueFiles: number;
-        byOperation: Record<ClaudeOperationType, number>;
+        byOperation: Record<OperationType, number>;
         byLanguage: Record<string, number>;
         totalCharacters: number;
         avgCodeLength: number;

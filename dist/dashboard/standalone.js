@@ -40,7 +40,7 @@ import { logger } from '../utils/logger.js';
 import { getPassword, isUsingDefaultPassword } from '../config/password.js';
 import { getEmbeddingTimeout } from '../config/embeddingTimeouts.js';
 import { createConnection } from 'net';
-import { ClaudeSessionWatcher } from '../claude-sessions/sessionWatcher.js';
+import { SessionWatcher } from '../claude-sessions/sessionWatcher.js';
 /**
  * Simple embedding provider that connects to Frankenstein via Unix socket
  * FULLY DYNAMIC - no hardcoded dimensions!
@@ -306,12 +306,12 @@ async function startDashboard() {
             const db = dashboardServer ? dashboardServer.db : null;
             if (sessionWatcherEnabled && embeddingProvider && db) {
                 try {
-                    sessionWatcher = new ClaudeSessionWatcher(embeddingProvider, db, {
+                    sessionWatcher = new SessionWatcher(embeddingProvider, db, {
                         autoStart: true,
                         importance: 'medium',
                         additionalTags: []
                     });
-                    logger.info('Session watcher started - auto-extracting Claude sessions');
+                    logger.info('Session watcher started - auto-extracting  sessions');
                 }
                 catch (watcherError) {
                     logger.warn({ error: watcherError }, 'Failed to start session watcher');

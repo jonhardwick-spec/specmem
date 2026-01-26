@@ -482,7 +482,7 @@ export class SkillScanner {
         });
     }
     /**
-     * getSkillsForContext - returns skills formatted for Claude context
+     * getSkillsForContext - returns skills formatted for  context
      */
     getSkillsForContext() {
         const skills = this.getAllSkills();

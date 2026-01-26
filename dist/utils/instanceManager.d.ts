@@ -1,7 +1,7 @@
 /**
  * InstanceManager - Per-Project Instance Tracking for SpecMem
  *
- * Provides isolated instance management for each Claude session/project:
+ * Provides isolated instance management for each  session/project:
  * - Each project gets its own .specmem/{project_hash}/ directory
  * - PID files, sockets, and instance state are project-scoped
  * - Global registry tracks all running instances across projects

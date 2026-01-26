@@ -88,6 +88,18 @@ export class CodeAnalyzer {
             case 'rust':
                 this.extractRustDefinitions(fileId, filePath, lines, language, definitions);
                 break;
+            case 'html':
+                this.extractHTMLDefinitions(fileId, filePath, lines, language, definitions);
+                break;
+            case 'java':
+            case 'kotlin':
+            case 'scala':
+                this.extractJavaDefinitions(fileId, filePath, lines, language, definitions);
+                break;
+            case 'cpp':
+            case 'c':
+                this.extractCppDefinitions(fileId, filePath, lines, language, definitions);
+                break;
             default:
                 // Generic extraction for unknown languages
                 this.extractGenericDefinitions(fileId, filePath, lines, language, definitions);
@@ -657,6 +669,18 @@ export class CodeAnalyzer {
             case 'rust':
                 this.extractRustDependencies(fileId, filePath, lines, language, dependencies);
                 break;
+            case 'html':
+                this.extractHTMLDependencies(fileId, filePath, lines, language, dependencies);
+                break;
+            case 'java':
+            case 'kotlin':
+            case 'scala':
+                this.extractJavaDependencies(fileId, filePath, lines, language, dependencies);
+                break;
+            case 'cpp':
+            case 'c':
+                this.extractCppDependencies(fileId, filePath, lines, language, dependencies);
+                break;
             default:
                 // Try generic patterns
                 this.extractGenericDependencies(fileId, filePath, lines, language, dependencies);
@@ -980,6 +1004,9 @@ export class CodeAnalyzer {
      * createChunks - splits code into chunks for semantic search
      */
     createChunks(fileId, filePath, content, language, lines) {
+        if (language === 'html') {
+            return this.createHTMLChunks(fileId, filePath, content, language, lines);
+        }
         const chunks = [];
         // Don't chunk small files
         if (lines.length <= this.chunkSize) {
@@ -1155,6 +1182,1134 @@ export class CodeAnalyzer {
     // ========================================
     // HELPER METHODS
     // ========================================
+    // ========================================
+    // JAVA/KOTLIN/SCALA ANALYSIS
+    // ========================================
+    extractJavaDefinitions(fileId, filePath, lines, language, definitions) {
+        const patterns = {
+            // Classes, abstract classes
+            class: /^(?:\s*)(?:(?:public|private|protected|static|final|abstract|sealed|non-sealed)\s+)*class\s+(\w+)(?:<[^>]*>)?(?:\s+extends\s+([\w.<>]+))?(?:\s+implements\s+([^{]+))?/,
+            // Interfaces
+            interface: /^(?:\s*)(?:(?:public|private|protected|static)\s+)*interface\s+(\w+)(?:<[^>]*>)?(?:\s+extends\s+([^{]+))?/,
+            // Enums
+            enum: /^(?:\s*)(?:(?:public|private|protected|static)\s+)*enum\s+(\w+)(?:\s+implements\s+([^{]+))?/,
+            // Annotations
+            annotationDef: /^(?:\s*)(?:(?:public|private|protected)\s+)*@interface\s+(\w+)/,
+            // Records (Java 14+)
+            record: /^(?:\s*)(?:(?:public|private|protected|static|final)\s+)*record\s+(\w+)(?:<[^>]*>)?\s*\(([^)]*)\)/,
+            // Methods and constructors
+            method: /^(?:\s*)(?:(?:public|private|protected|static|final|abstract|synchronized|native|default|strictfp|override)\s+)*(?:(?:<[^>]*>\s+)?)([\w.<>\[\]?]+)\s+(\w+)\s*\(([^)]*)\)/,
+            constructor: /^(?:\s*)(?:(?:public|private|protected)\s+)*(\w+)\s*\(([^)]*)\)\s*(?:throws\s+[\w.,\s]+)?\s*\{/,
+            // Fields, constants, variables
+            field: /^(?:\s*)(?:(?:public|private|protected|static|final|volatile|transient)\s+)+([\w.<>\[\]?]+)\s+(\w+)\s*(?:=\s*(.+?))?;/,
+            // Static/instance initializer blocks
+            staticInit: /^(?:\s*)static\s*\{/,
+            // Annotations on next line (track for context)
+            annotation: /^(?:\s*)@(\w+)(?:\(([^)]*)\))?/,
+            // Kotlin-specific
+            kotlinFun: /^(?:\s*)(?:(?:public|private|protected|internal|open|override|suspend|inline|infix|operator|tailrec)\s+)*fun\s+(?:<[^>]*>\s+)?(\w+)\s*\(([^)]*)\)(?:\s*:\s*([\w.<>?]+))?/,
+            kotlinVal: /^(?:\s*)(?:(?:public|private|protected|internal|open|override|const|lateinit)\s+)*(?:val|var)\s+(\w+)\s*(?::\s*([\w.<>?]+))?\s*(?:=|$)/,
+            kotlinObject: /^(?:\s*)(?:(?:public|private|protected|internal)\s+)*(?:companion\s+)?object\s+(\w+)?/,
+            kotlinDataClass: /^(?:\s*)(?:(?:public|private|protected|internal|open|sealed)\s+)*data\s+class\s+(\w+)/,
+        };
+        const definitionStack = [];
+        let braceDepth = 0;
+        let lastAnnotations = [];
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            const openBraces = (line.match(/\{/g) || []).length;
+            const closeBraces = (line.match(/\}/g) || []).length;
+            // Pop definitions from stack when scope closes
+            for (let b = 0; b < closeBraces; b++) {
+                const newDepth = braceDepth - (b + 1);
+                while (definitionStack.length > 0 && definitionStack[definitionStack.length - 1].braceDepthAtStart >= newDepth) {
+                    definitionStack.pop();
+                }
+            }
+            braceDepth += openBraces - closeBraces;
+            if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*') || trimmed === '') {
+                continue;
+            }
+            const getCurrentParent = () => definitionStack.length > 0 ? definitionStack[definitionStack.length - 1].def : null;
+            const getQualifiedName = (name) => {
+                const parent = getCurrentParent();
+                if (!parent) return undefined;
+                return parent.qualifiedName ? `${parent.qualifiedName}.${name}` : `${parent.name}.${name}`;
+            };
+            const getVisibility = (line) => {
+                if (line.includes('private')) return 'private';
+                if (line.includes('protected')) return 'protected';
+                if (line.includes('internal')) return 'internal';
+                return 'public';
+            };
+            // Track annotations
+            let match = line.match(patterns.annotation);
+            if (match && !line.match(patterns.annotationDef)) {
+                lastAnnotations.push(match[1]);
+                continue;
+            }
+            const decorators = [...lastAnnotations];
+            lastAnnotations = [];
+            // Annotation definition (@interface)
+            match = line.match(patterns.annotationDef);
+            if (match) {
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'annotation',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isExported: line.includes('public'),
+                    parentDefinitionId: getCurrentParent()?.id,
+                    signature: trimmed,
+                    decorators
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Enum
+            match = line.match(patterns.enum);
+            if (match) {
+                const parent = getCurrentParent();
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'enum',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isExported: line.includes('public'),
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Record (Java 14+)
+            match = line.match(patterns.record);
+            if (match) {
+                const parent = getCurrentParent();
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'record',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isExported: line.includes('public'),
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Interface
+            match = line.match(patterns.interface);
+            if (match) {
+                const parent = getCurrentParent();
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'interface',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isExported: line.includes('public'),
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Kotlin data class
+            match = line.match(patterns.kotlinDataClass);
+            if (match) {
+                const parent = getCurrentParent();
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'class',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators,
+                    metadata: { isDataClass: true }
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Class
+            match = line.match(patterns.class);
+            if (match) {
+                const parent = getCurrentParent();
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'class',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isExported: line.includes('public'),
+                    isAbstract: line.includes('abstract'),
+                    isStatic: line.includes('static'),
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Kotlin object/companion
+            match = line.match(patterns.kotlinObject);
+            if (match) {
+                const name = match[1] || 'Companion';
+                const def = this.createDefinition(fileId, filePath, {
+                    name,
+                    qualifiedName: getQualifiedName(name),
+                    definitionType: 'class',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isStatic: true,
+                    parentDefinitionId: getCurrentParent()?.id,
+                    signature: trimmed,
+                    metadata: { isObject: true, isCompanion: line.includes('companion') }
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Kotlin fun
+            match = line.match(patterns.kotlinFun);
+            if (match) {
+                const parent = getCurrentParent();
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: parent?.definitionType === 'class' || parent?.definitionType === 'interface' ? 'method' : 'function',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isAsync: line.includes('suspend'),
+                    returnType: match[3],
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators
+                }));
+                continue;
+            }
+            // Kotlin val/var
+            match = line.match(patterns.kotlinVal);
+            if (match) {
+                const parent = getCurrentParent();
+                const isConst = line.includes('const') || (line.includes('val') && braceDepth <= 1);
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: isConst ? 'constant' : 'variable',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed,
+                    decorators
+                }));
+                continue;
+            }
+            // Static initializer
+            if (patterns.staticInit.test(line)) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: 'static_init',
+                    qualifiedName: getQualifiedName('static_init'),
+                    definitionType: 'function',
+                    startLine: i + 1,
+                    language,
+                    isStatic: true,
+                    parentDefinitionId: getCurrentParent()?.id,
+                    signature: trimmed
+                }));
+                continue;
+            }
+            // Constructor — must match BEFORE method since constructors look like methods
+            const parent = getCurrentParent();
+            if (parent && parent.definitionType === 'class') {
+                match = line.match(patterns.constructor);
+                if (match && match[1] === parent.name) {
+                    definitions.push(this.createDefinition(fileId, filePath, {
+                        name: match[1],
+                        qualifiedName: getQualifiedName(match[1]),
+                        definitionType: 'constructor',
+                        startLine: i + 1,
+                        language,
+                        visibility: getVisibility(line),
+                        parentDefinitionId: parent.id,
+                        signature: trimmed,
+                        decorators
+                    }));
+                    continue;
+                }
+            }
+            // Method
+            match = line.match(patterns.method);
+            if (match) {
+                const returnType = match[1];
+                const methodName = match[2];
+                // Skip control flow keywords that look like methods
+                if (['if', 'for', 'while', 'switch', 'catch', 'return', 'new', 'throw'].includes(methodName)) continue;
+                const parentDef = getCurrentParent();
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: methodName,
+                    qualifiedName: getQualifiedName(methodName),
+                    definitionType: parentDef?.definitionType === 'class' || parentDef?.definitionType === 'interface' || parentDef?.definitionType === 'enum' ? 'method' : 'function',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isStatic: line.includes('static'),
+                    isAbstract: line.includes('abstract'),
+                    isAsync: line.includes('synchronized'),
+                    returnType,
+                    parentDefinitionId: parentDef?.id,
+                    signature: trimmed,
+                    decorators
+                }));
+                continue;
+            }
+            // Field / constant
+            match = line.match(patterns.field);
+            if (match) {
+                const fieldType = match[1];
+                const fieldName = match[2];
+                // Skip if it's a keyword
+                if (['return', 'throw', 'new', 'if', 'for', 'while'].includes(fieldName)) continue;
+                const isFinal = line.includes('final');
+                const isStatic = line.includes('static');
+                const parentDef = getCurrentParent();
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: fieldName,
+                    qualifiedName: getQualifiedName(fieldName),
+                    definitionType: (isFinal && isStatic) ? 'constant' : 'variable',
+                    startLine: i + 1,
+                    language,
+                    visibility: getVisibility(line),
+                    isStatic,
+                    parentDefinitionId: parentDef?.id,
+                    signature: trimmed,
+                    decorators,
+                    metadata: { type: fieldType, isFinal }
+                }));
+            }
+        }
+    }
+    extractJavaDependencies(fileId, filePath, lines, language, dependencies) {
+        const patterns = {
+            // import com.foo.Bar;
+            import: /^import\s+(?:static\s+)?([\w.]+(?:\.\*)?);/,
+            // package com.foo.bar;
+            package: /^package\s+([\w.]+);/
+        };
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            // Package declaration
+            let match = trimmed.match(patterns.package);
+            if (match) {
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: match[1],
+                    importType: 'package',
+                    importStatement: trimmed,
+                    lineNumber: i + 1,
+                    language,
+                    isExternal: false
+                }));
+                continue;
+            }
+            // Import
+            match = trimmed.match(patterns.import);
+            if (match) {
+                const target = match[1];
+                const isStatic = trimmed.includes('static');
+                const isWildcard = target.endsWith('.*');
+                const parts = target.split('.');
+                const importedName = isWildcard ? '*' : parts[parts.length - 1];
+                const packagePath = isWildcard ? target.slice(0, -2) : parts.slice(0, -1).join('.');
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: target,
+                    importType: isStatic ? 'import_static' : 'import',
+                    importStatement: trimmed,
+                    importedNames: [importedName],
+                    isNamespaceImport: isWildcard,
+                    lineNumber: i + 1,
+                    language,
+                    isExternal: !target.startsWith('java.') && !target.startsWith('javax.'),
+                    isBuiltin: target.startsWith('java.') || target.startsWith('javax.'),
+                    packageName: packagePath
+                }));
+            }
+        }
+    }
+    // ========================================
+    // C/C++ ANALYSIS
+    // ========================================
+    extractCppDefinitions(fileId, filePath, lines, language, definitions) {
+        const patterns = {
+            // Functions: return_type name(params)
+            function: /^(?:(?:static|inline|virtual|explicit|constexpr|consteval|extern|friend|template\s*<[^>]*>\s*)\s+)*(?:const\s+)?(?:unsigned\s+|signed\s+|long\s+|short\s+)*([\w:*&<>[\]]+(?:\s*[*&]+)?)\s+(\w+)\s*\(([^)]*)\)\s*(?:const|override|noexcept|final|=\s*0|=\s*default|=\s*delete)?\s*[{;]/,
+            // Methods with class:: prefix
+            methodImpl: /^(?:(?:const\s+)?(?:unsigned\s+|signed\s+)*)?([\w:*&<>[\]]+(?:\s*[*&]+)?)\s+(\w+)::(\w+)\s*\(([^)]*)\)/,
+            // Class/struct
+            class: /^(?:(?:template\s*<[^>]*>\s*)?)?(?:class|struct)\s+(?:__attribute__\s*\([^)]*\)\s+)?(\w+)(?:\s*:\s*(?:public|private|protected)\s+([\w:<>]+(?:\s*,\s*(?:public|private|protected)\s+[\w:<>]+)*))?/,
+            // Enum
+            enum: /^(?:typedef\s+)?enum\s+(?:class\s+)?(\w+)?(?:\s*:\s*\w+)?\s*\{/,
+            // Typedef
+            typedef: /^typedef\s+(?:(?:struct|union|enum)\s+(?:\w+\s+)?)?([\w\s*&<>]+)\s+(\w+)\s*;/,
+            // Using (C++ type alias)
+            using: /^using\s+(\w+)\s*=\s*(.+);/,
+            // Namespace
+            namespace: /^namespace\s+(\w+)/,
+            // Union
+            union: /^(?:typedef\s+)?union\s+(\w+)/,
+            // Macro definitions
+            define: /^#define\s+(\w+)(?:\(([^)]*)\))?\s*(.*)/,
+            // Global/static variables and constants
+            globalVar: /^(?:(?:static|extern|const|constexpr|volatile|thread_local|inline)\s+)+(?:const\s+)?(?:unsigned\s+|signed\s+|long\s+|short\s+)*([\w:*&<>[\]]+(?:\s*[*&]+)?)\s+(\w+)\s*(?:=\s*(.+?))?;/,
+            // Constructor/destructor in class body
+            ctorDtor: /^\s+(?:(?:explicit|virtual|inline)\s+)*~?(\w+)\s*\(([^)]*)\)\s*(?::\s*[^{]*)?[{;]/,
+            // Operator overload
+            operator: /(?:[\w*&<>]+)\s+operator\s*([^\s(]+)\s*\(([^)]*)\)/,
+        };
+        const definitionStack = [];
+        let braceDepth = 0;
+        let inMultiLineComment = false;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            // Handle multi-line comments
+            if (inMultiLineComment) {
+                if (trimmed.includes('*/')) inMultiLineComment = false;
+                continue;
+            }
+            if (trimmed.startsWith('/*')) {
+                if (!trimmed.includes('*/')) inMultiLineComment = true;
+                continue;
+            }
+            if (trimmed.startsWith('//') || trimmed === '') continue;
+            const openBraces = (line.match(/\{/g) || []).length;
+            const closeBraces = (line.match(/\}/g) || []).length;
+            for (let b = 0; b < closeBraces; b++) {
+                const newDepth = braceDepth - (b + 1);
+                while (definitionStack.length > 0 && definitionStack[definitionStack.length - 1].braceDepthAtStart >= newDepth) {
+                    definitionStack.pop();
+                }
+            }
+            braceDepth += openBraces - closeBraces;
+            const getCurrentParent = () => definitionStack.length > 0 ? definitionStack[definitionStack.length - 1].def : null;
+            const getQualifiedName = (name) => {
+                const parent = getCurrentParent();
+                if (!parent) return undefined;
+                return parent.qualifiedName ? `${parent.qualifiedName}::${name}` : `${parent.name}::${name}`;
+            };
+            const getVisibility = (line) => {
+                if (/^\s*private\s*:/.test(line)) return 'private';
+                if (/^\s*protected\s*:/.test(line)) return 'protected';
+                if (/^\s*public\s*:/.test(line)) return 'public';
+                return 'public';
+            };
+            // Macro (#define)
+            let match = line.match(patterns.define);
+            if (match) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    definitionType: match[2] !== undefined ? 'macro' : 'constant',
+                    startLine: i + 1,
+                    language,
+                    signature: trimmed,
+                    metadata: match[2] !== undefined ? { params: match[2] } : {}
+                }));
+                continue;
+            }
+            // Namespace
+            match = line.match(patterns.namespace);
+            if (match) {
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    definitionType: 'namespace',
+                    startLine: i + 1,
+                    language,
+                    signature: trimmed
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Enum
+            match = line.match(patterns.enum);
+            if (match) {
+                const name = match[1] || `anon_enum_L${i + 1}`;
+                const def = this.createDefinition(fileId, filePath, {
+                    name,
+                    qualifiedName: getQualifiedName(name),
+                    definitionType: 'enum',
+                    startLine: i + 1,
+                    language,
+                    parentDefinitionId: getCurrentParent()?.id,
+                    signature: trimmed
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Union
+            match = line.match(patterns.union);
+            if (match) {
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'struct',
+                    startLine: i + 1,
+                    language,
+                    parentDefinitionId: getCurrentParent()?.id,
+                    signature: trimmed,
+                    metadata: { isUnion: true }
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Class/struct
+            match = line.match(patterns.class);
+            if (match) {
+                const parent = getCurrentParent();
+                const def = this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: trimmed.startsWith('struct') || trimmed.match(/^template.*struct/) ? 'struct' : 'class',
+                    startLine: i + 1,
+                    language,
+                    isAbstract: false,
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed
+                });
+                definitions.push(def);
+                if (line.includes('{')) definitionStack.push({ def, braceDepthAtStart: braceDepth - openBraces });
+                continue;
+            }
+            // Typedef
+            match = line.match(patterns.typedef);
+            if (match) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: match[2],
+                    definitionType: 'type',
+                    startLine: i + 1,
+                    language,
+                    signature: trimmed,
+                    metadata: { aliasOf: match[1].trim() }
+                }));
+                continue;
+            }
+            // Using alias
+            match = line.match(patterns.using);
+            if (match) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: match[1],
+                    qualifiedName: getQualifiedName(match[1]),
+                    definitionType: 'type',
+                    startLine: i + 1,
+                    language,
+                    parentDefinitionId: getCurrentParent()?.id,
+                    signature: trimmed,
+                    metadata: { aliasOf: match[2].trim() }
+                }));
+                continue;
+            }
+            // Operator overload
+            match = line.match(patterns.operator);
+            if (match) {
+                const parent = getCurrentParent();
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: `operator${match[1]}`,
+                    qualifiedName: getQualifiedName(`operator${match[1]}`),
+                    definitionType: 'method',
+                    startLine: i + 1,
+                    language,
+                    parentDefinitionId: parent?.id,
+                    signature: trimmed
+                }));
+                continue;
+            }
+            // Method implementation (ClassName::method)
+            match = line.match(patterns.methodImpl);
+            if (match) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: match[3],
+                    qualifiedName: `${match[2]}::${match[3]}`,
+                    definitionType: match[3] === match[2] ? 'constructor' : (match[3] === `~${match[2]}` ? 'destructor' : 'method'),
+                    startLine: i + 1,
+                    language,
+                    returnType: match[1]?.trim(),
+                    signature: trimmed
+                }));
+                continue;
+            }
+            // Constructor/destructor inside class body
+            const parentDef = getCurrentParent();
+            if (parentDef && (parentDef.definitionType === 'class' || parentDef.definitionType === 'struct')) {
+                match = line.match(patterns.ctorDtor);
+                if (match) {
+                    const ctorName = match[1];
+                    if (ctorName === parentDef.name || ctorName === `~${parentDef.name}` || `~${ctorName}` === trimmed.match(/~(\w+)/)?.[0]) {
+                        const isDtor = trimmed.includes('~');
+                        definitions.push(this.createDefinition(fileId, filePath, {
+                            name: isDtor ? `~${parentDef.name}` : parentDef.name,
+                            qualifiedName: getQualifiedName(isDtor ? `~${parentDef.name}` : parentDef.name),
+                            definitionType: isDtor ? 'destructor' : 'constructor',
+                            startLine: i + 1,
+                            language,
+                            parentDefinitionId: parentDef.id,
+                            signature: trimmed
+                        }));
+                        continue;
+                    }
+                }
+            }
+            // Function (top-level or in namespace) / method (in class)
+            match = line.match(patterns.function);
+            if (match) {
+                const returnType = match[1];
+                const funcName = match[2];
+                if (['if', 'for', 'while', 'switch', 'catch', 'return', 'throw', 'sizeof', 'alignof', 'decltype', 'static_cast', 'dynamic_cast', 'const_cast', 'reinterpret_cast'].includes(funcName)) continue;
+                const parentDef2 = getCurrentParent();
+                const isMethod = parentDef2?.definitionType === 'class' || parentDef2?.definitionType === 'struct';
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: funcName,
+                    qualifiedName: getQualifiedName(funcName),
+                    definitionType: isMethod ? 'method' : 'function',
+                    startLine: i + 1,
+                    language,
+                    isStatic: line.includes('static'),
+                    isExported: !line.includes('static') && braceDepth === 0,
+                    returnType: returnType?.trim(),
+                    parentDefinitionId: parentDef2?.id,
+                    signature: trimmed,
+                    metadata: {
+                        isVirtual: line.includes('virtual'),
+                        isConstexpr: line.includes('constexpr'),
+                        isInline: line.includes('inline'),
+                        isConst: /\)\s*const/.test(line)
+                    }
+                }));
+                continue;
+            }
+            // Global/static variables and constants
+            if (braceDepth <= 1) {
+                match = line.match(patterns.globalVar);
+                if (match) {
+                    const varName = match[2];
+                    if (['if', 'for', 'while', 'switch', 'return'].includes(varName)) continue;
+                    const isConst = line.includes('const') || line.includes('constexpr');
+                    definitions.push(this.createDefinition(fileId, filePath, {
+                        name: varName,
+                        qualifiedName: getQualifiedName(varName),
+                        definitionType: isConst ? 'constant' : 'variable',
+                        startLine: i + 1,
+                        language,
+                        isStatic: line.includes('static'),
+                        isExported: line.includes('extern'),
+                        parentDefinitionId: getCurrentParent()?.id,
+                        signature: trimmed,
+                        metadata: { type: match[1].trim() }
+                    }));
+                }
+            }
+        }
+    }
+    extractCppDependencies(fileId, filePath, lines, language, dependencies) {
+        const patterns = {
+            // #include <header> or #include "header"
+            includeAngle: /^#include\s+<([^>]+)>/,
+            includeQuote: /^#include\s+"([^"]+)"/,
+            // using namespace foo;
+            usingNamespace: /^using\s+namespace\s+([\w:]+);/,
+            // using foo::bar;
+            usingDecl: /^using\s+([\w:]+);/
+        };
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            // Angle bracket include (system/external)
+            let match = trimmed.match(patterns.includeAngle);
+            if (match) {
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: match[1],
+                    importType: 'include',
+                    importStatement: trimmed,
+                    lineNumber: i + 1,
+                    language,
+                    isExternal: true,
+                    isBuiltin: ['stdio.h', 'stdlib.h', 'string.h', 'math.h', 'iostream', 'vector', 'string', 'map', 'set', 'unordered_map', 'unordered_set', 'algorithm', 'memory', 'functional', 'utility', 'cassert', 'cstdio', 'cstdlib', 'cstring', 'cmath', 'thread', 'mutex', 'atomic', 'chrono', 'filesystem', 'fstream', 'sstream', 'iomanip', 'numeric', 'array', 'deque', 'list', 'queue', 'stack', 'tuple', 'variant', 'optional', 'any', 'type_traits', 'concepts', 'ranges', 'span', 'format'].includes(match[1])
+                }));
+                continue;
+            }
+            // Quote include (local/relative)
+            match = trimmed.match(patterns.includeQuote);
+            if (match) {
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: match[1],
+                    importType: 'include',
+                    importStatement: trimmed,
+                    lineNumber: i + 1,
+                    language,
+                    isRelative: true,
+                    isExternal: false
+                }));
+                continue;
+            }
+            // using namespace
+            match = trimmed.match(patterns.usingNamespace);
+            if (match) {
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: match[1],
+                    importType: 'using_namespace',
+                    importStatement: trimmed,
+                    isNamespaceImport: true,
+                    lineNumber: i + 1,
+                    language,
+                    isBuiltin: match[1] === 'std' || match[1].startsWith('std::')
+                }));
+                continue;
+            }
+            // using declaration
+            match = trimmed.match(patterns.usingDecl);
+            if (match) {
+                const parts = match[1].split('::');
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: match[1],
+                    importType: 'using',
+                    importStatement: trimmed,
+                    importedNames: [parts[parts.length - 1]],
+                    lineNumber: i + 1,
+                    language,
+                    isBuiltin: match[1].startsWith('std::')
+                }));
+            }
+        }
+    }
+    // ========================================
+    // HTML ANALYSIS
+    // ========================================
+    extractHTMLDefinitions(fileId, filePath, lines, language, definitions) {
+        const patterns = {
+            idAttr: /\bid=["']([^"']+)["']/i,
+            classAttr: /\bclass=["']([^"']+)["']/i,
+            scriptOpen: /<script\b[^>]*>/i,
+            scriptClose: /<\/script>/i,
+            styleOpen: /<style\b[^>]*>/i,
+            styleClose: /<\/style>/i,
+            formTag: /<form\b[^>]*(?:id|name)=["']([^"']+)["'][^>]*>/i,
+            templateTag: /<template\b[^>]*(?:id)=["']([^"']+)["'][^>]*>/i,
+            sectionTags: /<(header|footer|nav|main|section|article|aside)\b[^>]*(?:id=["']([^"']+)["'])?[^>]*>/i,
+            dataAttr: /\bdata-([\w-]+)=["']([^"']+)["']/i,
+            componentTags: /<(slot|component)\b[^>]*(?:(?:name|id)=["']([^"']+)["'])?[^>]*>/i,
+        };
+        let inScript = false;
+        let scriptStart = -1;
+        let inStyle = false;
+        let styleStart = -1;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            // Track script blocks
+            if (!inScript && patterns.scriptOpen.test(line) && !line.includes(' src=')) {
+                inScript = true;
+                scriptStart = i;
+            }
+            if (inScript && patterns.scriptClose.test(line)) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: `script_block_L${scriptStart + 1}`,
+                    definitionType: 'script',
+                    startLine: scriptStart + 1,
+                    endLine: i + 1,
+                    language,
+                    signature: lines[scriptStart].trim()
+                }));
+                inScript = false;
+            }
+            // Track style blocks
+            if (!inStyle && patterns.styleOpen.test(line)) {
+                inStyle = true;
+                styleStart = i;
+            }
+            if (inStyle && patterns.styleClose.test(line)) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: `style_block_L${styleStart + 1}`,
+                    definitionType: 'style',
+                    startLine: styleStart + 1,
+                    endLine: i + 1,
+                    language,
+                    signature: lines[styleStart].trim()
+                }));
+                inStyle = false;
+            }
+            // ID attributes
+            const idMatch = line.match(patterns.idAttr);
+            if (idMatch) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: idMatch[1],
+                    definitionType: 'element',
+                    startLine: i + 1,
+                    language,
+                    signature: line.trim()
+                }));
+            }
+            // Class attributes
+            const classMatch = line.match(patterns.classAttr);
+            if (classMatch) {
+                const classes = classMatch[1].split(/\s+/).filter(Boolean);
+                for (const cls of classes) {
+                    definitions.push(this.createDefinition(fileId, filePath, {
+                        name: cls,
+                        definitionType: 'class',
+                        startLine: i + 1,
+                        language,
+                        signature: line.trim()
+                    }));
+                }
+            }
+            // Form tags
+            const formMatch = line.match(patterns.formTag);
+            if (formMatch) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: formMatch[1],
+                    definitionType: 'form',
+                    startLine: i + 1,
+                    language,
+                    signature: line.trim()
+                }));
+            }
+            // Template tags
+            const templateMatch = line.match(patterns.templateTag);
+            if (templateMatch) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: templateMatch[1],
+                    definitionType: 'component',
+                    startLine: i + 1,
+                    language,
+                    signature: line.trim()
+                }));
+            }
+            // Section tags with IDs
+            const sectionMatch = line.match(patterns.sectionTags);
+            if (sectionMatch && sectionMatch[2]) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: sectionMatch[2],
+                    qualifiedName: `${sectionMatch[1]}#${sectionMatch[2]}`,
+                    definitionType: 'element',
+                    startLine: i + 1,
+                    language,
+                    signature: line.trim()
+                }));
+            }
+            // Component/slot tags
+            const componentMatch = line.match(patterns.componentTags);
+            if (componentMatch) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: componentMatch[2] || `${componentMatch[1]}_L${i + 1}`,
+                    definitionType: 'component',
+                    startLine: i + 1,
+                    language,
+                    signature: line.trim()
+                }));
+            }
+            // Data attributes on key elements
+            const dataMatch = line.match(patterns.dataAttr);
+            if (dataMatch) {
+                definitions.push(this.createDefinition(fileId, filePath, {
+                    name: `data-${dataMatch[1]}`,
+                    definitionType: 'attribute',
+                    startLine: i + 1,
+                    language,
+                    signature: line.trim(),
+                    metadata: { value: dataMatch[2] }
+                }));
+            }
+        }
+    }
+    extractHTMLDependencies(fileId, filePath, lines, language, dependencies) {
+        const patterns = {
+            scriptSrc: /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/i,
+            linkStylesheet: /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/i,
+            linkImport: /<link\b[^>]*\brel=["'](?:import|modulepreload)["'][^>]*\bhref=["']([^"']+)["'][^>]*>/i,
+            imgSrc: /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/i,
+            sourceSrc: /<source\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/i,
+            iframeSrc: /<iframe\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/i,
+            linkHref: /<link\b[^>]*\bhref=["']([^"']+)["'][^>]*>/i,
+        };
+        let inModuleScript = false;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            // Script src
+            const scriptMatch = line.match(patterns.scriptSrc);
+            if (scriptMatch) {
+                const src = scriptMatch[1];
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: src,
+                    importType: 'script_src',
+                    importStatement: line.trim(),
+                    lineNumber: i + 1,
+                    isExternal: src.startsWith('http') || src.startsWith('//'),
+                    isRelative: src.startsWith('.') || (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('//')),
+                    language
+                }));
+            }
+            // Stylesheets
+            const styleMatch = line.match(patterns.linkStylesheet);
+            if (styleMatch) {
+                const href = styleMatch[1];
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: href,
+                    importType: 'stylesheet',
+                    importStatement: line.trim(),
+                    lineNumber: i + 1,
+                    isExternal: href.startsWith('http') || href.startsWith('//'),
+                    isRelative: href.startsWith('.') || (!href.startsWith('/') && !href.startsWith('http') && !href.startsWith('//')),
+                    language
+                }));
+            }
+            // Link imports/modulepreload
+            const importMatch = line.match(patterns.linkImport);
+            if (importMatch) {
+                const href = importMatch[1];
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: href,
+                    importType: 'import',
+                    importStatement: line.trim(),
+                    lineNumber: i + 1,
+                    isExternal: href.startsWith('http') || href.startsWith('//'),
+                    isRelative: href.startsWith('.'),
+                    language
+                }));
+            }
+            // Images
+            const imgMatch = line.match(patterns.imgSrc);
+            if (imgMatch) {
+                const src = imgMatch[1];
+                if (!src.startsWith('data:')) {
+                    dependencies.push(this.createDependency(fileId, filePath, {
+                        targetPath: src,
+                        importType: 'asset',
+                        importStatement: line.trim(),
+                        lineNumber: i + 1,
+                        isExternal: src.startsWith('http') || src.startsWith('//'),
+                        isRelative: src.startsWith('.') || (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('//')),
+                        language
+                    }));
+                }
+            }
+            // Source elements
+            const sourceMatch = line.match(patterns.sourceSrc);
+            if (sourceMatch) {
+                const src = sourceMatch[1];
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: src,
+                    importType: 'asset',
+                    importStatement: line.trim(),
+                    lineNumber: i + 1,
+                    isExternal: src.startsWith('http') || src.startsWith('//'),
+                    language
+                }));
+            }
+            // Iframes
+            const iframeMatch = line.match(patterns.iframeSrc);
+            if (iframeMatch) {
+                const src = iframeMatch[1];
+                dependencies.push(this.createDependency(fileId, filePath, {
+                    targetPath: src,
+                    importType: 'iframe',
+                    importStatement: line.trim(),
+                    lineNumber: i + 1,
+                    isExternal: src.startsWith('http') || src.startsWith('//'),
+                    language
+                }));
+            }
+            // Track module script blocks for inline imports
+            if (/<script\b[^>]*type=["']module["'][^>]*>/i.test(line) && !line.includes(' src=')) {
+                inModuleScript = true;
+            }
+            if (inModuleScript && /<\/script>/i.test(line)) {
+                inModuleScript = false;
+            }
+            // Inline ES imports inside module scripts
+            if (inModuleScript) {
+                const esImport = line.match(/^\s*import\s+(?:(?:\{[^}]*\}|\*\s+as\s+\w+|\w+)\s+from\s+)?['"]([^'"]+)['"]/);
+                if (esImport) {
+                    const src = esImport[1];
+                    dependencies.push(this.createDependency(fileId, filePath, {
+                        targetPath: src,
+                        importType: 'import',
+                        importStatement: line.trim(),
+                        lineNumber: i + 1,
+                        isExternal: src.startsWith('http') || src.startsWith('//'),
+                        isRelative: src.startsWith('.'),
+                        language
+                    }));
+                }
+            }
+        }
+    }
+    createHTMLChunks(fileId, filePath, content, language, lines) {
+        const chunks = [];
+        const structuralTags = new Set(['head', 'body', 'section', 'div', 'article', 'nav', 'header', 'footer', 'main', 'aside', 'form', 'table']);
+        const openTag = /<(head|body|section|div|article|nav|header|footer|main|aside|form|table)\b[^>]*>/i;
+        const scriptOpen = /<script\b[^>]*>/i;
+        const scriptClose = /<\/script>/i;
+        const styleOpen = /<style\b[^>]*>/i;
+        const styleClose = /<\/style>/i;
+        let chunkIndex = 0;
+        // First pass: extract script and style blocks
+        let inScript = false, scriptStart = -1;
+        let inStyle = false, styleStart = -1;
+        const specialBlocks = []; // {start, end, type}
+        for (let i = 0; i < lines.length; i++) {
+            if (!inScript && scriptOpen.test(lines[i])) {
+                inScript = true;
+                scriptStart = i;
+            }
+            if (inScript && scriptClose.test(lines[i])) {
+                specialBlocks.push({ start: scriptStart, end: i, type: 'code' });
+                inScript = false;
+            }
+            if (!inStyle && styleOpen.test(lines[i])) {
+                inStyle = true;
+                styleStart = i;
+            }
+            if (inStyle && styleClose.test(lines[i])) {
+                specialBlocks.push({ start: styleStart, end: i, type: 'style' });
+                inStyle = false;
+            }
+        }
+        // Second pass: structural blocks at depth 1
+        let tagDepth = 0;
+        let blockStart = -1;
+        let blockTag = null;
+        const structuralBlocks = [];
+        const isInSpecial = (lineNum) => specialBlocks.some(b => lineNum >= b.start && lineNum <= b.end);
+        for (let i = 0; i < lines.length; i++) {
+            if (isInSpecial(i)) continue;
+            const line = lines[i];
+            const openMatch = line.match(openTag);
+            if (openMatch && tagDepth === 0) {
+                blockStart = i;
+                blockTag = openMatch[1].toLowerCase();
+                tagDepth = 1;
+                // Check for self-closing or single-line
+                const closeRegex = new RegExp(`</${blockTag}>`, 'i');
+                if (closeRegex.test(line)) {
+                    structuralBlocks.push({ start: i, end: i, tag: blockTag });
+                    tagDepth = 0;
+                    blockStart = -1;
+                }
+                continue;
+            }
+            if (tagDepth > 0 && blockTag) {
+                const innerOpen = new RegExp(`<${blockTag}\\b`, 'gi');
+                const innerClose = new RegExp(`</${blockTag}>`, 'gi');
+                const opens = (line.match(innerOpen) || []).length;
+                const closes = (line.match(innerClose) || []).length;
+                tagDepth += opens - closes;
+                if (tagDepth <= 0) {
+                    structuralBlocks.push({ start: blockStart, end: i, tag: blockTag });
+                    tagDepth = 0;
+                    blockStart = -1;
+                    blockTag = null;
+                }
+            }
+        }
+        // Create chunks from special blocks
+        for (const block of specialBlocks) {
+            const blockLines = lines.slice(block.start, block.end + 1);
+            const blockContent = blockLines.join('\n');
+            const startChar = lines.slice(0, block.start).join('\n').length + (block.start > 0 ? 1 : 0);
+            chunks.push(this.createChunk(fileId, filePath, {
+                chunkIndex: chunkIndex++,
+                startLine: block.start + 1,
+                endLine: block.end + 1,
+                startChar,
+                endChar: startChar + blockContent.length,
+                content: blockContent,
+                language,
+                chunkType: block.type
+            }));
+        }
+        // Create chunks from structural blocks
+        for (const block of structuralBlocks) {
+            const blockLines = lines.slice(block.start, block.end + 1);
+            const blockContent = blockLines.join('\n');
+            const startChar = lines.slice(0, block.start).join('\n').length + (block.start > 0 ? 1 : 0);
+            chunks.push(this.createChunk(fileId, filePath, {
+                chunkIndex: chunkIndex++,
+                startLine: block.start + 1,
+                endLine: block.end + 1,
+                startChar,
+                endChar: startChar + blockContent.length,
+                content: blockContent,
+                language,
+                chunkType: 'structure',
+                metadata: { tag: block.tag }
+            }));
+        }
+        // If no chunks created, fall back to default line-based chunking
+        if (chunks.length === 0) {
+            const fallbackChunks = [];
+            if (lines.length <= this.chunkSize) {
+                fallbackChunks.push(this.createChunk(fileId, filePath, {
+                    chunkIndex: 0,
+                    startLine: 1,
+                    endLine: lines.length,
+                    startChar: 0,
+                    endChar: content.length,
+                    content,
+                    language,
+                    chunkType: 'markup'
+                }));
+            } else {
+                let ci = 0;
+                let currentLine = 0;
+                while (currentLine < lines.length) {
+                    const startLine = currentLine;
+                    const endLine = Math.min(currentLine + this.chunkSize, lines.length);
+                    const chunkLines = lines.slice(startLine, endLine);
+                    const chunkContent = chunkLines.join('\n');
+                    const startChar = lines.slice(0, startLine).join('\n').length + (startLine > 0 ? 1 : 0);
+                    fallbackChunks.push(this.createChunk(fileId, filePath, {
+                        chunkIndex: ci++,
+                        startLine: startLine + 1,
+                        endLine,
+                        startChar,
+                        endChar: startChar + chunkContent.length,
+                        content: chunkContent,
+                        language,
+                        chunkType: 'markup'
+                    }));
+                    currentLine += this.chunkSize - this.chunkOverlap;
+                }
+            }
+            return fallbackChunks;
+        }
+        // Sort chunks by start line
+        chunks.sort((a, b) => a.startLine - b.startLine);
+        return chunks;
+    }
     createDefinition(fileId, filePath, data) {
         return {
             id: uuidv4(),
