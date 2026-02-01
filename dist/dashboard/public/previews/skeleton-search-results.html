@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Loading</title>
+    <style>
+        /* ============================================
+         * SPECMEM SKELETON - Search Results Preview
+         * Search and filter loading state
+         * ============================================ */
+
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #1a1a2e;
+            --bg-skeleton: #2a2a4e;
+            --bg-skeleton-light: #3a3a5e;
+            --bg-shimmer: rgba(255, 215, 0, 0.08);
+            --border-color: #333344;
+            --text-dim: #666;
+            --yellow-accent: rgba(255, 215, 0, 0.3);
+            --yellow-glow: rgba(255, 215, 0, 0.15);
+            --radius: 8px;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(90deg, rgba(255,215,0,0.02) 1px, transparent 1px),
+                linear-gradient(rgba(255,215,0,0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Search bar skeleton */
+        .search-section {
+            margin-bottom: 24px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            height: 48px;
+            border-radius: var(--radius);
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-input::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--bg-skeleton);
+            border-radius: 50%;
+        }
+
+        .search-input::after {
+            content: '';
+            position: absolute;
+            left: 32px;
+            top: 60%;
+            width: 8px;
+            height: 2px;
+            background: var(--bg-skeleton);
+            transform: rotate(45deg);
+        }
+
+        .search-button {
+            width: 120px;
+            height: 48px;
+            border-radius: var(--radius);
+        }
+
+        /* Filters row */
+        .filters-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            width: 100px;
+            height: 32px;
+            border-radius: 16px;
+        }
+
+        .filter-chip:nth-child(1) { width: 90px; }
+        .filter-chip:nth-child(2) { width: 110px; }
+        .filter-chip:nth-child(3) { width: 80px; }
+        .filter-chip:nth-child(4) { width: 120px; }
+
+        /* Results header */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .results-count {
+            width: 140px;
+            height: 20px;
+        }
+
+        .results-sort {
+            width: 100px;
+            height: 28px;
+            border-radius: 4px;
+        }
+
+        /* Search result item */
+        .result-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--yellow-accent);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .result-title-section {
+            flex: 1;
+        }
+
+        .result-title {
+            width: 70%;
+            height: 22px;
+            margin-bottom: 6px;
+        }
+
+        .result-meta {
+            display: flex;
+            gap: 12px;
+        }
+
+        .result-meta-item {
+            width: 70px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        .result-score {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-label {
+            width: 50px;
+            height: 14px;
+        }
+
+        .score-bar {
+            width: 60px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-skeleton);
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: var(--yellow-accent);
+            border-radius: 3px;
+        }
+
+        .result-item:nth-child(1) .score-fill { width: 92%; }
+        .result-item:nth-child(2) .score-fill { width: 87%; }
+        .result-item:nth-child(3) .score-fill { width: 78%; }
+        .result-item:nth-child(4) .score-fill { width: 71%; }
+        .result-item:nth-child(5) .score-fill { width: 65%; }
+        .result-item:nth-child(6) .score-fill { width: 58%; }
+
+        /* Content preview */
+        .result-content {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .content-line {
+            height: 14px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .content-line:nth-child(1) { width: 100%; }
+        .content-line:nth-child(2) { width: 90%; }
+        .content-line:nth-child(3) { width: 75%; }
+
+        /* Highlight markers (simulating matched text) */
+        .highlight-marker {
+            position: relative;
+        }
+
+        .highlight-marker::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 15%;
+            height: 100%;
+            background: var(--yellow-glow);
+            border-radius: 2px;
+        }
+
+        /* Tags */
+        .result-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .result-tag {
+            width: 70px;
+            height: 22px;
+            border-radius: 11px;
+        }
+
+        .result-tag:nth-child(1) { width: 65px; }
+        .result-tag:nth-child(2) { width: 80px; }
+        .result-tag:nth-child(3) { width: 55px; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+        }
+
+        .page-btn.active {
+            border: 1px solid var(--yellow-accent);
+        }
+
+        .page-dots {
+            width: 20px;
+            height: 16px;
+        }
+
+        /* Base skeleton styling */
+        .skeleton {
+            background: var(--bg-skeleton);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                var(--bg-shimmer) 50%,
+                transparent 100%
+            );
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Staggered animations */
+        .result-item {
+            animation: slideIn 0.3s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .result-item:nth-child(1) { animation-delay: 0s; }
+        .result-item:nth-child(2) { animation-delay: 0.05s; }
+        .result-item:nth-child(3) { animation-delay: 0.1s; }
+        .result-item:nth-child(4) { animation-delay: 0.15s; }
+        .result-item:nth-child(5) { animation-delay: 0.2s; }
+        .result-item:nth-child(6) { animation-delay: 0.25s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Searching indicator */
+        .searching-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            color: var(--text-dim);
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .search-wave {
+            display: flex;
+            gap: 3px;
+        }
+
+        .search-wave span {
+            display: block;
+            width: 4px;
+            height: 20px;
+            background: var(--yellow-accent);
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .search-wave span:nth-child(1) { animation-delay: 0s; }
+        .search-wave span:nth-child(2) { animation-delay: 0.1s; }
+        .search-wave span:nth-child(3) { animation-delay: 0.2s; }
+        .search-wave span:nth-child(4) { animation-delay: 0.3s; }
+        .search-wave span:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Search section -->
+        <div class="search-section">
+            <div class="search-bar">
+                <div class="search-input skeleton"></div>
+                <div class="search-button skeleton"></div>
+            </div>
+            <div class="filters-row">
+                <div class="filter-chip skeleton"></div>
+                <div class="filter-chip skeleton"></div>
+                <div class="filter-chip skeleton"></div>
+                <div class="filter-chip skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Searching indicator -->
+        <div class="searching-indicator">
+            <div class="search-wave">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            SEARCHING MEMORIES
+        </div>
+
+        <!-- Results header -->
+        <div class="results-header">
+            <div class="results-count skeleton"></div>
+            <div class="results-sort skeleton"></div>
+        </div>
+
+        <!-- Result items -->
+        <div class="result-item">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <div class="result-title skeleton"></div>
+                    <div class="result-meta">
+                        <div class="result-meta-item skeleton"></div>
+                        <div class="result-meta-item skeleton"></div>
+                    </div>
+                </div>
+                <div class="result-score">
+                    <div class="score-label skeleton"></div>
+                    <div class="score-bar">
+                        <div class="score-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="content-line skeleton highlight-marker"></div>
+                <div class="content-line skeleton"></div>
+                <div class="content-line skeleton"></div>
+            </div>
+            <div class="result-tags">
+                <div class="result-tag skeleton"></div>
+                <div class="result-tag skeleton"></div>
+            </div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <div class="result-title skeleton"></div>
+                    <div class="result-meta">
+                        <div class="result-meta-item skeleton"></div>
+                        <div class="result-meta-item skeleton"></div>
+                    </div>
+                </div>
+                <div class="result-score">
+                    <div class="score-label skeleton"></div>
+                    <div class="score-bar">
+                        <div class="score-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="content-line skeleton"></div>
+                <div class="content-line skeleton highlight-marker"></div>
+                <div class="content-line skeleton"></div>
+            </div>
+            <div class="result-tags">
+                <div class="result-tag skeleton"></div>
+                <div class="result-tag skeleton"></div>
+                <div class="result-tag skeleton"></div>
+            </div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <div class="result-title skeleton"></div>
+                    <div class="result-meta">
+                        <div class="result-meta-item skeleton"></div>
+                        <div class="result-meta-item skeleton"></div>
+                    </div>
+                </div>
+                <div class="result-score">
+                    <div class="score-label skeleton"></div>
+                    <div class="score-bar">
+                        <div class="score-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="content-line skeleton highlight-marker"></div>
+                <div class="content-line skeleton"></div>
+            </div>
+            <div class="result-tags">
+                <div class="result-tag skeleton"></div>
+            </div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <div class="result-title skeleton"></div>
+                    <div class="result-meta">
+                        <div class="result-meta-item skeleton"></div>
+                        <div class="result-meta-item skeleton"></div>
+                    </div>
+                </div>
+                <div class="result-score">
+                    <div class="score-label skeleton"></div>
+                    <div class="score-bar">
+                        <div class="score-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="content-line skeleton"></div>
+                <div class="content-line skeleton highlight-marker"></div>
+                <div class="content-line skeleton"></div>
+            </div>
+            <div class="result-tags">
+                <div class="result-tag skeleton"></div>
+                <div class="result-tag skeleton"></div>
+            </div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <div class="result-title skeleton"></div>
+                    <div class="result-meta">
+                        <div class="result-meta-item skeleton"></div>
+                        <div class="result-meta-item skeleton"></div>
+                    </div>
+                </div>
+                <div class="result-score">
+                    <div class="score-label skeleton"></div>
+                    <div class="score-bar">
+                        <div class="score-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="content-line skeleton highlight-marker"></div>
+                <div class="content-line skeleton"></div>
+            </div>
+            <div class="result-tags">
+                <div class="result-tag skeleton"></div>
+                <div class="result-tag skeleton"></div>
+                <div class="result-tag skeleton"></div>
+            </div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <div class="result-title skeleton"></div>
+                    <div class="result-meta">
+                        <div class="result-meta-item skeleton"></div>
+                        <div class="result-meta-item skeleton"></div>
+                    </div>
+                </div>
+                <div class="result-score">
+                    <div class="score-label skeleton"></div>
+                    <div class="score-bar">
+                        <div class="score-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="content-line skeleton"></div>
+                <div class="content-line skeleton"></div>
+                <div class="content-line skeleton highlight-marker"></div>
+            </div>
+            <div class="result-tags">
+                <div class="result-tag skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="page-btn skeleton"></div>
+            <div class="page-btn skeleton active"></div>
+            <div class="page-btn skeleton"></div>
+            <div class="page-btn skeleton"></div>
+            <div class="page-dots skeleton"></div>
+            <div class="page-btn skeleton"></div>
+        </div>
+    </div>
+</body>
+</html>

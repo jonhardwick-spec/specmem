@@ -1,0 +1,91 @@
+# ============================================
+# FRANKENSTEIN EMBEDDINGS - QQMS v2 EDITION
+# ============================================
+#
+# FEATURES:
+#   - QQMS v2 queue management (FIFO + ACK)
+#   - Priority aging (prevents starvation)
+#   - Dead Letter Queue (DLQ) for failed items
+#   - PostgreSQL-backed overflow queue
+#   - CPU-throttled (20% cap via --cpus=0.2)
+#   - Auto-pause when idle
+#
+# Build:
+#   docker build -f Dockerfile.frankenstein -t frankenstein-qqmsv2 .
+#
+# Run (THROTTLED with PostgreSQL):
+#   docker run -d \
+#     --name frankenstein-qqmsv2 \
+#     --cpus=0.2 \
+#     --memory=2g \
+#     -v /tmp/specmem-sockets:/sockets \
+#     -e SOCKET_PATH=/sockets/embeddings.sock \
+#     -e SPECMEM_DB_HOST=host.docker.internal \
+#     -e SPECMEM_DB_NAME=specmem \
+#     -e SPECMEM_DB_USER=specmem \
+#     -e SPECMEM_DB_PASSWORD=specmem \
+#     --add-host=host.docker.internal:host-gateway \
+#     frankenstein-qqmsv2
+#
+# ============================================
+
+FROM python:3.12-slim
+
+# Install system dependencies (including libpq for PostgreSQL)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/false embed && \
+    mkdir -p /home/embed/.cache && \
+    mkdir -p /overflow && \
+    chown -R embed:embed /home/embed /overflow
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements-frankenstein.txt ./
+RUN pip install --no-cache-dir -r requirements-frankenstein.txt
+
+# Copy application code (including QQMS v2 queue system)
+COPY frankenstein-embeddings.py overflow_queue.py qqms_v2.py ./
+
+# Pre-download model during build
+ENV TRANSFORMERS_CACHE=/home/embed/.cache/huggingface
+RUN python3 -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')" && \
+    chown -R embed:embed /home/embed/.cache
+
+# Change ownership
+RUN chown -R embed:embed /app
+
+# Switch to non-root user
+USER embed
+
+# Environment - Socket and throttling
+ENV SOCKET_PATH=/sockets/embeddings.sock
+ENV MAX_RPS=3
+ENV BASE_DELAY=200
+ENV CPU_THRESHOLD=15
+
+# QQMS v2 settings (PostgreSQL-backed overflow)
+ENV QQMS_V2_ENABLED=1
+ENV SPECMEM_DB_HOST=localhost
+ENV SPECMEM_DB_PORT=5432
+ENV SPECMEM_DB_NAME=specmem
+ENV SPECMEM_DB_USER=specmem
+ENV SPECMEM_DB_PASSWORD=specmem
+
+# HuggingFace cache settings (model baked in)
+ENV HF_HOME=/home/embed/.cache/huggingface
+ENV TRANSFORMERS_CACHE=/home/embed/.cache/huggingface
+ENV SENTENCE_TRANSFORMERS_HOME=/home/embed/.cache/huggingface
+
+# Healthcheck - uses SOCKET_PATH env var
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \
+  CMD test -S "${SOCKET_PATH}" || exit 1
+
+# Default CMD enables QQMS v2 with service mode (no idle shutdown)
+CMD ["python3", "frankenstein-embeddings.py", "--service", "--max-rps", "3", "--base-delay", "200", "--cpu-threshold", "15"]
