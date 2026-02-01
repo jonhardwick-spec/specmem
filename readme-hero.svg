@@ -1,0 +1,382 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="100%" height="auto">
+  <defs>
+    <!-- Gradient Definitions -->
+    <linearGradient id="cyanPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0d1117;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a1a;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.1);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.02);stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f19;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#0a0a12;stop-opacity:0.9" />
+    </linearGradient>
+
+    <linearGradient id="glowGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#00bfff;stop-opacity:0" />
+    </linearGradient>
+
+    <linearGradient id="barSpecMem" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(0,191,255,0.3);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(168,85,247,0.3);stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="1000" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="600" x2="1200" y2="600" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="700" x2="1200" y2="700" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="800" x2="1200" y2="800" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="900" x2="1200" y2="900" stroke="#00bfff" stroke-width="1"/>
+    <line x1="100" y1="0" x2="100" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="300" y1="0" x2="300" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="500" y1="0" x2="500" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="700" y1="0" x2="700" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="800" y1="0" x2="800" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="900" y1="0" x2="900" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="1000" y1="0" x2="1000" y2="1000" stroke="#00bfff" stroke-width="1"/>
+    <line x1="1100" y1="0" x2="1100" y2="1000" stroke="#00bfff" stroke-width="1"/>
+  </g>
+
+  <!-- Top glow effect -->
+  <ellipse cx="600" cy="0" rx="500" ry="200" fill="url(#glowGrad)" opacity="0.5"/>
+
+  <!-- ====================== HERO SECTION ====================== -->
+
+  <!-- Badge: Semantic Memory Layer -->
+  <g transform="translate(600, 50)">
+    <rect x="-140" y="0" width="280" height="40" rx="20" fill="url(#badgeGrad)" stroke="#00bfff" stroke-width="2" opacity="0.9"/>
+    <text x="0" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#00bfff" text-anchor="middle" font-weight="700" letter-spacing="2">SEMANTIC MEMORY LAYER</text>
+  </g>
+
+  <!-- Main Title: SpecMem -->
+  <text x="600" y="145" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="url(#cyanPurpleGrad)" text-anchor="middle" filter="url(#softGlow)">SpecMem</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="190" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#888888" text-anchor="middle" font-weight="400">Your Code Assistant Actually Remembers</text>
+
+  <!-- Description -->
+  <text x="600" y="230" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#666666" text-anchor="middle">74 MCP Tools | Per-Project Isolation | Semantic Search | Multi-Agent Coordination</text>
+
+  <!-- ====================== STATS CARDS ====================== -->
+
+  <!-- Stats Row -->
+  <g transform="translate(100, 280)">
+    <!-- Stat Card 1: 74 Tools -->
+    <g transform="translate(0, 0)">
+      <rect width="220" height="100" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="110" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="url(#cyanPurpleGrad)" text-anchor="middle" font-weight="800">74</text>
+      <text x="110" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#888888" text-anchor="middle">MCP Tools</text>
+    </g>
+
+    <!-- Stat Card 2: 100% Isolation -->
+    <g transform="translate(250, 0)">
+      <rect width="220" height="100" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="110" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="url(#cyanPurpleGrad)" text-anchor="middle" font-weight="800">100%</text>
+      <text x="110" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#888888" text-anchor="middle">Project Isolation</text>
+    </g>
+
+    <!-- Stat Card 3: <1s Search -->
+    <g transform="translate(500, 0)">
+      <rect width="220" height="100" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="110" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="url(#cyanPurpleGrad)" text-anchor="middle" font-weight="800">&lt;1s</text>
+      <text x="110" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#888888" text-anchor="middle">Semantic Search</text>
+    </g>
+
+    <!-- Stat Card 4: 0 Context Lost -->
+    <g transform="translate(750, 0)">
+      <rect width="220" height="100" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="110" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="url(#cyanPurpleGrad)" text-anchor="middle" font-weight="800">0</text>
+      <text x="110" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#888888" text-anchor="middle">Context Lost</text>
+    </g>
+  </g>
+
+  <!-- ====================== COMPARISON CHART ====================== -->
+
+  <g transform="translate(60, 420)">
+    <!-- Chart Container -->
+    <rect width="520" height="340" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Chart Title -->
+    <text x="260" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#00bfff" text-anchor="middle" font-weight="700">MCP Tool Count Comparison</text>
+
+    <!-- Y-axis labels -->
+    <text x="45" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="end">80</text>
+    <text x="45" y="125" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="end">60</text>
+    <text x="45" y="175" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="end">40</text>
+    <text x="45" y="225" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="end">20</text>
+    <text x="45" y="275" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="end">0</text>
+
+    <!-- Grid lines -->
+    <line x1="55" y1="70" x2="490" y2="70" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    <line x1="55" y1="120" x2="490" y2="120" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    <line x1="55" y1="170" x2="490" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    <line x1="55" y1="220" x2="490" y2="220" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    <line x1="55" y1="270" x2="490" y2="270" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Bars -->
+    <!-- SpecMem: 74 tools -->
+    <rect x="75" y="85" width="70" height="185" rx="4" fill="url(#barSpecMem)" filter="url(#glow)"/>
+    <text x="110" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#00bfff" text-anchor="middle" font-weight="700">74</text>
+    <text x="110" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#d0d0d0" text-anchor="middle">SpecMem</text>
+
+    <!-- Cursor: 8 tools -->
+    <rect x="165" y="250" width="70" height="20" rx="4" fill="#6b7280"/>
+    <text x="200" y="245" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#888" text-anchor="middle">8</text>
+    <text x="200" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888888" text-anchor="middle">Cursor</text>
+
+    <!-- Clone: 7 tools -->
+    <rect x="255" y="252" width="70" height="18" rx="4" fill="#ef4444" opacity="0.7"/>
+    <text x="290" y="247" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#888" text-anchor="middle">7</text>
+    <text x="290" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888888" text-anchor="middle">Clone</text>
+
+    <!-- Generic MCP: 3 tools -->
+    <rect x="345" y="262" width="70" height="8" rx="4" fill="#fbbf24" opacity="0.7"/>
+    <text x="380" y="257" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#888" text-anchor="middle">3</text>
+    <text x="380" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888888" text-anchor="middle">Generic</text>
+
+    <!-- CLAUDE.md: 0 tools -->
+    <rect x="435" y="268" width="70" height="2" rx="1" fill="#22c55e" opacity="0.7"/>
+    <text x="470" y="263" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#888" text-anchor="middle">0</text>
+    <text x="470" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888888" text-anchor="middle">CLAUDE.md</text>
+
+    <!-- Legend -->
+    <g transform="translate(75, 310)">
+      <rect x="0" y="0" width="12" height="12" rx="2" fill="url(#barSpecMem)"/>
+      <text x="18" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">SpecMem (Open Source)</text>
+
+      <rect x="130" y="0" width="12" height="12" rx="2" fill="#6b7280"/>
+      <text x="148" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Cursor ($20/mo)</text>
+
+      <rect x="250" y="0" width="12" height="12" rx="2" fill="#ef4444" opacity="0.7"/>
+      <text x="268" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Clone (Broken)</text>
+    </g>
+  </g>
+
+  <!-- ====================== FEATURE CARDS ====================== -->
+
+  <g transform="translate(620, 420)">
+    <!-- Features Container -->
+    <rect width="520" height="340" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Features Title -->
+    <text x="260" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#00bfff" text-anchor="middle" font-weight="700">Key Features</text>
+
+    <!-- Feature Grid -->
+    <!-- Row 1 -->
+    <g transform="translate(25, 55)">
+      <!-- Semantic Search -->
+      <g transform="translate(0, 0)">
+        <rect width="145" height="80" rx="12" fill="rgba(0,191,255,0.1)" stroke="rgba(0,191,255,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="28" r="14" fill="rgba(0,191,255,0.2)"/>
+        <text x="30" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#00bfff" text-anchor="middle">S</text>
+        <text x="52" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f5f5f5" font-weight="600">Search</text>
+        <text x="15" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Find code by meaning,</text>
+        <text x="15" y="67" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">not keywords</text>
+      </g>
+
+      <!-- Per-Project Isolation -->
+      <g transform="translate(160, 0)">
+        <rect width="145" height="80" rx="12" fill="rgba(168,85,247,0.1)" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="28" r="14" fill="rgba(168,85,247,0.2)"/>
+        <text x="30" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a855f7" text-anchor="middle">I</text>
+        <text x="52" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f5f5f5" font-weight="600">Isolation</text>
+        <text x="15" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Each project gets its</text>
+        <text x="15" y="67" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">own DB schema</text>
+      </g>
+
+      <!-- Multi-Agent -->
+      <g transform="translate(320, 0)">
+        <rect width="145" height="80" rx="12" fill="rgba(0,191,255,0.1)" stroke="rgba(0,191,255,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="28" r="14" fill="rgba(0,191,255,0.2)"/>
+        <text x="30" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#00bfff" text-anchor="middle">M</text>
+        <text x="52" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f5f5f5" font-weight="600">Multi-Agent</text>
+        <text x="15" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Team coordination</text>
+        <text x="15" y="67" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">built in</text>
+      </g>
+    </g>
+
+    <!-- Row 2 -->
+    <g transform="translate(25, 150)">
+      <!-- Auto-Memorization -->
+      <g transform="translate(0, 0)">
+        <rect width="145" height="80" rx="12" fill="rgba(168,85,247,0.1)" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="28" r="14" fill="rgba(168,85,247,0.2)"/>
+        <text x="30" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a855f7" text-anchor="middle">A</text>
+        <text x="52" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f5f5f5" font-weight="600">Auto-Mem</text>
+        <text x="15" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Tracks code Claude</text>
+        <text x="15" y="67" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">writes automatically</text>
+      </g>
+
+      <!-- File Watcher -->
+      <g transform="translate(160, 0)">
+        <rect width="145" height="80" rx="12" fill="rgba(0,191,255,0.1)" stroke="rgba(0,191,255,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="28" r="14" fill="rgba(0,191,255,0.2)"/>
+        <text x="30" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#00bfff" text-anchor="middle">W</text>
+        <text x="52" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f5f5f5" font-weight="600">Watcher</text>
+        <text x="15" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Real-time codebase</text>
+        <text x="15" y="67" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">indexing</text>
+      </g>
+
+      <!-- Session History -->
+      <g transform="translate(320, 0)">
+        <rect width="145" height="80" rx="12" fill="rgba(168,85,247,0.1)" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+        <circle cx="30" cy="28" r="14" fill="rgba(168,85,247,0.2)"/>
+        <text x="30" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a855f7" text-anchor="middle">H</text>
+        <text x="52" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f5f5f5" font-weight="600">History</text>
+        <text x="15" y="55" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">Session extraction</text>
+        <text x="15" y="67" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#888">auto-saves context</text>
+      </g>
+    </g>
+
+    <!-- Bottom text -->
+    <text x="260" y="275" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">Plus 12 Agent Management, 6 Package Tracking, 5 Trace Tools...</text>
+
+    <!-- Tool Categories Summary -->
+    <g transform="translate(40, 290)">
+      <rect x="0" y="0" width="430" height="35" rx="8" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <text x="215" y="14" font-family="monospace" font-size="9" fill="#00bfff" text-anchor="middle">Memory(10) Team(9) Code(8) Auto(7) Trace(5) Agents(12)</text>
+      <text x="215" y="27" font-family="monospace" font-size="9" fill="#a855f7" text-anchor="middle">Codebase(9) Package(6) Watcher(4) Embedding(3) Session(3)</text>
+    </g>
+  </g>
+
+  <!-- ====================== COMPARISON TABLE ====================== -->
+
+  <g transform="translate(60, 790)">
+    <!-- Table Container -->
+    <rect width="1080" height="180" rx="16" fill="url(#cardGrad)" stroke="rgba(0,191,255,0.2)" stroke-width="1"/>
+
+    <!-- Table Title -->
+    <text x="540" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#00bfff" text-anchor="middle" font-weight="700">Feature Comparison</text>
+
+    <!-- Table Headers -->
+    <g transform="translate(0, 45)">
+      <rect x="20" y="0" width="180" height="30" rx="4" fill="rgba(0,191,255,0.1)"/>
+      <text x="110" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#00bfff" text-anchor="middle" font-weight="600">Feature</text>
+
+      <rect x="210" y="0" width="180" height="30" rx="4" fill="rgba(0,191,255,0.2)"/>
+      <text x="300" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#00bfff" text-anchor="middle" font-weight="700">SpecMem</text>
+
+      <rect x="400" y="0" width="150" height="30" rx="4" fill="rgba(107,114,128,0.2)"/>
+      <text x="475" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888" text-anchor="middle" font-weight="600">Cursor</text>
+
+      <rect x="560" y="0" width="150" height="30" rx="4" fill="rgba(239,68,68,0.1)"/>
+      <text x="635" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888" text-anchor="middle" font-weight="600">Clone</text>
+
+      <rect x="720" y="0" width="150" height="30" rx="4" fill="rgba(34,197,94,0.1)"/>
+      <text x="795" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888" text-anchor="middle" font-weight="600">CLAUDE.md</text>
+
+      <rect x="880" y="0" width="180" height="30" rx="4" fill="rgba(251,191,36,0.1)"/>
+      <text x="970" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#888" text-anchor="middle" font-weight="600">Generic MCP</text>
+    </g>
+
+    <!-- Table Rows -->
+    <!-- Row 1: MCP Tools -->
+    <g transform="translate(0, 85)">
+      <text x="110" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d0d0d0" text-anchor="middle">MCP Tools</text>
+      <text x="300" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#00bfff" text-anchor="middle" font-weight="700">74</text>
+      <text x="475" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">~8</text>
+      <text x="635" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">~7</text>
+      <text x="795" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">0</text>
+      <text x="970" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">3</text>
+    </g>
+
+    <!-- Row 2: Per-Project Isolation -->
+    <g transform="translate(0, 105)">
+      <text x="110" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d0d0d0" text-anchor="middle">Project Isolation</text>
+      <text x="300" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#22c55e" text-anchor="middle">&#10003;</text>
+      <text x="475" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+      <text x="635" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+      <text x="795" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+      <text x="970" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+    </g>
+
+    <!-- Row 3: Multi-Agent -->
+    <g transform="translate(0, 125)">
+      <text x="110" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d0d0d0" text-anchor="middle">Multi-Agent</text>
+      <text x="300" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#22c55e" text-anchor="middle">&#10003;</text>
+      <text x="475" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+      <text x="635" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+      <text x="795" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+      <text x="970" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#ef4444" text-anchor="middle">&#10007;</text>
+    </g>
+
+    <!-- Row 4: Cost -->
+    <g transform="translate(0, 145)">
+      <text x="110" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d0d0d0" text-anchor="middle">Monthly Cost</text>
+      <text x="300" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#22c55e" text-anchor="middle" font-weight="700">FREE</text>
+      <text x="475" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#ef4444" text-anchor="middle">$20/mo</text>
+      <text x="635" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">Free</text>
+      <text x="795" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">Free</text>
+      <text x="970" y="15" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#666" text-anchor="middle">Free</text>
+    </g>
+
+    <!-- Row 5: Status -->
+    <g transform="translate(0, 165)">
+      <text x="110" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#d0d0d0" text-anchor="middle">Status</text>
+      <text x="300" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#a855f7" text-anchor="middle">Production Ready</text>
+      <text x="475" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#666" text-anchor="middle">Subscription</text>
+      <text x="635" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#ef4444" text-anchor="middle">Half-Broken</text>
+      <text x="795" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#666" text-anchor="middle">Manual</text>
+      <text x="970" y="10" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#666" text-anchor="middle">Limited</text>
+    </g>
+  </g>
+
+  <!-- ====================== FOOTER / CTA ====================== -->
+
+  <!-- CTA Section - moved down -->
+  <g transform="translate(600, 985)">
+    <!-- CTA Link -->
+    <a href="https://hardwicksoftware.github.io/specmem">
+      <rect x="-120" y="-18" width="240" height="28" rx="14" fill="url(#cyanPurpleGrad)" filter="url(#glow)"/>
+      <text x="0" y="-1" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="600">Full Documentation</text>
+    </a>
+  </g>
+
+  <!-- Copyright -->
+  <text x="600" y="995" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#444" text-anchor="middle">2024-2026 Hardwick Software Services</text>
+</svg>
