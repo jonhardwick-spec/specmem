@@ -4,10 +4,10 @@
 <details> 
 <summary><strong>Updated install instructions -- Read before all</strong></summary>
 Eg:
-npm install -g specmem-hardwicksoftware
-cd /<yourprojectdirectory>/
-specmem setup
-specmem init
+** npm install -g specmem-hardwicksoftware
+** cd /$your-project-directory/
+** specmem setup
+** specmem init
 
 --> In the future just run specmem init instead of claude,
 --> Its better startup anyways, trust 🤝
