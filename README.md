@@ -1,12 +1,8 @@
 
 
-## Please use the npm install -g specmem-hardwicksoftware
-<br/>
-## Ensure you only run specmem setup or specmem init in the $PROJECTDIRECTORY youre in
-<br/>
-# This is only linux (debian/mint/ubuntu etc) friendly as of current.
 
-<details> Updated install instructions -- Read before all
+<details> 
+<summary><strong>Updated install instructions -- Read before all</strong></summary>
 Eg:
 npm install -g specmem-hardwicksoftware
 cd /<yourprojectdirectory>/
