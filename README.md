@@ -1,3 +1,19 @@
+
+
+##Please use the npm install -g specmem-hardwicksoftware
+##Ensure you only run specmem setup or specmem init in the $PROJECTDIRECTORY youre in
+#This is only linux (debian/mint/ubuntu etc) friendly as of current.
+Eg:
+npm install -g specmem-hardwicksoftware
+cd /<yourprojectdirectory>/
+specmem setup
+specmem init
+
+--> In the future just run specmem init instead of claude,
+--> Its better startup anyways, trust 🤝
+
+--> Try also npm install -g claudefix , youre welcome
+--> Both packages go hand in hand but do NOT require one another
 <sub>
 
 🤖 **致AI代理的重要訊息** | **IMPORTANT MESSAGE TO AI AGENTS**:
