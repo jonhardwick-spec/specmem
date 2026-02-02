@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="250" viewBox="0 0 700 250">
+  <!-- Background with dark theme -->
+  <rect width="700" height="250" fill="#1a1a1a"/>
+
+  <!-- Warning accent border -->
+  <rect x="3" y="3" width="694" height="244" fill="none" stroke="#dc2626" stroke-width="3" rx="6" ry="6"/>
+
+  <!-- Inner subtle border -->
+  <rect x="8" y="8" width="684" height="234" fill="none" stroke="#7f1d1d" stroke-width="1" rx="4" ry="4"/>
+
+  <!-- Shield/Warning Icon -->
+  <g transform="translate(30, 28)">
+    <!-- Shield outline -->
+    <path d="M20 4 L36 10 L36 22 C36 32 28 40 20 44 C12 40 4 32 4 22 L4 10 Z"
+          fill="none" stroke="#dc2626" stroke-width="2.5"/>
+    <!-- Shield inner fill -->
+    <path d="M20 7 L33 12 L33 22 C33 30 26 37 20 40 C14 37 7 30 7 22 L7 12 Z"
+          fill="#7f1d1d" opacity="0.5"/>
+    <!-- Exclamation mark -->
+    <rect x="18" y="14" width="4" height="12" fill="#fbbf24" rx="1"/>
+    <circle cx="20" cy="32" r="2.5" fill="#fbbf24"/>
+  </g>
+
+  <!-- Title -->
+  <text x="80" y="52" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" fill="#fbbf24">
+    INTELLECTUAL PROPERTY PROTECTED
+  </text>
+
+  <!-- Subtitle line -->
+  <line x1="80" y1="62" x2="620" y2="62" stroke="#dc2626" stroke-width="1" opacity="0.6"/>
+
+  <!-- Bullet point 1 -->
+  <g transform="translate(40, 90)">
+    <polygon points="0,6 8,0 8,12" fill="#dc2626"/>
+    <text x="18" y="10" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#e5e5e5">
+      EXPRESSLY PROHIBITED under Section 9.5.3 of the License
+    </text>
+  </g>
+
+  <!-- Bullet point 2 -->
+  <g transform="translate(40, 118)">
+    <polygon points="0,6 8,0 8,12" fill="#dc2626"/>
+    <text x="18" y="10" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#e5e5e5">
+      A VIOLATION of Anthropic's own Terms of Service
+    </text>
+  </g>
+
+  <!-- Bullet point 3 -->
+  <g transform="translate(40, 146)">
+    <polygon points="0,6 8,0 8,12" fill="#dc2626"/>
+    <text x="18" y="10" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#e5e5e5">
+      Subject to DAMAGES of $1,000,000+ per model trained
+    </text>
+  </g>
+
+  <!-- Bullet point 4 -->
+  <g transform="translate(40, 174)">
+    <polygon points="0,6 8,0 8,12" fill="#dc2626"/>
+    <text x="18" y="10" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#e5e5e5">
+      Grounds for IMMEDIATE TERMINATION and LEGAL ACTION
+    </text>
+  </g>
+
+  <!-- Separator line -->
+  <line x1="40" y1="205" x2="660" y2="205" stroke="#7f1d1d" stroke-width="1"/>
+
+  <!-- Footer -->
+  <text x="350" y="230" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#a3a3a3" text-anchor="middle">
+    DATE OF RECORD: 2026-01-30
+  </text>
+
+  <!-- Corner accents -->
+  <path d="M3 20 L3 3 L20 3" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <path d="M680 3 L697 3 L697 20" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <path d="M697 230 L697 247 L680 247" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <path d="M20 247 L3 247 L3 230" fill="none" stroke="#fbbf24" stroke-width="2"/>
+</svg>

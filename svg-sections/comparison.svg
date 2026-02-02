@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="1200" height="850">
+  <defs>
+    <!-- Cyan-Purple Gradient for SpecMem -->
+    <linearGradient id="specmemGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glassmorphism Background -->
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#0f0f1a;stop-opacity:0.98" />
+    </linearGradient>
+
+    <!-- Glow filter for SpecMem bar -->
+    <filter id="specmemGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle shadow for cards -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#00bfff" flood-opacity="0.15"/>
+    </filter>
+
+    <!-- Gray gradient for competitors -->
+    <linearGradient id="grayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a4a5c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3a3a4c;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Lighter gray for basic tools -->
+    <linearGradient id="lightGrayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#5a5a6c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a4a5c;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Red-ish gradient for clone/no implementation -->
+    <linearGradient id="cloneGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#5c3a3a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4c3232;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Orange gradient for limited tools -->
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6b5a3a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5a4a30;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Background -->
+  <rect width="1200" height="850" fill="#0a0a0f"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="600" x2="1200" y2="600" stroke="#00bfff" stroke-width="1"/>
+    <line x1="0" y1="700" x2="1200" y2="700" stroke="#00bfff" stroke-width="1"/>
+  </g>
+
+  <!-- Main Card with glassmorphism effect -->
+  <rect x="30" y="25" width="1140" height="800" rx="24" ry="24" fill="url(#cardBg)" filter="url(#cardShadow)"/>
+  <rect x="30" y="25" width="1140" height="800" rx="24" ry="24" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <!-- Title Section -->
+  <text x="600" y="70" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#f5f5f5" text-anchor="middle">
+    MCP Tool Count: SpecMem vs The Competition
+  </text>
+  <text x="600" y="98" font-family="Inter, Arial, sans-serif" font-size="14" fill="#888888" text-anchor="middle">
+    Real tools. Real capabilities. The numbers speak for themselves.
+  </text>
+
+  <!-- Chart Area -->
+  <!-- Y-Axis Labels -->
+  <text x="70" y="160" font-family="Inter, Arial, sans-serif" font-size="11" fill="#666666" text-anchor="end">80</text>
+  <text x="70" y="220" font-family="Inter, Arial, sans-serif" font-size="11" fill="#666666" text-anchor="end">60</text>
+  <text x="70" y="280" font-family="Inter, Arial, sans-serif" font-size="11" fill="#666666" text-anchor="end">40</text>
+  <text x="70" y="340" font-family="Inter, Arial, sans-serif" font-size="11" fill="#666666" text-anchor="end">20</text>
+  <text x="70" y="400" font-family="Inter, Arial, sans-serif" font-size="11" fill="#666666" text-anchor="end">0</text>
+
+  <!-- Horizontal Grid Lines -->
+  <line x1="85" y1="155" x2="1130" y2="155" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="85" y1="215" x2="1130" y2="215" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="85" y1="275" x2="1130" y2="275" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="85" y1="335" x2="1130" y2="335" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="85" y1="395" x2="1130" y2="395" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+
+  <!-- BAR 1: SpecMem - 74 tools (DOMINANT) - height = 74/80 * 240 = 222 -->
+  <rect x="100" y="173" width="95" height="222" rx="6" ry="6" fill="url(#specmemGradient)" filter="url(#specmemGlow)"/>
+  <rect x="100" y="173" width="47" height="222" rx="6" ry="6" fill="rgba(255,255,255,0.1)"/>
+  <text x="147" y="158" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="800" fill="#00bfff" text-anchor="middle">74</text>
+  <text x="147" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#f5f5f5" text-anchor="middle">SpecMem</text>
+  <text x="147" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#00bfff" text-anchor="middle">Full Implementation</text>
+
+  <!-- BAR 2: Cursor - ~15 tools - height = 15/80 * 240 = 45 -->
+  <rect x="220" y="350" width="95" height="45" rx="6" ry="6" fill="url(#grayGradient)"/>
+  <text x="267" y="338" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#9ca3af" text-anchor="middle">~15</text>
+  <text x="267" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#9ca3af" text-anchor="middle">Cursor</text>
+  <text x="267" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#666666" text-anchor="middle">$20/mo, code-focused</text>
+
+  <!-- BAR 3: Continue.dev - ~12 tools - height = 12/80 * 240 = 36 -->
+  <rect x="340" y="359" width="95" height="36" rx="6" ry="6" fill="url(#grayGradient)"/>
+  <text x="387" y="347" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#9ca3af" text-anchor="middle">~12</text>
+  <text x="387" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#9ca3af" text-anchor="middle">Continue.dev</text>
+  <text x="387" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#666666" text-anchor="middle">Context only</text>
+
+  <!-- BAR 4: Windsurf - ~10 tools - height = 10/80 * 240 = 30 -->
+  <rect x="460" y="365" width="95" height="30" rx="6" ry="6" fill="url(#grayGradient)"/>
+  <text x="507" y="353" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#9ca3af" text-anchor="middle">~10</text>
+  <text x="507" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#9ca3af" text-anchor="middle">Windsurf</text>
+  <text x="507" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#666666" text-anchor="middle">Limited tools</text>
+
+  <!-- BAR 5: mem0ai/mem0 - ~6 tools - height = 6/80 * 240 = 18 -->
+  <rect x="580" y="377" width="95" height="18" rx="6" ry="6" fill="url(#orangeGradient)"/>
+  <text x="627" y="365" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#d4a574" text-anchor="middle">~6</text>
+  <text x="627" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#d4a574" text-anchor="middle">mem0ai</text>
+  <text x="627" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#8a7a5a" text-anchor="middle">Basic CRUD only</text>
+
+  <!-- BAR 6: Generic MCP Memory Servers - ~4 tools - height = 4/80 * 240 = 12 -->
+  <rect x="700" y="383" width="95" height="12" rx="6" ry="6" fill="url(#lightGrayGradient)"/>
+  <text x="747" y="371" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#7a7a8a" text-anchor="middle">~4</text>
+  <text x="747" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#7a7a8a" text-anchor="middle">Other MCPs</text>
+  <text x="747" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#555555" text-anchor="middle">Store/retrieve only</text>
+
+  <!-- BAR 7: GitHub Copilot - 0 MCP tools -->
+  <rect x="820" y="392" width="95" height="3" rx="2" ry="2" fill="url(#cloneGradient)"/>
+  <text x="867" y="380" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#ff6b6b" text-anchor="middle">0</text>
+  <text x="867" y="420" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#ff6b6b" text-anchor="middle">Copilot</text>
+  <text x="867" y="436" font-family="Inter, Arial, sans-serif" font-size="10" fill="#aa5555" text-anchor="middle">No MCP support</text>
+
+  <!-- BAR 8: superagenticai clone - 0 tools -->
+  <rect x="940" y="392" width="95" height="3" rx="2" ry="2" fill="url(#cloneGradient)"/>
+  <text x="987" y="380" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#ff6b6b" text-anchor="middle">0</text>
+  <text x="987" y="420" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#ff6b6b" text-anchor="middle">superagenticai/</text>
+  <text x="987" y="434" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#ff6b6b" text-anchor="middle">specmem</text>
+  <text x="987" y="450" font-family="Inter, Arial, sans-serif" font-size="9" fill="#aa5555" text-anchor="middle">Cargo cult clone</text>
+
+  <!-- Comparison Notes Section -->
+  <rect x="60" y="470" width="1080" height="130" rx="12" ry="12" fill="rgba(0,191,255,0.05)" stroke="rgba(0,191,255,0.2)" stroke-width="1"/>
+
+  <text x="80" y="495" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#00bfff">Why SpecMem Wins:</text>
+
+  <text x="80" y="520" font-family="Inter, Arial, sans-serif" font-size="12" fill="#b0b0b0">
+    <tspan font-weight="600" fill="#f5f5f5">Cursor/Windsurf:</tspan> Code editing tools, no persistent memory. Your context resets every session.
+  </text>
+  <text x="80" y="540" font-family="Inter, Arial, sans-serif" font-size="12" fill="#b0b0b0">
+    <tspan font-weight="600" fill="#f5f5f5">Continue.dev:</tspan> Context management but lacks semantic search, team coordination, and code tracing.
+  </text>
+  <text x="80" y="560" font-family="Inter, Arial, sans-serif" font-size="12" fill="#b0b0b0">
+    <tspan font-weight="600" fill="#f5f5f5">mem0ai/mem0:</tspan> Basic store/retrieve. No semantic search, no team comms, no file watching, no session extraction.
+  </text>
+  <text x="80" y="580" font-family="Inter, Arial, sans-serif" font-size="12" fill="#b0b0b0">
+    <tspan font-weight="600" fill="#f5f5f5">GitHub Copilot:</tspan> Completions only. No MCP support, no memory persistence, limited to current file context.
+  </text>
+
+  <!-- Warning Box for Clone -->
+  <rect x="60" y="615" width="1080" height="90" rx="12" ry="12" fill="rgba(255,107,107,0.08)" stroke="rgba(255,107,107,0.3)" stroke-width="1"/>
+
+  <!-- Warning icon (triangle) -->
+  <path d="M85 655 L95 638 L105 655 Z" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+  <text x="95" y="652" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" fill="#ff6b6b" text-anchor="middle">!</text>
+
+  <!-- Warning text -->
+  <text x="120" y="645" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#ff6b6b">
+    WARNING: superagenticai/specmem is a cargo cult clone with NO actual implementation
+  </text>
+  <text x="120" y="665" font-family="Inter, Arial, sans-serif" font-size="11" fill="#b0b0b0">
+    They copied our README without understanding per-project isolation, socket race conditions, or search_path requirements.
+  </text>
+  <text x="120" y="685" font-family="Inter, Arial, sans-serif" font-size="11" fill="#b0b0b0">
+    Their "memory" is glorified localStorage. Ours has episodic, semantic, procedural, and working memory types with embeddings.
+  </text>
+
+  <!-- Legend -->
+  <rect x="920" y="115" width="200" height="110" rx="8" ry="8" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <text x="940" y="138" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#888888">Legend</text>
+  <rect x="940" y="150" width="16" height="10" rx="2" ry="2" fill="url(#specmemGradient)"/>
+  <text x="962" y="159" font-family="Inter, Arial, sans-serif" font-size="10" fill="#f5f5f5">SpecMem (Full)</text>
+  <rect x="940" y="168" width="16" height="10" rx="2" ry="2" fill="url(#grayGradient)"/>
+  <text x="962" y="177" font-family="Inter, Arial, sans-serif" font-size="10" fill="#9ca3af">Code Editors</text>
+  <rect x="940" y="186" width="16" height="10" rx="2" ry="2" fill="url(#orangeGradient)"/>
+  <text x="962" y="195" font-family="Inter, Arial, sans-serif" font-size="10" fill="#d4a574">Basic MCP Memory</text>
+  <rect x="940" y="204" width="16" height="10" rx="2" ry="2" fill="url(#cloneGradient)"/>
+  <text x="962" y="213" font-family="Inter, Arial, sans-serif" font-size="10" fill="#ff6b6b">No Implementation</text>
+
+  <!-- Stats callout -->
+  <rect x="60" y="115" width="220" height="85" rx="8" ry="8" fill="rgba(0,191,255,0.08)" stroke="rgba(0,191,255,0.3)" stroke-width="1"/>
+  <text x="170" y="145" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#00bfff" text-anchor="middle">SpecMem Advantage</text>
+  <text x="170" y="175" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#f5f5f5" text-anchor="middle">4.9x more tools</text>
+  <text x="170" y="192" font-family="Inter, Arial, sans-serif" font-size="10" fill="#888888" text-anchor="middle">vs nearest competitor (Cursor)</text>
+
+  <!-- Tool Categories callout -->
+  <rect x="310" y="115" width="280" height="85" rx="8" ry="8" fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+  <text x="450" y="140" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#a855f7" text-anchor="middle">SpecMem Tool Categories</text>
+  <text x="330" y="162" font-family="Inter, Arial, sans-serif" font-size="10" fill="#c0c0c0">Memory &amp; Search (33)</text>
+  <text x="480" y="162" font-family="Inter, Arial, sans-serif" font-size="10" fill="#c0c0c0">Team Coordination (15)</text>
+  <text x="330" y="180" font-family="Inter, Arial, sans-serif" font-size="10" fill="#c0c0c0">Codebase Analysis (12)</text>
+  <text x="480" y="180" font-family="Inter, Arial, sans-serif" font-size="10" fill="#c0c0c0">Session Extraction (6)</text>
+  <text x="330" y="195" font-family="Inter, Arial, sans-serif" font-size="10" fill="#c0c0c0">File Watching (4)</text>
+  <text x="480" y="195" font-family="Inter, Arial, sans-serif" font-size="10" fill="#c0c0c0">Package Tracking (6)</text>
+
+  <!-- Feature comparison table -->
+  <rect x="60" y="720" width="1080" height="90" rx="12" ry="12" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+  <!-- Table header -->
+  <text x="180" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#888888" text-anchor="middle">Feature</text>
+  <text x="320" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#00bfff" text-anchor="middle">SpecMem</text>
+  <text x="440" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#888888" text-anchor="middle">Cursor</text>
+  <text x="540" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#888888" text-anchor="middle">mem0</text>
+  <text x="640" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#888888" text-anchor="middle">Copilot</text>
+  <text x="760" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#888888" text-anchor="middle">Continue</text>
+  <text x="900" y="745" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600" fill="#ff6b6b" text-anchor="middle">Clone</text>
+
+  <!-- Row 1: Semantic Memory -->
+  <text x="180" y="765" font-family="Inter, Arial, sans-serif" font-size="10" fill="#b0b0b0" text-anchor="middle">Semantic Memory</text>
+  <text x="320" y="765" font-family="Inter, Arial, sans-serif" font-size="12" fill="#22c55e" text-anchor="middle">Yes</text>
+  <text x="440" y="765" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="540" y="765" font-family="Inter, Arial, sans-serif" font-size="12" fill="#f59e0b" text-anchor="middle">Basic</text>
+  <text x="640" y="765" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="760" y="765" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="900" y="765" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+
+  <!-- Row 2: Team Coordination -->
+  <text x="180" y="785" font-family="Inter, Arial, sans-serif" font-size="10" fill="#b0b0b0" text-anchor="middle">Multi-Agent Teams</text>
+  <text x="320" y="785" font-family="Inter, Arial, sans-serif" font-size="12" fill="#22c55e" text-anchor="middle">Yes</text>
+  <text x="440" y="785" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="540" y="785" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="640" y="785" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="760" y="785" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="900" y="785" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+
+  <!-- Row 3: Code Tracing -->
+  <text x="180" y="802" font-family="Inter, Arial, sans-serif" font-size="10" fill="#b0b0b0" text-anchor="middle">Code Tracebacks</text>
+  <text x="320" y="802" font-family="Inter, Arial, sans-serif" font-size="12" fill="#22c55e" text-anchor="middle">Yes</text>
+  <text x="440" y="802" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="540" y="802" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="640" y="802" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="760" y="802" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+  <text x="900" y="802" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ff6b6b" text-anchor="middle">No</text>
+
+  <!-- Bottom attribution -->
+  <text x="600" y="840" font-family="Inter, Arial, sans-serif" font-size="10" fill="#555555" text-anchor="middle">
+    Hardwick Software Services - Real implementation, not README theater | justcalljon.pro/specmem
+  </text>
+</svg>

@@ -1,0 +1,1 @@
+{"version":3,"file":"terminal.d.ts","sourceRoot":"","sources":["../../../src/dashboard/api/terminal.ts"],"names":[],"mappings":"AAAA;;;;;;;GAOG;AAGH,OAAO,EAAE,MAAM,EAAE,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AA+ClE,wBAAgB,oBAAoB,CAClC,WAAW,EAAE,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,EAAE,QAAQ,EAAE,IAAI,EAAE,YAAY,KAAK,IAAI,GACrE,MAAM,CA2OR;AAoGD,eAAe,oBAAoB,CAAC"}

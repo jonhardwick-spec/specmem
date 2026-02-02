@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECMEM // MEMORY RECALL VIEWER</title>
+    <style>
+        /* ============================================
+         * CSGO THEME - Yellow (#FFD700) & Black (#000000)
+         * Memory Recall Viewer Dashboard
+         * ============================================ */
+
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --csgo-yellow: #FFD700;
+            --csgo-yellow-dark: #B8860B;
+            --csgo-yellow-glow: rgba(255, 215, 0, 0.5);
+            --csgo-black: #000000;
+            --csgo-dark: #0a0a0a;
+            --csgo-darker: #050505;
+            --csgo-gray: #1a1a1a;
+            --csgo-gray-light: #2a2a2a;
+            --csgo-text: #e0e0e0;
+            --csgo-text-dim: #888888;
+            --csgo-success: #4CAF50;
+            --csgo-error: #f44336;
+            --csgo-warning: #ff9800;
+            --csgo-border: #333333;
+            --csgo-blue: #2196F3;
+            --csgo-purple: #9C27B0;
+        }
+
+        body {
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+            background: var(--csgo-black);
+            color: var(--csgo-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(90deg, rgba(255,215,0,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(255,215,0,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ============================================
+         * HEADER
+         * ============================================ */
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(180deg, var(--csgo-dark) 0%, var(--csgo-black) 100%);
+            border-bottom: 2px solid var(--csgo-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--csgo-yellow);
+            text-shadow: 0 0 10px var(--csgo-yellow-glow);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo a {
+            color: var(--csgo-text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .logo a:hover {
+            color: var(--csgo-yellow);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            color: var(--csgo-yellow);
+            text-shadow: 0 0 5px var(--csgo-yellow-glow);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* ============================================
+         * MAIN CONTENT
+         * ============================================ */
+
+        .main-content {
+            margin-top: 60px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+         * SEARCH BAR
+         * ============================================ */
+
+        .search-container {
+            background: linear-gradient(135deg, var(--csgo-gray) 0%, var(--csgo-dark) 100%);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--csgo-yellow), transparent);
+            opacity: 0.5;
+        }
+
+        .search-mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-mode-btn {
+            padding: 8px 16px;
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            color: var(--csgo-text-dim);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-mode-btn:hover {
+            border-color: var(--csgo-yellow);
+            color: var(--csgo-text);
+        }
+
+        .search-mode-btn.active {
+            background: var(--csgo-yellow);
+            border-color: var(--csgo-yellow);
+            color: var(--csgo-black);
+            font-weight: 600;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 2px;
+            padding: 12px 15px 12px 40px;
+            color: var(--csgo-text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--csgo-yellow);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--csgo-text-dim);
+            font-size: 18px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--csgo-text-dim);
+        }
+
+        .filter-select {
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 2px;
+            padding: 8px 12px;
+            color: var(--csgo-text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--csgo-yellow);
+        }
+
+        /* ============================================
+         * BUTTONS
+         * ============================================ */
+
+        .btn {
+            background: linear-gradient(135deg, var(--csgo-yellow) 0%, var(--csgo-yellow-dark) 100%);
+            color: var(--csgo-black);
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 15px var(--csgo-yellow-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--csgo-gray-light);
+            color: var(--csgo-text);
+            border: 1px solid var(--csgo-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--csgo-gray);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--csgo-error) 0%, #c62828 100%);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* ============================================
+         * MEMORY CARDS GRID
+         * ============================================ */
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .memory-card {
+            background: linear-gradient(135deg, var(--csgo-gray) 0%, var(--csgo-dark) 100%);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .memory-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--csgo-yellow), var(--csgo-yellow-dark));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .memory-card:hover {
+            border-color: var(--csgo-yellow);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.2), 0 0 0 1px rgba(255, 215, 0, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .memory-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .memory-card:active {
+            transform: translateY(-2px);
+        }
+
+        .memory-card-header {
+            background: var(--csgo-darker);
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--csgo-border);
+        }
+
+        .memory-type-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+
+        .memory-type-episodic { background: var(--csgo-blue); color: white; }
+        .memory-type-semantic { background: var(--csgo-success); color: white; }
+        .memory-type-procedural { background: var(--csgo-purple); color: white; }
+        .memory-type-working { background: var(--csgo-warning); color: black; }
+        .memory-type-consolidated { background: var(--csgo-yellow); color: black; }
+
+        .importance-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            border-radius: 2px;
+        }
+
+        .importance-critical { background: var(--csgo-error); color: white; }
+        .importance-high { background: #ff5722; color: white; }
+        .importance-medium { background: var(--csgo-warning); color: black; }
+        .importance-low { background: var(--csgo-gray-light); color: var(--csgo-text); }
+        .importance-trivial { background: var(--csgo-border); color: var(--csgo-text-dim); }
+
+        .memory-card-body {
+            padding: 15px;
+        }
+
+        .memory-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--csgo-text);
+            max-height: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+        }
+
+        .memory-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .memory-tag {
+            font-size: 11px;
+            background: var(--csgo-darker);
+            color: var(--csgo-yellow);
+            padding: 3px 8px;
+            border-radius: 2px;
+            border: 1px solid var(--csgo-yellow);
+        }
+
+        .memory-card-footer {
+            background: var(--csgo-darker);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--csgo-border);
+            font-size: 11px;
+            color: var(--csgo-text-dim);
+        }
+
+        .memory-timestamp {
+            font-family: 'Orbitron', monospace;
+        }
+
+        .memory-access-count {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ============================================
+         * PAGINATION
+         * ============================================ */
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .pagination-info {
+            color: var(--csgo-text-dim);
+            font-size: 14px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* ============================================
+         * MODAL - Memory Detail View
+         * ============================================ */
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: linear-gradient(135deg, var(--csgo-dark) 0%, var(--csgo-black) 100%);
+            border: 2px solid var(--csgo-yellow);
+            border-radius: 4px;
+            width: 90vw;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(90deg, var(--csgo-yellow) 0%, var(--csgo-yellow-dark) 100%);
+            color: var(--csgo-black);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--csgo-black);
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: calc(90vh - 120px);
+            overflow-y: auto;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: var(--csgo-darker);
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--csgo-yellow);
+            border-radius: 4px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--csgo-yellow);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--csgo-border);
+        }
+
+        .detail-content {
+            background: var(--csgo-darker);
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .detail-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-meta-item {
+            background: var(--csgo-darker);
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        .detail-meta-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--csgo-text-dim);
+            margin-bottom: 5px;
+        }
+
+        .detail-meta-value {
+            font-size: 14px;
+            color: var(--csgo-text);
+        }
+
+        .related-memories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .related-memory-card {
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .related-memory-card:hover {
+            border-color: var(--csgo-yellow);
+        }
+
+        .related-memory-preview {
+            font-size: 12px;
+            color: var(--csgo-text-dim);
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .related-memory-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+        }
+
+        .modal-footer {
+            background: var(--csgo-darker);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--csgo-border);
+        }
+
+        /* ============================================
+         * LOADING & EMPTY STATES
+         * ============================================ */
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--csgo-border);
+            border-top-color: var(--csgo-yellow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--csgo-text-dim);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--csgo-border);
+        }
+
+        .empty-state-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            color: var(--csgo-text);
+            margin-bottom: 10px;
+        }
+
+        /* ============================================
+         * TOAST NOTIFICATIONS
+         * ============================================ */
+
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--csgo-gray);
+            border-left: 4px solid var(--csgo-yellow);
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            animation: toastSlideIn 0.3s ease;
+            min-width: 300px;
+        }
+
+        .toast-success { border-left-color: var(--csgo-success); }
+        .toast-error { border-left-color: var(--csgo-error); }
+        .toast-warning { border-left-color: var(--csgo-warning); }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Card fade in animation */
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Skeleton loading animation */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--csgo-gray) 25%, var(--csgo-gray-light) 50%, var(--csgo-gray) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        /* Memory card shine effect on hover */
+        .memory-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+            pointer-events: none;
+        }
+
+        .memory-card:hover::after {
+            left: 100%;
+        }
+
+        /* Similarity badge glow */
+        .similarity-badge {
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+    <script src="/shared-logger.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <span>SPECMEM</span> // MEMORY RECALL
+            <a href="/">Back to Dashboard</a>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-value" id="totalMemories">-</span>
+                <span class="stat-label">Total Memories</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="withEmbeddings">-</span>
+                <span class="stat-label">With Embeddings</span>
+            </div>
+        </div>
+        <div id="language-selector-container" style="margin: 0 16px;"></div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="exportMemories('json')">Export JSON</button>
+            <button class="btn btn-secondary" onclick="exportMemories('csv')">Export CSV</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search Container -->
+        <div class="search-container">
+            <!-- Search Mode Toggle -->
+            <div class="search-mode-toggle">
+                <button class="search-mode-btn active" id="textSearchBtn" onclick="setSearchMode('text')">
+                    Text Search
+                </button>
+                <button class="search-mode-btn" id="semanticSearchBtn" onclick="setSearchMode('semantic')">
+                    Semantic Search
+                </button>
+            </div>
+
+            <div class="search-row">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search memories by content...">
+                </div>
+                <button class="btn" onclick="searchMemories()">Search</button>
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <span class="filter-label">Type:</span>
+                    <select class="filter-select" id="filterType">
+                        <option value="">All Types</option>
+                        <option value="episodic">Episodic</option>
+                        <option value="semantic">Semantic</option>
+                        <option value="procedural">Procedural</option>
+                        <option value="working">Working</option>
+                        <option value="consolidated">Consolidated</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Importance:</span>
+                    <select class="filter-select" id="filterImportance">
+                        <option value="">All Levels</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                        <option value="trivial">Trivial</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Sort:</span>
+                    <select class="filter-select" id="filterSort">
+                        <option value="created">Created Date</option>
+                        <option value="updated">Updated Date</option>
+                        <option value="accessed">Last Accessed</option>
+                        <option value="importance">Importance</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Order:</span>
+                    <select class="filter-select" id="filterOrder">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Tags:</span>
+                    <input type="text" class="filter-select" id="filterTags" placeholder="tag1,tag2" style="width: 150px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Grid -->
+        <div id="memoryGrid" class="memory-grid">
+            <!-- Memory cards will be inserted here -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <div class="pagination-info" id="paginationInfo">
+                Showing 0 of 0 memories
+            </div>
+            <div class="pagination-buttons">
+                <button class="btn btn-secondary btn-small" id="prevBtn" onclick="prevPage()" disabled>Previous</button>
+                <button class="btn btn-secondary btn-small" id="nextBtn" onclick="nextPage()" disabled>Next</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Memory Detail Modal -->
+    <div class="modal-overlay" id="memoryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Memory Details</span>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-small" onclick="deleteCurrentMemory()">Delete Memory</button>
+                <button class="btn btn-secondary btn-small" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let currentOffset = 0;
+        let currentLimit = 50;
+        let totalMemories = 0;
+        let currentMemoryId = null;
+        let searchDebounceTimer = null;
+        let searchMode = 'text'; // 'text' or 'semantic'
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadMemories();
+
+            // Setup search debounce
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => {
+                    currentOffset = 0;
+                    loadMemories();
+                }, 300);
+            });
+
+            // Setup filter change handlers
+            ['filterType', 'filterImportance', 'filterSort', 'filterOrder'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    currentOffset = 0;
+                    loadMemories();
+                });
+            });
+
+            // Enter key to search
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    currentOffset = 0;
+                    loadMemories();
+                }
+            });
+        });
+
+        // ============================================
+        // SEARCH MODE
+        // ============================================
+        function setSearchMode(mode) {
+            searchMode = mode;
+            const textBtn = document.getElementById('textSearchBtn');
+            const semanticBtn = document.getElementById('semanticSearchBtn');
+            const searchInput = document.getElementById('searchInput');
+
+            if (mode === 'text') {
+                textBtn.classList.add('active');
+                semanticBtn.classList.remove('active');
+                searchInput.placeholder = 'Search memories by content...';
+            } else {
+                textBtn.classList.remove('active');
+                semanticBtn.classList.add('active');
+                searchInput.placeholder = 'Search by meaning (semantic search)...';
+            }
+
+            // Reload if there's a search query
+            if (searchInput.value.trim()) {
+                currentOffset = 0;
+                loadMemories();
+            }
+        }
+
+        // ============================================
+        // API FUNCTIONS
+        // ============================================
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/memory/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.stats) {
+                        document.getElementById('totalMemories').textContent = data.stats.total.toLocaleString();
+                        document.getElementById('withEmbeddings').textContent = data.stats.withEmbeddings.toLocaleString();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function loadMemories() {
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+            try {
+                const searchQuery = document.getElementById('searchInput').value;
+                const memoryType = document.getElementById('filterType').value;
+                const importance = document.getElementById('filterImportance').value;
+                const orderBy = document.getElementById('filterSort').value;
+                const orderDirection = document.getElementById('filterOrder').value;
+                const tags = document.getElementById('filterTags').value;
+
+                let response;
+                let data;
+
+                // Use semantic search if enabled and there's a query
+                if (searchMode === 'semantic' && searchQuery.trim()) {
+                    response = await fetch('/api/memory/semantic', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            query: searchQuery,
+                            limit: currentLimit,
+                            memoryType: memoryType || undefined,
+                            importance: importance || undefined
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Semantic search failed');
+                    }
+
+                    data = await response.json();
+                    // Transform semantic results to match regular format
+                    const memories = (data.results || []).map(r => ({
+                        ...r.memory,
+                        similarity: r.similarity
+                    }));
+                    totalMemories = memories.length;
+
+                    renderMemories(memories, true);
+                    updatePagination({
+                        memories,
+                        total: memories.length,
+                        hasMore: false,
+                        page: { offset: 0, limit: currentLimit }
+                    });
+                    return;
+                }
+
+                // Build query params for text search
+                const params = new URLSearchParams({
+                    limit: currentLimit,
+                    offset: currentOffset,
+                    orderBy,
+                    orderDirection
+                });
+
+                if (searchQuery) params.append('q', searchQuery);
+                if (memoryType) params.append('memoryType', memoryType);
+                if (importance) params.append('importance', importance);
+
+                // Use different endpoint for tag filtering
+                let url = `/api/memory/search?${params}`;
+                if (tags && !searchQuery) {
+                    url = `/api/memory/by-tags?tags=${encodeURIComponent(tags)}&limit=${currentLimit}&offset=${currentOffset}`;
+                }
+
+                response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to load memories');
+                }
+
+                data = await response.json();
+                const memories = data.memories || [];
+                totalMemories = data.total || memories.length;
+
+                renderMemories(memories, false);
+                updatePagination(data);
+            } catch (error) {
+                console.error('Failed to load memories:', error);
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#9888;</div>
+                        <div class="empty-state-title">Error Loading Memories</div>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadMemoryDetail(id) {
+            try {
+                const response = await fetch(`/api/memory/recall/${id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load memory details');
+                }
+
+                const data = await response.json();
+                if (data.success && data.memory) {
+                    currentMemoryId = id;
+                    renderMemoryModal(data.memory);
+                    openModal();
+
+                    // Load related memories
+                    loadRelatedMemories(id);
+                }
+            } catch (error) {
+                console.error('Failed to load memory detail:', error);
+                showToast('Failed to load memory details', 'error');
+            }
+        }
+
+        async function loadRelatedMemories(id) {
+            try {
+                const response = await fetch(`/api/memory/${id}/related?depth=2`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.relatedMemories && data.relatedMemories.length > 0) {
+                        renderRelatedMemories(data.relatedMemories);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load related memories:', error);
+            }
+        }
+
+        async function deleteMemory(id) {
+            if (!confirm('Are you sure you want to delete this memory? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/memory/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete memory');
+                }
+
+                showToast('Memory deleted successfully', 'success');
+                closeModal();
+                loadMemories();
+                loadStats();
+            } catch (error) {
+                console.error('Failed to delete memory:', error);
+                showToast('Failed to delete memory', 'error');
+            }
+        }
+
+        async function exportMemories(format) {
+            try {
+                const searchQuery = document.getElementById('searchInput').value;
+                const memoryType = document.getElementById('filterType').value;
+                const tags = document.getElementById('filterTags').value.split(',').filter(t => t.trim());
+
+                const body = {
+                    format,
+                    limit: 1000
+                };
+
+                if (memoryType) body.memoryType = memoryType;
+                if (tags.length > 0) body.tags = tags;
+
+                const response = await fetch('/api/memory/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                if (format === 'csv') {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'memories-export.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('Memories exported as CSV', 'success');
+                } else {
+                    const data = await response.json();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'memories-export.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast(`Exported ${data.exported} memories as JSON`, 'success');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                showToast('Export failed', 'error');
+            }
+        }
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        function renderMemories(memories, showSimilarity = false) {
+            const grid = document.getElementById('memoryGrid');
+
+            if (memories.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">&#128193;</div>
+                        <div class="empty-state-title">No Memories Found</div>
+                        <p>Try adjusting your search or filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = memories.map(memory => `
+                <div class="memory-card" onclick="loadMemoryDetail('${memory.id}')" style="animation: cardFadeIn 0.3s ease forwards; animation-delay: ${memories.indexOf(memory) * 0.05}s; opacity: 0;">
+                    <div class="memory-card-header">
+                        <span class="memory-type-badge memory-type-${memory.memoryType}">${memory.memoryType}</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            ${showSimilarity && memory.similarity !== undefined ? `
+                                <span class="similarity-badge" style="background: ${getSimilarityColor(memory.similarity)}; color: ${memory.similarity > 0.7 ? 'black' : 'white'}; padding: 4px 8px; border-radius: 2px; font-size: 10px; font-weight: 600;">
+                                    ${(memory.similarity * 100).toFixed(0)}% match
+                                </span>
+                            ` : ''}
+                            <span class="importance-badge importance-${memory.importance}">${memory.importance}</span>
+                        </div>
+                    </div>
+                    <div class="memory-card-body">
+                        <div class="memory-content">${escapeHtml(memory.content)}</div>
+                        ${memory.tags && memory.tags.length > 0 ? `
+                            <div class="memory-tags">
+                                ${memory.tags.slice(0, 5).map(tag => `<span class="memory-tag">${escapeHtml(tag)}</span>`).join('')}
+                                ${memory.tags.length > 5 ? `<span class="memory-tag">+${memory.tags.length - 5} more</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="memory-card-footer">
+                        <span class="memory-timestamp">${formatDate(memory.createdAt)}</span>
+                        <span class="memory-access-count">&#128065; ${memory.accessCount || 0}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getSimilarityColor(similarity) {
+            if (similarity >= 0.8) return '#4CAF50';
+            if (similarity >= 0.6) return '#FFD700';
+            if (similarity >= 0.4) return '#ff9800';
+            return '#f44336';
+        }
+
+        function renderMemoryModal(memory) {
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-section-title">Content</div>
+                    <div class="detail-content">${escapeHtml(memory.content)}</div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title">Metadata</div>
+                    <div class="detail-meta-grid">
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Memory ID</div>
+                            <div class="detail-meta-value" style="font-family: monospace; font-size: 12px;">${memory.id}</div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Type</div>
+                            <div class="detail-meta-value">
+                                <span class="memory-type-badge memory-type-${memory.memoryType}">${memory.memoryType}</span>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Importance</div>
+                            <div class="detail-meta-value">
+                                <span class="importance-badge importance-${memory.importance}">${memory.importance}</span>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Created</div>
+                            <div class="detail-meta-value">${formatDateTime(memory.createdAt)}</div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Updated</div>
+                            <div class="detail-meta-value">${formatDateTime(memory.updatedAt)}</div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Access Count</div>
+                            <div class="detail-meta-value">${memory.accessCount || 0}</div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Last Accessed</div>
+                            <div class="detail-meta-value">${memory.lastAccessedAt ? formatDateTime(memory.lastAccessedAt) : 'Never'}</div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <div class="detail-meta-label">Has Embedding</div>
+                            <div class="detail-meta-value">${memory.embedding ? 'Yes' : 'No'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${memory.tags && memory.tags.length > 0 ? `
+                    <div class="detail-section">
+                        <div class="detail-section-title">Tags</div>
+                        <div class="memory-tags">
+                            ${memory.tags.map(tag => `<span class="memory-tag">${escapeHtml(tag)}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${memory.metadata && Object.keys(memory.metadata).length > 0 ? `
+                    <div class="detail-section">
+                        <div class="detail-section-title">Custom Metadata</div>
+                        <div class="detail-content">${JSON.stringify(memory.metadata, null, 2)}</div>
+                    </div>
+                ` : ''}
+
+                <div class="detail-section">
+                    <div class="detail-section-title">Related Memories</div>
+                    <div id="relatedMemoriesContainer" class="related-memories-grid">
+                        <div class="loading-spinner" style="grid-column: 1/-1;"><div class="spinner" style="width: 30px; height: 30px;"></div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRelatedMemories(relatedMemories) {
+            const container = document.getElementById('relatedMemoriesContainer');
+
+            if (relatedMemories.length === 0) {
+                container.innerHTML = '<p style="color: var(--csgo-text-dim); grid-column: 1/-1;">No related memories found</p>';
+                return;
+            }
+
+            container.innerHTML = relatedMemories.map(item => `
+                <div class="related-memory-card" onclick="loadMemoryDetail('${item.memory.id}')">
+                    <div class="related-memory-preview">${escapeHtml(item.memory.content.substring(0, 150))}...</div>
+                    <div class="related-memory-meta">
+                        <span>${item.relationType} (depth: ${item.depth})</span>
+                        <span>Strength: ${(item.strength * 100).toFixed(0)}%</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePagination(data) {
+            const info = document.getElementById('paginationInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            const start = data.page.offset + 1;
+            const end = Math.min(data.page.offset + data.memories.length, data.total);
+            info.textContent = `Showing ${start}-${end} of ${data.total} memories`;
+
+            prevBtn.disabled = data.page.offset === 0;
+            nextBtn.disabled = !data.hasMore;
+        }
+
+        // ============================================
+        // PAGINATION
+        // ============================================
+        function prevPage() {
+            if (currentOffset > 0) {
+                currentOffset = Math.max(0, currentOffset - currentLimit);
+                loadMemories();
+            }
+        }
+
+        function nextPage() {
+            currentOffset += currentLimit;
+            loadMemories();
+        }
+
+        function searchMemories() {
+            currentOffset = 0;
+            loadMemories();
+        }
+
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+        function openModal() {
+            document.getElementById('memoryModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('memoryModal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentMemoryId = null;
+        }
+
+        function deleteCurrentMemory() {
+            if (currentMemoryId) {
+                deleteMemory(currentMemoryId);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('memoryModal').addEventListener('click', (e) => {
+            if (e.target.id === 'memoryModal') {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+
+    <!-- Language Selector Component -->
+    <script src="/shared-language-selector.js"></script>
+    <script>
+        // Initialize language selector
+        const langSelector = new SpecMemLanguageSelector({
+            containerId: 'language-selector-container',
+            onLanguageChange: (langCode, langInfo) => {
+                console.log('Language changed to:', langCode, langInfo.name);
+            }
+        });
+    </script>
+</body>
+</html>

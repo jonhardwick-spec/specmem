@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats Dashboard - Loading</title>
+    <style>
+        /* ============================================
+         * SPECMEM SKELETON - Stats Dashboard Preview
+         * Metrics and analytics loading state
+         * ============================================ */
+
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #1a1a2e;
+            --bg-skeleton: #2a2a4e;
+            --bg-skeleton-light: #3a3a5e;
+            --bg-shimmer: rgba(255, 215, 0, 0.08);
+            --border-color: #333344;
+            --text-dim: #666;
+            --yellow-accent: rgba(255, 215, 0, 0.3);
+            --yellow-glow: rgba(255, 215, 0, 0.15);
+            --radius: 8px;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(90deg, rgba(255,215,0,0.02) 1px, transparent 1px),
+                linear-gradient(rgba(255,215,0,0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            width: 200px;
+            height: 32px;
+        }
+
+        .header-date {
+            width: 120px;
+            height: 20px;
+        }
+
+        /* Stats grid - top metrics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--yellow-accent);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            width: 80px;
+            height: 36px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            width: 100px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .stat-change {
+            width: 60px;
+            height: 14px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
+        /* Charts section */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            width: 140px;
+            height: 20px;
+        }
+
+        .chart-toggle {
+            width: 80px;
+            height: 28px;
+            border-radius: 14px;
+        }
+
+        /* Line chart skeleton */
+        .line-chart {
+            height: 200px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 20px 0;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--bg-skeleton);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            overflow: hidden;
+            animation: barGrow 1.5s ease-out;
+        }
+
+        .chart-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, var(--yellow-glow) 0%, transparent 100%);
+        }
+
+        .chart-bar:nth-child(1) { height: 60%; animation-delay: 0s; }
+        .chart-bar:nth-child(2) { height: 80%; animation-delay: 0.05s; }
+        .chart-bar:nth-child(3) { height: 45%; animation-delay: 0.1s; }
+        .chart-bar:nth-child(4) { height: 90%; animation-delay: 0.15s; }
+        .chart-bar:nth-child(5) { height: 70%; animation-delay: 0.2s; }
+        .chart-bar:nth-child(6) { height: 55%; animation-delay: 0.25s; }
+        .chart-bar:nth-child(7) { height: 85%; animation-delay: 0.3s; }
+        .chart-bar:nth-child(8) { height: 65%; animation-delay: 0.35s; }
+        .chart-bar:nth-child(9) { height: 75%; animation-delay: 0.4s; }
+        .chart-bar:nth-child(10) { height: 50%; animation-delay: 0.45s; }
+
+        @keyframes barGrow {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        .chart-axis {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .axis-label {
+            width: 30px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* Pie chart skeleton */
+        .pie-chart {
+            width: 160px;
+            height: 160px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--bg-skeleton) 0deg 120deg,
+                var(--bg-skeleton-light) 120deg 210deg,
+                var(--yellow-accent) 210deg 280deg,
+                var(--border-color) 280deg 360deg
+            );
+            position: relative;
+            animation: pieRotate 3s linear infinite;
+        }
+
+        .pie-chart::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: var(--bg-card);
+            border-radius: 50%;
+        }
+
+        @keyframes pieRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pie-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .pie-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pie-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .pie-legend-label {
+            width: 80px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        /* Distribution table */
+        .distribution-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .section-header {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            width: 180px;
+            height: 20px;
+        }
+
+        .table-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .row-label {
+            width: 120px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .row-bar-container {
+            flex: 1;
+            margin: 0 16px;
+            height: 8px;
+            background: var(--bg-skeleton);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .row-bar {
+            height: 100%;
+            background: var(--yellow-accent);
+            border-radius: 4px;
+            animation: barFill 1s ease-out;
+        }
+
+        .table-row:nth-child(1) .row-bar { width: 85%; animation-delay: 0s; }
+        .table-row:nth-child(2) .row-bar { width: 65%; animation-delay: 0.1s; }
+        .table-row:nth-child(3) .row-bar { width: 45%; animation-delay: 0.2s; }
+        .table-row:nth-child(4) .row-bar { width: 30%; animation-delay: 0.3s; }
+        .table-row:nth-child(5) .row-bar { width: 15%; animation-delay: 0.4s; }
+
+        @keyframes barFill {
+            from { width: 0; }
+        }
+
+        .row-value {
+            width: 50px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        /* Base skeleton styling */
+        .skeleton {
+            background: var(--bg-skeleton);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                var(--bg-shimmer) 50%,
+                transparent 100%
+            );
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Loading indicator */
+        .loading-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dim);
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--yellow-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title skeleton"></div>
+            <div class="header-date skeleton"></div>
+        </div>
+
+        <!-- Top stats grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon skeleton"></div>
+                <div class="stat-value skeleton"></div>
+                <div class="stat-label skeleton"></div>
+                <div class="stat-change skeleton"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon skeleton"></div>
+                <div class="stat-value skeleton"></div>
+                <div class="stat-label skeleton"></div>
+                <div class="stat-change skeleton"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon skeleton"></div>
+                <div class="stat-value skeleton"></div>
+                <div class="stat-label skeleton"></div>
+                <div class="stat-change skeleton"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon skeleton"></div>
+                <div class="stat-value skeleton"></div>
+                <div class="stat-label skeleton"></div>
+                <div class="stat-change skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="charts-row">
+            <!-- Line/bar chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title skeleton"></div>
+                    <div class="chart-toggle skeleton"></div>
+                </div>
+                <div class="line-chart">
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                </div>
+                <div class="chart-axis">
+                    <div class="axis-label skeleton"></div>
+                    <div class="axis-label skeleton"></div>
+                    <div class="axis-label skeleton"></div>
+                    <div class="axis-label skeleton"></div>
+                    <div class="axis-label skeleton"></div>
+                </div>
+            </div>
+
+            <!-- Pie chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title skeleton"></div>
+                </div>
+                <div class="pie-chart"></div>
+                <div class="pie-legend">
+                    <div class="pie-legend-item">
+                        <div class="pie-legend-dot skeleton"></div>
+                        <div class="pie-legend-label skeleton"></div>
+                    </div>
+                    <div class="pie-legend-item">
+                        <div class="pie-legend-dot skeleton"></div>
+                        <div class="pie-legend-label skeleton"></div>
+                    </div>
+                    <div class="pie-legend-item">
+                        <div class="pie-legend-dot skeleton"></div>
+                        <div class="pie-legend-label skeleton"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribution table -->
+        <div class="distribution-section">
+            <div class="section-header">
+                <div class="section-title skeleton"></div>
+            </div>
+            <div class="table-row">
+                <div class="row-label skeleton"></div>
+                <div class="row-bar-container">
+                    <div class="row-bar"></div>
+                </div>
+                <div class="row-value skeleton"></div>
+            </div>
+            <div class="table-row">
+                <div class="row-label skeleton"></div>
+                <div class="row-bar-container">
+                    <div class="row-bar"></div>
+                </div>
+                <div class="row-value skeleton"></div>
+            </div>
+            <div class="table-row">
+                <div class="row-label skeleton"></div>
+                <div class="row-bar-container">
+                    <div class="row-bar"></div>
+                </div>
+                <div class="row-value skeleton"></div>
+            </div>
+            <div class="table-row">
+                <div class="row-label skeleton"></div>
+                <div class="row-bar-container">
+                    <div class="row-bar"></div>
+                </div>
+                <div class="row-value skeleton"></div>
+            </div>
+            <div class="table-row">
+                <div class="row-label skeleton"></div>
+                <div class="row-bar-container">
+                    <div class="row-bar"></div>
+                </div>
+                <div class="row-value skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Loading footer -->
+        <div class="loading-footer">
+            <span class="spinner"></span> Calculating Metrics
+        </div>
+    </div>
+</body>
+</html>

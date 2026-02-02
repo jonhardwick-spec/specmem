@@ -1,0 +1,3756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECMEM // TEAM MEMBER OPERATIONS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Modern Color Palette */
+            --primary: #0EA5E9;
+            --primary-dark: #0284C7;
+            --primary-glow: rgba(14, 165, 233, 0.4);
+            --accent: #8B5CF6;
+            --accent-light: #A78BFA;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #F43F5E;
+            --info: #06B6D4;
+
+            /* Backgrounds */
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1A1A1A;
+            --bg-elevated: #1F1F1F;
+            --bg-overlay: rgba(0, 0, 0, 0.85);
+
+            /* Text */
+            --text-primary: #F3F4F6;
+            --text-secondary: #D1D5DB;
+            --text-tertiary: #9CA3AF;
+            --text-dim: #6B7280;
+
+            /* Borders */
+            --border-primary: #2A2A2A;
+            --border-secondary: #333333;
+            --border-accent: #3F3F3F;
+
+            /* Legacy compatibility */
+            --csgo-yellow: var(--primary);
+            --csgo-yellow-dark: var(--primary-dark);
+            --csgo-yellow-glow: var(--primary-glow);
+            --csgo-black: var(--bg-primary);
+            --csgo-dark: var(--bg-secondary);
+            --csgo-darker: var(--bg-primary);
+            --csgo-gray: var(--bg-tertiary);
+            --csgo-gray-light: var(--bg-elevated);
+            --csgo-text: var(--text-primary);
+            --csgo-text-dim: var(--text-dim);
+            --csgo-success: var(--success);
+            --csgo-error: var(--error);
+            --csgo-warning: var(--warning);
+            --csgo-border: var(--border-primary);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.02) 1px, transparent 1px),
+                linear-gradient(rgba(14, 165, 233, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 64px;
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 1px rgba(14, 165, 233, 0.2);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 40%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 360px;
+            gap: 20px;
+            padding: 84px 24px 24px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel {
+            background: rgba(26, 26, 26, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            border-color: var(--border-secondary);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+            color: var(--text-primary);
+            padding: 14px 18px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .panel-body {
+            padding: 16px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+
+        .panel-body::-webkit-scrollbar { width: 6px; }
+        .panel-body::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 3px; }
+        .panel-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 3px;
+        }
+        .panel-body::-webkit-scrollbar-thumb:hover { opacity: 0.8; }
+
+        .team-member-card {
+            background: rgba(31, 31, 31, 0.6);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-member-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .team-member-card:hover {
+            border-color: var(--border-accent);
+            background: rgba(31, 31, 31, 0.9);
+            transform: translateX(2px);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+        }
+
+        .team-member-card:hover::before {
+            opacity: 1;
+        }
+
+        .team-member-card.selected {
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.08);
+            box-shadow: 0 0 0 1px var(--primary), 0 4px 20px rgba(14, 165, 233, 0.2);
+        }
+
+        .team-member-card.selected::before {
+            opacity: 1;
+        }
+
+        .team-member-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .team-member-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--csgo-text);
+        }
+
+        .team-member-type {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .team-member-type.worker {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .team-member-type.overseer {
+            background: rgba(14, 165, 233, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+        .team-member-type.qa {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            padding: 5px 12px;
+            border-radius: 14px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge.running {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .status-badge.completed {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--info);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        .status-badge.failed {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+        .status-badge.stopped {
+            background: rgba(107, 114, 128, 0.15);
+            color: var(--text-dim);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-badge.running .status-dot { animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .token-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 10px;
+        }
+
+        .token-value {
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--csgo-text-dim);
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--csgo-border);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+
+        .detail-label { color: var(--csgo-text-dim); }
+        .detail-value { color: var(--csgo-text); font-family: 'Orbitron', monospace; font-size: 12px; }
+
+        .log-container {
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 10px;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry.info { color: var(--csgo-text); }
+        .log-entry.warn { color: var(--csgo-warning); }
+        .log-entry.error { color: var(--csgo-error); }
+        .log-entry.debug { color: var(--csgo-text-dim); }
+
+        .log-timestamp {
+            color: var(--csgo-text-dim);
+            margin-right: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error) 0%, #DC2626 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-accent);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .deploy-form {
+            display: grid;
+            gap: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--csgo-text-dim);
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--bg-tertiary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .no-team-members {
+            text-align: center;
+            padding: 30px;
+            color: var(--csgo-text-dim);
+        }
+
+        .no-team-members-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.3;
+        }
+
+        .ws-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .ws-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--csgo-error);
+        }
+
+        .ws-dot.connected { background: var(--csgo-success); }
+
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-tertiary);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-secondary);
+            color: var(--text-secondary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .log-filters {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .hidden { display: none !important; }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid var(--csgo-border);
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-secondary);
+        }
+
+        .tab-btn:hover::before {
+            width: 60%;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::before {
+            width: 100%;
+        }
+
+        .tab-btn.tab-disabled {
+            color: var(--csgo-gray);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tab-btn.tab-disabled:hover {
+            color: var(--csgo-gray);
+        }
+
+        .task-team-member-notice {
+            width: 100%;
+        }
+
+        .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 9px;
+            background: var(--csgo-error);
+            color: white;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-card {
+            background: rgba(31, 31, 31, 0.6);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .code-card:hover {
+            border-color: var(--border-secondary);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-card-header {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .code-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .code-meta {
+            font-size: 11px;
+            color: var(--csgo-text-dim);
+        }
+
+        .code-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .code-tag {
+            font-size: 9px;
+            padding: 3px 8px;
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .code-preview {
+            background: var(--csgo-darker);
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: var(--csgo-text);
+            border-top: 1px solid var(--csgo-border);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            border-top: 1px solid var(--csgo-border);
+            background: var(--csgo-gray-light);
+        }
+
+        .feedback-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            font-size: 10px;
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            color: var(--csgo-text);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feedback-btn:hover {
+            border-color: var(--csgo-yellow);
+        }
+
+        .feedback-btn.positive:hover { border-color: var(--csgo-success); color: var(--csgo-success); }
+        .feedback-btn.negative:hover { border-color: var(--csgo-error); color: var(--csgo-error); }
+        .feedback-btn.question:hover { border-color: #2196F3; color: #2196F3; }
+        .feedback-btn.critique:hover { border-color: var(--csgo-warning); color: var(--csgo-warning); }
+
+        .feedback-count {
+            font-family: 'Orbitron', monospace;
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+        }
+
+        .feedback-list {
+            padding: 10px 12px;
+            border-top: 1px solid var(--csgo-border);
+        }
+
+        .feedback-item {
+            padding: 8px;
+            background: var(--csgo-darker);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .feedback-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .feedback-type {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+
+        .feedback-type.positive { background: rgba(76, 175, 80, 0.2); color: var(--csgo-success); }
+        .feedback-type.negative { background: rgba(244, 67, 54, 0.2); color: var(--csgo-error); }
+        .feedback-type.question { background: rgba(33, 150, 243, 0.2); color: #2196F3; }
+        .feedback-type.critique { background: rgba(255, 152, 0, 0.2); color: var(--csgo-warning); }
+
+        .message-container {
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            height: 350px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message-item {
+            padding: 12px;
+            background: rgba(31, 31, 31, 0.6);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .message-item:hover {
+            background: rgba(31, 31, 31, 0.9);
+            transform: translateX(2px);
+        }
+
+        .message-item.sent {
+            background: rgba(14, 165, 233, 0.1);
+            border-left-color: var(--primary);
+        }
+
+        .message-item.received {
+            background: rgba(31, 31, 31, 0.6);
+            border-left-color: var(--text-dim);
+        }
+
+        .message-item.unread {
+            border-left-color: var(--success);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .message-from {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .message-time {
+            color: var(--csgo-text-dim);
+        }
+
+        .message-text {
+            font-size: 13px;
+            color: var(--csgo-text);
+        }
+
+        .message-input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .message-input-container input,
+        .message-input-container select {
+            flex: 1;
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 2px;
+            padding: 10px;
+            color: var(--csgo-text);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .message-input-container select {
+            max-width: 150px;
+        }
+
+        .encouragement-banner {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .encouragement-banner:hover {
+            border-color: rgba(14, 165, 233, 0.5);
+            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.15);
+        }
+
+        .encouragement-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.5));
+        }
+
+        .encouragement-text {
+            flex: 1;
+        }
+
+        .encouragement-text h4 {
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .encouragement-text p {
+            color: var(--text-tertiary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .collab-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .collab-stat {
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .collab-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            color: var(--csgo-yellow);
+        }
+
+        .collab-stat-label {
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .share-code-form {
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .share-code-form textarea {
+            width: 100%;
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 2px;
+            padding: 10px;
+            color: var(--csgo-text);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            max-width: 640px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Limit Gauges */
+        .limit-gauges {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .limit-gauge {
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .limit-gauge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .limit-gauge-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--csgo-text-dim);
+        }
+
+        .limit-gauge-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .limit-gauge-badge.ok { display: none; }
+        .limit-gauge-badge.warning { background: rgba(255, 152, 0, 0.3); color: var(--csgo-warning); border: 1px solid var(--csgo-warning); }
+        .limit-gauge-badge.critical { background: rgba(244, 67, 54, 0.3); color: var(--csgo-error); border: 1px solid var(--csgo-error); animation: pulse 1s infinite; }
+        .limit-gauge-badge.exceeded { background: var(--csgo-error); color: white; border: 1px solid var(--csgo-error); animation: pulse 0.5s infinite; }
+
+        .limit-gauge-bar {
+            height: 8px;
+            background: var(--csgo-darker);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .limit-gauge-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .limit-gauge-fill.ok { background: linear-gradient(90deg, var(--csgo-success) 0%, #2E7D32 100%); }
+        .limit-gauge-fill.warning { background: linear-gradient(90deg, var(--csgo-warning) 0%, #F57C00 100%); }
+        .limit-gauge-fill.critical { background: linear-gradient(90deg, var(--csgo-error) 0%, #C62828 100%); }
+        .limit-gauge-fill.exceeded { background: linear-gradient(90deg, #D32F2F 0%, #B71C1C 100%); }
+
+        .limit-gauge-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 10px;
+        }
+
+        .limit-gauge-value {
+            font-family: 'Orbitron', monospace;
+            color: var(--csgo-yellow);
+        }
+
+        .limit-gauge-percent {
+            color: var(--csgo-text-dim);
+        }
+
+        .limit-gauge[data-level="warning"] {
+            border-color: var(--csgo-warning);
+        }
+
+        .limit-gauge[data-level="critical"],
+        .limit-gauge[data-level="exceeded"] {
+            border-color: var(--csgo-error);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.3);
+        }
+
+        .limit-suggestion {
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+            margin-top: 4px;
+            font-style: italic;
+            display: none;
+        }
+
+        .limit-gauge[data-level="warning"] .limit-suggestion,
+        .limit-gauge[data-level="critical"] .limit-suggestion,
+        .limit-gauge[data-level="exceeded"] .limit-suggestion {
+            display: block;
+        }
+
+        .limit-ack-list {
+            margin-top: 10px;
+            padding: 8px;
+            background: var(--csgo-darker);
+            border-radius: 4px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .limit-ack-item {
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+            padding: 4px 0;
+            border-bottom: 1px solid var(--csgo-border);
+        }
+
+        .limit-ack-item:last-child {
+            border-bottom: none;
+        }
+
+        .limit-ack-type {
+            color: var(--csgo-yellow);
+            text-transform: uppercase;
+            margin-right: 5px;
+        }
+
+        .limit-warning-alert {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+            border: 1px solid var(--csgo-error);
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .limit-warning-alert.hidden {
+            display: none;
+        }
+
+        .limit-warning-icon {
+            font-size: 20px;
+            color: var(--csgo-error);
+        }
+
+        .limit-warning-text {
+            flex: 1;
+        }
+
+        .limit-warning-text h4 {
+            color: var(--csgo-error);
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .limit-warning-text p {
+            color: var(--csgo-text-dim);
+            font-size: 11px;
+        }
+
+        .history-panel {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            bottom: 40px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        .history-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        .history-close {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: var(--error);
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .history-close:hover {
+            background: rgba(244, 63, 94, 0.25);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+        .history-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            overflow: hidden;
+        }
+        .history-teamMembers-panel, .history-sessions-panel {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--csgo-border);
+            overflow: hidden;
+        }
+        .history-sessions-panel { border-right: none; }
+        .history-panel-title {
+            padding: 12px 15px;
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--csgo-yellow);
+            background: var(--csgo-darker);
+            border-bottom: 1px solid var(--csgo-border);
+            letter-spacing: 2px;
+        }
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .history-list::-webkit-scrollbar { width: 6px; }
+        .history-list::-webkit-scrollbar-track { background: var(--csgo-darker); }
+        .history-list::-webkit-scrollbar-thumb { background: var(--csgo-yellow); border-radius: 3px; }
+        .history-loading, .history-empty {
+            text-align: center;
+            padding: 30px;
+            color: var(--csgo-text-dim);
+            font-size: 13px;
+        }
+        .history-team-member-item {
+            padding: 12px;
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .history-team-member-item:hover { border-color: var(--csgo-yellow); }
+        .history-team-member-item.selected {
+            border-color: var(--csgo-yellow);
+            background: var(--csgo-gray-light);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        .history-team-member-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--csgo-text);
+            margin-bottom: 6px;
+        }
+        .history-team-member-expand {
+            color: var(--csgo-yellow);
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+        .history-team-member-item.selected .history-team-member-expand { transform: rotate(90deg); }
+        .history-team-member-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--csgo-text-dim);
+        }
+        .history-session-count {
+            color: var(--csgo-yellow);
+            font-family: 'Orbitron', monospace;
+        }
+        .session-card {
+            background: rgba(31, 31, 31, 0.6);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .session-card:hover {
+            border-color: var(--border-secondary);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        .session-card-header {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .session-card-header:hover {
+            background: rgba(14, 165, 233, 0.05);
+        }
+        .session-date {
+            font-size: 13px;
+            color: var(--csgo-text);
+            margin-bottom: 5px;
+        }
+        .session-time-range {
+            font-size: 11px;
+            color: var(--csgo-text-dim);
+            font-family: 'Orbitron', monospace;
+        }
+        .session-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 11px;
+        }
+        .session-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--csgo-text-dim);
+        }
+        .session-stat-value {
+            color: var(--csgo-yellow);
+            font-family: 'Orbitron', monospace;
+        }
+        .session-status {
+            padding: 3px 8px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .session-status.completed { background: rgba(76, 175, 80, 0.2); color: var(--csgo-success); }
+        .session-status.failed { background: rgba(244, 67, 54, 0.2); color: var(--csgo-error); }
+        .session-status.interrupted { background: rgba(255, 152, 0, 0.2); color: var(--csgo-warning); }
+        .session-status.running { background: rgba(33, 150, 243, 0.2); color: #2196F3; }
+        .session-detail-panel {
+            position: fixed;
+            top: 60px;
+            left: 60px;
+            right: 60px;
+            bottom: 60px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .session-detail-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .session-detail-section { margin-bottom: 25px; }
+        .session-detail-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--csgo-yellow);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--csgo-border);
+        }
+        .session-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .session-info-item {
+            background: var(--csgo-gray);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--csgo-border);
+        }
+        .session-info-label {
+            font-size: 10px;
+            color: var(--csgo-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .session-info-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--csgo-yellow);
+        }
+        .task-list { list-style: none; }
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .task-check {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        .task-check.completed { background: var(--csgo-success); color: white; }
+        .task-check.failed { background: var(--csgo-error); color: white; }
+        .task-check.pending { background: var(--csgo-text-dim); color: white; }
+        .task-name { flex: 1; font-size: 13px; color: var(--csgo-text); }
+        .task-status { font-size: 10px; color: var(--csgo-text-dim); }
+        .session-log-container {
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .session-log-entry {
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .session-log-entry.info { color: var(--csgo-text); }
+        .session-log-entry.warn { color: var(--csgo-warning); }
+        .session-log-entry.error { color: var(--csgo-error); }
+        .session-log-entry.debug { color: var(--csgo-text-dim); }
+        .session-log-timestamp { color: var(--csgo-text-dim); margin-right: 10px; }
+        .log-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--csgo-gray);
+            border-top: 1px solid var(--csgo-border);
+        }
+        .log-pagination-info { font-size: 11px; color: var(--csgo-text-dim); }
+        .log-pagination-btns { display: flex; gap: 8px; }
+        .id-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .id-chip {
+            padding: 4px 8px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--csgo-yellow);
+            border-radius: 2px;
+            font-size: 10px;
+            color: var(--csgo-yellow);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Live Status Panel */
+        .live-status-panel {
+            background: var(--csgo-gray);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 15px;
+        }
+        .live-stat-box {
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            padding: 10px;
+        }
+        .live-stat-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--csgo-text-dim);
+            margin-bottom: 4px;
+        }
+        .live-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--csgo-yellow);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .heartbeat-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--csgo-error);
+            transition: background 0.3s;
+        }
+        .heartbeat-dot.alive {
+            background: var(--csgo-success);
+            animation: heartbeat 1s infinite;
+        }
+        .heartbeat-dot.dead {
+            background: var(--csgo-error);
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        /* Communicator Chat */
+        .communicator-chat {
+            background: var(--csgo-darker);
+            border: 1px solid var(--csgo-border);
+            border-radius: 4px;
+            height: 280px;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .comm-message {
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .comm-message.sent {
+            background: rgba(255, 215, 0, 0.15);
+            border-left: 3px solid var(--csgo-yellow);
+        }
+        .comm-message.received {
+            background: var(--csgo-gray);
+            border-left: 3px solid var(--csgo-success);
+        }
+        .comm-message.error {
+            background: rgba(244, 67, 54, 0.15);
+            border-left: 3px solid var(--csgo-error);
+        }
+        .comm-message.system {
+            background: rgba(33, 150, 243, 0.15);
+            border-left: 3px solid #2196F3;
+            font-style: italic;
+        }
+        .comm-message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 10px;
+        }
+        .comm-message-from {
+            color: var(--csgo-yellow);
+            font-weight: 600;
+        }
+        .comm-message-time {
+            color: var(--csgo-text-dim);
+        }
+        .comm-message-content {
+            color: var(--csgo-text);
+            word-break: break-word;
+        }
+        .communicator-input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .communicator-input-container input:focus,
+        .communicator-input-container select:focus {
+            outline: none;
+            border-color: var(--csgo-yellow);
+        }
+
+        /* Deploy Modal Animations */
+        .modal-overlay {
+            animation: modalFadeIn 0.2s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-overlay .panel {
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script src="/shared-logger.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">SPECMEM // TEAM MEMBER OPS
+            <a href="/" style="color: var(--csgo-text-dim); text-decoration: none; font-size: 12px; font-family: Rajdhani; margin-left: 15px;">Dashboard</a>
+            <a href="/team-member-history.html" style="color: var(--csgo-text-dim); text-decoration: none; font-size: 12px; font-family: Rajdhani; margin-left: 10px;">History</a>
+            <a href="/memory-recall.html" style="color: var(--csgo-text-dim); text-decoration: none; font-size: 12px; font-family: Rajdhani; margin-left: 10px;">Memory</a>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total TeamMembers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-running">0</div>
+                <div class="stat-label">Running</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-tokens">0</div>
+                <div class="stat-label">Tokens Used</div>
+            </div>
+        </div>
+        <div id="language-selector-container" style="margin: 0 12px;"></div>
+        <div class="ws-status">
+            <div class="ws-dot" id="ws-indicator"></div>
+            <span id="ws-status-text">Disconnected</span>
+            <button class="btn btn-small btn-secondary" onclick="showHistoryModal()">History</button>
+            <a href="/prompt" class="btn" style="padding:10px 20px;font-size:13px;margin-left:10px;">Go to Console</a>
+            <a href="/" class="btn btn-small btn-secondary">Dashboard</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="panel">
+            <div class="panel-header">
+                <span>TeamMember List</span>
+                <button class="btn btn-small" onclick="showDeployModal()">+ Deploy</button>
+            </div>
+            <div class="panel-body">
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="running">Running</button>
+                    <button class="filter-btn" data-filter="completed">Done</button>
+                    <button class="filter-btn" data-filter="failed">Failed</button>
+                </div>
+                <div id="team-member-list">
+                    <div class="no-team-members">
+                        <div class="no-team-members-icon">&#128640;</div>
+                        <p>No team members deployed yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="grid-column: span 2;">
+            <div class="panel-header">
+                <span>TeamMember Collaboration</span>
+                <div style="display: flex; gap: 10px;">
+                    <span id="collab-pending-badge" class="tab-badge hidden">0</span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="tab-container">
+                    <button class="tab-btn active" data-tab="details">Details</button>
+                    <button class="tab-btn" data-tab="communicator">Communicator</button>
+                    <button class="tab-btn" data-tab="shared-code">Shared Code <span id="shared-code-count" class="tab-badge hidden">0</span></button>
+                    <button class="tab-btn" data-tab="messages">Messages <span id="unread-count" class="tab-badge hidden">0</span></button>
+                    <button class="tab-btn" data-tab="logs">Logs</button>
+                </div>
+
+                <div id="tab-details" class="tab-content active">
+                    <div id="team-member-details">
+                        <div class="no-team-members">
+                            <p>Select a team member to view details</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-communicator" class="tab-content">
+                    <div id="communicator-no-team-member" class="no-team-members">
+                        <p>Select a team member to use the communicator</p>
+                    </div>
+                    <div id="communicator-panel" class="hidden">
+                        <div class="live-status-panel" style="margin-bottom:15px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div id="heartbeat-indicator" class="heartbeat-dot dead"></div>
+                                    <span style="font-family:'Orbitron',monospace;font-size:12px;color:var(--csgo-yellow);">LIVE STATUS</span>
+                                </div>
+                                <span id="live-team-member-name" style="font-size:13px;color:var(--csgo-text);">-</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+                                <div class="live-stat-box">
+                                    <div class="live-stat-label">Current Task</div>
+                                    <div class="live-stat-value" id="live-task">Idle</div>
+                                    <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="live-task-progress" style="width:0%"></div></div>
+                                </div>
+                                <div class="live-stat-box">
+                                    <div class="live-stat-label">Tokens</div>
+                                    <div class="live-stat-value" id="live-tokens">0</div>
+                                    <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="live-tokens-progress" style="width:0%"></div></div>
+                                </div>
+                                <div class="live-stat-box">
+                                    <div class="live-stat-label">Memory</div>
+                                    <div class="live-stat-value" id="live-memory">0 MB</div>
+                                    <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="live-memory-progress" style="width:0%"></div></div>
+                                </div>
+                                <div class="live-stat-box">
+                                    <div class="live-stat-label">Files</div>
+                                    <div class="live-stat-value" id="live-files">0</div>
+                                    <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="live-files-progress" style="width:0%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-title" style="margin-bottom:10px;">TEAM MEMBER COMMUNICATOR</div>
+                        <div id="communicator-chat" class="communicator-chat"></div>
+                        <div class="communicator-input-container">
+                            <select id="comm-command-type" style="max-width:140px;background:var(--csgo-darker);border:1px solid var(--csgo-border);padding:10px;color:var(--csgo-text);">
+                                <option value="message">Message</option>
+                                <option value="task">Assign Task</option>
+                                <option value="query">Query Status</option>
+                                <option value="stop">Stop TeamMember</option>
+                                <option value="custom">Custom JSON</option>
+                            </select>
+                            <input type="text" id="comm-input" placeholder="Type command or message..." style="flex:1;background:var(--csgo-darker);border:1px solid var(--csgo-border);padding:10px;color:var(--csgo-text);">
+                            <button class="btn" onclick="sendTeamMemberCommand()">SEND</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-shared-code" class="tab-content">
+                    <div class="collab-stats" id="collab-stats">
+                        <div class="collab-stat">
+                            <div class="collab-stat-value" id="stat-shared">0</div>
+                            <div class="collab-stat-label">Shared Code</div>
+                        </div>
+                        <div class="collab-stat">
+                            <div class="collab-stat-value" id="stat-feedback">0</div>
+                            <div class="collab-stat-label">Feedback</div>
+                        </div>
+                        <div class="collab-stat">
+                            <div class="collab-stat-value" id="stat-messages">0</div>
+                            <div class="collab-stat-label">Messages</div>
+                        </div>
+                        <div class="collab-stat">
+                            <div class="collab-stat-value" id="stat-positive">0%</div>
+                            <div class="collab-stat-label">Positive Rate</div>
+                        </div>
+                    </div>
+
+                    <div id="encouragement-banner" class="encouragement-banner hidden">
+                        <div class="encouragement-icon">&#128161;</div>
+                        <div class="encouragement-text">
+                            <h4>Share Your Work!</h4>
+                            <p id="encouragement-message">Your team member just completed a task. Consider sharing the code for review!</p>
+                        </div>
+                        <button class="btn btn-small" onclick="showShareCodeModal()">Share Now</button>
+                    </div>
+
+                    <div id="shared-code-list">
+                        <div class="no-team-members">
+                            <p>No shared code yet. Be the first to share!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-messages" class="tab-content">
+                    <div class="message-container" id="message-container">
+                        <div class="no-team-members">
+                            <p>No messages yet</p>
+                        </div>
+                    </div>
+                    <div class="message-input-container">
+                        <select id="message-to-team-member">
+                            <option value="">All TeamMembers (Broadcast)</option>
+                        </select>
+                        <select id="message-priority" style="max-width:100px;">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                        <input type="text" id="message-input" placeholder="Type a message to send to team members...">
+                        <button class="btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+
+                <div id="tab-logs" class="tab-content">
+                    <div class="log-filters">
+                        <button class="filter-btn active" data-log="all">All</button>
+                        <button class="filter-btn" data-log="info">Info</button>
+                        <button class="filter-btn" data-log="warn">Warn</button>
+                        <button class="filter-btn" data-log="error">Error</button>
+                    </div>
+                    <div class="log-container" id="log-container">
+                        <div class="log-entry info">Select a team member to view logs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TeamMember deployment modal removed - use Console tab instead -->
+
+    <div id="share-code-modal" class="modal-overlay hidden">
+        <div class="panel modal-content" style="width: 500px;">
+            <div class="panel-header">
+                <span>Share Code</span>
+                <button onclick="hideShareCodeModal()" style="background:none;border:none;color:#000;font-size:18px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="panel-body">
+                <form class="deploy-form" onsubmit="shareCode(event)">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="share-title" placeholder="Bug fix for auth module" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="share-description" placeholder="Fixed the session timeout issue">
+                    </div>
+                    <div class="form-group">
+                        <label>File Path (optional)</label>
+                        <input type="text" id="share-filepath" placeholder="src/auth/session.ts">
+                    </div>
+                    <div class="form-group">
+                        <label>Language</label>
+                        <select id="share-language">
+                            <option value="typescript">TypeScript</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="rust">Rust</option>
+                            <option value="go">Go</option>
+                            <option value="sql">SQL</option>
+                            <option value="bash">Bash</option>
+                            <option value="text">Text</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tags (comma separated)</label>
+                        <input type="text" id="share-tags" placeholder="bugfix, auth, session">
+                    </div>
+                    <div class="form-group">
+                        <label>Code</label>
+                        <textarea id="share-code" placeholder="Paste your code here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn" style="width:100%;">Share Code</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-modal" class="modal-overlay hidden">
+        <div class="panel modal-content" style="width: 400px;">
+            <div class="panel-header">
+                <span>Give Feedback</span>
+                <button onclick="hideFeedbackModal()" style="background:none;border:none;color:#000;font-size:18px;cursor:pointer;">&times;</button>
+            </div>
+            <div class="panel-body">
+                <form class="deploy-form" onsubmit="submitFeedback(event)">
+                    <input type="hidden" id="feedback-code-id">
+                    <div class="form-group">
+                        <label>Feedback Type</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="feedback-type" value="positive" checked> Positive
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="feedback-type" value="critique"> Critique
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="feedback-type" value="question"> Question
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="radio" name="feedback-type" value="negative"> Negative
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="feedback-message" placeholder="Your feedback..." required style="min-height: 80px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn" style="width:100%;">Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal-overlay hidden">
+        <div class="history-panel">
+            <div class="history-header">
+                <span class="history-title">TEAM MEMBER HISTORY</span>
+                <button onclick="hideHistoryModal()" class="history-close">&times;</button>
+            </div>
+            <div class="history-body">
+                <div class="history-teamMembers-panel">
+                    <div class="history-panel-title">AGENTS</div>
+                    <div id="history-team-member-list" class="history-list">
+                        <div class="history-loading">Loading team members...</div>
+                    </div>
+                </div>
+                <div class="history-sessions-panel">
+                    <div class="history-panel-title">SESSIONS</div>
+                    <div id="history-sessions-list" class="history-list">
+                        <div class="history-empty">Select a team member to view sessions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="session-detail-modal" class="modal-overlay hidden">
+        <div class="session-detail-panel">
+            <div class="history-header">
+                <span class="history-title">SESSION DETAILS</span>
+                <button onclick="hideSessionDetailModal()" class="history-close">&times;</button>
+            </div>
+            <div class="session-detail-body" id="session-detail-content">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // SPECMEM Team Member Dashboard - Complete Implementation
+        // Uses SPECMEM HTTP API endpoints for real team member data
+        // ============================================================================
+
+        let ws = null;
+        let teamMembers = new Map();
+        let selectedTeamMemberId = null;
+        let currentFilter = 'all';
+        let currentLogFilter = 'all';
+        let teamMemberLogs = new Map();
+        let historyTeamMembers = [];
+        let selectedHistoryTeamMemberId = null;
+        let historySessions = [];
+        let currentSessionLogs = [];
+        let currentLogOffset = 0;
+        let currentLogLimit = 100;
+        let totalLogCount = 0;
+        let isAuthenticated = false;
+        let allMessages = [];
+        let autoRefreshInterval = null;
+
+        // ============================================================================
+        // AUTHENTICATION - Must login first!
+        // ============================================================================
+        async function authenticate() {
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: 'specmem_westayunprofessional' }),
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success || res.ok) {
+                    isAuthenticated = true;
+                    console.log('SPECMEM: Authenticated successfully');
+                    return true;
+                }
+                console.error('SPECMEM: Authentication failed', data);
+                serverLog('error', 'Authentication failed', { data });
+                return false;
+            } catch (err) {
+                console.error('SPECMEM: Authentication error', err);
+                serverLog('error', 'Authentication error', { error: err.message });
+                return false;
+            }
+        }
+
+        // ============================================================================
+        // WEBSOCKET CONNECTION - Real-time updates
+        // ============================================================================
+        function connectWebSocket() {
+            try {
+                const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+                // Try the team members-specific WebSocket first, fall back to general
+                const wsUrl = `${protocol}//${location.host}/ws/team-members/live`;
+                console.log('SPECMEM: Connecting to WebSocket:', wsUrl);
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    document.getElementById('ws-indicator').classList.add('connected');
+                    document.getElementById('ws-status-text').textContent = 'Connected (Live)';
+                    console.log('SPECMEM: WebSocket connected');
+                    // Subscribe to all team member updates
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type: 'subscribe', channel: 'team-members' }));
+                    }
+                };
+
+                ws.onclose = () => {
+                    document.getElementById('ws-indicator').classList.remove('connected');
+                    document.getElementById('ws-status-text').textContent = 'Disconnected';
+                    console.log('SPECMEM: WebSocket disconnected, reconnecting in 3s...');
+                    setTimeout(connectWebSocket, 3000);
+                };
+
+                ws.onerror = (err) => {
+                    console.log('SPECMEM: WebSocket error, will retry');
+                    // Try fallback to general /ws endpoint
+                    setTimeout(() => {
+                        if (ws.readyState !== WebSocket.OPEN) {
+                            connectFallbackWebSocket();
+                        }
+                    }, 1000);
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleWSMessage(data);
+                    } catch (e) {
+                        console.log('SPECMEM: Non-JSON WebSocket message:', event.data);
+                    }
+                };
+            } catch (err) {
+                console.error('SPECMEM: WebSocket connection failed', err);
+                serverLog('error', 'WebSocket connection failed', { error: err.message });
+                setTimeout(connectWebSocket, 5000);
+            }
+        }
+
+        function connectFallbackWebSocket() {
+            try {
+                const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+                ws = new WebSocket(`${protocol}//${location.host}/ws`);
+                ws.onopen = () => {
+                    document.getElementById('ws-indicator').classList.add('connected');
+                    document.getElementById('ws-status-text').textContent = 'Connected';
+                };
+                ws.onclose = () => {
+                    document.getElementById('ws-indicator').classList.remove('connected');
+                    document.getElementById('ws-status-text').textContent = 'Disconnected';
+                    setTimeout(connectWebSocket, 3000);
+                };
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleWSMessage(data);
+                    } catch (e) {}
+                };
+            } catch (err) {
+                setTimeout(connectWebSocket, 5000);
+            }
+        }
+
+        // BUG FIX: Added null checks to prevent undefined property access errors
+        function handleWSMessage(data) {
+            if (!data || !data.type) return;
+
+            switch (data.type) {
+                case 'team member:registered':
+                case 'team member:status':
+                    if (data.team-member && data.team-member.id) {
+                        team members.set(data.team-member.id, data.team-member);
+                        renderTeamMemberList();
+                        if (selectedTeamMemberId === data.team-member.id) renderTeamMemberDetails(data.team-member);
+                    }
+                    break;
+                case 'team member:log':
+                    if (data.log && data.log.teamMemberId) {
+                        if (!teamMemberLogs.has(data.log.teamMemberId)) team memberLogs.set(data.log.teamMemberId, []);
+                        team memberLogs.get(data.log.teamMemberId).push(data.log);
+                        if (selectedTeamMemberId === data.log.teamMemberId) appendLog(data.log);
+                    }
+                    break;
+                case 'team member:tokens':
+                    if (data.teamMemberId && team members.has(data.teamMemberId)) {
+                        team members.get(data.teamMemberId).tokensUsed = data.tokensUsed || 0;
+                        renderTeamMemberList();
+                        if (selectedTeamMemberId === data.teamMemberId) {
+                            renderTeamMemberDetails(teamMembers.get(data.teamMemberId));
+                            loadTeamMemberLimits(data.teamMemberId);
+                        }
+                    }
+                    break;
+                case 'team member:task':
+                    if (data.teamMemberId && team members.has(data.teamMemberId)) {
+                        team members.get(data.teamMemberId).currentTask = data.task;
+                        renderTeamMemberList();
+                        if (selectedTeamMemberId === data.teamMemberId) renderTeamMemberDetails(teamMembers.get(data.teamMemberId));
+                    }
+                    break;
+                case 'team member:limit_warning':
+                    if (data.teamMemberId && data.warning) {
+                        handleLimitWarning(data.teamMemberId, data.warning);
+                        if (selectedTeamMemberId === data.teamMemberId) {
+                            loadTeamMemberLimits(data.teamMemberId);
+                        }
+                    }
+                    break;
+                case 'team member:limit_acknowledged':
+                    if (data.teamMemberId && selectedTeamMemberId === data.teamMemberId) {
+                        loadTeamMemberLimits(data.teamMemberId);
+                    }
+                    break;
+            }
+            updateStats();
+        }
+
+        // BUG FIX: Added null safety for warning object properties
+        function handleLimitWarning(teamMemberId, warning) {
+            const banner = document.getElementById('limit-warning-banner');
+            const title = document.getElementById('limit-warning-title');
+            const message = document.getElementById('limit-warning-message');
+
+            if (banner && title && message && selectedTeamMemberId === teamMemberId && warning) {
+                const warningType = (warning.type || 'unknown').toUpperCase();
+                const warningLevel = warning.level || 'warning';
+                const warningMsg = warning.message || 'Resource limit reached';
+                const warningSuggestion = warning.suggestion || 'Consider reducing resource usage';
+
+                title.textContent = `${warningType} Limit ${warningLevel}`;
+                message.textContent = `${warningMsg} - ${warningSuggestion}`;
+                banner.classList.remove('hidden');
+
+                setTimeout(() => {
+                    banner.classList.add('hidden');
+                }, 10000);
+            }
+        }
+
+        // ============================================================================
+        // LOAD ACTIVE AGENTS - Uses SPECMEM API
+        // GET /api/specmem/team-member/active?withinSeconds=300
+        // ============================================================================
+        async function loadTeamMembers() {
+            try {
+                // Fetch active team members from SPECMEM API (active within last 5 minutes)
+                const res = await fetch('/api/specmem/team-member/active?withinSeconds=300', {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (data.success && data.team-members) {
+                    team members.clear();
+                    data.team-members.forEach(team member => {
+                        // Map SPECMEM team member data to dashboard format
+                        const mappedTeamMember = {
+                            id: team member.teamMemberId,
+                            name: team member.teamMemberName || team member.teamMemberId,
+                            type: team member.teamMemberType || 'worker',
+                            status: mapTeamMemberStatus(teamMember.status, team member.secondsAgo),
+                            tokensUsed: team member.metadata?.tokensUsed || 0,
+                            tokensLimit: team member.metadata?.tokensLimit || 100000,
+                            createdAt: team member.metadata?.createdAt || new Date().toISOString(),
+                            lastHeartbeat: team member.lastHeartbeat,
+                            secondsAgo: team member.secondsAgo,
+                            currentTask: team member.metadata?.currentTask || null,
+                            metadata: team member.metadata || {}
+                        };
+                        team members.set(teamMember.teamMemberId, mappedTeamMember);
+                    });
+                    renderTeamMemberList();
+                    updateStats();
+                    updateMessageTeamMemberSelect();
+                    console.log(`SPECMEM: Loaded ${data.team-members.length} active team members`);
+                } else {
+                    console.log('SPECMEM: No active team members or API returned empty');
+                    renderTeamMemberList();
+                    updateStats();
+                }
+            } catch (err) {
+                console.error('SPECMEM: Failed to load team members:', err);
+                serverLog('error', 'Failed to load team members', { error: err.message });
+                // Show error in UI
+                const container = document.getElementById('team-member-list');
+                if (container) {
+                    container.innerHTML = `<div class="no-team-members"><div class="no-team-members-icon">&#9888;</div><p>Error loading team members. Check API connection.</p></div>`;
+                }
+            }
+        }
+
+        // Map team member status based on last heartbeat
+        function mapTeamMemberStatus(status, secondsAgo) {
+            if (status === 'completed' || status === 'failed' || status === 'stopped') {
+                return status;
+            }
+            // If no heartbeat in 2 minutes, consider it pending/stale
+            if (secondsAgo > 120) {
+                return 'pending';
+            }
+            // Active heartbeat = running
+            return status === 'active' ? 'running' : (status || 'running');
+        }
+
+        function renderTeamMemberList() {
+            const container = document.getElementById('team-member-list');
+            const filtered = Array.from(teamMembers.values()).filter(a => currentFilter === 'all' || a.status === currentFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="no-team-members"><div class="no-team-members-icon">&#128640;</div><p>No team members found</p><p style="font-size:11px;color:var(--csgo-text-dim);margin-top:10px;">TeamMembers must send heartbeats to appear here.<br/>Check /api/specmem/team-member/active endpoint.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(a => `
+                <div class="team-member-card ${selectedTeamMemberId === a.id ? 'selected' : ''}" onclick="selectTeamMember('${a.id}')">
+                    <div class="team-member-card-header">
+                        <span class="team-member-name">${escapeHtml(a.name)}</span>
+                        <span class="team-member-type ${a.type}">${a.type}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <div class="status-badge ${a.status}">
+                            <span class="status-dot"></span>
+                            ${a.status}
+                        </div>
+                        ${a.secondsAgo !== undefined ? `<span style="font-size:10px;color:var(--csgo-text-dim);">${formatSecondsAgo(a.secondsAgo)}</span>` : ''}
+                    </div>
+                    ${a.lastHeartbeat ? `<div style="font-size:10px;color:var(--csgo-text-dim);margin-bottom:6px;">Last heartbeat: ${formatTime(a.lastHeartbeat)}</div>` : ''}
+                    ${a.currentTask ? `
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${a.currentTask.progress || 0}%"></div>
+                        </div>
+                    ` : ''}
+                    <div class="token-info">
+                        <span>Tokens</span>
+                        <span><span class="token-value">${formatNumber(a.tokensUsed || 0)}</span> / ${formatNumber(a.tokensLimit || 100000)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatSecondsAgo(seconds) {
+            if (seconds < 60) return `${Math.round(seconds)}s ago`;
+            if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`;
+            return `${Math.round(seconds / 3600)}h ago`;
+        }
+
+        let teamMemberLimitsCache = new Map();
+
+        // Check if team member is a Task team member (from Claude Code via team_member_sessions)
+        function isTaskTeamMember(teamMember) {
+            if (!teamMember) return false;
+            // Task team members have source: 'task-team-member' in their metadata
+            return teamMember.metadata?.source === 'task-team-member';
+        }
+
+        // Update tabs visibility based on team member type
+        function updateTabsForTeamMemberType(teamMember) {
+            const isTask = isTaskTeamMember(teamMember);
+            const communicatorTab = document.querySelector('[data-tab="communicator"]');
+            const sharedCodeTab = document.querySelector('[data-tab="shared-code"]');
+            const messagesTab = document.querySelector('[data-tab="messages"]');
+
+            // For Task team members, disable certain tabs visually but keep them clickable to show message
+            if (isTask) {
+                if (communicatorTab) communicatorTab.classList.add('tab-disabled');
+                if (sharedCodeTab) sharedCodeTab.classList.add('tab-disabled');
+                if (messagesTab) messagesTab.classList.add('tab-disabled');
+            } else {
+                if (communicatorTab) communicatorTab.classList.remove('tab-disabled');
+                if (sharedCodeTab) sharedCodeTab.classList.remove('tab-disabled');
+                if (messagesTab) messagesTab.classList.remove('tab-disabled');
+            }
+
+            // Update content in disabled tabs for Task team members
+            if (isTask) {
+                const sharedCodeContent = document.getElementById('tab-shared-code');
+                const messagesContent = document.getElementById('tab-messages');
+                const communicatorContent = document.getElementById('tab-communicator');
+
+                if (sharedCodeContent) {
+                    const existingNotice = sharedCodeContent.querySelector('.task-team-member-notice');
+                    if (!existingNotice) {
+                        const notice = document.createElement('div');
+                        notice.className = 'task-team-member-notice';
+                        notice.innerHTML = `
+                            <div class="no-team-members" style="padding: 40px;">
+                                <div class="no-team-members-icon">&#128295;</div>
+                                <p><strong>Not Available for Task Team Members</strong></p>
+                                <p style="font-size: 12px; color: var(--csgo-gray); margin-top: 8px;">
+                                    Task team members (Claude Code) don't use the shared code collaboration system.
+                                    <br>View the <strong>Logs</strong> tab to see team member activity.
+                                </p>
+                            </div>
+                        `;
+                        sharedCodeContent.innerHTML = '';
+                        sharedCodeContent.appendChild(notice);
+                    }
+                }
+
+                if (messagesContent) {
+                    const existingNotice = messagesContent.querySelector('.task-team-member-notice');
+                    if (!existingNotice) {
+                        const notice = document.createElement('div');
+                        notice.className = 'task-team-member-notice';
+                        notice.innerHTML = `
+                            <div class="no-team-members" style="padding: 40px;">
+                                <div class="no-team-members-icon">&#128172;</div>
+                                <p><strong>Not Available for Task Team Members</strong></p>
+                                <p style="font-size: 12px; color: var(--csgo-gray); margin-top: 8px;">
+                                    Task team members run autonomously and don't use the inter-team-member messaging system.
+                                    <br>View the <strong>Logs</strong> tab to see team member activity.
+                                </p>
+                            </div>
+                        `;
+                        messagesContent.querySelector('.message-container').innerHTML = notice.innerHTML;
+                    }
+                }
+
+                if (communicatorContent) {
+                    const panel = communicatorContent.querySelector('#communicator-panel');
+                    const noTeamMember = communicatorContent.querySelector('#communicator-no-team-member');
+                    if (panel) panel.classList.add('hidden');
+                    if (noTeamMember) {
+                        noTeamMember.innerHTML = `
+                            <div class="no-team-members-icon">&#128295;</div>
+                            <p><strong>Not Available for Task Team Members</strong></p>
+                            <p style="font-size: 12px; color: var(--csgo-gray); margin-top: 8px;">
+                                Task team members don't support real-time communication.
+                                <br>They execute autonomously based on their initial prompt.
+                            </p>
+                        `;
+                        noTeamMember.classList.remove('hidden');
+                    }
+                }
+            }
+        }
+
+        function selectTeamMember(id) {
+            selectedTeamMemberId = id;
+            renderTeamMemberList();
+            const teamMember = team members.get(id);
+            if (teamMember) {
+                // Update tabs first based on team member type
+                updateTabsForTeamMemberType(teamMember);
+
+                // Render details with Task team member awareness
+                renderTeamMemberDetails(teamMember);
+                loadTeamMemberLogs(id);
+
+                // Only load limits for non-Task team members (they don't have limit tracking)
+                if (!isTaskTeamMember(teamMember)) {
+                    loadTeamMemberLimits(id);
+                }
+            }
+        }
+
+        async function loadTeamMemberLimits(teamMemberId) {
+            // NOTE: SPECMEM team members don't have a separate limits endpoint
+            // Use metadata from the team member itself if available
+            const teamMember = team members.get(teamMemberId);
+            if (team member && team member.metadata) {
+                // Create synthetic limits from metadata if available
+                const limits = {
+                    tokens_used: team member.tokensUsed || 0,
+                    tokens_limit: team member.tokensLimit || 100000,
+                    memory_used: team member.metadata.memoryUsed || 0,
+                    memory_limit: team member.metadata.memoryLimit || 50 * 1024 * 1024,
+                    files_processed: team member.metadata.filesProcessed || 0,
+                    files_limit: team member.metadata.filesLimit || 1000,
+                    output_size: team member.metadata.outputSize || 0,
+                    output_limit: team member.metadata.outputLimit || 10 * 1024 * 1024
+                };
+                const status = [
+                    { type: 'token', level: 'ok', percentage: (limits.tokens_used / limits.tokens_limit) * 100 },
+                    { type: 'memory', level: 'ok', percentage: (limits.memory_used / limits.memory_limit) * 100 },
+                    { type: 'file', level: 'ok', percentage: (limits.files_processed / limits.files_limit) * 100 },
+                    { type: 'output', level: 'ok', percentage: (limits.output_size / limits.output_limit) * 100 }
+                ];
+                teamMemberLimitsCache.set(teamMemberId, { limits, status });
+                renderLimitGauges(teamMemberId);
+            }
+        }
+
+        const LIMIT_SUGGESTIONS = {
+            token: 'Consider chunking your analysis into smaller tasks',
+            memory: 'Flush logs to database, reduce in-memory caching',
+            file: 'Process files in batches of 10',
+            output: 'Stream output instead of buffering'
+        };
+
+        function renderLimitGauges(teamMemberId) {
+            const cached = teamMemberLimitsCache.get(teamMemberId);
+            if (!cached) return;
+
+            const { limits, status } = cached;
+            const container = document.getElementById('limit-gauges-container');
+            if (!container) return;
+
+            const gauges = [
+                { type: 'token', label: 'Tokens', current: limits.tokens_used, limit: limits.tokens_limit, unit: '' },
+                { type: 'memory', label: 'Memory', current: limits.memory_used, limit: limits.memory_limit, unit: 'B' },
+                { type: 'file', label: 'Files', current: limits.files_processed, limit: limits.files_limit, unit: '' },
+                { type: 'output', label: 'Output', current: limits.output_size, limit: limits.output_limit, unit: 'B' }
+            ];
+
+            container.innerHTML = gauges.map(g => {
+                const statusItem = status.find(s => s.type === g.type) || { level: 'ok', percentage: 0 };
+                const percentage = Math.min(statusItem.percentage, 100);
+                const level = statusItem.level;
+                const suggestion = LIMIT_SUGGESTIONS[g.type];
+
+                return `
+                    <div class="limit-gauge" data-level="${level}" title="${suggestion}">
+                        <div class="limit-gauge-header">
+                            <span class="limit-gauge-title">${g.label}</span>
+                            <span class="limit-gauge-badge ${level}">${level === 'ok' ? '' : level}</span>
+                        </div>
+                        <div class="limit-gauge-bar">
+                            <div class="limit-gauge-fill ${level}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="limit-gauge-info">
+                            <span class="limit-gauge-value">${formatBytes(g.current, g.unit)} / ${formatBytes(g.limit, g.unit)}</span>
+                            <span class="limit-gauge-percent">${percentage.toFixed(1)}%</span>
+                        </div>
+                        <div class="limit-suggestion">${suggestion}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // BUG FIX: Handle both usage patterns - with unit param (for limit gauges) and without (for shared code)
+        function formatBytes(bytes, unit) {
+            // If unit is provided and not 'B', use formatNumber for non-byte values
+            if (unit !== undefined && unit !== 'B') return formatNumber(bytes);
+            // Default byte formatting
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function renderTeamMemberDetails(teamMember) {
+            const container = document.getElementById('team-member-details');
+            const task = team member.currentTask;
+            const isTask = isTaskTeamMember(teamMember);
+
+            // For Task team members, render a different view
+            if (isTask) {
+                container.innerHTML = `
+                    <div class="detail-section" style="background: linear-gradient(135deg, rgba(255,214,0,0.1) 0%, rgba(0,0,0,0) 50%); border-left: 3px solid var(--csgo-yellow); padding-left: 15px;">
+                        <div class="detail-title" style="color: var(--csgo-yellow);">Task Team Member (Claude Code)</div>
+                        <div class="detail-row"><span class="detail-label">TeamMember ID</span><span class="detail-value" style="font-family: monospace; font-size: 11px;">${teamMember.id}</span></div>
+                        <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${escapeHtml(teamMember.name)}</span></div>
+                        <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">${teamMember.type || 'task-team-member'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge ${teamMember.status}"><span class="status-dot"></span>${teamMember.status}</span></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-title">Session Info</div>
+                        <div class="detail-row"><span class="detail-label">Started</span><span class="detail-value">${formatDate(teamMember.createdAt)}</span></div>
+                        ${teamMember.lastHeartbeat ? `<div class="detail-row"><span class="detail-label">Last Activity</span><span class="detail-value">${formatDate(teamMember.lastHeartbeat)}</span></div>` : ''}
+                        <div class="detail-row"><span class="detail-label">Tokens Used</span><span class="detail-value token-value">${formatNumber(teamMember.tokensUsed || 0)}</span></div>
+                    </div>
+
+                    ${task ? `
+                        <div class="detail-section">
+                            <div class="detail-title">Current Task</div>
+                            <div class="detail-row"><span class="detail-label">Task</span><span class="detail-value">${escapeHtml(task.name)}</span></div>
+                            ${task.progress !== undefined ? `
+                                <div class="detail-row"><span class="detail-label">Progress</span><span class="detail-value">${task.progress}%</span></div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${task.progress}%"></div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+
+                    ${teamMember.metadata?.prompt ? `
+                        <div class="detail-section">
+                            <div class="detail-title">Task Description</div>
+                            <div style="background: var(--csgo-darker); padding: 12px; border-radius: 4px; font-size: 12px; line-height: 1.5; color: var(--csgo-text); max-height: 150px; overflow-y: auto;">
+                                ${escapeHtml(teamMember.metadata.prompt).substring(0, 500)}${teamMember.metadata.prompt.length > 500 ? '...' : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${teamMember.metadata?.workingDirectory ? `
+                        <div class="detail-section">
+                            <div class="detail-title">Environment</div>
+                            <div class="detail-row"><span class="detail-label">Working Dir</span><span class="detail-value" style="font-family: monospace; font-size: 11px;">${escapeHtml(teamMember.metadata.workingDirectory)}</span></div>
+                        </div>
+                    ` : ''}
+
+                    <div class="detail-section" style="margin-top: 15px; padding: 12px; background: rgba(255,214,0,0.05); border-radius: 4px;">
+                        <p style="font-size: 11px; color: var(--csgo-gray); margin: 0;">
+                            <strong>Note:</strong> Task team members are autonomous Claude Code instances.
+                            They don't support real-time communication or shared code features.
+                            Check the <strong>Logs</strong> tab for activity history.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Standard team member details (non-Task team members)
+            container.innerHTML = `
+                <div id="limit-warning-banner" class="limit-warning-alert hidden">
+                    <div class="limit-warning-icon">!</div>
+                    <div class="limit-warning-text">
+                        <h4 id="limit-warning-title">Limit Warning</h4>
+                        <p id="limit-warning-message">A team member has reached a limit threshold</p>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-title">Resource Limits</div>
+                    <div id="limit-gauges-container" class="limit-gauges">
+                        <div class="limit-gauge">
+                            <div class="limit-gauge-header"><span class="limit-gauge-title">Loading...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-title">TeamMember Info (SPECMEM)</div>
+                    <div class="detail-row"><span class="detail-label">TeamMember ID</span><span class="detail-value" style="font-family:monospace;font-size:11px;">${escapeHtml(teamMember.id)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${escapeHtml(teamMember.name)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">${teamMember.type}</span></div>
+                    <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge ${teamMember.status}"><span class="status-dot"></span>${teamMember.status}</span></div>
+                    ${teamMember.lastHeartbeat ? `<div class="detail-row"><span class="detail-label">Last Heartbeat</span><span class="detail-value">${formatDate(teamMember.lastHeartbeat)}</span></div>` : ''}
+                    ${teamMember.secondsAgo !== undefined ? `<div class="detail-row"><span class="detail-label">Time Since Heartbeat</span><span class="detail-value">${formatSecondsAgo(teamMember.secondsAgo)}</span></div>` : ''}
+                    <div class="detail-row"><span class="detail-label">Created</span><span class="detail-value">${formatDate(teamMember.createdAt)}</span></div>
+                </div>
+
+                ${task ? `
+                    <div class="detail-section">
+                        <div class="detail-title">Current Task</div>
+                        <div class="detail-row"><span class="detail-label">Task</span><span class="detail-value">${escapeHtml(task.name)}</span></div>
+                        <div class="detail-row"><span class="detail-label">Progress</span><span class="detail-value">${task.progress}%</span></div>
+                        <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge ${task.status}"><span class="status-dot"></span>${task.status}</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${task.progress}%"></div>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="action-bar">
+                    ${teamMember.status === 'running' ? `
+                        <button class="btn btn-danger btn-small" onclick="stopTeamMember('${teamMember.id}')">Stop</button>
+                        <button class="btn btn-secondary btn-small" onclick="restartTeamMember('${teamMember.id}')">Restart</button>
+                    ` : teamMember.status === 'failed' || teamMember.status === 'stopped' ? `
+                        <button class="btn btn-small" onclick="restartTeamMember('${teamMember.id}')">Restart</button>
+                    ` : ''}
+                </div>
+            `;
+
+            if (teamMemberLimitsCache.has(teamMember.id)) {
+                renderLimitGauges(teamMember.id);
+            }
+        }
+
+        async function loadTeamMemberLogs(teamMemberId) {
+            // NOTE: SPECMEM doesn't have per-team member logs endpoint
+            // Show placeholder message for now
+            const container = document.getElementById('log-container');
+            if (container) {
+                const teamMember = team members.get(teamMemberId);
+                container.innerHTML = `
+                    <div class="log-entry info">
+                        <span class="log-timestamp">${formatTime(new Date())}</span>
+                        TeamMember logs for SPECMEM team members are stored in the database.
+                    </div>
+                    <div class="log-entry info">
+                        <span class="log-timestamp">${formatTime(new Date())}</span>
+                        Team Member: ${teamMember?.name || teamMemberId} | Status: ${teamMember?.status || 'unknown'}
+                    </div>
+                    ${teamMember?.lastHeartbeat ? `
+                        <div class="log-entry info">
+                            <span class="log-timestamp">${formatTime(teamMember.lastHeartbeat)}</span>
+                            Last heartbeat received
+                        </div>
+                    ` : ''}
+                `;
+            }
+        }
+
+        function renderLogs(logs) {
+            const container = document.getElementById('log-container');
+            const filtered = logs.filter(l => currentLogFilter === 'all' || l.level === currentLogFilter);
+            container.innerHTML = filtered.map(l => `
+                <div class="log-entry ${l.level}">
+                    <span class="log-timestamp">${formatTime(l.timestamp)}</span>
+                    ${escapeHtml(l.message)}
+                </div>
+            `).join('') || '<div class="log-entry info">No logs yet</div>';
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendLog(log) {
+            if (currentLogFilter !== 'all' && log.level !== currentLogFilter) return;
+            const container = document.getElementById('log-container');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${log.level}`;
+            entry.innerHTML = `<span class="log-timestamp">${formatTime(log.timestamp)}</span>${escapeHtml(log.message)}`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateStats() {
+            const all = Array.from(teamMembers.values());
+            document.getElementById('stat-total').textContent = all.length;
+            document.getElementById('stat-running').textContent = all.filter(a => a.status === 'running').length;
+            // BUG FIX: Guard against undefined tokensUsed
+            document.getElementById('stat-tokens').textContent = formatNumber(all.reduce((s, a) => s + (a.tokensUsed || 0), 0));
+        }
+
+        // BUG FIX: Deploy modal was removed - redirect to console instead
+        function showDeployModal() {
+            // The deploy modal HTML was removed, redirect to console for deployment
+            window.location.href = '/prompt';
+        }
+        function hideDeployModal() {
+            // No-op since modal was removed
+        }
+
+        // BUG FIX: These functions reference removed deploy modal elements - make them no-ops
+        function updateWorkerTypeVisibility() {
+            // No-op - deploy modal was removed
+        }
+
+        function updateCommandPlaceholder() {
+            // No-op - deploy modal was removed
+        }
+
+        // BUG FIX: Deploy modal was removed - this function now redirects to console
+        async function deployTeamMember(e) {
+            if (e) e.preventDefault();
+            // Redirect to console for deployment since modal was removed
+            window.location.href = '/prompt';
+        }
+
+        async function stopTeamMember(id) {
+            // SPECMEM: Send a stop command message to the team member
+            try {
+                const res = await fetch('/api/specmem/team-member/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        from: 'dashboard',
+                        to: id,
+                        message: JSON.stringify({ type: 'command', action: 'stop' }),
+                        priority: 'high'
+                    })
+                });
+                if (res.ok) {
+                    alert('Stop command sent to team member');
+                    loadTeamMembers();
+                }
+            } catch (err) {
+                console.error('SPECMEM: Stop command failed:', err);
+                alert('Failed to send stop command');
+            }
+        }
+
+        async function restartTeamMember(id) {
+            // SPECMEM: Send a restart command message to the team member
+            try {
+                const res = await fetch('/api/specmem/team-member/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        from: 'dashboard',
+                        to: id,
+                        message: JSON.stringify({ type: 'command', action: 'restart' }),
+                        priority: 'high'
+                    })
+                });
+                if (res.ok) {
+                    alert('Restart command sent to team member');
+                    loadTeamMembers();
+                }
+            } catch (err) {
+                console.error('SPECMEM: Restart command failed:', err);
+                alert('Failed to send restart command');
+            }
+        }
+
+        document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderTeamMemberList();
+            });
+        });
+
+        document.querySelectorAll('.filter-btn[data-log]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn[data-log]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLogFilter = btn.dataset.log;
+                if (selectedTeamMemberId && team memberLogs.has(selectedTeamMemberId)) {
+                    renderLogs(teamMemberLogs.get(selectedTeamMemberId));
+                }
+            });
+        });
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function formatNumber(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n.toString();
+        }
+
+        function formatDate(d) {
+            return new Date(d).toLocaleString();
+        }
+
+        function formatTime(d) {
+            return new Date(d).toLocaleTimeString();
+        }
+
+        let sharedCodeList = [];
+        let teamMemberMessages = [];
+        let collabStats = { totalSharedCode: 0, totalFeedback: 0, totalMessages: 0, positiveRatio: 0 };
+        let currentTab = 'details';
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTab = btn.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(`tab-${currentTab}`).classList.add('active');
+                if (currentTab === 'shared-code') loadSharedCode();
+                // Load all messages regardless of selected team member (spy mode)
+                if (currentTab === 'messages') loadAllMessages();
+            });
+        });
+
+        async function loadSharedCode() {
+            try {
+                const res = await fetch('/api/team-members/shared-code?limit=50');
+                const data = await res.json();
+                if (data.success) {
+                    sharedCodeList = data.sharedCode;
+                    renderSharedCode();
+                }
+                await loadCollabStats();
+            } catch (err) {
+                console.error('Failed to load shared code:', err);
+            }
+        }
+
+        async function loadCollabStats() {
+            try {
+                // Try SPECMEM spy stats endpoint
+                const res = await fetch('/api/specmem/team-member/spy/stats?sinceHours=24', {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success && data.stats) {
+                    document.getElementById('stat-shared').textContent = '0'; // Not used in SPECMEM
+                    document.getElementById('stat-feedback').textContent = '0'; // Not used in SPECMEM
+                    document.getElementById('stat-messages').textContent = data.stats.totalMessages || 0;
+                    document.getElementById('stat-positive').textContent = `${data.stats.activeTeamMembers || 0} active`;
+                }
+            } catch (err) {
+                // Silently fail - stats are not critical
+                console.log('SPECMEM: Could not load collab stats (optional)');
+            }
+        }
+
+        // NOTE: formatBytes function is defined earlier in the file
+
+        function renderSharedCode() {
+            const container = document.getElementById('shared-code-list');
+            if (sharedCodeList.length === 0) {
+                container.innerHTML = '<div class="no-team-members"><p>No shared code yet. Be the first to share!</p></div>';
+                return;
+            }
+            container.innerHTML = sharedCodeList.map(code => {
+                const teamMember = team members.get(code.teamMemberId);
+                const teamMemberName = team member ? team member.name : 'Unknown';
+                const codeContent = code.code || code.codePreview || '';
+                const isChunked = code.isChunked || false;
+                const codeSize = code.codeSize || 0;
+                const totalChunks = code.totalChunks || 0;
+                return `
+                    <div class="code-card" data-code-id="${code.id}">
+                        <div class="code-card-header">
+                            <div>
+                                <div class="code-title">${escapeHtml(code.title)}${isChunked ? ' <span class="code-tag" style="background: rgba(255, 152, 0, 0.2); border-color: #ff9800; color: #ff9800;">LARGE FILE (CHUNKED)</span>' : ''}</div>
+                                <div class="code-meta">
+                                    By ${escapeHtml(teamMemberName)} | ${code.language} | ${formatDate(code.createdAt)}${codeSize ? ' | ' + formatBytes(codeSize) : ''}${isChunked ? ' | ' + totalChunks + ' chunks' : ''}
+                                </div>
+                                ${code.tags && code.tags.length ? `
+                                    <div class="code-tags">
+                                        ${code.tags.map(t => `<span class="code-tag">${escapeHtml(t)}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ${code.description ? `<div class="code-meta" style="padding: 8px 12px;">${escapeHtml(code.description)}</div>` : ''}
+                        <div class="code-preview" id="code-preview-${code.id}">${escapeHtml(codeContent)}${isChunked ? '\n\n... [Preview only - click Load More or Download Full Code]' : ''}</div>
+                        ${isChunked ? `
+                        <div class="chunk-progress" id="chunk-progress-${code.id}" style="padding: 8px 12px; font-size: 11px; color: var(--csgo-text-dim); background: var(--csgo-gray);">
+                            Showing preview (1 KB) of ${formatBytes(codeSize)} | Chunks: 0/${totalChunks} loaded
+                        </div>
+                        ` : ''}
+                        <div class="code-actions">
+                            ${isChunked ? `
+                            <button class="feedback-btn" onclick="loadMoreChunks('${code.id}')" id="load-more-${code.id}">Load More</button>
+                            <button class="feedback-btn" onclick="downloadFullCode('${code.id}')" style="border-color: var(--csgo-yellow); color: var(--csgo-yellow);">Download Full</button>
+                            ` : ''}
+                            <button class="feedback-btn positive" onclick="showFeedbackModal('${code.id}', 'positive')">+ Good</button>
+                            <button class="feedback-btn critique" onclick="showFeedbackModal('${code.id}', 'critique')">Critique</button>
+                            <button class="feedback-btn question" onclick="showFeedbackModal('${code.id}', 'question')">? Question</button>
+                            <button class="feedback-btn negative" onclick="showFeedbackModal('${code.id}', 'negative')">- Issue</button>
+                            <button class="feedback-btn" onclick="toggleFeedback('${code.id}')">View Feedback</button>
+                        </div>
+                        <div id="feedback-${code.id}" class="feedback-list hidden"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        const loadedChunks = new Map();
+
+        async function loadMoreChunks(codeId) {
+            const code = sharedCodeList.find(c => c.id === codeId);
+            if (!code || !code.isChunked) return;
+
+            const loaded = loadedChunks.get(codeId) || 0;
+            const totalChunks = code.totalChunks || 0;
+            if (loaded >= totalChunks) {
+                alert('All chunks loaded');
+                return;
+            }
+
+            const loadBtn = document.getElementById(`load-more-${codeId}`);
+            if (loadBtn) loadBtn.textContent = 'Loading...';
+
+            try {
+                const res = await fetch(`/api/team-members/shared-code/${codeId}/chunk/${loaded}`);
+                const data = await res.json();
+                if (data.success && data.chunk) {
+                    const preview = document.getElementById(`code-preview-${codeId}`);
+                    if (preview) {
+                        const currentText = preview.textContent.replace(/\n\n\.\.\. \[Preview only.*\]$/, '');
+                        preview.textContent = currentText + data.chunk.data;
+                    }
+                    loadedChunks.set(codeId, loaded + 1);
+                    const progress = document.getElementById(`chunk-progress-${codeId}`);
+                    if (progress) {
+                        const newLoaded = loaded + 1;
+                        progress.textContent = `Chunks: ${newLoaded}/${totalChunks} loaded | ${formatBytes(newLoaded * 50 * 1024)} of ${formatBytes(code.codeSize)}`;
+                    }
+                    if (loaded + 1 >= totalChunks) {
+                        if (loadBtn) loadBtn.textContent = 'All Loaded';
+                        loadBtn.disabled = true;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load chunk:', err);
+                alert('Failed to load chunk');
+            } finally {
+                if (loadBtn && loadBtn.textContent === 'Loading...') loadBtn.textContent = 'Load More';
+            }
+        }
+
+        async function downloadFullCode(codeId) {
+            window.open(`/api/team-members/shared-code/${codeId}/download`, '_blank');
+        }
+
+        async function toggleFeedback(codeId) {
+            const container = document.getElementById(`feedback-${codeId}`);
+            if (!container.classList.contains('hidden')) {
+                container.classList.add('hidden');
+                return;
+            }
+            try {
+                const res = await fetch(`/api/team-members/shared-code/${codeId}/feedback`);
+                const data = await res.json();
+                if (data.success && data.feedback.length > 0) {
+                    container.innerHTML = data.feedback.map(fb => {
+                        const teamMember = team members.get(fb.fromTeamMemberId);
+                        const teamMemberName = team member ? team member.name : 'Unknown';
+                        return `
+                            <div class="feedback-item">
+                                <div class="feedback-item-header">
+                                    <span class="feedback-type ${fb.feedbackType}">${fb.feedbackType}</span>
+                                    <span style="color: var(--csgo-text-dim); font-size: 10px;">${formatDate(fb.createdAt)}</span>
+                                </div>
+                                <div style="margin-bottom: 5px; font-size: 11px; color: var(--csgo-yellow);">${escapeHtml(teamMemberName)}</div>
+                                <div>${escapeHtml(fb.message)}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: var(--csgo-text-dim); padding: 10px;">No feedback yet</div>';
+                }
+                container.classList.remove('hidden');
+            } catch (err) {
+                console.error('Failed to load feedback:', err);
+            }
+        }
+
+        function showShareCodeModal() { document.getElementById('share-code-modal').classList.remove('hidden'); }
+        function hideShareCodeModal() { document.getElementById('share-code-modal').classList.add('hidden'); }
+
+        async function shareCode(e) {
+            e.preventDefault();
+            if (!selectedTeamMemberId) {
+                alert('Select a team member first');
+                return;
+            }
+            const payload = {
+                title: document.getElementById('share-title').value,
+                description: document.getElementById('share-description').value,
+                filePath: document.getElementById('share-filepath').value,
+                language: document.getElementById('share-language').value,
+                tags: document.getElementById('share-tags').value.split(',').map(t => t.trim()).filter(t => t),
+                code: document.getElementById('share-code').value
+            };
+            try {
+                const res = await fetch(`/api/team-members/${selectedTeamMemberId}/share-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    hideShareCodeModal();
+                    document.getElementById('share-title').value = '';
+                    document.getElementById('share-description').value = '';
+                    document.getElementById('share-filepath').value = '';
+                    document.getElementById('share-tags').value = '';
+                    document.getElementById('share-code').value = '';
+                    loadSharedCode();
+                }
+            } catch (err) {
+                console.error('Failed to share code:', err);
+            }
+        }
+
+        function showFeedbackModal(codeId, feedbackType) {
+            document.getElementById('feedback-code-id').value = codeId;
+            document.querySelector(`input[name="feedback-type"][value="${feedbackType}"]`).checked = true;
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+        function hideFeedbackModal() { document.getElementById('feedback-modal').classList.add('hidden'); }
+
+        async function submitFeedback(e) {
+            e.preventDefault();
+            if (!selectedTeamMemberId) {
+                alert('Select a team member first');
+                return;
+            }
+            const codeId = document.getElementById('feedback-code-id').value;
+            const feedbackType = document.querySelector('input[name="feedback-type"]:checked').value;
+            const message = document.getElementById('feedback-message').value;
+            try {
+                const res = await fetch(`/api/team-members/shared-code/${codeId}/feedback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fromTeamMemberId: selectedTeamMemberId, feedbackType, message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    hideFeedbackModal();
+                    document.getElementById('feedback-message').value = '';
+                    loadCollabStats();
+                    toggleFeedback(codeId);
+                }
+            } catch (err) {
+                console.error('Failed to submit feedback:', err);
+            }
+        }
+
+        // ============================================================================
+        // LOAD MESSAGES - Uses SPECMEM API
+        // GET /api/specmem/team-member/spy/all-messages?limit=100
+        // ============================================================================
+        async function loadMessages(teamMemberId) {
+            try {
+                // Load ALL messages for spy view
+                const res = await fetch('/api/specmem/team-member/spy/all-messages?limit=100&sinceMinutes=1440', {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success && data.messages) {
+                    // Transform to dashboard format
+                    team memberMessages = data.messages.map(msg => ({
+                        id: msg.id,
+                        fromTeamMemberId: msg.from,
+                        toTeamMemberId: msg.to,
+                        message: msg.message,
+                        priority: msg.priority,
+                        createdAt: msg.timestamp,
+                        read: true // All spied messages are "read"
+                    }));
+                    renderMessages();
+                    console.log(`SPECMEM: Loaded ${data.messages.length} messages`);
+                } else {
+                    team memberMessages = [];
+                    renderMessages();
+                }
+                updateMessageTeamMemberSelect();
+            } catch (err) {
+                console.error('SPECMEM: Failed to load messages:', err);
+            }
+        }
+
+        // Load all messages regardless of selected team-member
+        async function loadAllMessages() {
+            try {
+                const res = await fetch('/api/specmem/team-member/spy/all-messages?limit=100&sinceMinutes=1440', {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success && data.messages) {
+                    allMessages = data.messages;
+                    team memberMessages = data.messages.map(msg => ({
+                        id: msg.id,
+                        fromTeamMemberId: msg.from,
+                        toTeamMemberId: msg.to,
+                        message: msg.message,
+                        priority: msg.priority,
+                        createdAt: msg.timestamp,
+                        read: true
+                    }));
+                    renderMessages();
+                }
+            } catch (err) {
+                console.error('SPECMEM: Failed to load all messages:', err);
+            }
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('message-container');
+            if (agentMessages.length === 0) {
+                container.innerHTML = '<div class="no-team-members"><p>No messages yet</p><p style="font-size:11px;color:var(--csgo-text-dim);margin-top:10px;">Messages sent via POST /api/specmem/team-member/message will appear here.</p></div>';
+                return;
+            }
+            container.innerHTML = team memberMessages.map(msg => {
+                const fromTeamMember = team members.get(msg.fromTeamMemberId);
+                const toTeamMember = team members.get(msg.toTeamMemberId);
+                const isSent = msg.fromTeamMemberId === selectedTeamMemberId || msg.fromTeamMemberId === 'dashboard';
+                const priorityColor = getPriorityColor(msg.priority);
+                const toDisplay = msg.toTeamMemberId === 'all' ? 'ALL' : (toTeamMember?.name || msg.toTeamMemberId || 'Unknown');
+                return `
+                    <div class="message-item ${isSent ? 'sent' : 'received'}" style="border-left-color: ${priorityColor};">
+                        <div class="message-header">
+                            <span class="message-from" style="color: var(--csgo-yellow);">
+                                ${escapeHtml(fromTeamMember?.name || msg.fromTeamMemberId || 'Unknown')}
+                                <span style="color: var(--csgo-text-dim);"> -> </span>
+                                ${escapeHtml(toDisplay)}
+                            </span>
+                            <span style="display:flex;align-items:center;gap:8px;">
+                                <span class="status-badge" style="background:${priorityColor}20;color:${priorityColor};font-size:9px;padding:2px 5px;">${(msg.priority || 'medium').toUpperCase()}</span>
+                                <span class="message-time">${formatTime(msg.createdAt)}</span>
+                            </span>
+                        </div>
+                        <div class="message-text">${escapeHtml(msg.message)}</div>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function getPriorityColor(priority) {
+            switch (priority) {
+                case 'critical': return '#f44336';
+                case 'high': return '#ff9800';
+                case 'medium': return '#FFD700';
+                case 'low': return '#4CAF50';
+                default: return '#888888';
+            }
+        }
+
+        function updateMessageTeamMemberSelect() {
+            const select = document.getElementById('message-to-team-member');
+            if (!select) return;
+            const options = ['<option value="">All TeamMembers (Broadcast)</option>'];
+            team members.forEach((a, id) => {
+                options.push(`<option value="${id}">${escapeHtml(a.name)} (${a.type})</option>`);
+            });
+            select.innerHTML = options.join('');
+        }
+
+        // ============================================================================
+        // SEND MESSAGE - Uses SPECMEM API
+        // POST /api/specmem/team-member/message
+        // ============================================================================
+        async function sendMessage() {
+            const toTeamMemberId = document.getElementById('message-to-team-member').value;
+            const message = document.getElementById('message-input').value;
+            const prioritySelect = document.getElementById('message-priority');
+            const priority = prioritySelect ? prioritySelect.value : 'medium';
+
+            if (!message) {
+                alert('Enter a message');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/specmem/team-member/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        from: 'dashboard',
+                        to: toTeamMemberId || 'all', // If no team member selected, broadcast to all
+                        message: message,
+                        priority: priority
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('message-input').value = '';
+                    console.log('SPECMEM: Message sent successfully', data);
+                    // Reload messages to show the new one
+                    setTimeout(() => loadAllMessages(), 500);
+                } else {
+                    alert('Failed to send message: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('SPECMEM: Failed to send message:', err);
+                alert('Failed to send message');
+            }
+        }
+
+        function showEncouragement(message) {
+            document.getElementById('encouragement-message').textContent = message;
+            document.getElementById('encouragement-banner').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('encouragement-banner').classList.add('hidden');
+            }, 15000);
+        }
+
+        const originalHandleWSMessage = handleWSMessage;
+        handleWSMessage = function(data) {
+            originalHandleWSMessage(data);
+            if (data.type === 'code:shared') {
+                loadSharedCode();
+                if (data.data && data.data.teamMemberId !== selectedTeamMemberId) {
+                    showEncouragement('New code was shared! Check it out and provide feedback.');
+                }
+            }
+            if (data.type === 'feedback:given') {
+                loadCollabStats();
+            }
+            if (data.type === 'message:sent') {
+                if (data.data && (data.data.toTeamMemberId === selectedTeamMemberId || data.data.fromTeamMemberId === selectedTeamMemberId)) {
+                    loadMessages(selectedTeamMemberId);
+                }
+            }
+            if (data.type === 'team member:status' && data.team-member?.status === 'completed') {
+                showEncouragement('Your team member completed a task! Share your code for peer review.');
+            }
+        };
+
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function showHistoryModal() {
+            document.getElementById('history-modal').classList.remove('hidden');
+            loadHistoryTeamMembers();
+        }
+
+        function hideHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function hideSessionDetailModal() {
+            document.getElementById('session-detail-modal').classList.add('hidden');
+        }
+
+        // ============================================================================
+        // LOAD TEAM MEMBER HISTORY - Uses SPECMEM API
+        // GET /api/specmem/team-member/spy/history?sinceHours=24
+        // ============================================================================
+        async function loadHistoryTeamMembers() {
+            const container = document.getElementById('history-team-member-list');
+            container.innerHTML = '<div class="history-loading">Loading team member history...</div>';
+            try {
+                const res = await fetch('/api/specmem/team-member/spy/history?sinceHours=24', {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success && data.team-members && data.team-members.length > 0) {
+                    // Transform SPECMEM history data to dashboard format
+                    historyTeamMembers = data.team-members.map(team member => ({
+                        id: team member.teamMemberId,
+                        name: team member.teamMemberName || team member.teamMemberId,
+                        type: team member.teamMemberType || 'worker',
+                        sessionCount: 1, // SPECMEM tracks individual sessions
+                        lastSessionDate: team member.lastHeartbeat,
+                        isActive: team member.isActive,
+                        status: teamMember.status,
+                        metadata: team member.metadata
+                    }));
+                    renderHistoryTeamMembers();
+                    console.log(`SPECMEM: Loaded ${data.team-members.length} team members from history`);
+                } else {
+                    container.innerHTML = '<div class="history-empty">No team member history found in last 24 hours</div>';
+                }
+            } catch (err) {
+                console.error('SPECMEM: Failed to load history team members:', err);
+                container.innerHTML = '<div class="history-empty">Error loading team member history</div>';
+            }
+        }
+
+        function renderHistoryTeamMembers() {
+            const container = document.getElementById('history-team-member-list');
+            container.innerHTML = historyTeamMembers.map(team member => `
+                <div class="history-team-member-item ${selectedHistoryTeamMemberId === team member.id ? 'selected' : ''}"
+                     onclick="selectHistoryTeamMember('${teamMember.id}')">
+                    <div class="history-team-member-name">
+                        <span class="history-team-member-expand">&gt;</span>
+                        ${escapeHtml(teamMember.name)}
+                        ${teamMember.isActive ? '<span style="display:inline-block;width:8px;height:8px;background:var(--csgo-success);border-radius:50%;margin-left:8px;animation:pulse 1.5s infinite;"></span>' : ''}
+                    </div>
+                    <div class="history-team-member-meta">
+                        <span>${teamMember.type}</span>
+                        <span class="status-badge ${teamMember.isActive ? 'running' : 'stopped'}" style="font-size:9px;padding:2px 5px;">
+                            ${teamMember.isActive ? 'ACTIVE' : teamMember.status || 'INACTIVE'}
+                        </span>
+                    </div>
+                    ${teamMember.lastSessionDate ? `<div style="font-size: 10px; color: var(--csgo-text-dim); margin-top: 4px;">Last heartbeat: ${formatDate(teamMember.lastSessionDate)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function selectHistoryTeamMember(teamMemberId) {
+            selectedHistoryTeamMemberId = teamMemberId;
+            renderHistoryTeamMembers();
+            const container = document.getElementById('history-sessions-list');
+            container.innerHTML = '<div class="history-loading">Loading sessions...</div>';
+            try {
+                const res = await fetch(`/api/team-members/${teamMemberId}/sessions?limit=20`);
+                const data = await res.json();
+                if (data.success && data.sessions.length > 0) {
+                    historySessions = data.sessions;
+                    renderHistorySessions();
+                } else {
+                    container.innerHTML = '<div class="history-empty">No sessions found for this team member</div>';
+                }
+            } catch (err) {
+                console.error('Failed to load sessions:', err);
+                container.innerHTML = '<div class="history-empty">Error loading sessions</div>';
+            }
+        }
+
+        function renderHistorySessions() {
+            const container = document.getElementById('history-sessions-list');
+            container.innerHTML = historySessions.map(session => {
+                const startDate = new Date(session.sessionStart);
+                const endDate = session.sessionEnd ? new Date(session.sessionEnd) : null;
+                const duration = endDate ? Math.round((endDate - startDate) / 1000) : 0;
+                return `
+                    <div class="session-card">
+                        <div class="session-card-header" onclick="viewSessionDetails('${session.id}')">
+                            <div>
+                                <div class="session-date">${startDate.toLocaleDateString()}</div>
+                                <div class="session-time-range">${startDate.toLocaleTimeString()}${endDate ? ' - ' + endDate.toLocaleTimeString() : ' (ongoing)'}</div>
+                                <div class="session-stats">
+                                    <div class="session-stat">Tasks: <span class="session-stat-value">${session.taskCount}</span></div>
+                                    <div class="session-stat">Code: <span class="session-stat-value">${session.codeCount}</span></div>
+                                    <div class="session-stat">Tokens: <span class="session-stat-value">${formatNumber(session.tokensUsed)}</span></div>
+                                </div>
+                            </div>
+                            <span class="session-status ${session.status}">${session.status}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function viewSessionDetails(sessionId) {
+            document.getElementById('session-detail-modal').classList.remove('hidden');
+            const container = document.getElementById('session-detail-content');
+            container.innerHTML = '<div class="history-loading">Loading session details...</div>';
+            try {
+                const res = await fetch(`/api/team-members/sessions/${sessionId}`);
+                const data = await res.json();
+                if (data.success) {
+                    renderSessionDetails(data.session, sessionId);
+                } else {
+                    container.innerHTML = '<div class="history-empty">Session not found</div>';
+                }
+            } catch (err) {
+                console.error('Failed to load session details:', err);
+                container.innerHTML = '<div class="history-empty">Error loading session details</div>';
+            }
+        }
+
+        function renderSessionDetails(session, sessionId) {
+            const container = document.getElementById('session-detail-content');
+            const startDate = new Date(session.sessionStart);
+            const endDate = session.sessionEnd ? new Date(session.sessionEnd) : null;
+            const duration = endDate ? Math.round((endDate - startDate) / 1000) : 0;
+
+            let tasksHtml = '';
+            if (session.tasksCompleted && session.tasksCompleted.length > 0) {
+                tasksHtml = `
+                    <div class="session-detail-section">
+                        <div class="session-detail-title">TASKS (${session.tasksCompleted.length})</div>
+                        <div class="task-list">
+                            ${session.tasksCompleted.map(task => `
+                                <div class="task-item">
+                                    <div class="task-check ${task.status}">${task.status === 'completed' ? '&#10003;' : task.status === 'failed' ? '&#10007;' : '?'}</div>
+                                    <span class="task-name">${escapeHtml(task.name || 'Unnamed Task')}</span>
+                                    <span class="task-status">${task.status}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let codeIdsHtml = '';
+            if (session.codeSharedIds && session.codeSharedIds.length > 0) {
+                codeIdsHtml = `
+                    <div class="session-detail-section">
+                        <div class="session-detail-title">SHARED CODE (${session.codeSharedIds.length})</div>
+                        <div class="id-list">
+                            ${session.codeSharedIds.map(id => `<span class="id-chip">${id.substring(0, 8)}...</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let feedbackIdsHtml = '';
+            if (session.feedbackGivenIds && session.feedbackGivenIds.length > 0) {
+                feedbackIdsHtml = `
+                    <div class="session-detail-section">
+                        <div class="session-detail-title">FEEDBACK GIVEN (${session.feedbackGivenIds.length})</div>
+                        <div class="id-list">
+                            ${session.feedbackGivenIds.map(id => `<span class="id-chip">${id.substring(0, 8)}...</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let messagesIdsHtml = '';
+            if (session.messagesSentIds && session.messagesSentIds.length > 0) {
+                messagesIdsHtml = `
+                    <div class="session-detail-section">
+                        <div class="session-detail-title">MESSAGES SENT (${session.messagesSentIds.length})</div>
+                        <div class="id-list">
+                            ${session.messagesSentIds.map(id => `<span class="id-chip">${id.substring(0, 8)}...</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="session-detail-section">
+                    <div class="session-detail-title">SESSION OVERVIEW</div>
+                    <div class="session-info-grid">
+                        <div class="session-info-item">
+                            <div class="session-info-label">TeamMember</div>
+                            <div class="session-info-value">${escapeHtml(session.teamMemberName)}</div>
+                        </div>
+                        <div class="session-info-item">
+                            <div class="session-info-label">Type</div>
+                            <div class="session-info-value">${session.teamMemberType}</div>
+                        </div>
+                        <div class="session-info-item">
+                            <div class="session-info-label">Status</div>
+                            <div class="session-info-value"><span class="session-status ${session.status}">${session.status}</span></div>
+                        </div>
+                        <div class="session-info-item">
+                            <div class="session-info-label">Duration</div>
+                            <div class="session-info-value">${duration}s</div>
+                        </div>
+                        <div class="session-info-item">
+                            <div class="session-info-label">Tokens</div>
+                            <div class="session-info-value">${formatNumber(session.tokensUsed)}</div>
+                        </div>
+                        <div class="session-info-item">
+                            <div class="session-info-label">Started</div>
+                            <div class="session-info-value" style="font-size: 11px;">${startDate.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    ${session.summary ? `<div style="margin-top: 15px; font-size: 12px; color: var(--csgo-text-dim);">${escapeHtml(session.summary)}</div>` : ''}
+                </div>
+
+                ${tasksHtml}
+                ${codeIdsHtml}
+                ${feedbackIdsHtml}
+                ${messagesIdsHtml}
+
+                <div class="session-detail-section">
+                    <div class="session-detail-title">OUTPUT LOGS</div>
+                    <div id="session-logs-container" class="session-log-container">
+                        <div class="history-loading">Loading logs...</div>
+                    </div>
+                    <div class="log-pagination">
+                        <span class="log-pagination-info" id="log-pagination-info">Loading...</span>
+                        <div class="log-pagination-btns">
+                            <button class="btn btn-small btn-secondary" onclick="loadPrevLogs('${sessionId}')" id="prev-logs-btn" disabled>Prev</button>
+                            <button class="btn btn-small btn-secondary" onclick="loadNextLogs('${sessionId}')" id="next-logs-btn" disabled>Next</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            currentLogOffset = 0;
+            loadSessionLogs(sessionId);
+        }
+
+        async function loadSessionLogs(sessionId) {
+            const container = document.getElementById('session-logs-container');
+            try {
+                const res = await fetch(`/api/team-members/sessions/${sessionId}/logs?limit=${currentLogLimit}&offset=${currentLogOffset}`);
+                const data = await res.json();
+                if (data.success) {
+                    currentSessionLogs = data.logs;
+                    totalLogCount = data.totalCount;
+                    renderSessionLogs();
+                    updateLogPagination(sessionId);
+                } else {
+                    container.innerHTML = '<div class="session-log-entry info">No logs available</div>';
+                }
+            } catch (err) {
+                console.error('Failed to load session logs:', err);
+                container.innerHTML = '<div class="session-log-entry error">Error loading logs</div>';
+            }
+        }
+
+        function renderSessionLogs() {
+            const container = document.getElementById('session-logs-container');
+            if (currentSessionLogs.length === 0) {
+                container.innerHTML = '<div class="session-log-entry info">No logs available</div>';
+                return;
+            }
+            container.innerHTML = currentSessionLogs.map(log => `
+                <div class="session-log-entry ${log.level || 'info'}">
+                    <span class="session-log-timestamp">${formatTime(log.timestamp)}</span>
+                    ${escapeHtml(log.message)}
+                </div>
+            `).join('');
+        }
+
+        function updateLogPagination(sessionId) {
+            const info = document.getElementById('log-pagination-info');
+            const prevBtn = document.getElementById('prev-logs-btn');
+            const nextBtn = document.getElementById('next-logs-btn');
+
+            const start = currentLogOffset + 1;
+            const end = Math.min(currentLogOffset + currentSessionLogs.length, totalLogCount);
+            info.textContent = `Showing ${start}-${end} of ${totalLogCount}`;
+
+            prevBtn.disabled = currentLogOffset === 0;
+            nextBtn.disabled = currentLogOffset + currentLogLimit >= totalLogCount;
+
+            prevBtn.onclick = () => loadPrevLogs(sessionId);
+            nextBtn.onclick = () => loadNextLogs(sessionId);
+        }
+
+        function loadPrevLogs(sessionId) {
+            currentLogOffset = Math.max(0, currentLogOffset - currentLogLimit);
+            loadSessionLogs(sessionId);
+        }
+
+        function loadNextLogs(sessionId) {
+            currentLogOffset += currentLogLimit;
+            loadSessionLogs(sessionId);
+        }
+
+        // ============================================================================
+        // Communicator & Live Status Functions
+        // ============================================================================
+
+        let commMessages = [];
+        let lastHeartbeat = 0;
+        let heartbeatInterval = null;
+
+        function updateCommunicatorPanel() {
+            const noTeamMember = document.getElementById('communicator-no-team-member');
+            const panel = document.getElementById('communicator-panel');
+            if (selectedTeamMemberId) {
+                noTeamMember.classList.add('hidden');
+                panel.classList.remove('hidden');
+                const teamMember = team members.get(selectedTeamMemberId);
+                if (teamMember) {
+                    document.getElementById('live-team-member-name').textContent = team member.name;
+                    updateLiveStatus(teamMember);
+                    updateHeartbeat(teamMember.status === 'running');
+                }
+            } else {
+                noTeamMember.classList.remove('hidden');
+                panel.classList.add('hidden');
+            }
+        }
+
+        function updateLiveStatus(teamMember) {
+            const task = team member.currentTask;
+            document.getElementById('live-task').textContent = task ? task.name : 'Idle';
+            document.getElementById('live-task-progress').style.width = task ? task.progress + '%' : '0%';
+
+            const tokensUsed = team member.tokensUsed || 0;
+            const tokensLimit = team member.tokensLimit || 20000;
+            document.getElementById('live-tokens').textContent = formatNumber(tokensUsed);
+            document.getElementById('live-tokens-progress').style.width = Math.min((tokensUsed / tokensLimit) * 100, 100) + '%';
+
+            const cached = teamMemberLimitsCache.get(teamMember.id);
+            if (cached) {
+                const memUsed = cached.limits.memory_used || 0;
+                const memLimit = cached.limits.memory_limit || 50 * 1024 * 1024;
+                document.getElementById('live-memory').textContent = (memUsed / (1024 * 1024)).toFixed(1) + ' MB';
+                document.getElementById('live-memory-progress').style.width = Math.min((memUsed / memLimit) * 100, 100) + '%';
+
+                const filesUsed = cached.limits.files_processed || 0;
+                const filesLimit = cached.limits.files_limit || 1000;
+                document.getElementById('live-files').textContent = formatNumber(filesUsed);
+                document.getElementById('live-files-progress').style.width = Math.min((filesUsed / filesLimit) * 100, 100) + '%';
+            }
+        }
+
+        function updateHeartbeat(isAlive) {
+            const dot = document.getElementById('heartbeat-indicator');
+            if (isAlive) {
+                dot.classList.remove('dead');
+                dot.classList.add('alive');
+                lastHeartbeat = Date.now();
+            } else {
+                dot.classList.remove('alive');
+                dot.classList.add('dead');
+            }
+        }
+
+        function addCommMessage(type, content, from = 'System') {
+            const chat = document.getElementById('communicator-chat');
+            const msg = document.createElement('div');
+            msg.className = 'comm-message ' + type;
+            msg.innerHTML = `
+                <div class="comm-message-header">
+                    <span class="comm-message-from">${escapeHtml(from)}</span>
+                    <span class="comm-message-time">${formatTime(new Date())}</span>
+                </div>
+                <div class="comm-message-content">${escapeHtml(content)}</div>
+            `;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+            commMessages.push({ type, content, from, time: new Date() });
+            if (commMessages.length > 100) commMessages.shift();
+        }
+
+        async function sendTeamMemberCommand() {
+            if (!selectedTeamMemberId) {
+                addCommMessage('error', 'No team member selected');
+                return;
+            }
+            const cmdType = document.getElementById('comm-command-type').value;
+            const input = document.getElementById('comm-input');
+            const content = input.value.trim();
+            if (!content && cmdType !== 'query' && cmdType !== 'stop') {
+                addCommMessage('error', 'Please enter a command or message');
+                return;
+            }
+
+            let command = {};
+            switch (cmdType) {
+                case 'message':
+                    command = { type: 'message', content };
+                    break;
+                case 'task':
+                    command = { type: 'task', name: content, priority: 'normal' };
+                    break;
+                case 'query':
+                    command = { type: 'query', what: content || 'status' };
+                    break;
+                case 'stop':
+                    command = { type: 'stop', reason: content || 'User requested stop' };
+                    break;
+                case 'custom':
+                    try {
+                        command = JSON.parse(content);
+                    } catch (e) {
+                        addCommMessage('error', 'Invalid JSON: ' + e.message);
+                        return;
+                    }
+                    break;
+            }
+
+            addCommMessage('sent', JSON.stringify(command), 'You');
+            input.value = '';
+
+            try {
+                const res = await fetch(`/api/team-members/${selectedTeamMemberId}/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.response) {
+                        addCommMessage('received', JSON.stringify(data.response), team members.get(selectedTeamMemberId)?.name || 'Team Member');
+                    } else {
+                        addCommMessage('system', 'Command sent successfully');
+                    }
+                } else {
+                    addCommMessage('error', 'Failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                addCommMessage('error', 'Error: ' + err.message);
+            }
+        }
+
+        // Override selectTeamMember to update communicator
+        const originalSelectTeamMember = selectTeamMember;
+        selectTeamMember = function(id) {
+            originalSelectTeamMember(id);
+            updateCommunicatorPanel();
+        };
+
+        // Handle communicator tab switch
+        const origTabHandler = document.querySelectorAll('.tab-btn')[0].onclick;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.tab === 'communicator') {
+                    updateCommunicatorPanel();
+                }
+            });
+        });
+
+        // Listen for Enter key in communicator input
+        document.getElementById('comm-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendTeamMemberCommand();
+        });
+
+        // Handle WebSocket messages for live updates
+        const origWSHandler = handleWSMessage;
+        handleWSMessage = function(data) {
+            origWSHandler(data);
+            if (data.type === 'team member:status' && data.team-member?.id === selectedTeamMemberId) {
+                updateLiveStatus(data.team-member);
+                updateHeartbeat(data.team-member.status === 'running');
+            }
+            if (data.type === 'team member:tokens' && data.teamMemberId === selectedTeamMemberId) {
+                const teamMember = team members.get(selectedTeamMemberId);
+                if (teamMember) updateLiveStatus(teamMember);
+            }
+            if (data.type === 'team member:task' && data.teamMemberId === selectedTeamMemberId) {
+                const teamMember = team members.get(selectedTeamMemberId);
+                if (teamMember) updateLiveStatus(teamMember);
+            }
+            if (data.type === 'team member:response' && data.teamMemberId === selectedTeamMemberId) {
+                addCommMessage('received', JSON.stringify(data.response), team members.get(selectedTeamMemberId)?.name || 'Team Member');
+            }
+            if (data.type === 'team member:heartbeat' && data.teamMemberId === selectedTeamMemberId) {
+                updateHeartbeat(true);
+            }
+        };
+
+        // Periodic heartbeat check
+        setInterval(() => {
+            if (selectedTeamMemberId && Date.now() - lastHeartbeat > 10000) {
+                const teamMember = team members.get(selectedTeamMemberId);
+                if (team member && teamMember.status === 'running') {
+                    updateHeartbeat(false);
+                }
+            }
+        }, 5000);
+
+        // ============================================================================
+        // INITIALIZATION - Authenticate first, then start everything
+        // ============================================================================
+        async function initDashboard() {
+            console.log('SPECMEM: Initializing Team Member Dashboard...');
+
+            // Step 1: Authenticate
+            const authenticated = await authenticate();
+            if (!authenticated) {
+                console.error('SPECMEM: Authentication failed - some features may not work');
+                // Continue anyway, some endpoints might work without auth
+            }
+
+            // Step 2: Connect WebSocket for real-time updates
+            connectWebSocket();
+
+            // Step 3: Load initial data
+            await loadTeamMembers();
+            await loadAllMessages();
+
+            // Step 4: Set up auto-refresh every 5 seconds for active team members
+            autoRefreshInterval = setInterval(async () => {
+                await loadTeamMembers();
+                updateStats();
+            }, 5000);
+
+            // Also refresh messages periodically (every 10 seconds)
+            setInterval(loadAllMessages, 10000);
+
+            // Load collab stats periodically
+            setInterval(loadCollabStats, 60000);
+
+            console.log('SPECMEM: Team Member Dashboard initialized!');
+        }
+
+        // Start the dashboard when page loads
+        initDashboard();
+    </script>
+
+    <!-- Language Selector Component -->
+    <script src="/shared-language-selector.js"></script>
+    <script>
+        // Initialize language selector
+        const langSelector = new SpecMemLanguageSelector({
+            containerId: 'language-selector-container',
+            onLanguageChange: (langCode, langInfo) => {
+                console.log('Language changed to:', langCode, langInfo.name);
+            }
+        });
+    </script>
+</body>
+</html>
