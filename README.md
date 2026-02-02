@@ -4,12 +4,17 @@
 <details> 
 <summary><strong>Updated install instructions -- Read before all</strong></summary>
 Eg:
+<br/>
 ** npm install -g specmem-hardwicksoftware
+<br/>
 ** cd /$your-project-directory/
+<br/>
 ** specmem setup
+<br/>
 ** specmem init
+<br/>
 
---> In the future just run specmem init instead of claude,
+--> Now, In the future just run specmem init instead of claude,
 --> Its better startup anyways, trust 🤝
 
 --> Try also npm install -g claudefix , youre welcome
