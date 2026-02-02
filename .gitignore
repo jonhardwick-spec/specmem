@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.log
+.DS_Store
+specmem/sockets/
+specmem/data/
+.specmem/
+*.pid
+specmem/

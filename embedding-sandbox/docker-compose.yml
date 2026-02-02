@@ -1,0 +1,60 @@
+# SANDBOXED EMBEDDING CONTAINER
+# =============================
+# This container is AIR-GAPPED with ZERO network access
+#
+# Security features:
+# - network_mode: "none" - ZERO network access
+# - cap_drop: ALL - No special capabilities
+# - read_only: true - Cannot modify filesystem
+# - security_opt: no-new-privileges - Cannot escalate
+# - mem_limit: 512m - Max 512MB RAM (model needs ~150MB)
+#
+# Communication: Unix socket at ${SPECMEM_SOCKET_DIR}/embeddings.sock (or ${SPECMEM_HOME}/run)
+
+version: '3.8'
+
+services:
+  embedding-sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # CRITICAL: NO NETWORK ACCESS
+    network_mode: "none"
+
+    # Security hardening
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+
+    # Resource limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
+
+    # Temp directories for Python (read-only root needs these)
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+
+    # Unix socket mount - uses dynamic path for project isolation
+    volumes:
+      - ${SPECMEM_SOCKET_DIR:-${SPECMEM_HOME:-/specmem}/run}:/sockets:rw
+
+    # Environment
+    environment:
+      - SOCKET_PATH=/sockets/embeddings.sock
+      - TRANSFORMERS_OFFLINE=1
+      - HF_DATASETS_OFFLINE=1
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check via socket (using Node.js since container runs Node)
+    healthcheck:
+      test: ["CMD", "node", "-e", "const net=require('net');const s=net.createConnection('/sockets/embeddings.sock',()=>{s.write('{\"type\":\"health\"}\\n')});s.on('data',d=>{console.log(d.toString());s.destroy();process.exit(0)});s.on('error',e=>{process.exit(1)});setTimeout(()=>process.exit(1),5000)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

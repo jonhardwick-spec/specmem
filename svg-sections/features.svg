@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680">
+  <defs>
+    <!-- Gradient definitions -->
+    <linearGradient id="cyanPurpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="iconGradientBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.2" />
+    </linearGradient>
+
+    <linearGradient id="cardGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00bfff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.05" />
+    </linearGradient>
+
+    <!-- Glow filter for icons -->
+    <filter id="iconGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Card shadow filter -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+
+    <!-- Subtle card glow -->
+    <filter id="cardGlowFilter" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" fill="#0a0a0f"/>
+
+  <!-- Subtle radial gradient overlay -->
+  <ellipse cx="600" cy="340" rx="600" ry="400" fill="url(#cardGlow)" opacity="0.5"/>
+
+  <!-- Section Header -->
+  <text x="600" y="50" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="36" font-weight="800" fill="#f5f5f5">
+    Built for <tspan fill="url(#cyanPurpleGradient)">Real Work</tspan>
+  </text>
+  <text x="600" y="85" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="16" fill="#888888">
+    Not a toy. SpecMem's got the tools you actually need when you're shipping code.
+  </text>
+
+  <!-- Feature Cards Grid: 3 columns x 2 rows -->
+  <!-- Card dimensions: 360w x 240h, gap: 30px -->
+  <!-- Row 1 starts at y=120, Row 2 at y=390 -->
+  <!-- Col 1 x=30, Col 2 x=420, Col 3 x=810 -->
+
+  <!-- Card 1: Semantic Memory (Brain Icon) -->
+  <g transform="translate(30, 120)">
+    <!-- Card background with glassmorphism -->
+    <rect width="360" height="240" rx="20" ry="20" fill="rgba(15, 15, 25, 0.6)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" filter="url(#cardShadow)"/>
+
+    <!-- Icon container -->
+    <rect x="24" y="24" width="56" height="56" rx="12" ry="12" fill="url(#iconGradientBg)"/>
+
+    <!-- Brain Icon (two hemispheres, properly centered) -->
+    <g transform="translate(52, 52)" filter="url(#iconGlow)">
+      <!-- Left hemisphere -->
+      <path d="M-2 -14 C-8 -14, -14 -10, -14 -4 C-14 0, -12 3, -10 5 C-13 7, -14 10, -14 13 C-14 18, -10 20, -5 20 C-3 20, -1 19, -1 19 L-1 -14 C-1 -14, -2 -14, -2 -14" fill="#00bfff"/>
+      <!-- Left hemisphere folds -->
+      <path d="M-11 -6 Q-7 -4, -4 -7 M-12 2 Q-8 4, -4 1 M-11 10 Q-7 12, -4 9" stroke="#0a0a0f" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <!-- Right hemisphere -->
+      <path d="M2 -14 C8 -14, 14 -10, 14 -4 C14 0, 12 3, 10 5 C13 7, 14 10, 14 13 C14 18, 10 20, 5 20 C3 20, 1 19, 1 19 L1 -14 C1 -14, 2 -14, 2 -14" fill="#00bfff"/>
+      <!-- Right hemisphere folds -->
+      <path d="M11 -6 Q7 -4, 4 -7 M12 2 Q8 4, 4 1 M11 10 Q7 12, 4 9" stroke="#0a0a0f" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <!-- Center divide -->
+      <line x1="0" y1="-14" x2="0" y2="20" stroke="#0a0a0f" stroke-width="2"/>
+    </g>
+
+    <!-- Title -->
+    <text x="24" y="110" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="#f5f5f5">Semantic Memory</text>
+
+    <!-- Description -->
+    <text x="24" y="140" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#888888">
+      <tspan x="24" dy="0">Find code by meaning, not just keywords.</tspan>
+      <tspan x="24" dy="22">"That auth thing we built last week"</tspan>
+      <tspan x="24" dy="22">actually works. Vector embeddings with</tspan>
+      <tspan x="24" dy="22">pgvector do the heavy lifting.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 2: Multi-Agent Teams (Users Icon) -->
+  <g transform="translate(420, 120)">
+    <rect width="360" height="240" rx="20" ry="20" fill="rgba(15, 15, 25, 0.6)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" filter="url(#cardShadow)"/>
+
+    <rect x="24" y="24" width="56" height="56" rx="12" ry="12" fill="url(#iconGradientBg)"/>
+
+    <!-- Users Icon -->
+    <g transform="translate(36, 38)" filter="url(#iconGlow)">
+      <circle cx="12" cy="8" r="5" fill="#00bfff"/>
+      <path d="M20 21c0-4.4-3.6-8-8-8s-8 3.6-8 8" stroke="#00bfff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="26" cy="10" r="4" fill="#00bfff" opacity="0.7"/>
+      <path d="M32 21c0-3.3-2.7-6-6-6" stroke="#00bfff" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+      <circle cx="-2" cy="10" r="4" fill="#00bfff" opacity="0.7"/>
+      <path d="M-8 21c0-3.3 2.7-6 6-6" stroke="#00bfff" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+    </g>
+
+    <text x="24" y="110" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="#f5f5f5">Multi-Agent Teams</text>
+
+    <text x="24" y="140" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#888888">
+      <tspan x="24" dy="0">Spawn multiple Claude instances that</tspan>
+      <tspan x="24" dy="22">actually talk to each other. Task claiming,</tspan>
+      <tspan x="24" dy="22">team messages, swarm channels - no more</tspan>
+      <tspan x="24" dy="22">stepping on each other's work.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 3: Per-Project Isolation (Shield Icon) -->
+  <g transform="translate(810, 120)">
+    <rect width="360" height="240" rx="20" ry="20" fill="rgba(15, 15, 25, 0.6)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" filter="url(#cardShadow)"/>
+
+    <rect x="24" y="24" width="56" height="56" rx="12" ry="12" fill="url(#iconGradientBg)"/>
+
+    <!-- Shield Icon -->
+    <g transform="translate(40, 36)" filter="url(#iconGlow)">
+      <path d="M12 2L4 6v6c0 5.5 3.4 10.6 8 12 4.6-1.4 8-6.5 8-12V6l-8-4z" fill="none" stroke="#00bfff" stroke-width="2.5" stroke-linejoin="round" transform="scale(1.3)"/>
+      <path d="M9 12l2 2 4-4" fill="none" stroke="#00bfff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" transform="scale(1.3) translate(0, 1)"/>
+    </g>
+
+    <text x="24" y="110" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="#f5f5f5">Per-Project Isolation</text>
+
+    <text x="24" y="140" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#888888">
+      <tspan x="24" dy="0">Each project gets its own PostgreSQL</tspan>
+      <tspan x="24" dy="22">schema. Your startup's code won't mix</tspan>
+      <tspan x="24" dy="22">with your side project. Full data</tspan>
+      <tspan x="24" dy="22">separation, guaranteed.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 4: 74+ MCP Tools (Wrench Icon) -->
+  <g transform="translate(30, 390)">
+    <rect width="360" height="240" rx="20" ry="20" fill="rgba(15, 15, 25, 0.6)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" filter="url(#cardShadow)"/>
+
+    <rect x="24" y="24" width="56" height="56" rx="12" ry="12" fill="url(#iconGradientBg)"/>
+
+    <!-- Tools/Wrench Icon -->
+    <g transform="translate(36, 36)" filter="url(#iconGlow)">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="none" stroke="#00bfff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="scale(1.3)"/>
+    </g>
+
+    <text x="24" y="110" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="#f5f5f5">74+ MCP Tools</text>
+
+    <text x="24" y="140" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#888888">
+      <tspan x="24" dy="0">Memory ops, team comms, code search,</tspan>
+      <tspan x="24" dy="22">auto-memorization, trace &amp; explore,</tspan>
+      <tspan x="24" dy="22">agent management, codebase tools.</tspan>
+      <tspan x="24" dy="22">All integrated. All working together.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 5: Session Extraction (History Icon) -->
+  <g transform="translate(420, 390)">
+    <rect width="360" height="240" rx="20" ry="20" fill="rgba(15, 15, 25, 0.6)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" filter="url(#cardShadow)"/>
+
+    <rect x="24" y="24" width="56" height="56" rx="12" ry="12" fill="url(#iconGradientBg)"/>
+
+    <!-- History/Clock Icon -->
+    <g transform="translate(36, 36)" filter="url(#iconGlow)">
+      <circle cx="16" cy="16" r="12" fill="none" stroke="#00bfff" stroke-width="2.5"/>
+      <path d="M16 8v8l4 4" fill="none" stroke="#00bfff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M4 16h2M26 16h2M16 4v2M16 26v2" stroke="#00bfff" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+    </g>
+
+    <text x="24" y="110" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="#f5f5f5">Session Extraction</text>
+
+    <text x="24" y="140" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#888888">
+      <tspan x="24" dy="0">Pulls your Claude conversations into</tspan>
+      <tspan x="24" dy="22">searchable memory. What you asked,</tspan>
+      <tspan x="24" dy="22">what got built, all of it. Never lose</tspan>
+      <tspan x="24" dy="22">that discussion again.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 6: File Watching (Eye Icon) -->
+  <g transform="translate(810, 390)">
+    <rect width="360" height="240" rx="20" ry="20" fill="rgba(15, 15, 25, 0.6)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" filter="url(#cardShadow)"/>
+
+    <rect x="24" y="24" width="56" height="56" rx="12" ry="12" fill="url(#iconGradientBg)"/>
+
+    <!-- Eye Icon -->
+    <g transform="translate(36, 40)" filter="url(#iconGlow)">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="#00bfff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" transform="scale(1.3)"/>
+      <circle cx="15.6" cy="15.6" r="4" fill="none" stroke="#00bfff" stroke-width="2.5"/>
+      <circle cx="15.6" cy="15.6" r="1.5" fill="#00bfff"/>
+    </g>
+
+    <text x="24" y="110" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="#f5f5f5">File Watching</text>
+
+    <text x="24" y="140" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#888888">
+      <tspan x="24" dy="0">Automatic codebase indexing. Make a</tspan>
+      <tspan x="24" dy="22">change, SpecMem knows. No manual</tspan>
+      <tspan x="24" dy="22">syncing, no stale data. Your memory</tspan>
+      <tspan x="24" dy="22">stays current with your code.</tspan>
+    </text>
+  </g>
+
+  <!-- Decorative elements - subtle grid dots -->
+  <g opacity="0.1">
+    <circle cx="15" cy="15" r="1" fill="#00bfff"/>
+    <circle cx="15" cy="665" r="1" fill="#00bfff"/>
+    <circle cx="1185" cy="15" r="1" fill="#00bfff"/>
+    <circle cx="1185" cy="665" r="1" fill="#00bfff"/>
+  </g>
+</svg>
