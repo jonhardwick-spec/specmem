@@ -1,6 +1,6 @@
 
 
-
+##Please read updated install instructions, the source code here is outdated compared to the npm package
 <details> 
 <summary><strong>Updated install instructions -- Read before all</strong></summary>
 Eg:
