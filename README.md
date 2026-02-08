@@ -5,7 +5,7 @@
 <summary><strong>Updated install instructions -- Read before all</strong></summary>
 Eg:
 <br/>
-** npm install -g specmem-hardwicksoftware
+** sudo npm install -g specmem-hardwicksoftware
 <br/>
 ** cd /$your-project-directory/
 <br/>
