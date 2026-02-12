@@ -102,7 +102,7 @@ If output contains "ready" (not "not ready") -> Report: "DB: CONNECTED (port 543
 Otherwise -> Report: "DB: NOT AVAILABLE"
 
 **Step 4 - Check File Watcher:**
-Call the MCP tool `mcp__specmem__check_sync` with parameters:
+Call the MCP tool `mcp__specmem__check_sync_status` with parameters:
 ```json
 {
   "detailed": false
@@ -249,7 +249,7 @@ Display the result to the user:
 
 Check file watcher status.
 
-Call the MCP tool `mcp__specmem__check_sync` with parameters:
+Call the MCP tool `mcp__specmem__check_sync_status` with parameters:
 ```json
 {
   "detailed": false
@@ -270,7 +270,7 @@ If watcher is not running, suggest starting it with `/specmem-service watch star
 
 Check if MCP memories are in sync with filesystem.
 
-Call the MCP tool `mcp__specmem__check_sync` with parameters:
+Call the MCP tool `mcp__specmem__check_sync_status` with parameters:
 ```json
 {
   "detailed": true

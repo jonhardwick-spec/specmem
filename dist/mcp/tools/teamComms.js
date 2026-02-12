@@ -33,6 +33,57 @@ import path from 'path';
 import { getProjectPathForInsert } from '../../services/ProjectContext.js';
 import { getFileCommsTransport } from '../../comms/fileCommsTransport.js';
 import { smartCompress } from '../../utils/tokenCompressor.js';
+import { createRequire } from 'module';
+import { homedir } from 'os';
+import { existsSync } from 'fs';
+import { join } from 'path';
+// Lazy-load verified token-compressor (same as humanReadableOutput.js)
+let _tcComms = null;
+let _tcCommsLoaded = false;
+function _loadTCComms() {
+    if (_tcCommsLoaded) return _tcComms;
+    _tcCommsLoaded = true;
+    try {
+        const tcPath = join(homedir(), '.claude', 'hooks', 'token-compressor.cjs');
+        if (existsSync(tcPath)) {
+            const _require = createRequire(import.meta.url);
+            delete _require.cache[tcPath];
+            const mergedPath = join(homedir(), '.claude', 'hooks', 'merged-codes.cjs');
+            if (_require.cache[mergedPath]) delete _require.cache[mergedPath];
+            _tcComms = _require(tcPath);
+        }
+    } catch(e) {}
+    setTimeout(() => { _tcCommsLoaded = false; }, 5 * 60 * 1000).unref();
+    return _tcComms;
+}
+function verifiedCompress(text) {
+    if (!text || text.length < 20) return text;
+    const tc = _loadTCComms();
+    if (!tc?.compress || !tc?.decompress) return smartCompress(text, { threshold: 0.6 }).result;
+    try {
+        const compressed = tc.compress(text);
+        const decompressed = tc.decompress(compressed);
+        const norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
+        if (norm(decompressed) === norm(text)) return compressed;
+        // Word-level fallback
+        const inWords = norm(text).split(' ');
+        const outWords = norm(decompressed).split(' ');
+        const badWords = new Set();
+        for (let i = 0; i < Math.max(inWords.length, outWords.length); i++) {
+            if (inWords[i] !== outWords[i] && inWords[i]) badWords.add(inWords[i]);
+        }
+        if (badWords.size > 0) {
+            const codes = tc.CODES || {};
+            const saved = {};
+            for (const w of badWords) { if (codes[w]) { saved[w] = codes[w]; delete codes[w]; } }
+            const recompressed = tc.compress(text);
+            for (const [w, c] of Object.entries(saved)) codes[w] = c;
+            const redecomp = tc.decompress(recompressed);
+            if (norm(redecomp) === norm(text)) return recompressed;
+        }
+        return text;
+    } catch(e) { return text; }
+}
 // yooo gotta import schema helpers for proper project isolation no cap
 import { getProjectSchema } from '../../db/projectNamespacing.js';
 import { stripNewlines } from '../../utils/compactXmlResponse.js';
@@ -485,13 +536,15 @@ Examples:
         const projectPath = getProjectPathForInsert();
         const projectHash = createHash('sha256').update(projectPath).digest('hex').slice(0, 12);
         const channelEnforcementDir = `/tmp/specmem-${projectHash}/agent-channels`;
-        // Try to find this agent's channel assignment
-        // The agent ID is extracted from process context or recent files
+        // Try to find this agent's channel assignment (cached for speed)
         try {
-            if (fs.existsSync(channelEnforcementDir)) {
+            const cacheKey = `${channelEnforcementDir}`;
+            const cached = SendTeamMessage._channelCache?.get(cacheKey);
+            if (cached && Date.now() - cached.ts < 30000) { // 30s cache
+                assignedChannel = cached.channel;
+                agentId = cached.agentId;
+            } else if (fs.existsSync(channelEnforcementDir)) {
                 const files = fs.readdirSync(channelEnforcementDir);
-                // Find the most recent assignment file (likely this agent)
-                // In practice, the agent-loading-hook injects the ID into the prompt
                 let latestFile = null;
                 let latestTime = 0;
                 for (const file of files) {
@@ -503,11 +556,13 @@ Examples:
                         }
                     }
                 }
-                if (latestFile && Date.now() - latestTime < 300000) { // Only use if <5 min old
+                if (latestFile && Date.now() - latestTime < 300000) {
                     const assignment = JSON.parse(fs.readFileSync(`${channelEnforcementDir}/${latestFile}`, 'utf8'));
                     assignedChannel = assignment.channel;
                     agentId = assignment.agentId;
                 }
+                if (!SendTeamMessage._channelCache) SendTeamMessage._channelCache = new Map();
+                SendTeamMessage._channelCache.set(cacheKey, { channel: assignedChannel, agentId, ts: Date.now() });
             }
         }
         catch (e) {
@@ -604,7 +659,7 @@ Examples:
                     JSON.stringify({ timestamp }),
                     projectPath
                 ]);
-                // Update channel last_activity
+                // Update channel last_activity (fast, sub-ms)
                 await client.query(`
           UPDATE team_channels SET last_activity = NOW() WHERE id = $1
         `, [channelId]);
@@ -670,7 +725,7 @@ Examples:
         return {
             content: [{
                     type: 'text',
-                    text: `[SENT] Message sent (id: ${messageId.slice(0, 8)}, type: ${type})`
+                    text: `sent: ${type} → ${channel}\n${message.slice(0, 120)}${message.length > 120 ? '...' : ''}`
                 }]
         };
     }
@@ -880,9 +935,9 @@ Returns messages sorted by newest first.`;
                 queryParams.push(limit);
                 const result = await client.query(query, queryParams);
                 messages = result.rows.map((row) => {
-                    // Apply Chinese token compression if enabled
+                    // Apply verified token compression if enabled
                     const content = compress && row.content && row.content.length > 30
-                        ? smartCompress(row.content, { threshold: 0.75 }).result
+                        ? verifiedCompress(row.content)
                         : row.content;
                     return {
                         id: row.id,
@@ -894,20 +949,27 @@ Returns messages sorted by newest first.`;
                         timestamp: row.timestamp.toISOString(),
                         mentions: row.mentions || [],
                         is_unread: row.is_unread,
-                        thread_id: row.thread_id || undefined
+                        thread_id: row.thread_id || undefined,
+                        channel_name: row.channel_name || 'main'
                     };
                 });
                 if (result.rows.length > 0) {
                     channelName = result.rows[0].channel_name;
                 }
-                // Mark messages as read
+                // Mark messages as read — fire-and-forget with own connection
                 if (messages.length > 0) {
                     const messageIds = messages.map(m => m.id);
-                    await client.query(`
-            UPDATE team_messages
-            SET read_by = array_append(read_by, $1)
-            WHERE id = ANY($2) AND NOT ($1 = ANY(read_by))
-          `, [memberId, messageIds]);
+                    (async () => {
+                        const c2 = await dbPool.connect();
+                        try {
+                            await setClientSearchPath(c2);
+                            await c2.query(`
+                UPDATE team_messages
+                SET read_by = array_append(read_by, $1)
+                WHERE id = ANY($2) AND NOT ($1 = ANY(read_by))
+              `, [memberId, messageIds]);
+                        } finally { c2.release(); }
+                    })().catch(() => {});
                 }
             }
             finally {
@@ -959,9 +1021,9 @@ Returns messages sorted by newest first.`;
             }
             memMessages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
             messages = memMessages.slice(0, limit).map(msg => {
-                // Apply Chinese token compression if enabled
+                // Apply verified token compression if enabled
                 const content = compress && msg.content && msg.content.length > 30
-                    ? smartCompress(msg.content, { threshold: 0.75 }).result
+                    ? verifiedCompress(msg.content)
                     : msg.content;
                 return {
                     id: msg.id,
@@ -973,7 +1035,8 @@ Returns messages sorted by newest first.`;
                     timestamp: msg.timestamp,
                     mentions: msg.mentions,
                     is_unread: !msg.read_by.includes(memberId),
-                    thread_id: msg.thread_id
+                    thread_id: msg.thread_id,
+                    channel_name: msg.channel_id || 'main'
                 };
             });
             // Mark as read
@@ -992,7 +1055,7 @@ Returns messages sorted by newest first.`;
             since,
             storage: isDBAvailable() ? 'postgresql' : 'memory'
         });
-        // Human-readable format like find_memory/Read tool
+        // Human-readable format — grouped by channel, sorted, compressed
         const typeEmoji = {
             status: '🔄',
             question: '❓',
@@ -1001,6 +1064,7 @@ Returns messages sorted by newest first.`;
             help_request: '🆘',
             help_response: '💡'
         };
+        const priorityTag = { urgent: '‼️', high: '❗', normal: '', low: '' };
         const formatTimeAgo = (date) => {
             const now = Date.now();
             const then = new Date(date).getTime();
@@ -1012,30 +1076,45 @@ Returns messages sorted by newest first.`;
             if (diffHr < 24) return `${diffHr}h ago`;
             return `${Math.floor(diffHr / 24)}d ago`;
         };
-        const formatMessage = (m, idx) => {
+        const formatMessage = (m) => {
             const emoji = typeEmoji[m.type] || '💬';
-            const unread = m.is_unread ? ' ★ NEW' : '';
-            const time = formatTimeAgo(m.created_at);
-            const from = m.sender_name || 'unknown';
-            // Compress content with smartCompress for token savings
-            const rawContent = m.content.slice(0, 400);
-            const { result: compressedContent } = smartCompress(rawContent, { threshold: 0.6 });
-            const content = compressedContent.replace(/\n/g, '\n│   ');
-            const truncated = m.content.length > 400 ? '...' : '';
-            return `┌─${unread}────────────────────────────────────
-│ ${emoji} ${from}  •  ${m.type}  •  ${time}
-│   ${content}${truncated}
-└──────────────────────────────────────────`;
+            const unread = m.is_unread ? ' ★NEW' : '';
+            const pri = priorityTag[m.priority] || '';
+            const time = formatTimeAgo(m.timestamp);
+            const from = m.sender_name || m.sender || '?';
+            // Content already compressed by verified compressor above
+            const content = m.content.slice(0, 400).replace(/\n/g, ' ');
+            const truncated = m.content.length > 400 ? '…' : '';
+            return `  ${pri}${emoji}${unread} ${from} (${time}): ${content}${truncated}`;
         };
-        // Use [SPECMEM-*] tag format for consistency with other tools
-        const header = `[SPECMEM-TEAM-MESSAGES]
-📬 ${messages.length} messages • ${unreadCount} unread`;
-        const msgList = messages.map((m, i) => formatMessage(m, i)).join('\n');
-        const footer = `\n💬 send_team_message({message}) 回覆
-[/SPECMEM-TEAM-MESSAGES]`;
+        // Group messages by channel for sortable output
+        const byChannel = {};
+        for (const m of messages) {
+            const ch = m.channel_name || 'main';
+            if (!byChannel[ch]) byChannel[ch] = [];
+            byChannel[ch].push(m);
+        }
+        // Channel display order: main first, then swarms, then broadcasts
+        const channelOrder = ['main', 'swarm-1', 'swarm-2', 'swarm-3', 'swarm-4', 'swarm-5', 'broadcast'];
+        const sortedChannels = Object.keys(byChannel).sort((a, b) => {
+            const ai = channelOrder.indexOf(a) >= 0 ? channelOrder.indexOf(a) : 99;
+            const bi = channelOrder.indexOf(b) >= 0 ? channelOrder.indexOf(b) : 99;
+            return ai - bi;
+        });
+        let msgList = '';
+        for (const ch of sortedChannels) {
+            const msgs = byChannel[ch];
+            const chUnread = msgs.filter(m => m.is_unread).length;
+            const chLabel = chUnread > 0 ? `#${ch} (${chUnread} new)` : `#${ch}`;
+            msgList += `\n── ${chLabel} ──\n`;
+            msgList += msgs.map(m => formatMessage(m)).join('\n');
+            msgList += '\n';
+        }
+        const header = `[SPECMEM-TEAM-MESSAGES] ${messages.length} msgs • ${unreadCount} unread`;
+        const footer = `[/SPECMEM-TEAM-MESSAGES]`;
         const output = messages.length > 0
-            ? `${header}\n${msgList}${footer}`
-            : `${header}\n  無訊息\n${footer}`;
+            ? `${header}${msgList}${footer}`
+            : `${header}\n  No messages\n${footer}`;
         return { content: [{ type: 'text', text: output }] };
     }
 }
@@ -1494,7 +1573,7 @@ Use this to:
         `, [projectPath]);
                 recentActivity = activityResult.rows.map((row) => ({
                     who: row.sender_id.substring(7, 13), // Just ID suffix
-                    msg: row.content.substring(0, 40)
+                    msg: verifiedCompress(row.content.substring(0, 60))
                 }));
                 // Count open help requests (filtered by project)
                 const helpResult = await client.query(`

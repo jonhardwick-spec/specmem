@@ -57,7 +57,7 @@ export const SearchMemoryInput = z.object({
     // 'ask' = return mode options for user to choose
     // true = gallery mode (Mini COT analysis with COT reasoning)
     // false = basic mode (fast semantic + keyword search)
-    galleryMode: z.union([z.boolean(), z.literal('ask')]).default(false),
+    galleryMode: z.preprocess((val) => val === 'true' ? true : val === 'false' ? false : val, z.union([z.boolean(), z.literal('ask')])).default(false),
     // I5 FIX: Force include recent memories regardless of similarity
     // Useful for checking recent prompts/discussions that may not have embeddings yet
     includeRecent: z.number().int().min(0).max(50).default(0),

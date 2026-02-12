@@ -21,7 +21,7 @@
   <rect width="800" height="480" rx="16" ry="16" fill="url(#bgGrad)"/>
   <rect width="800" height="480" rx="16" ry="16" fill="none" stroke="url(#cyanPurple)" stroke-width="1" stroke-opacity="0.2"/>
 
-  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">What's New in v3.7</text>
+  <text x="400" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="url(#titleGrad)">What's New in v3.7.25</text>
 
   <!-- Card 1: New Languages -->
   <g transform="translate(17, 55)">
@@ -52,19 +52,22 @@
     </text>
   </g>
 
-  <!-- Card 2: Embedding Fix -->
+  <!-- Card 2: Dual Scoring + Token Compression -->
   <g transform="translate(408, 55)">
     <rect width="375" height="120" rx="10" fill="url(#cardGrad)" stroke="#00bfff" stroke-width="1"/>
     <rect width="375" height="3" rx="1.5" fill="#00bfff"/>
-    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#00bfff">Embedding Server Stability</text>
+    <text x="16" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#00bfff">Dual Scoring + Self-Healing Compression</text>
 
-    <rect x="16" y="42" width="60" height="18" rx="4" fill="#22c55e" fill-opacity="0.15"/>
-    <text x="46" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#22c55e">FIXED</text>
+    <rect x="16" y="42" width="80" height="18" rx="4" fill="#00bfff" fill-opacity="0.15"/>
+    <text x="56" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#00bfff">ALGO+COT</text>
+
+    <rect x="104" y="42" width="80" height="18" rx="4" fill="#22c55e" fill-opacity="0.15"/>
+    <text x="144" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#22c55e">CODEBOOK</text>
 
     <text font-family="system-ui, sans-serif" font-size="10.5" fill="#8b949e">
-      <tspan x="16" y="80">MCP proxy timeout handling got a full overhaul.</tspan>
-      <tspan x="16" dy="14">Stale socket connections, SIGTERM handling, and</tspan>
-      <tspan x="16" dy="14">reconnection logic all fixed. No more "embedding</tspan>
+      <tspan x="16" y="80">Dual ALGO+COT relevance scoring shows both scores.</tspan>
+      <tspan x="16" dy="14">Token compression with self-healing codebook learning</tspan>
+      <tspan x="16" dy="14">and neural translation via Argos Translate.</tspan>
     </text>
   </g>
 

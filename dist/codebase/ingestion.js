@@ -90,8 +90,8 @@ const DEFAULT_OPTIONS = {
     chunkSizeChars: 50_000, // 50K chars per chunk
     chunkOverlapChars: 1000, // 1K overlap
     generateEmbeddings: true,
-    embeddingBatchSize: 50,
-    parallelReads: 50,
+    embeddingBatchSize: 200,
+    parallelReads: 100,
     includeHiddenFiles: false,
     maxDepth: 50
 };

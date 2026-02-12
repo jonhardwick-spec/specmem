@@ -1,30 +1,23 @@
 #!/usr/bin/env node
 /**
- * SMART CONTEXT INJECTION HOOK v3
+ * SMART CONTEXT INJECTION HOOK v4
  * ================================
  *
- * When  searches (Grep/Glob), this hook:
- *   1. Extracts the search query
- *   2. Runs find_code_pointers (semantic code search)
- *   3. Gets FULL content + tracebacks (drill-down style)
- *   4. Chinese compresses the output
- *   5. Injects relevant code BEFORE 's search runs
+ * Read operations → find_memory (semantic memory search)
+ * Grep/Glob operations → find_code_pointers (semantic code search)
  *
- * For Read operations:
- *   - Searches memories related to the file being read
- *   - Returns relevant context about that file
- *
- * Flow:
- *    calls Search() → Hook intercepts → find_code_pointers
- *   → drill down (get full content) → compress → inject to 
+ * Uses pg Pool directly like MCP tools - no shell escaping issues
  */
 
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
 
-// Use shared specmem-paths for Pool and helpers
-const { getPool, expandCwd, getSchemaName, readStdinWithTimeout: sharedReadStdin } = require('./specmem-paths.cjs');
+// Use shared path resolution AND Pool
+const specmemPaths = require('./specmem-paths.cjs');
+const { expandCwd, getSpecmemPkg, getSpecmemHome, getProjectSocketDir, getPool, getSchemaName } = specmemPaths;
+
+// Get Pool from shared module (handles finding pg in specmem package)
 const Pool = getPool();
 
 // Exit early if pg not available
@@ -37,101 +30,48 @@ let compressHookOutput;
 try {
   compressHookOutput = require('./token-compressor.cjs').compressHookOutput;
 } catch (e) {
-  // Fallback if compressor not available
   compressHookOutput = (text) => text;
 }
 
-// Default SPECMEM_HOME to project-relative path
-const SPECMEM_HOME = expandCwd(process.env.SPECMEM_HOME) || path.join(process.cwd(), 'specmem');
-const SPECMEM_RUN_DIR = expandCwd(process.env.SPECMEM_RUN_DIR) || path.join(SPECMEM_HOME, 'sockets');
+// Dynamic path resolution
+const SPECMEM_HOME = getSpecmemHome();
+const SPECMEM_PKG = getSpecmemPkg();
+const SPECMEM_RUN_DIR = expandCwd(process.env.SPECMEM_RUN_DIR) || getProjectSocketDir(process.cwd());
 
-// Get current project path for filtering
-const PROJECT_PATH = expandCwd(process.env.SPECMEM_PROJECT_PATH) || process.cwd() || '/';
+let PROJECT_PATH = expandCwd(process.env.SPECMEM_PROJECT_PATH) || process.cwd() || '/';
 
-// Use imported getSchemaName from specmem-paths.cjs
-const SCHEMA_NAME = getSchemaName(PROJECT_PATH);
-
-// TASK #23 FIX: Use unified credential pattern with SPECMEM_PASSWORD fallback
-const UNIFIED_DEFAULT = 'specmem_westayunprofessional';
-const unifiedCred = expandCwd(process.env.SPECMEM_PASSWORD) || UNIFIED_DEFAULT;
+// Load .env from SPECMEM_PKG
+function loadEnv() {
+  const envFile = path.join(SPECMEM_PKG, 'specmem.env');
+  if (fs.existsSync(envFile)) {
+    const content = fs.readFileSync(envFile, 'utf8');
+    content.split('\n').forEach(line => {
+      const match = line.match(/^([^#=]+)=(.*)$/);
+      if (match && !process.env[match[1].trim()]) {
+        process.env[match[1].trim()] = match[2].trim();
+      }
+    });
+  }
+}
+loadEnv();
 
 const CONFIG = {
-  // How many results to return (default 5 for good coverage)
   searchLimit: parseInt(process.env.SPECMEM_SEARCH_LIMIT || '5'),
-  // Similarity threshold (0.15 for local embeddings which score lower)
-  threshold: parseFloat(process.env.SPECMEM_THRESHOLD || '0.15'),
-  // Zoom level 0-100: 0=signature only, 50=balanced, 100=full context
-  // Maps to content length: 0→100 chars, 50→500 chars, 100→2000 chars
-  zoom: parseInt(process.env.SPECMEM_ZOOM || '50'),
-  // Project filtering
+  threshold: parseFloat(process.env.SPECMEM_THRESHOLD || '0.40'),
+  maxContentLength: parseInt(process.env.SPECMEM_MAX_CONTENT || '300'),
   projectFilterEnabled: process.env.SPECMEM_PROJECT_FILTER !== 'false',
-  // Embedding socket
   embeddingSocket: expandCwd(process.env.SPECMEM_EMBEDDING_SOCKET) || path.join(SPECMEM_RUN_DIR, 'embeddings.sock'),
-  // Database connection - unified credential pattern
-  dbHost: expandCwd(process.env.SPECMEM_DB_HOST) || 'localhost',
-  dbPort: parseInt(expandCwd(process.env.SPECMEM_DB_PORT) || '5432'),
-  dbName: expandCwd(process.env.SPECMEM_DB_NAME) || unifiedCred,
-  dbUser: expandCwd(process.env.SPECMEM_DB_USER) || unifiedCred,
-  dbPassword: expandCwd(process.env.SPECMEM_DB_PASSWORD) || unifiedCred
+  // TASK #23 FIX: Use unified credential pattern with SPECMEM_PASSWORD fallback
+  dbHost: process.env.SPECMEM_DB_HOST || 'localhost',
+  dbPort: parseInt(process.env.SPECMEM_DB_PORT || '5432'),
+  dbName: process.env.SPECMEM_DB_NAME || process.env.SPECMEM_PASSWORD || 'specmem_westayunprofessional',
+  dbUser: process.env.SPECMEM_DB_USER || process.env.SPECMEM_PASSWORD || 'specmem_westayunprofessional',
+  dbPassword: process.env.SPECMEM_DB_PASSWORD || process.env.SPECMEM_PASSWORD || 'specmem_westayunprofessional'
 };
 
-// Cooldown to avoid spamming same queries
-const recentQueries = new Map();
-const COOLDOWN_MS = 5000;
-
-function shouldSkipQuery(query) {
-  const now = Date.now();
-  const lastTime = recentQueries.get(query);
-  if (lastTime && now - lastTime < COOLDOWN_MS) {
-    return true;
-  }
-  recentQueries.set(query, now);
-  // Cleanup old entries
-  for (const [q, t] of recentQueries) {
-    if (now - t > COOLDOWN_MS * 10) recentQueries.delete(q);
-  }
-  return false;
-}
-
-/**
- * Convert zoom level (0-100) to content length
- * zoom 0   → 100 chars (signature only - just function name and params)
- * zoom 50  → 500 chars (balanced - function body preview)
- * zoom 100 → 2000 chars (full context - entire function)
- */
-function zoomToContentLength(zoom) {
-  const minLength = 100;   // zoom 0
-  const maxLength = 2000;  // zoom 100
-  const clampedZoom = Math.max(0, Math.min(100, zoom));
-  return Math.round(minLength + (maxLength - minLength) * (clampedZoom / 100));
-}
-
-/**
- * Convert zoom level to max lines to show
- * zoom 0   → 3 lines (signature)
- * zoom 50  → 15 lines (preview)
- * zoom 100 → 50 lines (full)
- */
-function zoomToMaxLines(zoom) {
-  const minLines = 3;
-  const maxLines = 50;
-  const clampedZoom = Math.max(0, Math.min(100, zoom));
-  return Math.round(minLines + (maxLines - minLines) * (clampedZoom / 100));
-}
-
-/**
- * Non-blocking embedding service check
- * FIXED: No more blocking execSync - just check socket exists
- * If socket missing, hook silently fails - embedding server is started elsewhere
- */
-function isEmbeddingServiceReady() {
-  // Simple existence check - no blocking!
-  return fs.existsSync(CONFIG.embeddingSocket);
-}
-
-// Lazy-initialized pg Pool for async database access
+// Lazy-initialized pg Pool
 let dbPool = null;
-function createDbPool() {
+function getDbPool() {
   if (!dbPool) {
     dbPool = new Pool({
       host: CONFIG.dbHost,
@@ -139,162 +79,134 @@ function createDbPool() {
       database: CONFIG.dbName,
       user: CONFIG.dbUser,
       password: CONFIG.dbPassword,
-      max: 2,  // Small pool - hooks are short-lived
-      idleTimeoutMillis: 3000,
-      connectionTimeoutMillis: 3000
+      max: 3,
+      idleTimeoutMillis: 5000,
+      connectionTimeoutMillis: 5000
     });
   }
   return dbPool;
 }
 
-// Cache for DB embedding dimension (auto-detected)
-let cachedDbDimension = null;
-
 /**
- * ASYNC: Get embedding dimension from database
- * FIXED: Uses pg Pool instead of blocking execSync!
+ * Set search_path for project schema isolation
+ * Must be called before any queries to ensure we hit the right schema
  */
-async function getDbEmbeddingDimensionAsync() {
-  if (cachedDbDimension !== null) return cachedDbDimension;
-
-  try {
-    const pool = createDbPool();
-    // Set search path for project schema
-    await pool.query('SET search_path TO ' + SCHEMA_NAME + ', public');
-
-    const result = await pool.query(
-      "SELECT atttypmod FROM pg_attribute WHERE attname = 'embedding' AND attrelid = 'code_chunks'::regclass"
-    );
-    cachedDbDimension = result.rows[0]?.atttypmod || 1536;
-  } catch (e) {
-    cachedDbDimension = 1536; // Default fallback
-  }
-  return cachedDbDimension;
+async function setProjectSearchPath(client) {
+  const projectPath = PROJECT_PATH || process.env.SPECMEM_PROJECT_PATH || process.cwd();
+  const dirName = path.basename(projectPath).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  const schemaName = 'specmem_' + dirName;
+  await client.query('SET search_path TO ' + schemaName + ', public');
 }
 
 /**
- * Project embedding to target dimension
- * - If source < target: pad with zeros
- * - If source > target: truncate
- * - If equal: return as-is
+ * Scale embedding to target dimension (like DimensionService.scaleEmbedding)
+ * Pads with zeros or truncates to match target dimension
  */
-function projectEmbedding(embedding, targetDim) {
-  const sourceDim = embedding.length;
-  if (sourceDim === targetDim) return embedding;
+function scaleEmbedding(embedding, targetDim) {
+  if (embedding.length === targetDim) return embedding;
 
-  if (sourceDim < targetDim) {
-    // Pad with zeros
-    const padded = [...embedding];
-    while (padded.length < targetDim) padded.push(0);
-    return padded;
-  } else {
-    // Truncate
-    return embedding.slice(0, targetDim);
+  const result = new Array(targetDim).fill(0);
+  const copyLen = Math.min(embedding.length, targetDim);
+  for (let i = 0; i < copyLen; i++) {
+    result[i] = embedding[i];
   }
+
+  // Normalize
+  const magnitude = Math.sqrt(result.reduce((sum, val) => sum + val * val, 0));
+  if (magnitude > 0) {
+    for (let i = 0; i < targetDim; i++) {
+      result[i] = result[i] / magnitude;
+    }
+  }
+
+  return result;
 }
 
-async function generateEmbedding(text) {
-  // Quick check - don't wait for embedding service
-  if (!isEmbeddingServiceReady()) {
-    throw new Error('Embedding service not ready');
-  }
-
+/**
+ * Generate embedding via socket and scale to 1536 dims for memory search
+ */
+async function generateEmbedding(text, targetDim = 1536) {
+  // Truncate text to avoid sending massive blobs to embedding server
+  const truncated = text.length > 512 ? text.slice(0, 512) : text;
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
     let buffer = '';
-    socket.setTimeout(15000);  // 15s timeout - allows time for embedding cold-start
+    socket.setTimeout(10000);
 
     socket.connect(CONFIG.embeddingSocket, () => {
-      socket.write(JSON.stringify({ type: 'embed', text }) + '\n');
+      socket.write(JSON.stringify({ type: 'embed', text: truncated }) + '\n');
     });
 
-    socket.on('data', async (data) => {
+    socket.on('data', (data) => {
       buffer += data.toString();
-      const idx = buffer.indexOf('\n');
-      if (idx !== -1) {
+      const lines = buffer.split('\n').filter(l => l.trim());
+      for (const line of lines) {
         try {
-          const resp = JSON.parse(buffer.slice(0, idx));
-          socket.end();
+          const resp = JSON.parse(line);
           if (resp.embedding) {
-            // Auto-project to match DB dimension - ASYNC now!
-            const dbDim = await getDbEmbeddingDimensionAsync();
-            const projected = projectEmbedding(resp.embedding, dbDim);
-            resolve(projected);
-          } else {
-            reject(new Error('No embedding'));
+            socket.end();
+            // Scale to target dimension
+            const scaled = scaleEmbedding(resp.embedding, targetDim);
+            resolve(scaled);
+            return;
           }
-        } catch (e) { reject(e); }
+        } catch (e) {}
       }
     });
 
-    socket.on('error', reject);
-    socket.on('timeout', () => reject(new Error('timeout')));
+    socket.on('error', (e) => reject(e));
+    socket.on('timeout', () => {
+      socket.end();
+      reject(new Error('timeout'));
+    });
   });
 }
 
 /**
- * Build project filter clause for SQL queries
+ * find_memory - Search memories for Read operations
  */
-function buildProjectFilter(columnPath) {
-  if (!CONFIG.projectFilterEnabled || !PROJECT_PATH || PROJECT_PATH === '/') {
-    return '';
-  }
-  const escapedPath = PROJECT_PATH.replace(/'/g, "''");
-  return ` AND ${columnPath} = '${escapedPath}'`;
-}
-
-/**
- * ASYNC: Search code chunks with FULL content (drill-down style)
- * FIXED: Uses pg Pool instead of blocking execSync!
- *
- * Returns semantic matches with:
- *   - Full code content
- *   - Relevancy percentage
- *   - File path and line numbers
- *   - Chunk type (code, etc)
- */
-async function searchCodePointersWithDrilldown(query) {
+async function findMemory(query) {
   try {
-    const embedding = await generateEmbedding(query);
+    const embedding = await generateEmbedding(query, 384); // 384 dims for this DB
     const embStr = `[${embedding.join(',')}]`;
+    const pool = getDbPool();
 
-    const pool = createDbPool();
+    // Set search_path for project schema isolation
+    await setProjectSearchPath(pool);
 
-    // Set search path for project schema
-    await pool.query('SET search_path TO ' + SCHEMA_NAME + ', public');
+    let projectFilter = '';
+    const params = [embStr, CONFIG.threshold, CONFIG.searchLimit];
 
-    // Parameterized query - much safer and faster than string concat!
-    const result = await pool.query(
-      `SELECT
-        cc.file_path,
-        cc.chunk_type,
-        cc.language,
-        REPLACE(cc.content, E'\\n', '\\u2502') as content,
-        cc.start_line,
-        cc.end_line,
-        ROUND((1 - (cc.embedding <=> $1::vector))::numeric * 100, 1) as relevancy
-      FROM code_chunks cc
-      WHERE cc.embedding IS NOT NULL
-        AND 1 - (cc.embedding <=> $1::vector) > $2
+    if (CONFIG.projectFilterEnabled && PROJECT_PATH && PROJECT_PATH !== '/') {
+      projectFilter = ` AND (metadata->>'project_path' = $4 OR project_path = $4)`;
+      params.push(PROJECT_PATH);
+    }
+
+    const sql = `
+      SELECT
+        id,
+        LEFT(content, ${CONFIG.maxContentLength}) as content,
+        memory_type,
+        metadata->>'role' as role,
+        ROUND((1 - (embedding <=> $1::vector))::numeric * 100, 1) as relevancy
+      FROM memories
+      WHERE 1 - (embedding <=> $1::vector) > $2
+        AND embedding IS NOT NULL
+        ${projectFilter}
       ORDER BY relevancy DESC
-      LIMIT $3`,
-      [embStr, CONFIG.threshold, CONFIG.searchLimit]
-    );
+      LIMIT $3
+    `;
 
-    return result.rows.map(row => {
-      // Extract name from first meaningful line of content
-      const firstLine = (row.content || '').split('\n').find(l => l.trim() && !l.trim().startsWith('//') && !l.trim().startsWith('#')) || '';
-      const name = firstLine.trim().slice(0, 60) + (firstLine.length > 60 ? '...' : '');
-      return {
-        file_path: row.file_path,
-        def_type: row.chunk_type || 'code',
-        name: name || `${row.language || 'code'} chunk`,
-        content: row.content?.slice(0, zoomToContentLength(CONFIG.zoom)),
-        start_line: parseInt(row.start_line || 0),
-        end_line: parseInt(row.end_line || 0),
-        relevancy: parseFloat(row.relevancy || 0),
-        called_by: '' // Not available in code_chunks
-      };
+    const result = await pool.query(sql, params);
+    const rows = result.rows.filter(r => r.content && r.content.trim().length > 5);
+
+    // Deduplicate by content (first 100 chars) - prevents duplicate memories
+    const seen = new Set();
+    return rows.filter(r => {
+      const key = (r.content || '').trim().slice(0, 100);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
   } catch (e) {
     return [];
@@ -302,115 +214,186 @@ async function searchCodePointersWithDrilldown(query) {
 }
 
 /**
- * ASYNC: Search memories (for Read operations)
- * FIXED: Uses pg Pool instead of blocking execSync!
+ * Find file modification memories via codebase_pointers
+ * Returns conversation context from when the file was modified
  */
-async function searchMemories(query) {
+async function findFileModificationContext(filePath) {
   try {
-    const embedding = await generateEmbedding(query);
-    const embStr = `[${embedding.join(',')}]`;
+    const pool = getDbPool();
 
-    const pool = createDbPool();
+    // Set search_path for project schema isolation
+    await setProjectSearchPath(pool);
 
-    // Set search path for project schema
-    await pool.query('SET search_path TO ' + SCHEMA_NAME + ', public');
-
-    // Build query with optional project filter
-    let sql = `
+    // Query codebase_pointers joined with memories to get modification context
+    const sql = `
       SELECT
-        id::text,
-        content,
-        memory_type,
-        ROUND((1 - (embedding <=> $1::vector))::numeric * 100, 1) as relevancy
-      FROM memories
-      WHERE 1 - (embedding <=> $1::vector) > $2
+        m.id,
+        LEFT(m.content, ${CONFIG.maxContentLength}) as content,
+        m.metadata->>'role' as role,
+        m.created_at,
+        cp.pointer_type
+      FROM codebase_pointers cp
+      JOIN memories m ON cp.memory_id = m.id
+      WHERE cp.file_path = $1
+        OR cp.file_path LIKE '%' || $2 || '%'
+      ORDER BY m.created_at DESC
+      LIMIT 3
     `;
-    let params = [embStr, CONFIG.threshold, CONFIG.searchLimit];
 
-    if (CONFIG.projectFilterEnabled && PROJECT_PATH && PROJECT_PATH !== '/') {
-      sql += ` AND (metadata->>'project_path' = $4 OR metadata->>'project' = $4)`;
-      params.push(PROJECT_PATH);
-    }
+    // Use both absolute and relative path matching
+    const basename = path.basename(filePath);
+    const result = await pool.query(sql, [filePath, basename]);
 
-    sql += ` ORDER BY relevancy DESC LIMIT $3`;
-
-    const result = await pool.query(sql, params);
-
-    return result.rows
-      .filter(row => row.content && row.content !== 'undefined' && row.content.trim().length >= 5)
-      .map(row => ({
-        id: row.id,
-        content: row.content.slice(0, zoomToContentLength(CONFIG.zoom)),
-        type: row.memory_type,
-        relevancy: parseFloat(row.relevancy || 0)
-      }));
+    return result.rows.filter(r => r.content && r.content.trim().length > 5);
   } catch (e) {
     return [];
   }
 }
 
 /**
- * Format code pointers output - HUMAN READABLE bracket notation
- * Uses pipe separators for flat output that doesn't break 's formatting
+ * Extract file path from query if present
+ */
+function extractFilePath(query) {
+  const patterns = [
+    /(?:^|\s)([\/~][\w\/.-]+\.\w+)(?:\s|$|:)/,
+    /(?:^|\s)([\w-]+\/[\w\/.-]+\.\w+)(?:\s|$|:)/,
+    /(?:^|\s)(src\/[\w\/.-]+)(?:\s|$|:)/,
+    /(?:^|\s)(lib\/[\w\/.-]+)(?:\s|$|:)/,
+  ];
+  for (const pattern of patterns) {
+    const match = query.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+/**
+ * find_code_pointers - Search code for Grep/Glob operations
+ * NOTE: code_definitions has relative file paths, so no project filtering
+ * ENHANCED: If query contains file path, search that file specifically with 35% threshold
+ */
+async function findCodePointers(query) {
+  try {
+    const embedding = await generateEmbedding(query, 384); // 384 dims for this DB
+    const embStr = `[${embedding.join(',')}]`;
+    const pool = getDbPool();
+
+    // Set search_path for project schema isolation
+    await setProjectSearchPath(pool);
+
+    // Check if query contains a file path - if so, use lower threshold and file filter
+    const filePath = extractFilePath(query);
+    const threshold = filePath ? 0.40 : CONFIG.threshold;
+    const params = [embStr, threshold, CONFIG.searchLimit];
+
+    // Build file path filter if specified
+    const fileFilter = filePath ? `AND file_path ILIKE '%${filePath.replace(/'/g, "''")}%'` : '';
+
+    // NOTE: code_definitions stores relative paths so we don't filter by project path
+    const sql = `
+      SELECT
+        name,
+        definition_type,
+        file_path,
+        start_line,
+        end_line,
+        LEFT(signature, ${CONFIG.maxContentLength}) as signature,
+        ROUND((1 - (embedding <=> $1::vector))::numeric * 100, 1) as relevancy
+      FROM code_definitions
+      WHERE 1 - (embedding <=> $1::vector) > $2
+        AND embedding IS NOT NULL
+        ${fileFilter}
+      ORDER BY relevancy DESC
+      LIMIT $3
+    `;
+
+    const result = await pool.query(sql, params);
+    const rows = result.rows.filter(r => r.name && r.file_path);
+
+    // Deduplicate by name+file_path - prevents duplicate code entries
+    const seen = new Set();
+    return rows.filter(r => {
+      const key = r.name + ':' + r.file_path + ':' + r.start_line;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Format memories output - clean lines, one per result
+ * Now includes role labels for user/assistant distinction
+ */
+function formatMemories(results, query) {
+  if (!results.length) return '';
+
+  const lines = ['[SM-找] ' + results.length + '記憶:'];
+
+  results.forEach((r, i) => {
+    const rawContent = (r.content || '').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // FIXED: Parse [USER] and [CLAUDE] parts for 70 chars each
+    const userMatch = rawContent.match(/\[USER\]\s*([^\[]*)/i);
+    const claudeMatch = rawContent.match(/\[CLAUDE\]\s*([^\[]*)/i);
+
+    let formattedContent;
+    if (userMatch || claudeMatch) {
+      // Found structured content - show 70 chars each
+      const userPart = userMatch ? userMatch[1].trim().slice(0, 70) : '';
+      const claudePart = claudeMatch ? claudeMatch[1].trim().slice(0, 70) : '';
+      formattedContent = '';
+      if (userPart) formattedContent += '[戶②] ' + userPart + '...';
+      if (claudePart) formattedContent += (userPart ? ' ' : '') + '[佐] ' + claudePart + '...';
+    } else {
+      // No structure - use role tag and show 140 chars total
+      const roleTag = r.role === 'user' ? '[戶②]' :
+                      r.role === 'assistant' ? '[佐]' : '';
+      formattedContent = roleTag + ' ' + rawContent.slice(0, 140) + '...';
+    }
+
+    lines.push((i+1) + '.[' + r.relevancy + '%] ' + formattedContent);
+  });
+
+  lines.push('drill_down(N) 獲取完整');
+  return lines.join('\n');
+}
+
+/**
+ * Format file modification context - shows conversation around file changes
+ */
+function formatFileModificationContext(results, filePath) {
+  if (!results.length) return '';
+
+  const lines = ['[SM-檔改] ' + path.basename(filePath) + ' 修改記錄:'];
+
+  results.forEach((r, i) => {
+    const content = (r.content || '').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
+    const roleTag = r.role === 'user' ? '[戶②]' :
+                    r.role === 'assistant' ? '[佐]' :
+                    r.role === 'system' ? '[系]' : '';
+    lines.push((i+1) + '. ' + roleTag + ' ' + content);
+  });
+
+  return lines.join('\n');
+}
+
+/**
+ * Format code pointers output - clean lines, one per result
  */
 function formatCodePointers(results, query) {
   if (!results.length) return '';
 
-  const parts = [];
-  parts.push(`[SM-CODE] ${results.length} results | zoom: ${CONFIG.zoom}%`);
+  const lines = ['[SM-碼] ' + results.length + '定義:'];
 
   results.forEach((r, i) => {
-    const maxLines = zoomToMaxLines(CONFIG.zoom);
-    let codePreview = '';
-    if (r.content) {
-      // Flatten code to single line with vertical bars as line separators
-      const codeLines = r.content.split('\n').slice(0, maxLines);
-      codePreview = codeLines.map(l => l.trim()).filter(l => l).join(' | ');
-      if (codePreview.length > 200) codePreview = codePreview.slice(0, 200) + '...';
-    }
-
-    const calledBy = r.called_by ? ` <- ${r.called_by}` : '';
-    parts.push(`[${i+1}] ${r.relevancy}% ${r.name} (${r.def_type}) | ${r.file_path}:${r.start_line}${calledBy} | ${codePreview}`);
+    lines.push((i+1) + '.[' + r.relevancy + '%] ' + r.name + '(' + r.definition_type + ') ' + r.file_path + ':' + r.start_line);
   });
 
-  parts.push('[/SM-CODE]');
-  return parts.join(' | ');
-}
-
-/**
- * Format memories output - HUMAN READABLE bracket notation
- * Uses pipe separators for flat output that doesn't break 's formatting
- */
-function formatMemories(results, query) {
-  const validResults = results.filter(r => r.content && r.content.trim() && r.content !== 'undefined');
-  if (!validResults.length) return '';
-
-  const parts = [];
-  parts.push(`[SM-MEM] ${validResults.length} memories`);
-
-  validResults.forEach((r, i) => {
-    const isUser = r.content.startsWith('[USER]') || r.content.includes('用戶]');
-    const is = r.content.startsWith('[CLAUDE]') || r.content.includes('助手]');
-    const roleTag = isUser ? '[U]' : is ? '[C]' : '';
-
-    let cleanContent = r.content
-      .replace(/^\[USER\]\s*/i, '')
-      .replace(/^\[CLAUDE\]\s*/i, '')
-      .replace(/^用戶\]\s*/i, '')
-      .replace(/^助手\]\s*/i, '')
-      .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    if (cleanContent && cleanContent.length > 5) {
-      // Truncate long content
-      if (cleanContent.length > 150) cleanContent = cleanContent.slice(0, 150) + '...';
-      parts.push(`[${i+1}] ${r.relevancy}% ${roleTag} ${cleanContent}`);
-    }
-  });
-
-  parts.push('[/SM-MEM] drill_down(N) for full');
-  return parts.join(' | ');
+  lines.push('drill_down(N) 獲取代碼');
+  return lines.join('\n');
 }
 
 /**
@@ -420,7 +403,6 @@ function extractQuery(toolName, toolInput, userPrompt) {
   let query = '';
 
   if (toolName === 'Glob') {
-    // Extract meaningful parts from glob pattern
     query = (toolInput.pattern || '')
       .replace(/\*\*/g, ' ')
       .replace(/\*/g, ' ')
@@ -428,37 +410,35 @@ function extractQuery(toolName, toolInput, userPrompt) {
       .replace(/\//g, ' ')
       .trim();
   } else if (toolName === 'Grep') {
-    // Use grep pattern directly - this is what  is searching for
     query = toolInput.pattern || '';
   } else if (toolName === 'Read') {
-    // Use file path and extract meaningful names
     const filePath = toolInput.file_path || '';
     const basename = path.basename(filePath, path.extname(filePath));
     query = basename.replace(/[-_]/g, ' ');
   }
 
-  // Add user prompt context for better semantic matching
-  if (userPrompt && userPrompt.length > 10 && userPrompt.length < 200) {
-    query = `${userPrompt.slice(0, 100)} ${query}`.trim();
-  }
+  // NOTE: We intentionally do NOT append user prompt text here.
+  // The query should be ONLY the tool call metadata (grep pattern, file basename).
+  // We're searching for context to inject, not recording content.
 
   return query;
 }
 
 /**
- * Read stdin with timeout to prevent indefinite hangs
- * CRIT-07 FIX: All hooks must use this instead of raw for-await
+ * Read stdin with timeout
  */
 function readStdinWithTimeout(timeoutMs = 5000) {
   return new Promise((resolve) => {
     let input = '';
     const timer = setTimeout(() => {
-      process.stdin.destroy();
+      process.stdin.removeAllListeners();
       resolve(input);
     }, timeoutMs);
 
     process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => { input += chunk; });
+    process.stdin.on('data', (chunk) => {
+      input += chunk;
+    });
     process.stdin.on('end', () => {
       clearTimeout(timer);
       resolve(input);
@@ -470,17 +450,36 @@ function readStdinWithTimeout(timeoutMs = 5000) {
   });
 }
 
-async function main() {
-  // Exit early if pg module couldn't be loaded
-  if (!Pool) {
-    process.exit(0);
-  }
+// Debounce: skip if another hook ran within DEBOUNCE_MS
+const DEBOUNCE_MS = 8000; // 8 seconds between searches
+const DEBOUNCE_FILE = path.join(SPECMEM_RUN_DIR, '.smart-context-debounce');
 
-  // CRIT-07 FIX: Read with timeout instead of indefinite for-await
+function shouldDebounce() {
+  try {
+    if (fs.existsSync(DEBOUNCE_FILE)) {
+      const lastRun = parseInt(fs.readFileSync(DEBOUNCE_FILE, 'utf8').trim(), 10);
+      if (Date.now() - lastRun < DEBOUNCE_MS) return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function markRun() {
+  try { fs.writeFileSync(DEBOUNCE_FILE, String(Date.now())); } catch (e) {}
+}
+
+async function main() {
   let input = await readStdinWithTimeout(5000);
 
   let context;
   try { context = JSON.parse(input); } catch { process.exit(0); }
+
+  // Update paths dynamically based on actual project cwd
+  if (context.cwd) {
+    PROJECT_PATH = context.cwd;
+    const projectSocketDir = path.join(context.cwd, 'specmem', 'sockets');
+    CONFIG.embeddingSocket = path.join(projectSocketDir, 'embeddings.sock');
+  }
 
   const toolName = context.tool_name || context.toolName || '';
   const toolInput = context.tool_input || context.input || {};
@@ -491,46 +490,75 @@ async function main() {
     process.exit(0);
   }
 
+  // Debounce: don't slam sockets on rapid tool calls
+  if (shouldDebounce()) {
+    process.exit(0);
+  }
+
+  // Check embedding socket exists before attempting connection
+  if (!fs.existsSync(CONFIG.embeddingSocket)) {
+    process.exit(0);
+  }
+
   const query = extractQuery(toolName, toolInput, userPrompt);
 
   if (!query || query.length < 3) {
     process.exit(0);
   }
 
-  if (shouldSkipQuery(query)) {
-    process.exit(0);
-  }
+  // Mark this run for debounce
+  markRun();
 
   try {
     let output = '';
 
     if (toolName === 'Glob' || toolName === 'Grep') {
-      // Code search with drill-down for Glob/Grep
-      const results = await searchCodePointersWithDrilldown(query);
+      // CODE SEARCH: find_code_pointers
+      const results = await findCodePointers(query);
       if (results.length > 0) {
         output = formatCodePointers(results, query);
       }
     } else if (toolName === 'Read') {
-      // Memory search for Read
-      const results = await searchMemories(query);
-      if (results.length > 0) {
-        output = formatMemories(results, query);
+      // Get file path for modification context lookup
+      const filePath = toolInput.file_path || '';
+      const outputParts = [];
+
+      // 1. MEMORY SEARCH: find_memory (semantic search for related memories)
+      const memResults = await findMemory(query);
+      if (memResults.length > 0) {
+        outputParts.push(formatMemories(memResults, query));
+      }
+
+      // 2. FILE MODIFICATION CONTEXT: find memories linked to this file via codebase_pointers
+      // This shows the conversation context from when the file was last modified
+      if (filePath) {
+        const modResults = await findFileModificationContext(filePath);
+        if (modResults.length > 0) {
+          outputParts.push(formatFileModificationContext(modResults, filePath));
+        }
+      }
+
+      if (outputParts.length > 0) {
+        output = outputParts.join('\n---\n');
       }
     }
 
     // Chinese compress the output for token efficiency
+    // Keep newlines for readability
     if (output) {
       const compressed = compressHookOutput(output, {
         includeWarning: true,
-        preserveStructure: true
+        flattenOutput: false
       });
-      console.log(compressed);
+      // Add prefix reminding  to read the compressed content
+      const prefixedOutput = `Read this for context (you understand Traditional Chinese compression with 99%+ accuracy) ⚠️壓縮:繁中→EN\n${compressed}`;
+      console.log(prefixedOutput);
     }
   } catch (e) {
-    // Silent fail - don't break 's search
+    // Silent fail
   }
 
-  // Clean up pool before exit
+  // Close pool
   if (dbPool) {
     await dbPool.end().catch(() => {});
   }
@@ -538,10 +566,6 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(async () => {
-  // Clean up pool on error too
-  if (dbPool) {
-    await dbPool.end().catch(() => {});
-  }
+main().catch(() => {
   process.exit(0);
 });

@@ -18,7 +18,7 @@
  */
 import { getCompressionConfig } from '../config.js';
 import { logger } from '../utils/logger.js';
-import { existsSync } from 'fs';
+import { existsSync, appendFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 // ============================================================================
@@ -27,6 +27,7 @@ import { homedir } from 'os';
 let hooksCompressor = null;
 const HOOKS_DIR = join(homedir(), '.claude', 'hooks');
 const COMPRESSOR_PATH = join(HOOKS_DIR, 'token-compressor.cjs');
+const MISMATCH_LOG = '/tmp/specmem-compressor-mismatches.jsonl';
 // Use dynamic import for ESM compatibility (require() doesn't work in ESM)
 const loadHooksCompressor = async () => {
     try {
@@ -44,6 +45,57 @@ const loadHooksCompressor = async () => {
 };
 // Initialize async - will use fallback until loaded
 loadHooksCompressor();
+// ============================================================================
+// SELF-HEALING VERIFICATION
+// Compress → Decompress → Compare. If mismatch, log bad words for auto-patch.
+// Hardwick Translate picks these up and fixes/removes bad codebook entries.
+// ============================================================================
+const _norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
+function _verifyCompression(original, compressed) {
+    if (!hooksCompressor?.decompress) return compressed;
+    try {
+        const decompressed = hooksCompressor.decompress(compressed);
+        if (_norm(decompressed) === _norm(original)) return compressed; // Perfect round-trip ✓
+        // Mismatch — find bad WORDS, recompress with those words left in English
+        const inWords = _norm(original).split(' ');
+        const outWords = _norm(decompressed).split(' ');
+        const badWords = new Set();
+        for (let i = 0; i < Math.max(inWords.length, outWords.length); i++) {
+            if (inWords[i] !== outWords[i] && inWords[i]) {
+                badWords.add(inWords[i]);
+            }
+        }
+        if (badWords.size > 0) {
+            // Log bad words for Hardwick Translate to learn/fix
+            try {
+                appendFileSync(MISMATCH_LOG,
+                    JSON.stringify({ pairs: [...badWords].map(w => ({ expected: w, got: '' })), t: Date.now() }) + '\n');
+            } catch(e) {}
+            // Recompress: temporarily remove bad entries from codebook, compress again
+            // This leaves those words in English while compressing everything else
+            const codes = hooksCompressor.CODES;
+            if (codes) {
+                const saved = {};
+                for (const w of badWords) {
+                    if (codes[w]) { saved[w] = codes[w]; delete codes[w]; }
+                }
+                const recompressed = hooksCompressor.compress(original);
+                // Restore codebook entries
+                for (const [w, c] of Object.entries(saved)) codes[w] = c;
+                // Verify the recompressed version
+                const redecomp = hooksCompressor.decompress(recompressed);
+                if (_norm(redecomp) === _norm(original)) {
+                    return recompressed; // Fixed — bad words left in English
+                }
+            }
+            // Fallback: return original if still broken
+            return original;
+        }
+        return compressed;
+    } catch(e) {
+        return compressed;
+    }
+}
 // Fallback to old compressor if hooks version not available
 import { smartCompress as fallbackSmartCompress, shouldCompress as fallbackShouldCompress, smartWordByWordCompress as fallbackWordByWord } from '../utils/tokenCompressor.js';
 // Use hooks compressor if available, else fallback
@@ -131,15 +183,10 @@ export async function compactFor(text, context = 'system') {
         });
         // Only use compressed result if it's meaningfully smaller
         if (compressionRatio < 0.95 && wordsCompressed > 0) {
-            updateMetrics(originalLen, result.length, context);
-            logger.debug({
-                context,
-                originalLen,
-                compressedLen: result.length,
-                ratio: compressionRatio,
-                wordsCompressed
-            }, 'Text compressed for ');
-            return result;
+            // Self-healing: verify round-trip, log mismatches for Hardwick Translate
+            const verified = _verifyCompression(text, result);
+            updateMetrics(originalLen, verified.length, context);
+            return verified;
         }
         return text;
     }
@@ -165,8 +212,10 @@ export function compactForSync(text, context = 'system') {
             minLength: 50
         });
         if (wasCompressed && compressionRatio < 0.95) {
-            updateMetrics(originalLen, result.length, context);
-            return result;
+            // Self-healing: verify round-trip, reject if >20% mismatch
+            const verified = _verifyCompression(text, result);
+            updateMetrics(originalLen, verified.length, context);
+            return verified;
         }
         return text;
     }

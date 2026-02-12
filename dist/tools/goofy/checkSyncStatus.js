@@ -70,9 +70,25 @@ export class CheckSyncStatus {
                     contentMismatch: driftReport.contentMismatch
                 };
             }
+            // Update statusbar sync score live
+            try {
+                await watcherManager.writeSyncScore(driftReport.syncScore);
+            } catch (e) { /* non-critical */ }
             logger.info({ inSync: driftReport.inSync, syncScore: driftReport.syncScore }, 'sync check complete');
             // Build human readable response
             const drifted = driftReport.missingFromMcp.length + driftReport.missingFromDisk.length + driftReport.contentMismatch.length;
+            let detailLines = '';
+            if (params.detailed && drifted > 0) {
+                if (driftReport.missingFromMcp.length > 0) {
+                    detailLines += '\n\nMissing from MCP:\n' + driftReport.missingFromMcp.map(f => '  + ' + f).join('\n');
+                }
+                if (driftReport.missingFromDisk.length > 0) {
+                    detailLines += '\n\nDeleted from disk:\n' + driftReport.missingFromDisk.map(f => '  - ' + f).join('\n');
+                }
+                if (driftReport.contentMismatch.length > 0) {
+                    detailLines += '\n\nModified (hash mismatch):\n' + driftReport.contentMismatch.map(f => '  ~ ' + f).join('\n');
+                }
+            }
             const message = `Sync Score: ${Math.round(driftReport.syncScore * 100)}%
 ${summary}
 
@@ -83,7 +99,7 @@ Stats:
   Deleted: ${driftReport.missingFromDisk.length}
   Modified: ${driftReport.contentMismatch.length}
   Watcher: ${watcherStatus.isRunning ? 'Running' : 'Stopped'}
-  Events: ${watcherStatus.watcher.eventsProcessed}`;
+  Events: ${watcherStatus.watcher.eventsProcessed}${detailLines}`;
             return formatHumanReadableStatus('check_sync', message);
         }
         catch (error) {

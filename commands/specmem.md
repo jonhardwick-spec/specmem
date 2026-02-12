@@ -38,7 +38,7 @@ If validation fails, show appropriate error message from ERROR HANDLING section 
 | "stats" | `mcp__specmem__show_me_the_stats({includeTypeDistribution: true, includeImportanceDistribution: true, includeCacheStats: true, includeInstanceStats: true})` |
 | "code" / "search" | Validate args exist → `mcp__specmem__find_code_pointers({query: "<args>", limit: 10, includeTracebacks: true})` |
 | "team" | See TEAM SUBCOMMAND ROUTING below |
-| "sync" | `mcp__specmem__check_sync({detailed: true})` |
+| "sync" | `mcp__specmem__check_sync_status({detailed: true})` |
 | "watch" | `mcp__specmem__start_watching({})` |
 | "drill" / "drilldown" | Validate args is number → `mcp__specmem__drill_down({drilldownID: <args as number>, includeCode: true, includeContext: true, includeRelated: true})` |
 | UNKNOWN | Show: "Unknown subcommand: <subcommand>. Run /specmem help for available commands." |
@@ -300,7 +300,7 @@ Use claimId from claim_task response, or 'all' to release everything
 ```
 Returns: requestId for tracking responses
 
-### check_sync
+### check_sync_status
 ```json
 {
   "detailed": "boolean (default: false) - include file-by-file drift info"

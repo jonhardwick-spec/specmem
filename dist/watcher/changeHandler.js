@@ -261,8 +261,8 @@ export class AutoUpdateTheMemories {
             }
             // find existing memory by file path
             const existingMemory = await this.findMemoryByFilePath(metadata.relativePath);
-            if (!existingMemory) {
-                logger.info({ path: metadata.relativePath }, 'no existing memory found - treating as new file');
+            if (!existingMemory || !existingMemory.id) {
+                logger.info({ path: metadata.relativePath, hasMemory: !!existingMemory, hasId: !!existingMemory?.id }, 'no valid existing memory found - treating as new file');
                 await this.handleFileAdded(event);
                 return;
             }
@@ -359,7 +359,7 @@ export class AutoUpdateTheMemories {
         try {
             // 1. Handle memories table - mark as deleted (keeps history)
             const existingMemory = await this.findMemoryByFilePath(event.relativePath);
-            if (existingMemory) {
+            if (existingMemory && existingMemory.id) {
                 const updatedPayload = {
                     content: existingMemory.content,
                     embedding: existingMemory.embedding,
@@ -379,6 +379,9 @@ export class AutoUpdateTheMemories {
                 };
                 await this.config.yeeter.yeetUpdateById(existingMemory.id, updatedPayload);
                 logger.debug({ path: event.relativePath, memoryId: existingMemory.id }, 'memory marked as deleted');
+            }
+            else if (existingMemory && !existingMemory.id) {
+                logger.warn({ path: event.relativePath }, 'memory found but has null id - skipping memory update, will still delete from codebase_files');
             }
             // 2. Handle codebase_files table - actually delete the entry
             // Uses parameterized query with project_path filter for proper isolation

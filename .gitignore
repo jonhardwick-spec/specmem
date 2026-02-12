@@ -1,4 +1,5 @@
 node_modules/
+*.tgz
 .env
 *.log
 .DS_Store
@@ -7,24 +8,7 @@ specmem/data/
 .specmem/
 *.pid
 specmem/
-
-# Internal dev / not for github
+claudeProgressTracking/
+claude-hooks/.specmem/
 __pycache__/
 *.pyc
-*.pyo
-.setup-complete
-LongRoPE/
-heretic/
-models/
-data/
-claudefix-dev/
-claudeProgressTracking/
-claudescreenfix-redirect/
-ubuntu25-real-docker/
-accurate-readme-source.md
-SPECMEM-DOGS-MIDDLEEASTERNERS.md
-ai-detection-check.js
-ai-detector.js
-package-lock.json
-*.deb
-.claude/settings.local.json

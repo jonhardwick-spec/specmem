@@ -99,7 +99,9 @@ export class AreWeStillInSync {
             const totalFiles = diskFiles.length;
             const totalMemories = mcpFiles.length;
             const totalDrift = missingFromMcp.length + missingFromDisk.length + contentMismatch.length;
-            const totalItems = Math.max(totalFiles, totalMemories);
+            // Sync score = what % of disk files are correctly synced in MCP
+            // Deleted-from-disk files are cleanup work, not sync failures
+            const totalItems = totalFiles || 1;
             const driftPercentage = totalItems > 0 ? (totalDrift / totalItems) * 100 : 0;
             const syncScore = totalItems > 0 ? upToDate / totalItems : 1;
             const report = {
@@ -161,7 +163,7 @@ export class AreWeStillInSync {
                 contentMismatch: driftReport.contentMismatch.length
             }, 'drift detected - starting resync');
             // Helper to process files in PARALLEL batches with concurrency + retry on transient failure
-            const CONCURRENCY = 20; // Process 20 files simultaneously for 10+ files/sec throughput
+            const CONCURRENCY = 25; // High throughput: 30k files in 3min target, CPU-limited by QQMS
             const PER_FILE_TIMEOUT = getEmbeddingTimeout('fileWatcher'); // 120s per file operation
             const MAX_FILE_RETRIES = 1; // Retry failed files once before giving up
             const processInBatches = async (files, handler, operationType) => {
@@ -189,7 +191,7 @@ export class AreWeStillInSync {
                     }
                     // Yield to event loop between parallel batches
                     if (i + CONCURRENCY < files.length) {
-                        await new Promise(resolve => setImmediate(resolve));
+                        await new Promise(resolve => setTimeout(resolve, 50));
                     }
                     // Log progress every 50 files
                     if (processed > 0 && processed % 50 === 0) {
@@ -304,7 +306,7 @@ export class AreWeStillInSync {
     async scanDiskFiles() {
         logger.debug('scanning disk files (streaming, non-blocking)...');
         // Configurable limits via environment variables
-        const SCAN_BATCH_SIZE = parseInt(process.env['SPECMEM_SCAN_BATCH_SIZE'] || '500');
+        const SCAN_BATCH_SIZE = parseInt(process.env['SPECMEM_SCAN_BATCH_SIZE'] || '2000');
         const SCAN_MAX_FILES = parseInt(process.env['SPECMEM_SCAN_MAX_FILES'] || '50000');
         const SCAN_MAX_HEAP_MB = parseInt(process.env['SPECMEM_SCAN_MAX_HEAP_MB'] || '2048');
         const SCAN_MAX_HEAP_BYTES = SCAN_MAX_HEAP_MB * 1024 * 1024;

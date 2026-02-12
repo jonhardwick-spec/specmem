@@ -5,13 +5,14 @@
  * Converts search results into semantic gallery view with COT reasoning
  */
 import { createConnection } from 'net';
+import { existsSync } from 'fs';
 import * as path from 'path';
 import { logger } from '../utils/logger.js';
 import { getRunDir } from '../config.js';
 export class MiniCOTProvider {
     socketPath;
     timeout;
-    constructor(socketPath = path.join(getRunDir(), 'mini-cot.sock'), timeout = parseInt(process.env['SPECMEM_MINI_COT_TIMEOUT_MS'] || '60000', 10)) {
+    constructor(socketPath = path.join(getRunDir(), '..', 'specmem', 'sockets', 'minicot.sock'), timeout = parseInt(process.env['SPECMEM_MINI_COT_TIMEOUT_MS'] || '30000', 10)) {
         this.socketPath = socketPath;
         this.timeout = timeout;
     }
@@ -25,6 +26,10 @@ export class MiniCOTProvider {
      * 4. Sorts by relevance
      */
     async createGallery(query, memories) {
+        // Fast-fail if socket doesn't exist (service not running)
+        if (!existsSync(this.socketPath)) {
+            throw new Error(`Mini COT service not running (no socket at ${this.socketPath})`);
+        }
         return new Promise((resolve, reject) => {
             const socket = createConnection(this.socketPath);
             const timeoutId = setTimeout(() => {

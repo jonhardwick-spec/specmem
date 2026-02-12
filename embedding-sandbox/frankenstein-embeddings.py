@@ -273,12 +273,13 @@ def _get_cpu_thread_limit():
     except Exception as e:
         print(f"⚠️ Could not read CPU core limit from config: {e}", file=sys.stderr)
 
-    # Default
-    return 2
+    # Default - keep low to avoid CPU spikes with multiple servers
+    return 1
 
 _CPU_THREAD_LIMIT = _get_cpu_thread_limit()
 _CPU_THREAD_MIN = int(os.environ.get('SPECMEM_CPU_THREADS_MIN', '1'))
 torch.set_num_threads(_CPU_THREAD_LIMIT)
+torch.set_num_interop_threads(1)  # Limit cross-op parallelism to prevent CPU spikes
 # Also limit OpenMP/MKL threads used by numpy/sklearn
 os.environ.setdefault('OMP_NUM_THREADS', str(_CPU_THREAD_LIMIT))
 os.environ.setdefault('MKL_NUM_THREADS', str(_CPU_THREAD_LIMIT))
@@ -379,9 +380,9 @@ class QQMSConfig:
     burst_limit: int = 10                     # Burst allowance
 
     # Batch processing
-    batch_delay_ms: float = 100.0            # Delay between batches
-    max_batch_size: int = 16                  # Maximum items per batch
-    batch_cooldown_ms: float = 500.0         # Cooldown after large batch
+    batch_delay_ms: float = 25.0             # Delay between batches
+    max_batch_size: int = 64                  # Maximum items per batch
+    batch_cooldown_ms: float = 100.0         # Cooldown after large batch
 
     # Idle/cooldown
     idle_delay_after_burst_ms: float = 1000.0  # 1 second cooldown after burst
@@ -965,9 +966,9 @@ class AdaptiveBatchSizer:
 
     def __init__(self, config: ResourceConfig):
         self.config = config
-        self.base_batch_size = 16
-        self.min_batch_size = 4
-        self.max_batch_size = 64
+        self.base_batch_size = 64
+        self.min_batch_size = 16
+        self.max_batch_size = 128
         self.current_batch_size = self.base_batch_size
         self.last_adjustment = time.time()
         self.adjustment_interval = 5.0
@@ -3117,12 +3118,15 @@ class EmbeddingServer:
                 texts = [f"{r[1]}\n{r[2]}" for r in rows]  # path + content
 
                 try:
-                    # Generate embeddings - CRITICAL priority = NO THROTTLING for max speed!
+                    # Generate embeddings - LOW priority to avoid CPU spikes during cold start
                     embeddings = self.embedder.embed_batch(
                         texts,
                         force_dims=target_dims,
-                        priority=EmbeddingPriority.CRITICAL
+                        priority=EmbeddingPriority.LOW
                     )
+                    # Throttle between batches to keep CPU reasonable during startup
+                    import time
+                    time.sleep(0.5)
 
                     # Write back to database - BATCH UPDATE for max speed!
                     from psycopg2.extras import execute_batch
@@ -3348,12 +3352,14 @@ class EmbeddingServer:
                 ]
 
                 try:
-                    # Generate embeddings - CRITICAL priority = NO THROTTLING!
+                    # Generate embeddings - LOW priority to avoid CPU spikes during cold start
                     embeddings = self.embedder.embed_batch(
                         texts,
                         force_dims=target_dims,
-                        priority=EmbeddingPriority.CRITICAL
+                        priority=EmbeddingPriority.LOW
                     )
+                    import time
+                    time.sleep(0.5)
 
                     # Write back to database - BATCH UPDATE for max speed!
                     from psycopg2.extras import execute_batch
@@ -3767,9 +3773,9 @@ class EmbeddingServer:
         self._start_kys_watchdog()
 
         # Create thread pool for concurrent request handling
-        # RELIABILITY FIX: Increase default workers from 10 to 20 to handle 16 parallel
-        # requests during codebase indexing without queue backup
-        max_workers = int(os.environ.get('SPECMEM_EMBEDDING_MAX_WORKERS', '20'))
+        # CPU FIX: Reduced from 20 to 4 — 4 workers × 2 torch threads = 8 threads max per server
+        # Two servers = 16 threads total, stays under 50% CPU on multi-core systems
+        max_workers = int(os.environ.get('SPECMEM_EMBEDDING_MAX_WORKERS', '4'))
         executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix='embedding-worker')
 
         # RELIABILITY FIX: Pre-warm the model BEFORE accepting connections

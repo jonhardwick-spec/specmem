@@ -1,0 +1,70 @@
+# HARDWICK TRANSLATE - Optimized Neural MT
+# LibreTranslate optimized by Hardwick Software · justcalljon.pro
+# ===================================================
+# Neural MT for dynamic codebook expansion
+# Hard-capped: 500MB RAM, 5% CPU per configured core
+# INT8 quantized, CPU-pinned, memory-optimized
+#
+# First run: needs network to download en<>zh models (~200MB)
+# After: can run offline with cached models
+#
+# Communication: HTTP localhost:5001/translate
+# Models cached at: ${SPECMEM_HARDWICK_MODELS:-/tmp/specmem-hardwick-models}
+
+version: '3.8'
+
+services:
+  hardwick-translate:
+    image: libretranslate/libretranslate:latest
+    container_name: specmem-hardwick-translate
+    hostname: hardwick-translate
+
+    # Custom entrypoint with Hardwick optimizations
+    entrypoint: ["/bin/bash", "/opt/hardwick/entrypoint.sh"]
+
+    # Resource limits - HARD CAP
+    mem_limit: 500m
+    mem_reservation: 256m
+    cpus: ${SPECMEM_HARDWICK_CPUS:-0.2}
+
+    # Security hardening
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # Only expose to localhost
+    ports:
+      - "127.0.0.1:5001:5000"
+
+    # Persist models + mount custom entrypoint
+    volumes:
+      - ${SPECMEM_HARDWICK_MODELS:-/tmp/specmem-hardwick-models}:/home/libretranslate/.local:rw
+      - ./hardwick-translate-entrypoint.sh:/opt/hardwick/entrypoint.sh:ro
+
+    environment:
+      - LT_LOAD_ONLY=en,zh
+      - LT_THREADS=1
+      - LT_SUGGESTIONS=false
+      - LT_DISABLE_WEB_UI=true
+      - LT_UPDATE_MODELS=true
+      - LT_API_KEYS=false
+      - LT_DISABLE_FILES_TRANSLATION=true
+      - LT_METRICS=false
+      - CT2_COMPUTE_TYPE=int8
+      - CT2_INTER_THREADS=1
+      - CT2_INTRA_THREADS=1
+      - OMP_NUM_THREADS=1
+      - MKL_NUM_THREADS=1
+      - GUNICORN_NUM_WORKERS=1
+      - GUNICORN_TIMEOUT=120
+      - GUNICORN_MAX_REQUESTS=500
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5000/languages"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s

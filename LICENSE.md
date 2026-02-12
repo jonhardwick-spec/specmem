@@ -12,27 +12,22 @@
                         PRE-RELEASE RESTRICTION
 ================================================================================
 
-FREE FOR INDIVIDUAL DEVELOPERS earning less than $35,000 USD per year.
-You may use this Software free of charge for personal and commercial projects
-provided your gross annual income does not exceed the threshold above.
-
-ALL OTHER USERS: This Software is currently in PRE-RELEASE status. Commercial
-licensing for individuals and organizations above the income threshold will be
-available upon official release at:
+IMPORTANT: This Software is currently in PRE-RELEASE status. NO LICENSE IS
+GRANTED to use, copy, modify, distribute, or create derivative works of this
+Software until SpecMem has been OFFICIALLY ANNOUNCED as deployed at:
 
                     https://justcalljon.pro/specmem
 
-RESTRICTIONS (apply to ALL users including free-tier):
-  - You may NOT redistribute this Software or any portion thereof
-  - You may NOT use internal source code in your own projects
-  - You may NOT copy, extract, or replicate proprietary algorithms
-  - You may NOT use this Software or its outputs to train AI/ML models
+Until such official announcement is made and publicly accessible at the above
+URL, all rights are reserved by the Licensor. Any use of this Software prior
+to official announcement constitutes copyright infringement and unauthorized
+use, subject to all available legal remedies including but not limited to
+statutory damages under 17 U.S.C. Section 504.
 
-Until official release announcement at the above URL, no license is granted
-to users above the free-tier threshold. Any use of this Software prior to
-official announcement by non-qualifying users constitutes copyright
-infringement and unauthorized use, subject to all available legal remedies
-including but not limited to statutory damages under 17 U.S.C. Section 504.
+The terms and conditions set forth in this License Agreement shall become
+effective ONLY upon official announcement. Prior to that date, this document
+serves solely as notice of intended licensing terms and does not grant any
+rights whatsoever.
 
 ================================================================================
 

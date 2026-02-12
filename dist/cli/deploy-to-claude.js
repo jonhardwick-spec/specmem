@@ -41,30 +41,8 @@ const HOOKS_TARGET = path.join(CLAUDE_HOME, 'hooks');
 const COMMANDS_TARGET = path.join(CLAUDE_HOME, 'commands');
 // Files to deploy (only SpecMem-related files)
 // NOTE: .cjs extension required because package.json has "type": "module"
-const HOOK_FILES = [
-    // Main hooks (renamed to .cjs for CommonJS compatibility)
-    'agent-loading-hook.cjs',
-    'specmem-context-hook.cjs',
-    'specmem-drilldown-hook.cjs',
-    'smart-context-hook.cjs',
-    'specmem-session-start.cjs',
-    'specmem-precompact.cjs',
-    'input-aware-improver.cjs',
-    'drilldown-enforcer.cjs',
-    'specmem-drilldown-setter.cjs',
-    'subagent-loading-hook.cjs',
-    'task-progress-hook.cjs',
-    // Python/shell hooks (no extension change needed)
-    'specmem-unified-hook.py',
-    'auto-bypass.py',
-    'claude-watchdog.sh',
-    // Token compression dependencies
-    'token-compressor.cjs',
-    'merged-codes.cjs',
-    'merged-codes.json',
-    'cedict-codes.json',
-    'cedict-extracted.json',
-];
+// No hardcoded fallback list — deployer scans claude-hooks/ directory directly
+const HOOK_FILES = [];
 const COMMAND_FILES = [
     'specmem.md',
     'specmem-team-member.md',
@@ -232,7 +210,9 @@ function cleanupBackups(basePath, keepCount) {
     }
 }
 /**
- * Update 's settings.json to register hooks
+ * Update 's settings.json — ONLY permissions and MCP config
+ * Hook registration lives in hooks/settings.json (deployed as a file)
+ * This prevents duplicate hooks between the two settings files
  */
 function updateSettings() {
     const settingsPath = path.join(CLAUDE_HOME, 'settings.json');
@@ -247,96 +227,40 @@ function updateSettings() {
                 log('Could not parse existing settings.json, creating new one');
             }
         }
-        // Initialize hooks section
-        if (!settings.hooks) {
-            settings.hooks = {};
-        }
-        // Define hook configurations (use .cjs for CommonJS compatibility)
-        const drilldownHookPath = path.join(HOOKS_TARGET, 'specmem-drilldown-hook.cjs');
-        const smartContextHookPath = path.join(HOOKS_TARGET, 'smart-context-hook.cjs');
-        const inputAwareHookPath = path.join(HOOKS_TARGET, 'input-aware-improver.cjs');
-        // Check if SpecMem hooks already configured
-        const hasSpecMemHooks = (settings.hooks.UserPromptSubmit || []).some((entry) => JSON.stringify(entry).includes('specmem'));
-        if (hasSpecMemHooks) {
-            log('SpecMem hooks already registered in settings.json');
-            return true;
-        }
-        // Add UserPromptSubmit hooks (NO matcher field)
-        settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit || [];
-        if (fs.existsSync(drilldownHookPath)) {
-            settings.hooks.UserPromptSubmit.push({
-                hooks: [{
-                        type: 'command',
-                        command: `node ${drilldownHookPath}`,
-                        timeout: 30,
-                        statusMessage: '🔍 Searching SpecMem...',
-                        env: {
-                            // Hooks use specmem-paths.cjs to find package location dynamically
-                            // SPECMEM_PKG removed - no longer needed with dynamic path resolution
-                            SPECMEM_HOME: process.env.SPECMEM_HOME || path.join(os.homedir(), '.specmem'),
-                            SPECMEM_RUN_DIR: '${cwd}/specmem/sockets',
-                            SPECMEM_EMBEDDING_SOCKET: '${cwd}/specmem/sockets/embeddings.sock',
-                            SPECMEM_PROJECT_PATH: '${cwd}',
-                            SPECMEM_SEARCH_LIMIT: '5',
-                            SPECMEM_THRESHOLD: '0.25',
-                            SPECMEM_MAX_CONTENT: '300',
-                            SPECMEM_DB_HOST: process.env.SPECMEM_DB_HOST || 'localhost',
-                            SPECMEM_DB_PORT: process.env.SPECMEM_DB_PORT || '5432',
-                            SPECMEM_DB_NAME: process.env.SPECMEM_DB_NAME || 'specmem',
-                            SPECMEM_DB_USER: process.env.SPECMEM_DB_USER || 'specmem',
-                            SPECMEM_DB_PASSWORD: process.env.SPECMEM_DB_PASSWORD || 'specmem'
+        // IMPORTANT: Do NOT write hooks to main settings.json
+        // All hook config lives in ~/.claude/hooks/settings.json (deployed as a file)
+        // Writing hooks here would cause DOUBLE-FIRING of every hook
+        // Clean up any leftover specmem hooks from old deploys
+        if (settings.hooks && Object.keys(settings.hooks).length > 0) {
+            let cleaned = false;
+            for (const [event, entries] of Object.entries(settings.hooks)) {
+                if (Array.isArray(entries)) {
+                    const filtered = entries.filter((entry) => {
+                        const str = JSON.stringify(entry);
+                        // Remove specmem-related hooks (they live in hooks/settings.json now)
+                        if (str.includes('specmem') || str.includes('smart-context') ||
+                            str.includes('drilldown') || str.includes('input-aware') ||
+                            str.includes('agent-loading') || str.includes('subagent-loading') ||
+                            str.includes('task-progress') || str.includes('precompact')) {
+                            cleaned = true;
+                            return false;
                         }
-                    }]
-            });
-        }
-        // Add PreToolUse hooks (WITH string matcher)
-        settings.hooks.PreToolUse = settings.hooks.PreToolUse || [];
-        // NEW: Agent loading hook - shows clean loading indicator for Task deployments
-        // This replaces the verbose mega-prompt injection
-        const agentLoadingHookPath = path.join(HOOKS_TARGET, 'agent-loading-hook.cjs');
-        if (fs.existsSync(agentLoadingHookPath)) {
-            // Check if already registered
-            const hasAgentLoadingHook = settings.hooks.PreToolUse.some((entry) => JSON.stringify(entry).includes('agent-loading-hook'));
-            if (!hasAgentLoadingHook) {
-                settings.hooks.PreToolUse.push({
-                    matcher: 'Task', // Only intercept Task tool calls
-                    hooks: [{
-                            type: 'command',
-                            command: `node ${agentLoadingHookPath}`,
-                            timeout: 5 // Fast execution - just shows loading indicator
-                        }]
-                });
-                log('Registered agent-loading-hook for Task tool interception');
+                        return true;
+                    });
+                    settings.hooks[event] = filtered;
+                }
+            }
+            // Remove empty hook arrays
+            for (const [event, entries] of Object.entries(settings.hooks)) {
+                if (Array.isArray(entries) && entries.length === 0) {
+                    delete settings.hooks[event];
+                }
+            }
+            if (cleaned) {
+                log('Cleaned up duplicate specmem hooks from main settings.json');
             }
         }
-        // Smart context hook for general tool calls
-        if (fs.existsSync(smartContextHookPath)) {
-            settings.hooks.PreToolUse.push({
-                matcher: '*',
-                hooks: [{
-                        type: 'command',
-                        command: `node ${smartContextHookPath}`,
-                        timeout: 10,
-                        env: {
-                            SPECMEM_SEARCH_LIMIT: '5',
-                            SPECMEM_THRESHOLD: '0.30',
-                            SPECMEM_MAX_CONTENT: '200'
-                        }
-                    }]
-            });
-        }
-        // Add SessionStart hooks
-        settings.hooks.SessionStart = settings.hooks.SessionStart || [];
-        if (fs.existsSync(drilldownHookPath)) {
-            settings.hooks.SessionStart.push({
-                hooks: [{
-                        type: 'command',
-                        command: `node ${drilldownHookPath}`,
-                        timeout: 30
-                    }]
-            });
-        }
-        // Add permissions for SpecMem tools
+        // Add permissions for SpecMem tools (this DOES belong in main settings.json)
         if (!settings.permissions) {
             settings.permissions = { allow: [] };
         }
@@ -353,7 +277,7 @@ function updateSettings() {
         }
         // Write updated settings
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-        log('Updated settings.json with SpecMem hooks');
+        log('Updated settings.json (permissions only — hooks in hooks/settings.json)');
         return true;
     }
     catch (error) {

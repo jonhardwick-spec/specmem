@@ -99,6 +99,8 @@ function isMcpAvailable() {
 
 // Generate embedding via socket
 async function generateEmbedding(text, socketPath) {
+  // Truncate — embeddings only need short text
+  const truncated = text.length > 512 ? text.slice(0, 512) : text;
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(socketPath)) {
       reject(new Error('Embedding socket not found'));
@@ -110,7 +112,7 @@ async function generateEmbedding(text, socketPath) {
     socket.setTimeout(CONFIG.socketTimeout);
 
     socket.connect(socketPath, () => {
-      socket.write(JSON.stringify({ type: 'embed', text }) + '\n');
+      socket.write(JSON.stringify({ type: 'embed', text: truncated }) + '\n');
     });
 
     socket.on('data', (data) => {

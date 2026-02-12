@@ -49,8 +49,8 @@ const DEFAULT_CONFIG = {
     // With lazy loading, startup is faster - model loads on first request
     startupTimeoutMs: parseInt(process.env['SPECMEM_MINICOT_STARTUP_TIMEOUT'] || '60000', 10),
     maxRestartAttempts: parseInt(process.env['SPECMEM_MINICOT_MAX_RESTARTS'] || '5', 10),
-    // Mini COT is optional - disabled by default
-    autoStart: process.env['SPECMEM_MINICOT_AUTO_START'] === 'true',
+    // Mini COT enabled by default - set SPECMEM_MINICOT_AUTO_START=false to disable
+    autoStart: process.env['SPECMEM_MINICOT_AUTO_START'] !== 'false',
     killStaleOnStart: process.env['SPECMEM_MINICOT_KILL_STALE'] !== 'false',
     maxProcessAgeHours: parseFloat(process.env['SPECMEM_MINICOT_MAX_AGE_HOURS'] || '1'),
     modelName: process.env['SPECMEM_MINICOT_MODEL'] || 'TinyLlama/TinyLlama-1.1B-Chat-v1.0',

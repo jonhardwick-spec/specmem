@@ -1722,8 +1722,9 @@ class LocalEmbeddingProvider {
             sandboxAvailable: this.sandboxAvailable,
             socketConnected: this.socketConnected
         });
-        // Use QOMS to ensure we never exceed 20% CPU/RAM
-        return qoms.medium(async () => {
+        // Use QOMS critical - embeddings are fast (~200ms) and user queries must not be
+        // blocked by system-wide CPU from other projects' indexing processes
+        return qoms.critical(async () => {
             __debugLog('[EMBEDDING DEBUG]', Date.now(), 'GENERATE_EMBEDDING_QOMS_ACQUIRED', {
                 elapsedMs: Date.now() - methodStart
             });
@@ -1887,8 +1888,8 @@ class LocalEmbeddingProvider {
             batchSize: texts.length,
             totalChars: texts.reduce((sum, t) => sum + t.length, 0)
         });
-        // Use QOMS to ensure we never exceed resource limits
-        return qoms.medium(async () => {
+        // Use QOMS critical - embeddings must not be blocked by cross-project CPU usage
+        return qoms.critical(async () => {
             // Ensure we have target dimension from database
             const targetDim = await this.ensureTargetDimension();
             // Wait for sandbox to be available

@@ -93,7 +93,7 @@ const DEFAULT_CONFIG = {
     generateEmbeddings: true,
     watchForChanges: true,
     debounceMs: 1000,
-    batchSize: 50,
+    batchSize: 200,
     maxDepth: 30,
     // Enhanced analysis options - semantic search goes CRAZY with these
     extractDefinitions: true,

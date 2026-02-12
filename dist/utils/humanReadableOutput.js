@@ -11,33 +11,82 @@
  * - Preserves: [SPECMEM-*] tags, Query:, Mode:, Found N, percentages, roles, file paths
  * - Compresses: actual content using Traditional Chinese tokens for ~40-60% token savings
  */
-import { smartCompress, shouldCompress } from './tokenCompressor.js';
+// ============================================================================
+// SINGLE COMPRESSOR — Verified token-compressor.cjs (120K+ Hardwick codebook)
+// Word-level fallback: bad words stay English, queued for Hardwick Translate
+// ============================================================================
+import { existsSync, appendFileSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
+import { createRequire } from 'module';
+import { smartCompress as _fallbackCompress, shouldCompress } from './tokenCompressor.js';
+let _tc = null;
+let _tcLoaded = false;
+const _MISMATCH_LOG = '/tmp/specmem-compressor-mismatches.jsonl';
+function _loadTC() {
+    if (_tcLoaded) return _tc;
+    _tcLoaded = true;
+    try {
+        const tcPath = join(homedir(), '.claude', 'hooks', 'token-compressor.cjs');
+        if (existsSync(tcPath)) {
+            const _require = createRequire(import.meta.url);
+            // Only clear cache on first load or if codebook file changed
+            if (_require.cache[tcPath]) {
+                const mergedPath = join(homedir(), '.claude', 'hooks', 'merged-codes.cjs');
+                delete _require.cache[tcPath];
+                if (_require.cache[mergedPath]) delete _require.cache[mergedPath];
+            }
+            _tc = _require(tcPath);
+        }
+    } catch(e) {}
+    // Re-check every 5 min (not 60s — codebook doesn't change that often)
+    setTimeout(() => { _tcLoaded = false; }, 5 * 60 * 1000).unref();
+    return _tc;
+}
+const _norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
 // ANSI color codes for terminal output
-// Colors DISABLED by default - MCP responses don't need terminal styling
-// Set SPECMEM_COLOR=1 to enable if your terminal handles it properly
-// Many terminals (esp XFCE) show garbled rainbow output with ANSI codes
 const USE_COLOR = process.env.SPECMEM_COLOR === '1';
 const GREY = USE_COLOR ? '\x1b[90m' : '';
 const RESET = USE_COLOR ? '\x1b[0m' : '';
 const DIM = USE_COLOR ? '\x1b[2m' : '';
 /**
- * Compress content text while preserving structural elements
- * Only compresses the actual content, not tags/metadata
+ * Verified compress: compress → decompress → verify word-by-word
+ * Bad words stay English, queued for Hardwick Translate training
+ * THIS IS THE ONLY COMPRESSOR — no fallbacks, no old methods
  */
 function compressContent(content) {
-    if (!shouldCompress(content)) {
-        return content;
+    if (!content || content.length < 20) return content;
+    // Lazy-load verified Hardwick codebook compressor (picks up codebook updates)
+    const tc = _loadTC();
+    if (tc?.compress && tc?.decompress) {
+        try {
+            const compressed = tc.compress(content);
+            const decompressed = tc.decompress(compressed);
+            if (_norm(decompressed) === _norm(content)) return compressed; // Perfect ✓
+            // Word-level fallback
+            const inW = _norm(content).split(' ');
+            const outW = _norm(decompressed).split(' ');
+            const bad = new Set();
+            for (let i = 0; i < Math.max(inW.length, outW.length); i++) {
+                if (inW[i] !== outW[i] && inW[i]) bad.add(inW[i]);
+            }
+            if (bad.size > 0 && tc.CODES) {
+                try { appendFileSync(_MISMATCH_LOG, JSON.stringify({ pairs: [...bad].map(w => ({ expected: w })), t: Date.now() }) + '\n'); } catch(e) {}
+                const saved = {};
+                for (const w of bad) { if (tc.CODES[w]) { saved[w] = tc.CODES[w]; delete tc.CODES[w]; } }
+                const recomp = tc.compress(content);
+                for (const [w, c] of Object.entries(saved)) tc.CODES[w] = c;
+                const redecomp = tc.decompress(recomp);
+                if (_norm(redecomp) === _norm(content)) return recomp;
+            }
+            return content; // Can't verify → leave original
+        } catch(e) { return content; }
     }
+    // Last resort fallback (old compressor) — only if hooks compressor missing
     try {
-        const { result, wasCompressed } = smartCompress(content, {
-            threshold: 0.75, // Slightly lower threshold for content compression
-            minLength: 30 // Compress even shorter content
-        });
+        const { result, wasCompressed } = _fallbackCompress(content, { threshold: 0.75, minLength: 30 });
         return wasCompressed ? result : content;
-    }
-    catch {
-        return content;
-    }
+    } catch { return content; }
 }
 /**
  * Truncate with middle ellipsis - shows first N words ... last N words
@@ -316,6 +365,8 @@ export function formatHumanReadable(toolName, results, options) {
             hint = '\ndrill_down(ID) 獲取完整內容';
         }
     }
+    // Content already compressed by formatMemoryItem/formatDrilldownItem/formatCodeItem
+    // via compressContent() which uses verified Hardwick codebook + word-level fallback
     return grey + '[SPECMEM-' + tag + ']\n' + header + content + hint + '\n[/SPECMEM-' + tag + ']' + reset;
 }
 /**
@@ -325,7 +376,8 @@ export function formatHumanReadableStatus(toolName, message, options) {
     const tag = toolName.toUpperCase().replace(/_/g, '-');
     const grey = options?.grey !== false ? GREY : '';
     const reset = options?.grey !== false ? RESET : '';
-    return grey + '[SPECMEM-' + tag + ']\n' + message + '\n[/SPECMEM-' + tag + ']' + reset;
+    const compressed = compressContent(message);
+    return grey + '[SPECMEM-' + tag + ']\n' + compressed + '\n[/SPECMEM-' + tag + ']' + reset;
 }
 /**
  * Format an error in hook style

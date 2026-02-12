@@ -4,6 +4,30 @@ All notable changes to SpecMem - we keep it real with semantic versioning. Deada
 
 ---
 
+## [3.7.24] - 2026-02-12
+
+### Added
+- Self-healing token compression with codebook learning
+- Dual ALGO+COT relevance scoring (shows both scores in results)
+- Neural translation for codebook via Argos Translate
+- Mini-COT reads from code_definitions DB for richer reasoning
+- Background codebase crawler with LLM enrichment
+- Skill/command audit — all 18 commands verified and documented
+
+### Improved
+- Hook debouncing to prevent socket slamming
+- File watcher retry logic with exponential backoff
+- Embedding server resilience and self-healing
+- TUI cursor stability (no more ghost stage headers)
+- Smooth progress UI for long operations
+
+### Fixed
+- PTY output formatting inconsistencies
+- Socket contention under high load
+- Lazy-load breakage from aggressive self-healing
+
+---
+
 ## [3.5.96] - 2026-02-07
 
 ### Fixed

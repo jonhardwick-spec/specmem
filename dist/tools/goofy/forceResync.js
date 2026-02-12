@@ -41,6 +41,15 @@ export class ForceResync {
             const message = result.success
                 ? `Resync complete! Added ${result.filesAdded}, updated ${result.filesUpdated}, deleted ${result.filesMarkedDeleted} files in ${result.duration}ms.`
                 : `Resync completed with ${result.errors.length} errors. Added ${result.filesAdded}, updated ${result.filesUpdated}, deleted ${result.filesMarkedDeleted} files.`;
+            // Update statusbar sync score after resync
+            try {
+                const postReport = await watcherManager.checkSync();
+                if (postReport && typeof postReport.syncScore === 'number') {
+                    await watcherManager.writeSyncScore(postReport.syncScore);
+                }
+            } catch (e) {
+                logger.warn({ error: e }, 'failed to update sync score after resync');
+            }
             logger.info({
                 success: result.success,
                 filesAdded: result.filesAdded,

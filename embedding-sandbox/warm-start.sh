@@ -88,7 +88,7 @@ CONTAINER_NAME="specmem-embedding-${PROJECT_DIR_NAME}"
 IMAGE_NAME="specmem-embedding:latest"
 
 # CPU limit from env or default to 1.0
-CPU_LIMIT="${SPECMEM_EMBEDDING_CPU_LIMIT:-1.0}"
+CPU_LIMIT="${SPECMEM_EMBEDDING_CPU_LIMIT:-0.5}"
 
 # Warm start feeder script
 FEEDER_SCRIPT="$SPECMEM_DIR/embedding-sandbox/warm_start_feeder.py"
@@ -308,6 +308,12 @@ main() {
                 -e "SPECMEM_EMBEDDING_SOCKET=$SOCKET_PATH" \
                 -e "SPECMEM_SOCKET_DIR=$SOCKET_DIR" \
                 -e "SPECMEM_PROJECT_PATH=${SPECMEM_PROJECT_PATH:-}" \
+                -e "OMP_NUM_THREADS=1" \
+                -e "MKL_NUM_THREADS=1" \
+                -e "OPENBLAS_NUM_THREADS=1" \
+                -e "NUMEXPR_NUM_THREADS=1" \
+                -e "SPECMEM_CPU_THREADS=1" \
+                -e "SPECMEM_EMBEDDING_MAX_WORKERS=4" \
                 -l "specmem.user=$USER_ID" \
                 -l "specmem.version=$SPECMEM_VERSION" \
                 -l "specmem.created=$(date +%s)" \

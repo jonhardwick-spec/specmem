@@ -1,24 +1,31 @@
-# Runtime state files
+# SpecMem NPM Ignore - Keep tarball clean
+# ========================================
+
+# Internal docs / plans
+SPECMEM-DOGS*.md
+*-MIDDLEEASTERNERS*
+*.plan.md
+
+# Dev folders
+claudefix-dev/
+claudeProgressTracking/
+
+# Images (except legal)
+IMG_*
+
+# Runtime state (should not be packaged)
 **/specmem/sockets/
 **/claude-input-state.json
-**/seen-sessions.json
-**/session-start.lock
 **/session-stops.log
-**/embedding-death-reason.txt
+**/task-output-state.json
+**/agent-output-state.json
 
-# Python cache
+# Pycache
 **/__pycache__/
 **/*.pyc
 
-# Dev/build artifacts
+# Old tarballs
 *.tgz
-.git/
-.gitignore
-src/
-tsconfig.json
-ai-detector.js
-SPECMEM-DOGS-*.md
 
-# IDE
-.vscode/
-.idea/
+# Git
+.git/

@@ -2836,16 +2836,15 @@ async function coldStartEmbeddingDocker(projectPath, modelConfig, ui, codebaseRe
   ui.setSubProgress(0.2);
   await qqms();
 
-  // Launch Docker via warm-start.sh (now supports per-project sockets!)
-  ui.setStatus('Launching Docker embedding container...');
-  ui.setSubStatus('Starting cold-start process...');
-
-  const warmStartScript = path.join(__dirname, '..', 'embedding-sandbox', 'warm-start.sh');
-
-  if (!fs.existsSync(warmStartScript)) {
-    ui.setSubStatus('⚠️ warm-start.sh not found - skipping Docker');
-    return { serverRunning: false, warmupLatency: null, timeoutConfig };
-  }
+  // DOCKER DISABLED: Native Python (frankenstein-embeddings.py) is the primary system.
+  // Docker containers were causing CPU spikes and socket conflicts.
+  try {
+    const { execSync } = require('child_process');
+    execSync('docker rm -f $(docker ps -aq --filter "name=specmem-embedding") 2>/dev/null', { stdio: 'ignore', timeout: 10000 });
+  } catch {}
+  initLog('[DOCKER] Docker embedding disabled - using native Python exclusively');
+  ui.setSubStatus('Using native Python embedding server');
+  return { serverRunning: false, warmupLatency: null, timeoutConfig };
 
   // EARLY BAIL-OUT: Check if Docker is actually usable before wasting time
   // 1. Docker daemon must be running
@@ -3455,51 +3454,9 @@ async function indexCodebase(projectPath, ui, embeddingResult) {
         initLog(`Failed to clean stale socket: ${cleanErr.message}`);
       }
 
-      // Try to restart via warm-start.sh (Docker method - preferred)
-      const warmStartScript = path.join(__dirname, '..', 'embedding-sandbox', 'warm-start.sh');
-      if (fs.existsSync(warmStartScript)) {
-        ui.setSubStatus('Restarting Docker embedding container...');
-        initLog('Attempting Docker restart via warm-start.sh');
-
-        try {
-          const { spawn: spawnRecover } = require('child_process');
-          const socketsDir = path.join(projectPath, 'specmem', 'sockets');
-
-          const recoverProcess = spawnRecover('bash', [warmStartScript], {
-            cwd: path.dirname(warmStartScript),
-            env: {
-              ...process.env,
-              SPECMEM_PROJECT_PATH: projectPath,
-              SPECMEM_EMBEDDING_SOCKET: projectSocketPath,
-              SPECMEM_SOCKET_DIR: socketsDir
-            },
-            stdio: ['ignore', 'pipe', 'pipe']
-          });
-
-          // Wait for Docker to start (up to 60s for recovery)
-          // RELIABILITY FIX: Increased from 45s to 60s to match other wait times
-          ui.setSubStatus('Waiting for Docker container to recover...');
-          const recoverStart = Date.now();
-
-          // DYNAMIC WAIT: Poll for recovery with adaptive intervals (max 5min)
-          const recoveryReady = await waitForEmbeddingReady(projectSocketPath, { ui, label: 'Docker recovery' });
-          const recoverLatency = Date.now() - recoverStart;
-
-          if (recoveryReady) {
-            initLog(`Docker recovery successful in ${recoverLatency}ms`);
-            activeSocketPath = projectSocketPath;
-          } else {
-            initLog(`Docker recovery failed after ${recoverLatency}ms`);
-            activeSocketPath = null;
-          }
-        } catch (recoverErr) {
-          initLog(`Docker recovery error: ${recoverErr.message}`);
-          activeSocketPath = null;
-        }
-      } else {
-        initLog('warm-start.sh not found - cannot recover Docker container');
-        activeSocketPath = null;  // Mark as unavailable
-      }
+      // DOCKER DISABLED: Recovery uses native Python via MCP health monitor
+      initLog('Docker recovery disabled - MCP health monitor will restart native Python server');
+      activeSocketPath = null;
     } // end else (server truly dead after retries)
     } // end catch
     await qqms();
@@ -6240,9 +6197,9 @@ async function runAutoSetup(projectPath) {
   setupUI.start();
 
   try {
-    // Step 1: Database setup
+    // Step 1: Database setup — install, start, configure
     setupUI.setStage(1, 'DATABASE');
-    setupUI.setStatus('Connecting to PostgreSQL...');
+    setupUI.setStatus('Checking PostgreSQL...');
     setupUI.setSubProgress(0);
 
     const dbHost = process.env.SPECMEM_DB_HOST || 'localhost';
@@ -6251,16 +6208,97 @@ async function runAutoSetup(projectPath) {
     const dbUser = process.env.SPECMEM_DB_USER || 'specmem_westayunprofessional';
     const dbPass = process.env.SPECMEM_DB_PASSWORD || 'specmem_westayunprofessional';
 
+    // --- Install PostgreSQL if missing ---
+    let hasPsql = false;
+    try { execSync('which psql 2>/dev/null', { stdio: 'pipe' }); hasPsql = true; } catch (_) {}
+    if (!hasPsql) {
+      setupUI.setStatus('Installing PostgreSQL...');
+      setupUI.setSubStatus('apt-get install postgresql postgresql-17-pgvector');
+      initLog('[SETUP] PostgreSQL not found — installing');
+      try {
+        execSync('apt-get update -qq 2>/dev/null && apt-get install -y postgresql postgresql-common 2>/dev/null', { stdio: 'pipe', timeout: 120000 });
+        // Install pgvector for the installed PG version
+        try {
+          const pgVer = execSync("pg_config --version 2>/dev/null | grep -oP '\\d+' | head -1", { encoding: 'utf8', stdio: 'pipe' }).trim();
+          execSync(`apt-get install -y postgresql-${pgVer}-pgvector 2>/dev/null`, { stdio: 'pipe', timeout: 60000 });
+        } catch (_) {
+          // Try common versions
+          try { execSync('apt-get install -y postgresql-17-pgvector 2>/dev/null || apt-get install -y postgresql-16-pgvector 2>/dev/null || apt-get install -y postgresql-15-pgvector 2>/dev/null', { stdio: 'pipe', timeout: 60000 }); } catch (_) {}
+        }
+        initLog('[SETUP] PostgreSQL installed');
+      } catch (installErr) {
+        initLog('[SETUP] PostgreSQL install failed: ' + installErr.message);
+        setupUI.setSubStatus('PostgreSQL install failed — install manually');
+      }
+    }
+    setupUI.setSubProgress(0.2);
+
+    // --- Start PostgreSQL if not running ---
+    setupUI.setStatus('Starting PostgreSQL...');
+    try {
+      execSync('pg_isready -q 2>/dev/null', { stdio: 'pipe', timeout: 3000 });
+      setupUI.setSubStatus('PostgreSQL already running');
+    } catch (_pgDown) {
+      initLog('[SETUP] PostgreSQL not running — auto-starting');
+      const startCmds = [
+        'service postgresql start',
+        "pg_ctlcluster $(pg_lsclusters -h 2>/dev/null | head -1 | awk '{print $1, $2}') start",
+        'systemctl start postgresql',
+      ];
+      let pgStarted = false;
+      for (const cmd of startCmds) {
+        try {
+          execSync(cmd + ' 2>/dev/null', { stdio: 'pipe', timeout: 15000 });
+          for (let i = 0; i < 10; i++) {
+            try { execSync('pg_isready -q 2>/dev/null', { stdio: 'pipe', timeout: 2000 }); pgStarted = true; break; } catch (_) {}
+            execSync('sleep 0.5', { stdio: 'pipe' });
+          }
+          if (pgStarted) break;
+        } catch (_) {}
+      }
+      if (pgStarted) {
+        setupUI.setSubStatus('PostgreSQL started');
+        initLog('[SETUP] PostgreSQL auto-started');
+      } else {
+        setupUI.setSubStatus('Could not start PostgreSQL');
+        initLog('[SETUP] PostgreSQL auto-start failed');
+      }
+    }
+    setupUI.setSubProgress(0.4);
+
     let dbOk = false;
+
+    // --- Create user, database, and extensions ---
+    setupUI.setStatus('Setting up database...');
     try {
       execSync(`PGPASSWORD='${dbPass}' psql -h ${dbHost} -p ${dbPort} -U ${dbUser} -d ${dbName} -c "SELECT 1" 2>/dev/null`, { stdio: 'pipe' });
       dbOk = true;
     } catch (e) {
       setupUI.setSubStatus('Creating database...');
       try {
-        execSync(`sudo -u postgres psql -c "CREATE USER ${dbUser} WITH PASSWORD '${dbPass}';" 2>/dev/null || true`, { stdio: 'pipe' });
-        execSync(`sudo -u postgres psql -c "CREATE DATABASE ${dbName} OWNER ${dbUser};" 2>/dev/null || true`, { stdio: 'pipe' });
-        execSync(`sudo -u postgres psql -d ${dbName} -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null || true`, { stdio: 'pipe' });
+        // Try sudo first, fall back to su for containers/environments without sudo
+        const pgExec = (sql, db) => {
+          const dbFlag = db ? `-d ${db}` : '';
+          try {
+            execSync(`sudo -u postgres psql ${dbFlag} -c "${sql}" 2>/dev/null`, { stdio: 'pipe', timeout: 10000 });
+          } catch (_) {
+            execSync(`su - postgres -c "psql ${dbFlag} -c \\"${sql}\\"" 2>/dev/null`, { stdio: 'pipe', timeout: 10000 });
+          }
+        };
+        try { pgExec(`CREATE USER ${dbUser} WITH PASSWORD '${dbPass}';`); } catch (_) {}
+        try { pgExec(`CREATE DATABASE ${dbName} OWNER ${dbUser};`); } catch (_) {}
+        try { pgExec(`CREATE EXTENSION IF NOT EXISTS vector;`, dbName); } catch (vecErr) {
+          // pgvector not installed — try installing it
+          initLog('[SETUP] pgvector extension missing — installing');
+          setupUI.setSubStatus('Installing pgvector...');
+          try {
+            const pgVer = execSync("pg_config --version 2>/dev/null | grep -oP '\\d+' | head -1", { encoding: 'utf8', stdio: 'pipe' }).trim() || '17';
+            execSync(`apt-get install -y postgresql-${pgVer}-pgvector 2>/dev/null`, { stdio: 'pipe', timeout: 60000 });
+            pgExec(`CREATE EXTENSION IF NOT EXISTS vector;`, dbName);
+          } catch (_) {
+            initLog('[SETUP] pgvector install failed');
+          }
+        }
         dbOk = true;
       } catch (e2) {
         try {
@@ -6826,16 +6864,14 @@ ${c.red}${c.bright}╔═══════════════════�
       console.log('');
     }
 
-    // Auto warm-start paused embedding containers for this init
+    // DOCKER DISABLED: Kill any paused embedding containers instead of warm-starting them
     if (hasPaused) {
-      console.log(`${c.brightYellow}⚡ Warm-Starting Embeddings${c.reset}`);
+      console.log(`${c.brightYellow}🧹 Cleaning Up Docker Embedding Containers${c.reset}`);
       for (const container of dockerCleanup.pausedContainers) {
-        const warmResult = await warmStartContainer(container.name);
-        if (warmResult.success) {
-          console.log(`  ${c.green}✓${c.reset} ${c.cyan}${container.name}${c.reset} resumed in ${c.white}${warmResult.latencyMs}ms${c.reset} ${c.dim}+ feeding overflow${c.reset}`);
-        } else {
-          console.log(`  ${c.yellow}○${c.reset} ${c.cyan}${container.name}${c.reset} ${c.dim}(${warmResult.error})${c.reset}`);
-        }
+        try {
+          execSync(`docker rm -f ${container.name} 2>/dev/null`, { stdio: 'ignore', timeout: 10000 });
+          console.log(`  ${c.green}✓${c.reset} Removed ${c.cyan}${container.name}${c.reset} ${c.dim}(using native Python instead)${c.reset}`);
+        } catch {}
       }
       console.log('');
     }

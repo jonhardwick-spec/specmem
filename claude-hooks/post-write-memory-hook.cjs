@@ -112,6 +112,8 @@ function isEmbeddingServiceReady() {
  * Generate embedding via Frankenstein service (ASYNC, non-blocking call)
  */
 function generateEmbeddingAsync(text) {
+  // Truncate — embeddings only need short text
+  const truncated = text.length > 512 ? text.slice(0, 512) : text;
   return new Promise((resolve, reject) => {
     if (!isEmbeddingServiceReady()) {
       reject(new Error('Embedding service not ready'));
@@ -123,7 +125,7 @@ function generateEmbeddingAsync(text) {
     socket.setTimeout(10000);
 
     socket.connect(CONFIG.embeddingSocket, () => {
-      socket.write(JSON.stringify({ type: 'embed', text }) + '\n');
+      socket.write(JSON.stringify({ type: 'embed', text: truncated }) + '\n');
     });
 
     socket.on('data', (data) => {

@@ -126,13 +126,15 @@ function scaleEmbedding(embedding, targetDim) {
  * Generate embedding via socket and scale to 1536 dims for memory search
  */
 async function generateEmbedding(text, targetDim = 1536) {
+  // Truncate text to avoid sending massive blobs to embedding server
+  const truncated = text.length > 512 ? text.slice(0, 512) : text;
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
     let buffer = '';
-    socket.setTimeout(15000);  // 15s timeout - allows time for embedding cold-start
+    socket.setTimeout(10000);
 
     socket.connect(CONFIG.embeddingSocket, () => {
-      socket.write(JSON.stringify({ type: 'embed', text }) + '\n');
+      socket.write(JSON.stringify({ type: 'embed', text: truncated }) + '\n');
     });
 
     socket.on('data', (data) => {
@@ -415,10 +417,9 @@ function extractQuery(toolName, toolInput, userPrompt) {
     query = basename.replace(/[-_]/g, ' ');
   }
 
-  // Add user prompt context for better semantic matching
-  if (userPrompt && userPrompt.length > 10 && userPrompt.length < 200) {
-    query = `${userPrompt.slice(0, 100)} ${query}`.trim();
-  }
+  // NOTE: We intentionally do NOT append user prompt text here.
+  // The query should be ONLY the tool call metadata (grep pattern, file basename).
+  // We're searching for context to inject, not recording content.
 
   return query;
 }
@@ -449,6 +450,24 @@ function readStdinWithTimeout(timeoutMs = 5000) {
   });
 }
 
+// Debounce: skip if another hook ran within DEBOUNCE_MS
+const DEBOUNCE_MS = 8000; // 8 seconds between searches
+const DEBOUNCE_FILE = path.join(SPECMEM_RUN_DIR, '.smart-context-debounce');
+
+function shouldDebounce() {
+  try {
+    if (fs.existsSync(DEBOUNCE_FILE)) {
+      const lastRun = parseInt(fs.readFileSync(DEBOUNCE_FILE, 'utf8').trim(), 10);
+      if (Date.now() - lastRun < DEBOUNCE_MS) return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function markRun() {
+  try { fs.writeFileSync(DEBOUNCE_FILE, String(Date.now())); } catch (e) {}
+}
+
 async function main() {
   let input = await readStdinWithTimeout(5000);
 
@@ -471,11 +490,24 @@ async function main() {
     process.exit(0);
   }
 
+  // Debounce: don't slam sockets on rapid tool calls
+  if (shouldDebounce()) {
+    process.exit(0);
+  }
+
+  // Check embedding socket exists before attempting connection
+  if (!fs.existsSync(CONFIG.embeddingSocket)) {
+    process.exit(0);
+  }
+
   const query = extractQuery(toolName, toolInput, userPrompt);
 
   if (!query || query.length < 3) {
     process.exit(0);
   }
+
+  // Mark this run for debounce
+  markRun();
 
   try {
     let output = '';

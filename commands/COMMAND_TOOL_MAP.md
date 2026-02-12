@@ -10,7 +10,7 @@ Quick reference mapping all SpecMem commands to their corresponding MCP tools an
 |---|---------|--------------|-----------------|---------------|
 | 1 | `/specmem-find` | `mcp__specmem__find_memory` | N/A | query (2+ words) |
 | 2 | `/specmem-stats` | `mcp__specmem__show_me_the_stats` | N/A | none (optional: memory, codebase, team-members) |
-| 3 | `/specmem-drilldown` | `mcp__specmem__find_memory` | `mcp__specmem__spawn_research_team_member` | query (start or auto mode) |
+| 3 | `/specmem-drilldown` | `mcp__specmem__find_memory` | `mcp__specmem__spawn_research_teamMember` | query (start or auto mode) |
 | 4 | `/specmem-changes` | File change history tracker | N/A | none (optional: --limit, --path, --type) |
 | 5 | `/specmem-hooks` | Hook manager | N/A | subcommand (list, add, remove, enable, disable, deploy, scan, example, status) |
 | 6 | `/specmem-code` | `mcp__specmem__find_code_pointers` | N/A | query (code search) |
@@ -83,12 +83,12 @@ View recent file changes (add, modify, delete) with timestamps and content diffs
 #### 3. `/specmem-drilldown` - Interactive Memory Retrieval
 ```
 Primary Tool:   mcp__specmem__find_memory
-Secondary:      mcp__specmem__spawn_research_team_member
+Secondary:      mcp__specmem__spawn_research_teamMember
 Modes:          start (interactive), auto (automatic)
 Flow:
   1. Initial search: find_memory
   2. User controls depth and filtering
-  3. Optional: spawn_research_team_member for web research
+  3. Optional: spawn_research_teamMember for web research
 ```
 User-controlled drilldown for gathering curated context on complex topics.
 
@@ -111,7 +111,7 @@ Primary Tools:
   - Task tool (deploy team members)
 Subcommands:
   - deploy "<mission>"     (Task tool + team comms)
-  - list                   (mcp__specmem__get_active_team_members)
+  - list                   (mcp__specmem__getActiveTeamMembers)
   - memory store/search    (mcp__specmem__save_memory / mcp__specmem__find_memory)
   - codebase search        (mcp__specmem__find_code_pointers)
 ```
@@ -189,7 +189,7 @@ Manage custom pre/post-tool hooks and deployment to Claude.
 - `mcp__specmem__save_memory` - Store information
 - `mcp__specmem__show_me_the_stats` - System statistics
 - `mcp__specmem__find_code_pointers` - Code search/analysis
-- `mcp__specmem__spawn_research_team_member` - Web research
+- `mcp__specmem__spawn_research_teamMember` - Web research
 - `mcp__specmem__send_team_message` - Team communication
 - `mcp__specmem__read_team_messages` - Listen for team updates
 

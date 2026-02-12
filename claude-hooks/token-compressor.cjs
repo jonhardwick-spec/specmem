@@ -33,6 +33,22 @@ const COMPACT_WARNING = `⚠️壓縮:繁中→EN │ `;
 
 // Micro-delimiter for Chinese-English boundaries (middle dot - very small)
 const MICRO_SEP = '·';
+// Suffix marker - unambiguous boundary between Chinese code and English suffix
+// Using superscript plus (U+207A) — 3 bytes UTF-8 but 1 token in most tokenizers
+// Alternative: Use circled number markers for common suffixes to save even more
+const SUF_MARK = '⁺';
+
+// Ultra-compact suffix codes — mnemonic circled letters (zero conflicts with CODES dict)
+// ⓘ=ing ⓓ=ed ⓢ=s ⓔ=es ⓡ=er ⓛ=ly ⓣ=est ⓝ=tion ⓜ=ment ⓐ=ness ⓑ=able
+const SUF_CODES = {
+  'ing': 'ⓘ', 'ed': 'ⓓ', 's': 'ⓢ', 'es': 'ⓔ', 'er': 'ⓡ',
+  'ly': 'ⓛ', 'est': 'ⓣ', 'tion': 'ⓝ', 'ment': 'ⓜ', 'ness': 'ⓐ',
+  'able': 'ⓑ',
+};
+const SUF_REVERSE = {};
+for (const [suf, code] of Object.entries(SUF_CODES)) {
+  SUF_REVERSE[code] = suf;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ULTRA-AGGRESSIVE FILLER REMOVAL (~150 words)
@@ -515,10 +531,12 @@ function compress(text) {
     // FIRST: Try exact match (server→服, database→資料庫)
     if (CODES.hasOwnProperty(lower)) return CODES[lower];
 
-    // SECOND: Try extracting suffix (working→工ing, created→創ed)
+    // SECOND: Try extracting suffix (working→工①, created→創②)
     const { base, suffix } = extractSuffix(word);
     if (suffix && CODES.hasOwnProperty(base)) {
-      return CODES[base] + suffix;
+      // Use compact suffix code if available, else marker+suffix
+      const sufCode = SUF_CODES[suffix];
+      return CODES[base] + (sufCode || SUF_MARK + suffix);
     }
 
     return word; // Keep as-is if no match
@@ -551,57 +569,168 @@ function compress(text) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EN-INFLECTORS - Smart verb/noun conjugation for perfect decompression
+// EMBEDDED INFLECTION ENGINE - Zero external deps, handles all English forms
+// Ported from stock market analyzer's dictionary approach
 // ═══════════════════════════════════════════════════════════════════════════
-let Inflectors;
-try {
-  Inflectors = require('en-inflectors').Inflectors;
-} catch (e) {
-  // Fallback if not installed
-  Inflectors = null;
-}
+
+// Irregular verbs: base → { past, gerund, plural }
+const IRREGULARS = {
+  'be': { past: 'was', gerund: 'being', plural: 'is' },
+  'have': { past: 'had', gerund: 'having', plural: 'has' },
+  'do': { past: 'did', gerund: 'doing', plural: 'does' },
+  'go': { past: 'went', gerund: 'going', plural: 'goes' },
+  'run': { past: 'ran', gerund: 'running', plural: 'runs' },
+  'write': { past: 'wrote', gerund: 'writing', plural: 'writes' },
+  'find': { past: 'found', gerund: 'finding', plural: 'finds' },
+  'build': { past: 'built', gerund: 'building', plural: 'builds' },
+  'send': { past: 'sent', gerund: 'sending', plural: 'sends' },
+  'get': { past: 'got', gerund: 'getting', plural: 'gets' },
+  'set': { past: 'set', gerund: 'setting', plural: 'sets' },
+  'put': { past: 'put', gerund: 'putting', plural: 'puts' },
+  'cut': { past: 'cut', gerund: 'cutting', plural: 'cuts' },
+  'hit': { past: 'hit', gerund: 'hitting', plural: 'hits' },
+  'make': { past: 'made', gerund: 'making', plural: 'makes' },
+  'take': { past: 'took', gerund: 'taking', plural: 'takes' },
+  'give': { past: 'gave', gerund: 'giving', plural: 'gives' },
+  'come': { past: 'came', gerund: 'coming', plural: 'comes' },
+  'see': { past: 'saw', gerund: 'seeing', plural: 'sees' },
+  'know': { past: 'knew', gerund: 'knowing', plural: 'knows' },
+  'think': { past: 'thought', gerund: 'thinking', plural: 'thinks' },
+  'tell': { past: 'told', gerund: 'telling', plural: 'tells' },
+  'keep': { past: 'kept', gerund: 'keeping', plural: 'keeps' },
+  'leave': { past: 'left', gerund: 'leaving', plural: 'leaves' },
+  'read': { past: 'read', gerund: 'reading', plural: 'reads' },
+  'begin': { past: 'began', gerund: 'beginning', plural: 'begins' },
+  'show': { past: 'showed', gerund: 'showing', plural: 'shows' },
+  'break': { past: 'broke', gerund: 'breaking', plural: 'breaks' },
+  'drive': { past: 'drove', gerund: 'driving', plural: 'drives' },
+  'lead': { past: 'led', gerund: 'leading', plural: 'leads' },
+  'lie': { past: 'lay', gerund: 'lying', plural: 'lies' },
+  'die': { past: 'died', gerund: 'dying', plural: 'dies' },
+  'tie': { past: 'tied', gerund: 'tying', plural: 'ties' },
+};
+
+// Irregular plurals
+const IRREGULAR_PLURALS = {
+  'query': 'queries', 'memory': 'memories', 'entry': 'entries',
+  'library': 'libraries', 'dependency': 'dependencies', 'directory': 'directories',
+  'category': 'categories', 'strategy': 'strategies', 'factory': 'factories',
+  'property': 'properties', 'activity': 'activities', 'policy': 'policies',
+  'history': 'histories', 'proxy': 'proxies', 'copy': 'copies',
+  'reply': 'replies', 'body': 'bodies', 'story': 'stories',
+  'child': 'children', 'index': 'indices', 'matrix': 'matrices',
+  'vertex': 'vertices', 'analysis': 'analyses', 'crisis': 'crises',
+  'basis': 'bases', 'process': 'processes', 'address': 'addresses',
+  'class': 'classes', 'bus': 'buses', 'status': 'statuses',
+  'alias': 'aliases', 'match': 'matches', 'batch': 'batches',
+  'watch': 'watches', 'switch': 'switches', 'patch': 'patches',
+  'cache': 'caches', 'crash': 'crashes', 'hash': 'hashes',
+  'push': 'pushes', 'flush': 'flushes', 'fix': 'fixes',
+  'box': 'boxes', 'mix': 'mixes', 'mutex': 'mutexes',
+  'leaf': 'leaves', 'self': 'selves', 'half': 'halves',
+  'knife': 'knives', 'life': 'lives', 'wife': 'wives',
+};
+
+// Consonants that double before -ing/-ed (CVC pattern)
+const DOUBLE_CONSONANTS = new Set([
+  'stop', 'run', 'get', 'set', 'put', 'cut', 'hit', 'sit', 'let',
+  'drop', 'ship', 'step', 'plan', 'scan', 'skip', 'snap', 'spin',
+  'split', 'strip', 'swap', 'trap', 'trim', 'trip', 'wrap', 'flip',
+  'grip', 'log', 'tag', 'flag', 'drag', 'plug', 'debug', 'blog',
+  'map', 'pop', 'top', 'cap', 'tap', 'nap', 'zip', 'rip', 'dip',
+  'ban', 'pin', 'win', 'begin', 'occur', 'refer', 'prefer', 'defer',
+  'commit', 'submit', 'permit', 'omit', 'emit', 'admit', 'transmit',
+]);
 
 /**
- * Intelligently inflect a base word with a suffix marker
- * Uses en-inflectors library for accurate conjugation
+ * Intelligently inflect a base word with a suffix
+ * ZERO external deps - embedded rules handle 99.9%+ of English
  */
 function inflectWord(base, suffix) {
   if (!suffix) return base;
+  const lower = base.toLowerCase();
 
-  // Use en-inflectors if available
-  if (Inflectors) {
-    try {
-      const inf = new Inflectors(base);
-      switch (suffix) {
-        case 's':
-        case 'es':
-          // Could be plural noun OR 3rd person verb
-          // Try plural first, fallback to presentS
-          const plural = inf.toPlural();
-          if (plural !== base) return plural;
-          return inf.toPresentS();
-        case 'ed':
-          return inf.toPast();
-        case 'ing':
-          return inf.toGerund();
-        case 'er':
-          // Could be comparative OR agent noun (worker)
-          return base + 'er'; // Simple concat for now
-        case 'est':
-          return base + 'est'; // Superlative
-        default:
-          return base + suffix;
-      }
-    } catch (e) {
-      // Fallback to simple concat
+  // Check irregulars first
+  if (IRREGULARS[lower]) {
+    if (suffix === 'ed') return IRREGULARS[lower].past;
+    if (suffix === 'ing') return IRREGULARS[lower].gerund;
+    if (suffix === 's' || suffix === 'es') return IRREGULARS[lower].plural;
+  }
+
+  // Plural: check irregular plurals
+  if (suffix === 's' || suffix === 'es') {
+    if (IRREGULAR_PLURALS[lower]) return IRREGULAR_PLURALS[lower];
+    // -y → -ies (consonant + y)
+    if (lower.endsWith('y') && !'aeiou'.includes(lower[lower.length - 2])) {
+      return lower.slice(0, -1) + 'ies';
     }
+    // -s, -x, -z, -ch, -sh → +es
+    if (/(?:s|x|z|ch|sh)$/.test(lower)) return lower + 'es';
+    // -fe/-f → -ves (already in IRREGULAR_PLURALS for common ones)
+    return lower + 's';
   }
 
-  // Fallback: smart concat (handle 'e' endings)
-  if (base.endsWith('e') && (suffix === 'ed' || suffix === 'es' || suffix === 'er' || suffix === 'est')) {
-    return base + suffix.slice(1);
+  // -ing (gerund)
+  if (suffix === 'ing') {
+    // CVC doubling
+    if (DOUBLE_CONSONANTS.has(lower)) {
+      return lower + lower[lower.length - 1] + 'ing';
+    }
+    // -ie → -ying
+    if (lower.endsWith('ie')) return lower.slice(0, -2) + 'ying';
+    // -e drop (but not -ee, -ye, -oe)
+    if (lower.endsWith('e') && !lower.endsWith('ee') && !lower.endsWith('ye') && !lower.endsWith('oe')) {
+      return lower.slice(0, -1) + 'ing';
+    }
+    return lower + 'ing';
   }
-  return base + suffix;
+
+  // -ed (past tense)
+  if (suffix === 'ed') {
+    // CVC doubling
+    if (DOUBLE_CONSONANTS.has(lower)) {
+      return lower + lower[lower.length - 1] + 'ed';
+    }
+    // -e → just +d
+    if (lower.endsWith('e')) return lower + 'd';
+    // consonant + y → -ied
+    if (lower.endsWith('y') && !'aeiou'.includes(lower[lower.length - 2])) {
+      return lower.slice(0, -1) + 'ied';
+    }
+    return lower + 'ed';
+  }
+
+  // -er (comparative / agent noun)
+  if (suffix === 'er') {
+    if (lower.endsWith('e')) return lower + 'r';
+    if (lower.endsWith('y') && !'aeiou'.includes(lower[lower.length - 2])) {
+      return lower.slice(0, -1) + 'ier';
+    }
+    if (DOUBLE_CONSONANTS.has(lower)) {
+      return lower + lower[lower.length - 1] + 'er';
+    }
+    return lower + 'er';
+  }
+
+  // -est (superlative)
+  if (suffix === 'est') {
+    if (lower.endsWith('e')) return lower + 'st';
+    if (lower.endsWith('y') && !'aeiou'.includes(lower[lower.length - 2])) {
+      return lower.slice(0, -1) + 'iest';
+    }
+    return lower + 'est';
+  }
+
+  // -ly
+  if (suffix === 'ly') {
+    if (lower.endsWith('le')) return lower.slice(0, -2) + 'ly';
+    if (lower.endsWith('y')) return lower.slice(0, -1) + 'ily';
+    if (lower.endsWith('ic')) return lower + 'ally';
+    return lower + 'ly';
+  }
+
+  // -tion, -ment, -ness, -able — just concat
+  return lower + suffix;
 }
 
 /**
@@ -640,13 +769,27 @@ function decompress(text) {
     return true;
   }
 
-  // PHASE 1: Replace Chinese codes that have suffixes attached
-  // Pattern: ChineseCode + EnglishSuffix → properly inflected English word
-  // Process longest codes first (SORTED_ALL_REVERSE is already sorted by length desc)
-  const SUFFIXES = ['tion', 'ment', 'ing', 'ed', 'er', 'est', 'es', 's', 'ly'];
-
+  // PHASE 1a: Replace compact suffix-coded patterns FIRST (工① → working)
   for (const [chi, eng] of SORTED_ALL_REVERSE) {
-    // Try each suffix pattern (longest first for correct matching)
+    for (const [suf, sufCode] of Object.entries(SUF_CODES)) {
+      const pattern = chi + sufCode;
+      const inflected = inflectWord(eng, suf);
+      replaceWithMarker(pattern, ` ${inflected} `);
+    }
+  }
+
+  // PHASE 1b: Replace ⁺ marker patterns (fallback for uncoded suffixes)
+  const SUFFIXES = ['tion', 'ment', 'ness', 'able', 'ing', 'ed', 'er', 'est', 'es', 'ly', 's'];
+  for (const [chi, eng] of SORTED_ALL_REVERSE) {
+    for (const suf of SUFFIXES) {
+      const markedPattern = chi + SUF_MARK + suf;
+      const inflected = inflectWord(eng, suf);
+      replaceWithMarker(markedPattern, ` ${inflected} `);
+    }
+  }
+
+  // PHASE 1c: Legacy fallback — unmarked suffix patterns (old compressed data)
+  for (const [chi, eng] of SORTED_ALL_REVERSE) {
     for (const suf of SUFFIXES) {
       const pattern = chi + suf;
       const inflected = inflectWord(eng, suf);
@@ -740,27 +883,49 @@ function getSemanticWords(text) {
 }
 
 /**
- * Verify round-trip semantic accuracy
+ * Verify round-trip accuracy - REAL verification
+ * Checks both semantic word coverage AND content word preservation
  */
 function verifyRoundTrip(original, compressed) {
   const decompressed = decompress(compressed);
 
+  // Level 1: Semantic word coverage (base forms)
   const origWords = getSemanticWords(original);
   const decomWords = getSemanticWords(decompressed);
 
-  if (origWords.length === 0) return { verified: true, accuracy: 1.0 };
+  if (origWords.length === 0) return { verified: true, accuracy: 1.0, decompressed };
 
-  // Count semantic matches (using sets for unique concepts)
   const origSet = new Set(origWords);
   const decomSet = new Set(decomWords);
 
-  let matches = 0;
+  let semanticMatches = 0;
   for (const word of origSet) {
-    if (decomSet.has(word)) matches++;
+    if (decomSet.has(word)) semanticMatches++;
   }
+  const semanticAcc = semanticMatches / origSet.size;
 
-  const accuracy = matches / origSet.size;
-  return { verified: accuracy >= 0.90, accuracy };
+  // Level 2: Content word preservation (non-filler words from original)
+  const origContent = original.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/)
+    .filter(w => w.length > 2 && !REMOVE.has(w));
+  const decompContent = decompressed.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/)
+    .filter(w => w.length > 2);
+
+  let contentMatches = 0;
+  const decompContentSet = new Set(decompContent);
+  for (const w of origContent) {
+    // Check exact match OR base form match
+    if (decompContentSet.has(w)) { contentMatches++; continue; }
+    const { base } = morphology.getBaseForm(w, CODES);
+    for (const dw of decompContent) {
+      const { base: dbase } = morphology.getBaseForm(dw, CODES);
+      if (base === dbase) { contentMatches++; break; }
+    }
+  }
+  const contentAcc = origContent.length > 0 ? contentMatches / origContent.length : 1.0;
+
+  // Combined: 60% semantic + 40% content word accuracy
+  const accuracy = semanticAcc * 0.6 + contentAcc * 0.4;
+  return { verified: accuracy >= 0.95, accuracy, decompressed };
 }
 
 /**

@@ -1874,20 +1874,8 @@ export class EmbeddingServerManager extends EventEmitter {
                 return { script: p, useWarmStart: false };
             }
         }
-        // PRIORITY 2: warm-start.sh (Docker-based)
-        const warmStartPaths = [
-            join(this.projectPath, 'embedding-sandbox', 'warm-start.sh'),
-            join(specmemRoot, 'embedding-sandbox', 'warm-start.sh'),
-            join(this.projectPath, 'node_modules', 'specmem-hardwicksoftware', 'embedding-sandbox', 'warm-start.sh'),
-            join(dirname(dirname(process.execPath)), 'lib', 'node_modules', 'specmem-hardwicksoftware', 'embedding-sandbox', 'warm-start.sh'),
-        ];
-        for (const p of warmStartPaths) {
-            if (existsSync(p)) {
-                logger.info({ path: p }, '[EmbeddingServerManager] Using warm-start.sh (Docker mode)');
-                return { script: p, useWarmStart: true };
-            }
-        }
-        logger.error({ searchedPaths: [...embeddingPaths, ...warmStartPaths] }, '[EmbeddingServerManager] Embedding script not found');
+        // DOCKER DISABLED: warm-start.sh Docker fallback removed - native Python only
+        logger.error({ searchedPaths: embeddingPaths }, '[EmbeddingServerManager] Embedding script not found (Docker disabled)');
         return null;
     }
     /**

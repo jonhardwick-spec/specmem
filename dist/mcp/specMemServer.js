@@ -217,9 +217,11 @@ export class SpecMemServer {
                 logger.error({ timestamp, event: 'HANDSHAKE_NOTIFY_ERROR', error: error.message }, '[MCP DEBUG] Failed to notify tool list - tools may not be available');
                 process.stderr.write(`[SPECMEM ERROR ${timestamp}] Tool notification failed: ${error.message}\n`);
             }
-            // Send the startup announcement to 
+            // Send the startup announcement to
             startupLog('Calling announceToOnStartup()');
             this.announceToOnStartup();
+            // Auto-start Codebook Learner (resource-capped background service)
+            this._startCodebookLearner();
         };
         // get that db connection no cap
         this.db = getDatabase(config.database);
@@ -233,6 +235,85 @@ export class SpecMemServer {
         this.setupResourceHandlers();
         this.setupErrorHandling();
         logger.info('SpecMem MCP Server initialized - ready to remember some stuff fr fr');
+    }
+    // ═══════════════════════════════════════════════════════════════════════
+    // CODEBOOK LEARNER - Auto-start background service
+    // Resource-capped: 500MB RAM, 5% CPU per core
+    // Runs learning cycles every 5 min when misses accumulate
+    // ═══════════════════════════════════════════════════════════════════════
+    _startCodebookLearner() {
+        const LEARN_INTERVAL_MS = 60 * 1000; // Check every 60s — constant low-resource crawl
+        const MIN_MISSES_TO_LEARN = 3; // 3 unique misses = trigger (was 10)
+        let learnerInstance = null;
+        let isLearning = false;
+
+        const runCycle = async () => {
+            if (isLearning) return;
+            try {
+                // Lazy load CJS module
+                if (!learnerInstance) {
+                    const { createRequire } = await import('module');
+                    const require = createRequire(import.meta.url);
+                    const { CodebookLearner } = require('../services/codebookLearner.cjs');
+                    learnerInstance = new CodebookLearner(process.cwd());
+                    learnerInstance.startKYSWatchdog(); // KYS: pause server when Claude dies
+                    // Pre-start translate server (lazy model load, low resource)
+                    learnerInstance.start().then(ok => {
+                        if (ok) logger.info('[CodebookLearner] Translate server pre-started');
+                    }).catch(() => {});
+                    logger.info('[CodebookLearner] Initialized + KYS watchdog active (500MB RAM / 5% CPU cap)');
+                }
+
+                // Step 0: ALWAYS fix mismatches first (even if no new misses)
+                const mismatches = learnerInstance.getMismatchFreqs();
+                if (mismatches.size > 0) {
+                    isLearning = true;
+                    const fixResult = await learnerInstance.fixMismatches({ stream: false });
+                    if (fixResult.fixed > 0 || fixResult.removed > 0) {
+                        logger.info(fixResult, '[CodebookLearner] Mismatches auto-patched');
+                    }
+                }
+
+                // Check if enough misses accumulated for learning pass
+                const freqs = learnerInstance.getMissFreqs();
+                const candidates = [...freqs.entries()].filter(([, c]) => c >= 2).length;
+                if (candidates < MIN_MISSES_TO_LEARN) {
+                    isLearning = false;
+                    return;
+                }
+
+                isLearning = true;
+                logger.info({ candidates }, '[CodebookLearner] Learning cycle starting');
+
+                // Step 2: Dictionary pass (instant, no server needed)
+                const dictResult = await learnerInstance.learnFromDictionaries({ forceAll: false, stream: false });
+                if (dictResult.added > 0) {
+                    logger.info({ added: dictResult.added }, '[CodebookLearner] Dictionary entries added');
+                }
+
+                // Step 3: Neural MT pass for remaining (starts server if needed)
+                const mtResult = await learnerInstance.learn({ stream: false });
+                if (mtResult.added > 0) {
+                    logger.info({ added: mtResult.added, total: mtResult.total }, '[CodebookLearner] Neural MT entries added');
+                }
+
+                // Auto-pause server after learning (saves resources)
+                learnerInstance.pause();
+            } catch (e) {
+                logger.warn({ error: e.message }, '[CodebookLearner] Cycle failed (will retry)');
+            } finally {
+                isLearning = false;
+            }
+        };
+
+        // Start periodic learning
+        const timer = setInterval(runCycle, LEARN_INTERVAL_MS);
+        timer.unref(); // Don't prevent process exit
+
+        // Also run once after 30 sec startup delay
+        setTimeout(runCycle, 30000).unref();
+
+        logger.info('[CodebookLearner] Background service started (5min cycles, resource-capped)');
     }
     setupHandlers() {
         // list tools - show claude what we got plus the command executor

@@ -560,5 +560,5 @@ export async function processBatchesWithConcurrency(items, batchSize, concurrenc
  * DEFAULT_CONCURRENCY_LIMIT - safe default for parallel batch operations
  * 5 is a good balance between speed and not overwhelming the DB
  */
-export const DEFAULT_CONCURRENCY_LIMIT = 5;
+export const DEFAULT_CONCURRENCY_LIMIT = 10;
 //# sourceMappingURL=batchOperations.js.map

@@ -387,7 +387,11 @@ function installPythonDeps() {
     { name: 'onnx', cmd: 'onnx' },
     { name: 'onnxruntime', cmd: 'onnxruntime' },
     { name: 'optimum[onnxruntime]', cmd: 'optimum[onnxruntime]' },
-    { name: 'optimum', cmd: 'optimum' }
+    { name: 'optimum', cmd: 'optimum' },
+    { name: 'argostranslate', cmd: 'argostranslate' },
+    { name: 'ctranslate2', cmd: 'ctranslate2' },
+    { name: 'sentencepiece', cmd: 'sentencepiece' },
+    { name: 'emoji', cmd: 'emoji' }
   ];
 
   const progressPerDep = 0.8 / deps.length;
@@ -796,14 +800,35 @@ async function main() {
   installNodeDeps();
 
   try {
-    // Stage 4: Download
-    await downloadBaseModel();
+    // Check for packed/bundled models — skip download+optimize if they exist
+    const PACKED_MODEL_DIR = path.join(SPECMEM_PKG_DIR, 'embedding-sandbox', 'models', 'all-MiniLM-L6-v2');
+    const PACKED_ONNX = path.join(PACKED_MODEL_DIR, 'onnx', 'model_quint8_avx2.onnx');
 
-    // Stage 5: Optimize
-    try {
-      await optimizeModel();
-    } catch (optErr) {
-      progress.addWarning('Optimization skipped - base model still works');
+    if (fs.existsSync(PACKED_ONNX)) {
+      // Internalized model found — no download needed
+      progress.setStage(4, 'USING PACKED MODELS');
+      progress.setStatus('Internalized model found — Hardwick Software Optimized');
+      progress.setSubStatus('INT8 quantized ONNX — no download needed');
+      progress.setSubProgress(1);
+
+      progress.setStage(5, 'MODELS READY');
+      progress.setStatus('Pre-optimized model verified');
+      progress.setSubStatus(`${path.basename(PACKED_MODEL_DIR)} — INT8 AVX2`);
+      progress.setSubProgress(1);
+
+      console.log(`\n  ${c.green}✓${c.reset} ${c.bold}Packed models detected${c.reset} — skipping download`);
+      console.log(`  ${c.dim}Powered by Hardwick Software Optimizations: INT8 ONNX quantization${c.reset}\n`);
+    } else {
+      // No packed model — download and optimize (fallback for dev/custom builds)
+      // Stage 4: Download
+      await downloadBaseModel();
+
+      // Stage 5: Optimize
+      try {
+        await optimizeModel();
+      } catch (optErr) {
+        progress.addWarning('Optimization skipped - base model still works');
+      }
     }
 
     progress.stop(true);

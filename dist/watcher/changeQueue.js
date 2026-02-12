@@ -45,8 +45,8 @@ export class QueueTheChangesUp {
         this.changeHandler = changeHandler;
         this.config = {
             maxQueueSize: config.maxQueueSize ?? 10000,
-            batchSize: config.batchSize ?? 50,
-            processingIntervalMs: config.processingIntervalMs ?? 2000,
+            batchSize: config.batchSize ?? 100,
+            processingIntervalMs: config.processingIntervalMs ?? 500,
             maxRetries: config.maxRetries ?? 3,
             retryDelayMs: config.retryDelayMs ?? 1000,
             retryBackoffMultiplier: config.retryBackoffMultiplier ?? 2,

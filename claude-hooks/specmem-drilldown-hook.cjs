@@ -145,17 +145,22 @@ function ensureEmbeddingServiceRunning() {
  * Generate embedding via sandboxed container
  */
 async function generateEmbedding(text) {
-  // Ensure service is running first
-  ensureEmbeddingServiceRunning();
+  // Don't try to start services from a hook — just fail gracefully
+  if (!isSocketHealthy(CONFIG.embeddingSocket)) {
+    throw new Error('Embedding socket not available');
+  }
+
+  // Truncate — embeddings only need ~512 chars max
+  const truncated = text.length > 512 ? text.slice(0, 512) : text;
 
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
     let buffer = '';
 
-    socket.setTimeout(45000); // 45s to account for cold-start of embedding service
+    socket.setTimeout(10000); // 10s timeout
 
     socket.connect(CONFIG.embeddingSocket, () => {
-      socket.write(JSON.stringify({ type: 'embed', text }) + '\n');
+      socket.write(JSON.stringify({ type: 'embed', text: truncated }) + '\n');
     });
 
     socket.on('data', (data) => {
@@ -432,6 +437,17 @@ async function main() {
   if (prompt.startsWith('/') || prompt.startsWith('!')) {
     process.exit(0);
   }
+
+  // Debounce: skip if ran within last 5 seconds
+  const DRILLDOWN_DEBOUNCE_FILE = path.join(SPECMEM_RUN_DIR, '.drilldown-debounce');
+  try {
+    const fs = require('fs');
+    if (fs.existsSync(DRILLDOWN_DEBOUNCE_FILE)) {
+      const last = parseInt(fs.readFileSync(DRILLDOWN_DEBOUNCE_FILE, 'utf8').trim(), 10);
+      if (Date.now() - last < 5000) process.exit(0);
+    }
+    fs.writeFileSync(DRILLDOWN_DEBOUNCE_FILE, String(Date.now()));
+  } catch (e) {}
 
   // Skip task notifications (background agent completions treated as prompts)
   if (prompt.includes('<task-notification>') || prompt.includes('</task-notification>')) {
