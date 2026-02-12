@@ -105,6 +105,29 @@ function getClaudeBinary() {
     try {
       return execSync('which claude 2>/dev/null', { encoding: 'utf8' }).trim();
     } catch {}
+
+    // No Claude binary found anywhere — auto-install it
+    initLog('[SETUP] Claude CLI not found — installing @anthropic-ai/claude-code');
+    try {
+      execSync('npm install -g @anthropic-ai/claude-code 2>&1', { stdio: 'pipe', timeout: 120000 });
+      initLog('[SETUP] Claude CLI installed');
+      // Re-check after install
+      try {
+        return execSync('which claude 2>/dev/null', { encoding: 'utf8' }).trim();
+      } catch {}
+      // Check common install locations
+      const postInstallCandidates = [
+        '/usr/local/bin/claude',
+        path.join(os.homedir(), '.local', 'bin', 'claude'),
+        '/usr/bin/claude',
+      ];
+      for (const c of postInstallCandidates) {
+        if (fs.existsSync(c)) return c;
+      }
+    } catch (e) {
+      initLog('[SETUP] Claude CLI install failed: ' + e.message);
+    }
+
     return 'claude';
   }
 
@@ -6193,12 +6216,125 @@ async function verifySetupPrerequisites(projectPath) {
 async function runAutoSetup(projectPath) {
   // Create a dedicated ProgressUI for setup
   const setupUI = new ProgressUI();
-  setupUI.totalStages = 4;
+  setupUI.totalStages = 5;
   setupUI.start();
 
   try {
-    // Step 1: Database setup — install, start, configure
-    setupUI.setStage(1, 'DATABASE');
+    // Step 0: Docker — install if missing, start daemon
+    setupUI.setStage(1, 'DOCKER');
+    setupUI.setStatus('Checking Docker...');
+    setupUI.setSubProgress(0);
+
+    let hasDocker = false;
+    try { execSync('docker --version 2>/dev/null', { stdio: 'pipe' }); hasDocker = true; } catch (_) {}
+
+    if (!hasDocker) {
+      setupUI.setStatus('Installing Docker...');
+      initLog('[SETUP] Docker not found — installing');
+
+      const IS_MAC_INIT = process.platform === 'darwin';
+      const IS_LINUX_INIT = process.platform === 'linux';
+
+      if (IS_LINUX_INIT) {
+        // Method 1: Official Docker install script
+        setupUI.setSubStatus('Running official Docker install script...');
+        try {
+          execSync('curl -fsSL https://get.docker.com | sh 2>&1', { stdio: 'pipe', timeout: 300000 });
+          try { execSync('docker --version 2>/dev/null', { stdio: 'pipe' }); hasDocker = true; } catch (_) {}
+        } catch (e) {
+          initLog('[SETUP] Docker official script failed: ' + e.message);
+        }
+
+        // Method 2: Package manager fallback
+        if (!hasDocker) {
+          setupUI.setSubStatus('Trying package manager install...');
+          try {
+            let hasPkgMgr = false;
+            try { execSync('which apt-get 2>/dev/null', { stdio: 'pipe' }); hasPkgMgr = true;
+              execSync('apt-get update -qq 2>/dev/null && apt-get install -y docker.io 2>/dev/null', { stdio: 'pipe', timeout: 120000 });
+            } catch (_) {}
+            if (!hasPkgMgr) {
+              try { execSync('which dnf 2>/dev/null', { stdio: 'pipe' });
+                execSync('dnf install -y docker 2>/dev/null', { stdio: 'pipe', timeout: 120000 });
+              } catch (_) {}
+            }
+            try { execSync('docker --version 2>/dev/null', { stdio: 'pipe' }); hasDocker = true; } catch (_) {}
+          } catch (_) {}
+        }
+
+        // Configure Docker for non-root usage
+        if (hasDocker) {
+          try {
+            const user = process.env.USER || process.env.LOGNAME || 'root';
+            execSync(`usermod -aG docker ${user} 2>/dev/null`, { stdio: 'pipe' });
+          } catch (_) {}
+        }
+      } else if (IS_MAC_INIT) {
+        setupUI.setSubStatus('Installing Docker via Homebrew...');
+        try {
+          execSync('brew install --cask docker 2>&1', { stdio: 'pipe', timeout: 300000 });
+          execSync('open -a Docker 2>/dev/null', { stdio: 'pipe' });
+          // Wait for Docker Desktop
+          for (let i = 0; i < 12; i++) {
+            execSync('sleep 5', { stdio: 'pipe' });
+            try { execSync('docker info 2>/dev/null', { stdio: 'pipe' }); hasDocker = true; break; } catch (_) {}
+          }
+        } catch (e) {
+          initLog('[SETUP] Docker Desktop install failed: ' + e.message);
+          // Try colima
+          try {
+            execSync('brew install colima docker 2>&1', { stdio: 'pipe', timeout: 300000 });
+            execSync('colima start --cpu 2 --memory 4 2>&1', { stdio: 'pipe', timeout: 60000 });
+            try { execSync('docker info 2>/dev/null', { stdio: 'pipe' }); hasDocker = true; } catch (_) {}
+          } catch (_) {}
+        }
+      }
+
+      if (hasDocker) {
+        initLog('[SETUP] Docker installed');
+        setupUI.setSubStatus('Docker installed');
+      } else {
+        initLog('[SETUP] Docker install failed');
+        setupUI.setSubStatus('Docker install failed — install manually');
+      }
+    } else {
+      setupUI.setSubStatus('Docker already installed');
+    }
+    setupUI.setSubProgress(0.5);
+
+    // Start Docker daemon if not running
+    if (hasDocker) {
+      setupUI.setStatus('Starting Docker daemon...');
+      let dockerRunning = false;
+      try { execSync('docker info 2>/dev/null', { stdio: 'pipe', timeout: 10000 }); dockerRunning = true; } catch (_) {}
+
+      if (!dockerRunning) {
+        initLog('[SETUP] Docker daemon not running — starting');
+        const startCmds = [
+          'systemctl start docker 2>/dev/null',
+          'service docker start 2>/dev/null',
+        ];
+        for (const cmd of startCmds) {
+          try {
+            execSync(cmd, { stdio: 'pipe', timeout: 15000 });
+            // Wait for daemon
+            for (let i = 0; i < 10; i++) {
+              try { execSync('docker info 2>/dev/null', { stdio: 'pipe', timeout: 5000 }); dockerRunning = true; break; } catch (_) {}
+              execSync('sleep 1', { stdio: 'pipe' });
+            }
+            if (dockerRunning) break;
+          } catch (_) {}
+        }
+        setupUI.setSubStatus(dockerRunning ? 'Docker daemon started' : 'Could not start Docker daemon');
+      } else {
+        setupUI.setSubStatus('Docker daemon already running');
+      }
+    }
+    setupUI.setSubProgress(1);
+    await qqms();
+
+    // Step 2: Database setup — install, start, configure
+    setupUI.setStage(2, 'DATABASE');
     setupUI.setStatus('Checking PostgreSQL...');
     setupUI.setSubProgress(0);
 
@@ -6315,7 +6451,7 @@ async function runAutoSetup(projectPath) {
     await qqms();
 
     // Step 2:  hooks
-    setupUI.setStage(2, 'CLAUDE HOOKS');
+    setupUI.setStage(3, 'CLAUDE HOOKS');
     setupUI.setStatus('Installing hooks...');
     setupUI.setSubProgress(0);
 
@@ -6586,7 +6722,7 @@ async function runAutoSetup(projectPath) {
     await qqms();
 
     // Step 3: Global config
-    setupUI.setStage(3, 'GLOBAL CONFIG');
+    setupUI.setStage(4, 'GLOBAL CONFIG');
     setupUI.setStatus('Creating directories...');
     setupUI.setSubProgress(0);
 
@@ -6600,7 +6736,7 @@ async function runAutoSetup(projectPath) {
     await qqms();
 
     // Step 4: Project dirs
-    setupUI.setStage(4, 'PROJECT DIRS');
+    setupUI.setStage(5, 'PROJECT DIRS');
     setupUI.setStatus('Creating project directories...');
     setupUI.setSubProgress(0);
 

@@ -1,6 +1,6 @@
 {
   "name": "specmem-hardwicksoftware",
-  "version": "3.7.25",
+  "version": "3.7.26",
   "type": "module",
   "description": "Your Claude Code sessions don't have to start from scratch anymore — SpecMem gives your AI real memory. It won't forget your conversations, your code, or your architecture decisions between sessions. That's the whole point. Semantic code indexing that actually works: TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, C, C++, HTML and more. It doesn't just track functions — it gets classes, methods, fields, constants, enums, macros, imports, structs, the whole codebase graph. There's chat memory too, powered by pgvector embeddings. You've also got token compression, team coordination, multi-agent comms, and file watching built in. 74+ MCP tools. Runs on PostgreSQL + Docker. It's kind of a big deal. justcalljon.pro",
   "main": "dist/index.js",

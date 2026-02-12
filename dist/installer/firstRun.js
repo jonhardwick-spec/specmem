@@ -75,7 +75,7 @@ export function createInitialConfig() {
         version: '1.0.0',
         dbConfigured: isDatabaseConfigured(),
         embeddingProvider: detectEmbeddingProvider(),
-        watcherEnabled: process.env.SPECMEM_WATCHER_ENABLED === 'true'
+        watcherEnabled: process.env.SPECMEM_WATCHER_ENABLED !== 'false'
     };
     const configPath = getConfigPath();
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), { mode: 0o600 });
