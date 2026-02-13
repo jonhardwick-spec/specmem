@@ -320,4 +320,4 @@ Real talk - if something breaks, we fix it properly. No band-aids, no workaround
 https://justcalljon.pro
 
 For issues, questions, or feature requests, hit up:
-https://github.com/hardwicksoftware/specmem/issues
+https://github.com/jonhardwick-spec/specmem/issues
