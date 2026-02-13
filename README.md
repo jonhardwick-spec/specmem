@@ -1,3 +1,6 @@
+## SpecMem is currently undergoing massive updates to ensure root access is not required - Please come back for the 3.7.28 pre-release
+## It will be available shortly -- Free for devs making sub 35,000 a year* as always!
+
 <div align="center">
 
 <!-- Hero Banner -->
